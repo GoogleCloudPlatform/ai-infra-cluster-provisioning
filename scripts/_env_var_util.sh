@@ -87,7 +87,7 @@ _set_terraform_env_var() {
         echo "VM_TYPE environment variable not found. Default value is a2-highgpu-2g."
     else
         echo "Setting vm type to $VM_TYPE"
-        echo "machine_type = $VM_TYPE" >> /usr/primary/tf.auto.tfvars
+        echo "machine_type = \"$VM_TYPE\"" >> /usr/primary/tf.auto.tfvars
     fi
 
     # setting metadata info
@@ -99,12 +99,28 @@ _set_terraform_env_var() {
     fi
 
     # setting image name
-    if [[ -z "$IMAGE_NAME" ]]; then
-        echo "IMAGE_NAME environment variable not found. Default value is pytorch-1-12-gpu-debian-10."
+    if [[ -z "$IMAGE_FAMILY_NAME" ]]; then
+        if [[ -z "$IMAGE_NAME" ]]; then
+            echo "IMAGE_NAME environment variable not found. Default imafe family pytorch-1-12-gpu-debian-10 will be used."
+            export IMAGE_FAMILY_NAME=pytorch-1-12-gpu-debian-10
+            echo "instance_image = {" >> /usr/primary/tf.auto.tfvars
+            echo "  family  = \"$IMAGE_FAMILY_NAME\"" >> /usr/primary/tf.auto.tfvars
+            echo "  name  = \"\"" >> /usr/primary/tf.auto.tfvars
+            echo "  project = \"ml-images\"" >> /usr/primary/tf.auto.tfvars
+            echo "}" >> /usr/primary/tf.auto.tfvars
+        else
+            echo "Setting image name value to $IMAGE_NAME"
+            echo "instance_image = {" >> /usr/primary/tf.auto.tfvars
+            echo "  family  = \"\"" >> /usr/primary/tf.auto.tfvars
+            echo "  name  = \"$IMAGE_NAME\"" >> /usr/primary/tf.auto.tfvars
+            echo "  project = \"ml-images\"" >> /usr/primary/tf.auto.tfvars
+            echo "}" >> /usr/primary/tf.auto.tfvars
+        fi
     else
-        echo "Setting image name value to $IMAGE_NAME"
+        echo "Setting image family name value to $IMAGE_FAMILY_NAME"
         echo "instance_image = {" >> /usr/primary/tf.auto.tfvars
-        echo "  family  = \"$IMAGE_NAME\"" >> /usr/primary/tf.auto.tfvars
+        echo "  family  = \"$IMAGE_FAMILY_NAME\"" >> /usr/primary/tf.auto.tfvars
+        echo "  name  = \"\"" >> /usr/primary/tf.auto.tfvars
         echo "  project = \"ml-images\"" >> /usr/primary/tf.auto.tfvars
         echo "}" >> /usr/primary/tf.auto.tfvars
     fi

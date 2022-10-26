@@ -28,13 +28,10 @@ variable "instance_count" {
 variable "instance_image" {
   description = "Instance Image"
   type = object({
+    name    = string,
     family  = string,
     project = string
   })
-  default = {
-    family  = "hpc-centos-7"
-    project = "cloud-hpc-image-public"
-  }
 }
 
 variable "disk_size_gb" {
