@@ -15,10 +15,9 @@
   */
 
 module "network1" {
-  source          = "./modules/vpc"
-  project_id      = var.project_id
-  deployment_name = var.deployment_name
-  region          = var.region
+  source     = "./modules/pre-existing-vpc"
+  project_id = var.project_id
+  region     = var.region
 }
 
 module "startup" {

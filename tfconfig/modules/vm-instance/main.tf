@@ -63,13 +63,6 @@ locals {
   threads_per_core     = var.threads_per_core == 2 ? 2 : 1
 }
 
-/*
-data "google_compute_image" "compute_image" {
-  family  = var.instance_image.family
-  project = var.instance_image.project
-}
-*/
-
 data "google_compute_image" "compute_image" {
   name    = var.instance_image.name != "" ? var.instance_image.name : null
   family  = var.instance_image.family != "" ? var.instance_image.family : null

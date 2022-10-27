@@ -24,6 +24,12 @@ _terraform_setup() {
     echo "Apply exit code $tf_appl_ret_val"
     if [ $tf_appl_ret_val -eq 0 ]; then
         echo "Terraform apply finished successfully."
+        echo "Please use below commands to ssh into the VM instances."
+        accountName=`gcloud config get-value account`
+        username=${accountName%@*}
+        for ((i=0; i<${INSTANCE_COUNT}; i++)); do
+            echo "ssh -i ~/.ssh/google_compute_engine ${username}_google_com@nic0.${NAME_PREFIX}-$i.${ZONE}.c.${PROJECT_ID}.internal.gcpnode.com"
+        done
         # setup auto clean is environment variable is set
         if [[ -z "$CLEANUP_ON_EXIT" ]]; then
             echo "Cluster will be available after container exits."
@@ -51,6 +57,11 @@ _terraform_cleanup() {
             echo "Calling terraform destroy..."
             destroy_ret=0
             terraform -chdir=/usr/primary destroy -input=false -auto-approve || destroy_ret=$?
+            del_state_ret=0
+            if [ $destroy_ret -eq 0 ]; then
+                echo "Successfully destroyed resources. Cleaning up the terraform state."
+                gsutil rm -r gs://$TF_BUCKET_NAME/terraform/ || del_state_ret=$?
+            fi
          else
             echo "Terraform destroy is alredy executed."
          fi
@@ -79,9 +90,6 @@ _perform_terraform_action() {
             terraform --version
             terraform -chdir=/usr/primary init -input=false
             _terraform_cleanup
-            del_state_ret=0
-            # Currently terraform is failing to delete VPC. so cant remove the state file.
-            # `gsutil rm -r gs://$TF_BUCKET_NAME/terraform/` || del_state_ret=$?
         else
             echo "Terraform Sate file not found."
         fi
