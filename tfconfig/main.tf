@@ -33,6 +33,7 @@ __REPLACE_STARTUP_SCRIPT__
   labels          = merge(var.labels, { ghpc_role = "scripts",})
   deployment_name = var.deployment_name
   gcs_path        = var.gcs_path
+  gcs_bucket      = var.gcs_bucket
   region          = var.region
 }
 

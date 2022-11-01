@@ -60,7 +60,7 @@ _terraform_cleanup() {
             del_state_ret=0
             if [ $destroy_ret -eq 0 ]; then
                 echo "Successfully destroyed resources. Cleaning up the terraform state."
-                gsutil rm -r gs://$TF_BUCKET_NAME/terraform/ || del_state_ret=$?
+                gsutil rm -r gs://$TF_BUCKET_NAME/$TF_STATE_PATH/ || del_state_ret=$?
             fi
          else
             echo "Terraform destroy is alredy executed."
@@ -83,7 +83,7 @@ _perform_terraform_action() {
         fi
     elif [[ "${ACTION,,}" == "destroy" ]]; then
         chk_statefile_ret=0
-        `gsutil -q stat gs://$TF_BUCKET_NAME/terraform/state/*` || chk_statefile_ret=$?
+        gsutil ls gs://$TF_BUCKET_NAME/$TF_STATE_PATH/state/* || chk_statefile_ret=$?
         if [ $chk_statefile_ret -eq 0 ]; then
             echo "Destroying cluster..."
             export IS_CLEANUP_NEEDED="yes"
@@ -108,6 +108,8 @@ _set_terraform_backend() {
         _validate_gcs_path_for_terraform
     fi
 
+    echo "gcs_path = \"$TF_STATE_PATH\"" >> /usr/primary/tf.auto.tfvars
+    echo "gcs_bucket = \"$TF_BUCKET_NAME\"" >> /usr/primary/tf.auto.tfvars
     echo "Terraform state management files are created on cloud storage."
     _create_terraform_backend_file
 }
@@ -119,7 +121,7 @@ _create_terraform_backend_file() {
     echo "terraform {" > /usr/primary/backend.tf
     echo "  backend \"gcs\" {" >> /usr/primary/backend.tf
     echo "    bucket = \"$TF_BUCKET_NAME\"" >> /usr/primary/backend.tf
-    echo "    prefix = \"terraform/state\"" >> /usr/primary/backend.tf
+    echo "    prefix = \"$TF_STATE_PATH/state\"" >> /usr/primary/backend.tf
     echo "  }" >> /usr/primary/backend.tf
     echo "}" >> /usr/primary/backend.tf
 }

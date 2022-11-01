@@ -74,6 +74,11 @@ variable "gcs_path" {
   type        = string
 }
 
+variable "gcs_bucket" {
+  description = ""
+  type        = string
+}
+
 variable "region" {
   description = ""
   type        = string

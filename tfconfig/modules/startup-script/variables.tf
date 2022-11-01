@@ -25,7 +25,12 @@ variable "deployment_name" {
 }
 
 variable "gcs_path" {
-  description = "Path of GCS bucket to store the scripts."
+  description = "Path of GCS folder in the bucket to store the scripts."
+  type        = string
+}
+
+variable "gcs_bucket" {
+  description = "Name of GCS bucket to store the scripts."
   type        = string
 }
 

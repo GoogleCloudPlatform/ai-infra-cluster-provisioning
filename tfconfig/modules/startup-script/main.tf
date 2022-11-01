@@ -59,13 +59,13 @@ resource "random_id" "resource_name_suffix" {
 }
 
 data "google_storage_bucket" "configs_bucket" {
-  name                        = "${var.gcs_path}"
+  name                        = "${var.gcs_bucket}"
 }
 
 resource "google_storage_bucket_object" "scripts" {
   # this writes all scripts exactly once into GCS
   for_each = local.runners_map
-  name     = each.key
+  name     = "${var.gcs_path}/${each.key}"
   content  = each.value["content"]
   source   = each.value["source"]
   bucket   = data.google_storage_bucket.configs_bucket.name
