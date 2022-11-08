@@ -58,7 +58,7 @@ module "compute-vm-1" {
   machine_type        = var.machine_type
   zone                = var.zone
   startup_script      = module.startup.startup_script
-  metadata = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", })
+  metadata = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode="project_editors", })
   labels      = merge(var.labels, { ghpc_role = "compute",})
   name_prefix = var.name_prefix
   guest_accelerator = [{
