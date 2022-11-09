@@ -84,3 +84,7 @@ variable "region" {
   type        = string
 }
 
+variable "accelerator_type" {
+  description = ""
+  type        = string
+}

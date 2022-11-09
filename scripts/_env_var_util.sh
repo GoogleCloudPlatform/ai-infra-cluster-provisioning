@@ -117,6 +117,14 @@ _set_terraform_env_var() {
         echo "metadata = $METADATA" >> /usr/primary/tf.auto.tfvars
     fi
 
+    # setting accelerator type
+    if [[ -z "$ACCELERATOR_TYPE" ]]; then
+        echo "ACCELERATOR_TYPE environment variable not found. Default value is nvidia-tesla-a100."
+    else
+        echo "Setting accelerator type to $ACCELERATOR_TYPE"
+        echo "accelerator_type = \"$ACCELERATOR_TYPE\"" >> /usr/primary/tf.auto.tfvars
+    fi
+
     # setting image name
     if [[ -z "$IMAGE_FAMILY_NAME" ]]; then
         if [[ -z "$IMAGE_NAME" ]]; then

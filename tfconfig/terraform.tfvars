@@ -14,17 +14,18 @@
   * limitations under the License.
   */
 
-name_prefix     = "sptf"
-gpu_per_vm      = 2
-service_account = "455207029971-compute@developer.gserviceaccount.com"
-project_id      = "supercomputer-testing"
-instance_count  = 1
-zone            = "us-central1-f"
-machine_type    = "a2-highgpu-2g"
-instance_image = {
+name_prefix      = "sptf"
+gpu_per_vm       = 2
+service_account  = "455207029971-compute@developer.gserviceaccount.com"
+project_id       = "supercomputer-testing"
+instance_count   = 1
+zone             = "us-central1-f"
+machine_type     = "a2-highgpu-2g"
+instance_image   = {
   family  = "pytorch-1-12-gpu-debian-10"
   project = "ml-images"
 }
-labels = {}
-deployment_name = "sp-tf-v1"
-region          = "us-central1"
+labels           = {}
+deployment_name  = "sp-tf-v1"
+region           = "us-central1"
+accelerator_type = "nvidia-tesla-a100"

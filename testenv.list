@@ -2,7 +2,7 @@
 # Required environment variables.
 
 # ACTION. This defines the intended action to perform. The supported values are: Create, Destroy
-# PROJECT_ID. This is the project id to be used for creating resources. Ex: supercomputer-dev
+# PROJECT_ID. This is the project id to be used for creating resources. Ex: supercomputer-testing
 # NAME_PREFIX. This is the name prefix to be used for naming the resources. Ex: spani
 # REGION. This is the region for creating the resources. Ex: us-central1
 # ZONE. This is the Zone for creating the resources. Ex: us-central1-f
@@ -12,15 +12,18 @@
 # INSTANCE_COUNT. This defines the VM instance count. The default value is 1 if not set.
 # GPU_COUNT. This defines the GPU count per VM. The default value is 2 if not set.
 # VM_TYPE. This defines the VM type. The default value is a2-highgpu-2g if not set.
+# ACCELERATOR_TYPE. This defines the Accelerator type. The default value is nvidia-tesla-a100 if not set.
 # IMAGE_FAMILY_NAME. This defines the image family name for the VM. The default value is pytorch-1-12-gpu-debian-10 if not set. We support images only from ml-images project.
-# IMAGE_NAME. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-11-cu113-v20220701-debian-10 if not set. We support images only from ml-images project.
+# IMAGE_NAME. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-12-cu113-v20221107-debian-10 if not set. We support images only from ml-images project.
 # CLEANUP_ON_EXIT. This defines the cleanup behaviour when the container exits. If set to 'yes' then the cluster is cleaned up when container exits. The supported values are: yes, no.
 # SLEEP_DURATION_SEC. This defines the sleep duration in seconds when CLEANUP_ON_EXIT is set to yes. Default value is 300.
 # GCS_PATH. Google cloud storage bucket path to use for state management and copying scripts. Ex: gs://spani-tst
-# COPY_DIR_PATH. This defines the path of the directory in the container to copy file to the VM (under /tmp directory).Local directory can be mounted to the docker container and path can be specified via COPY_DIR_PATH environment variable to copy files.
+# COPY_DIR_PATH. This defines the path of the directory in the container to copy file to the VM (under /tmp directory). 
+#                Local directory can be mounted to the docker container and path can be specified via COPY_DIR_PATH environment variable to copy files.
 # METADATA. This defines optional metadata to be set for the VM. Ex: { key1 = "val", key2 = "val2"}
 # STARTUP_SCRIPT. This defines the startup script to run when the VM starts up. Ex: python /usr/cp/train.py
-# STARTUP_SCRIPT_PATH. This defines the path of the startup script in the container. The script gets executed when the VM starts.Local directory can be mounted into the container and the startup script path can be provided accordingly. Ex: /usr/cp/test.sh
+# STARTUP_SCRIPT_PATH. This defines the path of the startup script in the container. The script gets executed when the VM starts.
+#                      Local directory can be mounted into the container and the startup script path can be provided accordingly. Ex: /usr/cp/test.sh
 # SETUP_RAY. This controls if ray is setup on the VMs or not. If set to yes ray head node is setup on instance-0 and ray worker node is setup on other nodes. The supported values are: yes, no.
 # -----------------------------------------------------------------------------------------------
 

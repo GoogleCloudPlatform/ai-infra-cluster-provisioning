@@ -63,7 +63,7 @@ module "compute-vm-1" {
   name_prefix = var.name_prefix
   guest_accelerator = [{
     count = var.gpu_per_vm
-    type  = "nvidia-tesla-a100"
+    type  = var.accelerator_type
   }]
   deployment_name = var.deployment_name
 }
