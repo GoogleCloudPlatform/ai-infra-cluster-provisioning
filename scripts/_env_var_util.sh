@@ -34,7 +34,26 @@ _set_terraform_env_var() {
     else
         echo "Found Project ID $PROJECT_ID"
         echo "project_id = \"$PROJECT_ID\"" > /usr/primary/tf.auto.tfvars
-        project_num=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
+        proj_ret=0
+        project_num=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"` || proj_ret=$?
+        if [ $proj_ret != 0 ]; then
+            echo "Failed to get project number. Return value = $proj_ret"
+            auth_ret=0
+            auth_res=`gcloud auth list --format="value(ACCOUNT)"` || auth_ret=$?
+            if [ $auth_ret != 0 ]; then
+                echo "Failed to list auth accounts. Return = $auth_ret."
+                gcloud auth list
+                exit $auth_ret
+            elif [ -z "$auth_res" ]; then
+                echo "No authenticated account found."
+                gcloud auth login
+                gcloud auth application-default login
+                val=`gcloud config set project $PROJECT_ID` 
+                auth_res=`gcloud auth list --format="value(ACCOUNT)"` || auth_ret=$?
+                echo "Logged in as $auth_res"
+            fi
+            project_num=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
+        fi
         echo "Project number is $project_num"
         project_email=$project_num-compute@developer.gserviceaccount.com
         echo "Exporting service account as $project_email"
