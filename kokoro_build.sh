@@ -18,5 +18,5 @@ set -e
 cd "${KOKORO_ARTIFACTS_DIR}/git/ai-infra-cluster-provisioning"
 gcloud config set project supercomputer-testing
 cloud-build-local \
-  --config=/tmpfs/src/git/ai-infra-cluster-provisioning/cloudbuild-testing.yaml \
+  --config=/tmpfs/src/git/ai-infra-cluster-provisioning/test/cloudbuild-testing.yaml \
   --dryrun=false --bind-mount-source /tmpfs/src
