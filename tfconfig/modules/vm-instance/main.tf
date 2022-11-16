@@ -87,7 +87,6 @@ resource "google_compute_resource_policy" "placement_policy" {
   count = var.placement_policy != null ? 1 : 0
   name  = "${local.resource_prefix}-vm-instance-placement"
   group_placement_policy {
-    vm_count                  = var.placement_policy.vm_count
     availability_domain_count = var.placement_policy.availability_domain_count
     collocation               = var.placement_policy.collocation
   }
@@ -161,4 +160,14 @@ resource "google_compute_instance" "compute_vm" {
       metadata["ssh-keys"],
     ]
   }
+}
+
+resource "google_compute_instance_group" "instance-group" {
+  description = "${local.resource_prefix} instance group."
+  instances   = flatten([
+    google_compute_instance.compute_vm[*].id
+  ])
+  name        = "${local.resource_prefix}-instance-group"
+  project     = var.project_id
+  zone        = var.zone
 }

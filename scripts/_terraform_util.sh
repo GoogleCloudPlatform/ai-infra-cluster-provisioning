@@ -19,7 +19,7 @@
 #
 _terraform_setup() {
     terraform -chdir=/usr/primary validate
-    terraform -chdir=/usr/primary apply -input=false -auto-approve
+    terraform -chdir=/usr/primary apply -input=false -auto-approve --parallelism=20
     tf_appl_ret_val=$?
     echo "Apply exit code $tf_appl_ret_val"
     if [ $tf_appl_ret_val -eq 0 ]; then
