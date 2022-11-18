@@ -14,22 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-
-source /usr/_env_var_util.sh
-source /usr/_terraform_util.sh
-source /usr/_storage_util.sh
-source /usr/_script_util.sh
-source /usr/_debug_util.sh
-
-trap _terraform_cleanup EXIT SIGTERM SIGINT
-
-echo "================SETTING UP ENVIRONMENT FOR TERRAFORM================"
-_debug_hold
-_set_terraform_env_var
-_expand_files_to_copy
-_expand_startup_script
-
-_set_terraform_backend
-echo "====================================================================="
-_perform_terraform_action
+#
+# hold the execution if DEBUG_HOLD variable is set.
+# till the /tmp/debug_release file is not found
+#
+_debug_hold() {
+    echo "DEBUG_HOLD = $DEBUG_HOLD"
+    if [  ! -z "$DEBUG_HOLD" ]; then
+        echo "DEBUG_HOLD is set to $DEBUG_HOLD. Waiting for /tmp/debug_release file to be created."
+        while [  ! -f /tmp/debug_release ] 
+        do
+            echo "Waiting 10 seconds for /tmp/debug_release file to be created..."
+            sleep 10s
+        done
+    fi
+}

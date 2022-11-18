@@ -28,11 +28,6 @@ RUN apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,
 
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 COPY tfconfig/ /usr/primary/
-COPY scripts/entrypoint.sh /usr/entrypoint.sh
-COPY scripts/_env_var_util.sh /usr/_env_var_util.sh
-COPY scripts/_terraform_util.sh /usr/_terraform_util.sh
-COPY scripts/_storage_util.sh /usr/_storage_util.sh
-COPY scripts/_script_util.sh /usr/_script_util.sh
-COPY scripts/setup_ray.sh /usr/setup_ray.sh
+COPY scripts/ /usr/
 RUN chmod +x /usr/entrypoint.sh
 ENTRYPOINT ["/usr/entrypoint.sh"]
