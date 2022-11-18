@@ -26,7 +26,17 @@ runuser -u ray -- /opt/conda/bin/pip3 install \
   --no-cache-dir \
   "ray[default]==${ray_version}"
 
-if [[  "${HOSTNAME#*-}" == "0" ]]; then
+export HEAD_NODE_NAME=""
+for machine in $(gcloud compute instances list | grep ${HOSTNAME%-*} | sed 's/\(^\S\+\) .*/\1/');
+do
+  echo "${machine} -- ${HEAD_NODE_NAME}"
+  if [[ "$machine" > "$HEAD_NODE_NAME" ]]; then
+    export HEAD_NODE_NAME=$machine
+  fi
+done
+echo "HEAD_NODE_NAME value is $HEAD_NODE_NAME"
+
+if [[  "${HOSTNAME}" == "$HEAD_NODE_NAME" ]]; then
   echo "Starting Ray head node..."
   runuser -u ray -- /opt/conda/bin/ray start \
     --head \
@@ -35,7 +45,7 @@ if [[  "${HOSTNAME#*-}" == "0" ]]; then
 else
   echo "Starting Ray worker node..."
   runuser -u ray -- /opt/conda/bin/ray start \
-    --address=${HOSTNAME%-*}-0:${ray_port} \
+    --address=${HEAD_NODE_NAME}:${ray_port} \
     --num-gpus=${gpus_per_vm}
 fi
 

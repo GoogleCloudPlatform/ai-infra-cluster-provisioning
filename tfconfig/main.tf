@@ -38,7 +38,7 @@ __REPLACE_STARTUP_SCRIPT__
 }
 
 module "compute-vm-1" {
-  source               = "./modules/vm-instance"
+  source               = "./modules/vm-instance-group"
   subnetwork_self_link = module.network1.subnetwork_self_link
   service_account = {
     email  = var.service_account
@@ -57,6 +57,7 @@ module "compute-vm-1" {
   on_host_maintenance = "TERMINATE"
   machine_type        = var.machine_type
   zone                = var.zone
+  region              = var.region
   startup_script      = module.startup.startup_script
   metadata = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode="project_editors", })
   labels      = merge(var.labels, { ghpc_role = "compute",})
