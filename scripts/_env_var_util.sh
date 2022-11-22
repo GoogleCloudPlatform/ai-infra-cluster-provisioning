@@ -15,6 +15,7 @@
 # limitations under the License.
 
 #
+# test pr submit
 # method to set environment variables for terraform apply.
 #
 _set_terraform_env_var() {
