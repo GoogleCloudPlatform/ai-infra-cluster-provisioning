@@ -161,4 +161,8 @@ resource "google_compute_instance_group_manager" "mig" {
   }
   target_size = var.instance_count
   depends_on = [var.network_self_link, var.network_storage]
+  timeouts {
+    create = "30m"
+    update = "30m"
+  }
 }

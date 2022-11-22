@@ -87,10 +87,11 @@ _set_terraform_env_var() {
     # setting instance count
     if [[ -z "$INSTANCE_COUNT" ]]; then
         echo "INSTANCE_COUNT environment variable not found. Default value is 1"
+        export INSTANCE_COUNT=1
     else
         echo "Setting instance count to $INSTANCE_COUNT"
-        echo "instance_count = $INSTANCE_COUNT" >> /usr/primary/tf.auto.tfvars
     fi
+    echo "instance_count = $INSTANCE_COUNT" >> /usr/primary/tf.auto.tfvars
 
     # setting gpu count
     if [[ -z "$GPU_COUNT" ]]; then
@@ -98,16 +99,17 @@ _set_terraform_env_var() {
         export GPU_COUNT=2
     else
         echo "Setting gpu count to $GPU_COUNT"
-        echo "gpu_per_vm = $GPU_COUNT" >> /usr/primary/tf.auto.tfvars
     fi
+    echo "gpu_per_vm = $GPU_COUNT" >> /usr/primary/tf.auto.tfvars
 
     # setting vm type
     if [[ -z "$VM_TYPE" ]]; then
         echo "VM_TYPE environment variable not found. Default value is a2-highgpu-2g."
+        export VM_TYPE=a2-highgpu-2g
     else
         echo "Setting vm type to $VM_TYPE"
-        echo "machine_type = \"$VM_TYPE\"" >> /usr/primary/tf.auto.tfvars
     fi
+    echo "machine_type = \"$VM_TYPE\"" >> /usr/primary/tf.auto.tfvars
 
     # setting metadata info
     if [[ -z "$METADATA" ]]; then
@@ -120,10 +122,11 @@ _set_terraform_env_var() {
     # setting accelerator type
     if [[ -z "$ACCELERATOR_TYPE" ]]; then
         echo "ACCELERATOR_TYPE environment variable not found. Default value is nvidia-tesla-a100."
+        export ACCELERATOR_TYPE=nvidia-tesla-a100
     else
         echo "Setting accelerator type to $ACCELERATOR_TYPE"
-        echo "accelerator_type = \"$ACCELERATOR_TYPE\"" >> /usr/primary/tf.auto.tfvars
     fi
+    echo "accelerator_type = \"$ACCELERATOR_TYPE\"" >> /usr/primary/tf.auto.tfvars
 
     # setting image name
     if [[ -z "$IMAGE_FAMILY_NAME" ]]; then
@@ -151,6 +154,29 @@ _set_terraform_env_var() {
         echo "  project = \"ml-images\"" >> /usr/primary/tf.auto.tfvars
         echo "}" >> /usr/primary/tf.auto.tfvars
     fi
+
+    # setting labels
+    uuidvar=`dbus-uuidgen`
+    clusternum=${uuidvar:0:6}
+    if [[ -z "$LABELS" ]]; then
+        echo "labels = { aiinfra-cluster=\"$clusternum\" }" >> /usr/primary/tf.auto.tfvars
+    else
+        echo "Setting labels value to $LABELS"
+        finalLabel=${LABELS/"}"/", aiinfra-cluster=\"$clusternum\" }"}
+        echo "labels = $finalLabel" >> /usr/primary/tf.auto.tfvars
+    fi
+    
+    # setting disk information
+    if [[ -z "$DISK_SIZE_GB" ]]; then
+        export DISK_SIZE_GB=2000 
+    fi
+    if [[ -z "$DISK_TYPE" ]]; then
+        export DISK_TYPE=pd-ssd
+    fi
+    echo "Setting disk size to $DISK_SIZE_GB GB."
+    echo "disk_size_gb = $DISK_SIZE_GB" >> /usr/primary/tf.auto.tfvars
+    echo "Setting disk type to $DISK_TYPE."
+    echo "disk_type = \"$DISK_TYPE\"" >> /usr/primary/tf.auto.tfvars
 
     # setting image name
     if [[ -z "$SLEEP_DURATION_SEC" ]]; then

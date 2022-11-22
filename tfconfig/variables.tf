@@ -88,3 +88,13 @@ variable "accelerator_type" {
   description = ""
   type        = string
 }
+
+variable "disk_size_gb" {
+  description = ""
+  type        = number
+}
+
+variable "disk_type" {
+  description = ""
+  type        = string
+}

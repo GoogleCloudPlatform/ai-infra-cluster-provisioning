@@ -46,7 +46,8 @@ module "compute-vm-1" {
   }
   instance_count    = var.instance_count
   project_id        = var.project_id
-  disk_size_gb      = 2000
+  disk_size_gb      = var.disk_size_gb
+  disk_type         = var.disk_type
   network_self_link = module.network1.network_self_link
   placement_policy = {
     availability_domain_count = null
@@ -60,7 +61,7 @@ module "compute-vm-1" {
   region              = var.region
   startup_script      = module.startup.startup_script
   metadata = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode="project_editors", })
-  labels      = merge(var.labels, { ghpc_role = "compute",})
+  labels      = merge(var.labels, { aiinfra_role = "compute",})
   name_prefix = var.name_prefix
   guest_accelerator = [{
     count = var.gpu_per_vm
