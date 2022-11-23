@@ -93,6 +93,10 @@ _perform_terraform_action() {
         else
             echo "Terraform Sate file not found."
         fi
+    elif [[ "${ACTION,,}" == "validate" ]]; then
+        terraform --version
+        terraform -chdir=/usr/primary init -input=false
+        terraform -chdir=/usr/primary validate
     else
         echo "Action $ACTION is not supported..."
     fi

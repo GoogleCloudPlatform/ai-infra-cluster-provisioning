@@ -25,10 +25,9 @@ steps:
           '-f', 'Dockerfile', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
-          '--env-file', 'testenv.list',
+          '--env-file', 'test/testenv.list',
           '--network=cloudbuild',
-          'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest']
-images:
-- 'us-central1-docker.pkg.dev/${PROJECT_ID}/cluster-provision-repo/cluster-provision-image'
+          'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
+          'Validate' ]
 
 timeout: 900s
