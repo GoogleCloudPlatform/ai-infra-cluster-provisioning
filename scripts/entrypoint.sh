@@ -25,6 +25,11 @@ source /usr/_debug_util.sh
 trap _terraform_cleanup EXIT SIGTERM SIGINT
 
 echo "================SETTING UP ENVIRONMENT FOR TERRAFORM================"
+if [ ! -z "$1" ]; then
+    export ACTION=$1
+    echo "Setting Action to $ACTION"
+fi
+
 _debug_hold
 _set_terraform_env_var
 _expand_files_to_copy

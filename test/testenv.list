@@ -27,7 +27,6 @@
 # SETUP_RAY. This controls if ray is setup on the VMs or not. If set to yes ray head node is setup on instance-0 and ray worker node is setup on other nodes. The supported values are: yes, no.
 # -----------------------------------------------------------------------------------------------
 
-ACTION=Create
 PROJECT_ID=supercomputer-testing
 NAME_PREFIX=spani2
 REGION=us-central1
@@ -35,5 +34,4 @@ ZONE=us-central1-a
 GCS_PATH=gs://spani-tst
 METADATA={ key1 = "val", key2 = "val2"}
 INSTANCE_COUNT=1
-CLEANUP_ON_EXIT=yes
 SLEEP_DURATION_SEC=1
