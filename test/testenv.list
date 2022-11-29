@@ -31,7 +31,6 @@ PROJECT_ID=supercomputer-testing
 NAME_PREFIX=spani2
 REGION=us-central1
 ZONE=us-central1-a
-GCS_PATH=gs://spani-tst
+GCS_PATH=gs://spani-tst/gcb-test
 METADATA={ key1 = "val", key2 = "val2"}
 INSTANCE_COUNT=1
-SLEEP_DURATION_SEC=1

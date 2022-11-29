@@ -23,11 +23,6 @@ steps:
   args: [ 'build', '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/cluster-provision-repo/cluster-provision-image:latest',
           '--cache-from', 'us-central1-docker.pkg.dev/${PROJECT_ID}/cluster-provision-repo/cluster-provision-image:latest',
           '-f', 'Dockerfile', '.' ]
-#- name: 'gcr.io/cloud-builders/docker'
-#  args: [ 'run',
-#          '--env-file', 'test/testenvcreate.list',
-#          '--network=cloudbuild',
-#          'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
           '--env-file', 'test/testenv.list',
