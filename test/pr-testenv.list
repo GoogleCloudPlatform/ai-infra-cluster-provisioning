@@ -28,7 +28,7 @@
 # -----------------------------------------------------------------------------------------------
 
 PROJECT_ID=supercomputer-testing
-NAME_PREFIX=spani2
+NAME_PREFIX=gcbpresub
 REGION=us-central1
 ZONE=us-central1-a
 GCS_PATH=gs://spani-tst/gcb-test

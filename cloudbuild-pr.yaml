@@ -25,7 +25,7 @@ steps:
           '-f', 'Dockerfile', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
-          '--env-file', 'test/testenv.list',
+          '--env-file', 'test/pr-testenv.list',
           '--network=cloudbuild',
           'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
           'Validate' ]
