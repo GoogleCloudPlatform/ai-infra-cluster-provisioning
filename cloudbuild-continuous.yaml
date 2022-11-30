@@ -25,15 +25,24 @@ steps:
           '-f', 'Dockerfile', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
-          '--env-file', 'test/testenv.list',
+          '--env-file', 'test/continuous-testenv.list',
+          '--network=cloudbuild',
+          'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
+          'Destroy' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'run',
+          '--env-file', 'test/continuous-testenv.list',
           '--network=cloudbuild',
           'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
           'Create' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
-          '--env-file', 'test/testenv.list',
+          '--env-file', 'test/continuous-testenv.list',
           '--network=cloudbuild',
           'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
           'Destroy' ]
 
-timeout: 900s
+images:
+- 'us-central1-docker.pkg.dev/${PROJECT_ID}/cluster-provision-repo/cluster-provision-image'
+
+timeout: 1800s
