@@ -10,7 +10,7 @@ This document describes the current status and the upcoming milestones of the Cl
 | :---: | :--- | :---: |
 | 🟢 | **[Create repository and project](#create-repository-and-project)** | Q4 2022 |
 | 🟡 | **[Basic feature set and LLM integration](#basic-feature-set-release-and-llm-integration)** | Dec 2022 |
-| 🔴 | **[Advanced feature set for 10K+ support](#advanced-feature-set-for-10k-support)** | Mid Jan 2023 |
+| 🔴 | **[Advanced feature set for 10K+ GPU support](#advanced-feature-set-for-10k-gpu-support)** | Mid Jan 2023 |
 | 🔴 | **[GKE support](#gke-support)** | Q1 2023 |
 
 ### Create repository and project
@@ -39,16 +39,19 @@ We will work on creating the MVP of cluster provisioning tool and work on integr
 
 | Status | Goal | Remarks | ETA |
 | :---: | :--- | --- | :---: |
-| 🟢 | MVP for cluster provisioning tool <ul><li>VM instance creation via MIG</li><li>Jupyter notebook endpoint for VMs</li><li>Ray cluster setup</li><li>Copy local script to VM and define startup script.</li><li>Flexible GPU and VM configuration</li></ul> | [Bug Tracking](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning/issues) | - |
+| 🟢 | MVP for cluster provisioning tool <ul><li>VM instance creation via MIG</li><li>Ray cluster setup</li><li>Copy local script to VM and define startup script.</li><li>Flexible GPU and VM configuration</li></ul> | [Bug Tracking](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning/issues) | - |
 | 🟢 | Integration with LLM pipeline | `Done` | - |
-| 🟡 | Integration and presubmit validations | `InProgress` | Dec 16, 2022 |
+| 🟡 | Jupyter notebook endpoint for connecting to the cluster | `InProgress` | Dec 09, 2022 |
+| 🟡 | Integration and presubmit validations | `InProgress` | Dec 09, 2022 |
 | 🟡 | Create artifact repository and release private image | `InProgress` | Dec 16, 2022 |
+| 🔴 | Example scripts to run multinode training | `NotStarted` | - |
 | 🔴 | Monitoring pipeline integration with cluster provisioning tool | `NotStarted` | - |
 | 🔴 | Create artifact repository and release public image | `NotStarted` | - |
+| 🔴 | Public blog for the cluster provisioning tool. | `NotStarted` | - |
 
 
-### Advanced feature set for 10K+ support
-> The target of this milestone is to integrate advanced features to cluster provisioning tool required for 16K GPU support. As we validate more scenarios for 16K GPU we will find additional goals required to support it. This milestone will be done when we have adequate support for 16K GPU in cluster provisioning tool.
+### Advanced feature set for 10K+ GPU support
+> The target of this milestone is to integrate advanced features to cluster provisioning tool required for 10K+ GPU support. As we validate more scenarios for 10K+ GPUs we will find additional goals required to support it. This milestone will be done when we have adequate support for 16K GPU in cluster provisioning tool.
 
 | Status | Goal | Remarks | ETA |
 | :---: | :--- | --- | :---: |
@@ -56,8 +59,8 @@ We will work on creating the MVP of cluster provisioning tool and work on integr
 | 🔴 | Multi NIC instance support | | - |
 | 🔴 | GCSFuse support | | - |
 | 🔴 | Add automatic placement policy for large number of VMs | | - |
-| 🔴 | Example scripts to run multinode training | | - |
 | 🔴 | Multiple orchestartor support | | - |
+| 🔴 | Additional Documentation for 10K+ GPU scenario. | | - |
 
 
 ### GKE support 
