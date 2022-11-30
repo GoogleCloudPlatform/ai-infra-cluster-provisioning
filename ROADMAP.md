@@ -51,7 +51,7 @@ We will work on creating the MVP of cluster provisioning tool and work on integr
 
 
 ### Advanced feature set for 10K+ GPU support
-> The target of this milestone is to integrate advanced features to cluster provisioning tool required for 10K+ GPU support. As we validate more scenarios for 10K+ GPUs we will find additional goals required to support it. This milestone will be done when we have adequate support for 16K GPU in cluster provisioning tool.
+> The target of this milestone is to integrate advanced features to cluster provisioning tool required for 10K+ GPU support. As we validate more scenarios for 10K+ GPUs we will find additional goals required to support it. 
 
 | Status | Goal | Remarks | ETA |
 | :---: | :--- | --- | :---: |
