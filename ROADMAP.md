@@ -10,7 +10,7 @@ This document describes the current status and the upcoming milestones of the Cl
 | :---: | :--- | :---: |
 | 🟢 | **[Create repository and project](#create-repository-and-project)** | Q4 2022 |
 | 🟡 | **[Basic feature set and LLM integration](#basic-feature-set-release-and-llm-integration)** | Dec 2022 |
-| 🔴 | **[Advanced feature set for 16K support](#advanced-feature-set-for-16k-support)** | Mid Jan 2023 |
+| 🔴 | **[Advanced feature set for 10K+ support](#advanced-feature-set-for-10k-support)** | Mid Jan 2023 |
 | 🔴 | **[GKE support](#gke-support)** | Q1 2023 |
 
 ### Create repository and project
@@ -22,12 +22,12 @@ Setting up the repository will allow us to manage the code for the cluster provi
 
 | Status | Goal | Remarks | ETA |
 | :---: | :--- | --- | :---: |
-| 🟢 | CUJ Document | [AI Infra CUJ (AdAstra timeline)](https://docs.google.com/document/d/1OEt35xhRdf3Ef4OWHkMNreWG8ETsMEBcLMYH1wqxfFE/edit?usp=sharing) | - |
-| 🟢 | Cluster Provisioning design document | [Design for AI Infra Cluster Provisioning](https://docs.google.com/document/d/19PYmkS421vto7KE-E3b9Y-lzxORf_Yr8fuRuoNDWa5o/edit?usp=sharing&resourcekey=0-ZXfWNopetrLCQnuBerSL4w) | - |
-| 🟢 | Test Plan | [Test Plan for AI Infra Cluster Provisioning](https://docs.google.com/document/d/1tbSb94V5rZ4TGuZiY-OWQ1N2TbP24WGsQYvChsaXZDU/edit?usp=sharing) |-|
-| 🟢 | Cluster provisioning turbo launch release | [Approved](https://turbo.corp.google.com/docs/272662) |-|
+| 🟢 | CUJ Document | `CUJ doc created and reviewed internally`  | - |
+| 🟢 | Cluster Provisioning design document | `Design doc Created and reviewed` | - |
+| 🟢 | Test Plan | `Test plan created and reviewed internally` |-|
+| 🟢 | Cluster provisioning release | `Approved` |-|
 | 🟢 | Github repository | [GoogleClousPlatform/ai-infra-cluster-provisioning](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning) |-|
-| 🟢 | Create Project to release image | [gce-ai-infra](https://pantheon.corp.google.com/welcome?project=gce-ai-infra) |-|
+| 🟢 | Create Project to release image | `gce-ai-infra project created` |-|
 
 
 ### Basic feature set release and LLM integration
@@ -39,7 +39,7 @@ We will work on creating the MVP of cluster provisioning tool and work on integr
 
 | Status | Goal | Remarks | ETA |
 | :---: | :--- | --- | :---: |
-| 🟢 | MVP for cluster provisioning tool | [Bug Tracking](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning/issues) | - |
+| 🟢 | MVP for cluster provisioning tool <ul><li>VM instance creation via MIG</li><li>Jupyter notebook endpoint for VMs</li><li>Ray cluster setup</li><li>Copy local script to VM and define startup script.</li><li>Flexible GPU and VM configuration</li></ul> | [Bug Tracking](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning/issues) | - |
 | 🟢 | Integration with LLM pipeline | `Done` | - |
 | 🟡 | Integration and presubmit validations | `InProgress` | Dec 16, 2022 |
 | 🟡 | Create artifact repository and release private image | `InProgress` | Dec 16, 2022 |
@@ -47,7 +47,7 @@ We will work on creating the MVP of cluster provisioning tool and work on integr
 | 🔴 | Create artifact repository and release public image | `NotStarted` | - |
 
 
-### Advanced feature set for 16K support
+### Advanced feature set for 10K+ support
 > The target of this milestone is to integrate advanced features to cluster provisioning tool required for 16K GPU support. As we validate more scenarios for 16K GPU we will find additional goals required to support it. This milestone will be done when we have adequate support for 16K GPU in cluster provisioning tool.
 
 | Status | Goal | Remarks | ETA |
@@ -56,6 +56,8 @@ We will work on creating the MVP of cluster provisioning tool and work on integr
 | 🔴 | Multi NIC instance support | | - |
 | 🔴 | GCSFuse support | | - |
 | 🔴 | Add automatic placement policy for large number of VMs | | - |
+| 🔴 | Example scripts to run multinode training | | - |
+| 🔴 | Multiple orchestartor support | | - |
 
 
 ### GKE support 
