@@ -24,6 +24,10 @@ source /usr/_debug_util.sh
 
 trap _terraform_cleanup EXIT SIGTERM SIGINT
 
+export GREEN='\e[1;32m'
+export RED='\e[0;31m'
+export NOC='\e[0m'
+
 echo "================SETTING UP ENVIRONMENT FOR TERRAFORM================"
 if [ ! -z "$1" ]; then
     export ACTION=$1

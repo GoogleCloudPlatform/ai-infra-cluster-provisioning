@@ -25,7 +25,9 @@
 # STARTUP_SCRIPT_PATH. This defines the path of the startup script in the container. The script gets executed when the VM starts.
 #                      Local directory can be mounted into the container and the startup script path can be provided accordingly. Ex: /usr/cp/test.sh
 # SETUP_RAY. This controls if ray is setup on the VMs or not. If set to yes ray head node is setup on instance-0 and ray worker node is setup on other nodes. The supported values are: yes, no.
-# -----------------------------------------------------------------------------------------------
+# SHOW_PROXY_URL. This controls if Jupyter notebook proxy url is retrieved for the cluster or not. If this is present and set to no, then connection information is not collected.
+#                 The supported values are: yes, no.
+# -------------------------------------------------------------------------------------------------
 
 PROJECT_ID=supercomputer-testing
 NAME_PREFIX=gcbpresub
