@@ -23,7 +23,7 @@ _set_terraform_env_var() {
 
     # Check cluster provisioning action.
     if [[ -z "$ACTION" ]]; then
-        echo "Cluster provisioning action is not defined. Example: 'Create' or 'Destroy'. Exiting.."
+        echo -e "${RED} Cluster provisioning action is not defined. Please provide 'Create' or 'Destroy' in the 'docker run' command. Exiting.. ${NOC}"
         exit 1
     fi
 
