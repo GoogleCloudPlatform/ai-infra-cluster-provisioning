@@ -18,7 +18,7 @@
 # method to create gcs bucket for terraform state
 #
 _create_gcs_bucket_for_terraform() {
-    export TF_BUCKET_NAME=$NAME_PREFIX-tf-bucket
+    export TF_BUCKET_NAME=aiinfra-terraform-$PROJECT_ID
     list_tf_bucket_ret=0
     list_tf_bucket_out=`gcloud storage buckets list gs://$TF_BUCKET_NAME` || list_tf_bucket_ret=$?
     if [ $list_tf_bucket_ret -eq 0 ]; then
@@ -41,7 +41,7 @@ _create_gcs_bucket_for_terraform() {
             exit $create_tf_bucket_ret
         fi
     fi
-    export TF_STATE_PATH=terraform
+    export TF_STATE_PATH=$NAME_PREFIX-deployment/terraform
 }
 
 #
