@@ -36,7 +36,7 @@ _terraform_setup() {
     else
         echo "Terraform apply failed with error $apply_ret."
         migErr=$(gcloud compute instance-groups managed list-errors $NAME_PREFIX-mig --zone $ZONE)
-        echo -e "${RED} migErr ${NOP}"
+        echo -e "${RED} $migErr ${NOP}"
         exit $apply_ret
     fi
 }
