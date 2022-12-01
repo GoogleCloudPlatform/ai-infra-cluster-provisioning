@@ -27,7 +27,6 @@
 # -------------------------------------------------------------------------------------------------
 
 PROJECT_ID=supercomputer-testing
-NAME_PREFIX=gcbpresub
 ZONE=us-central1-a
 GCS_PATH=gs://spani-tst/gcb-test
 METADATA={ key1 = "val", key2 = "val2"}

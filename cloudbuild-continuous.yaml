@@ -26,18 +26,21 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
           '--env-file', 'test/continuous-testenv.list',
+          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}',
           '--network=cloudbuild',
           'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
           'Destroy' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
           '--env-file', 'test/continuous-testenv.list',
+          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}',
           '--network=cloudbuild',
           'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
           'Create' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
           '--env-file', 'test/continuous-testenv.list',
+          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}',
           '--network=cloudbuild',
           'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
           'Destroy' ]
