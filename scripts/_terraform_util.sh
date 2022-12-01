@@ -60,7 +60,7 @@ _Display_connection_info() {
                     sleep 15s
                     ((attempt++))
                 else
-                    echo "${vm} : ${connStr}" >> /usr/connectiondata.txt
+                    echo "${vm} : https://${connStr}" >> /usr/connectiondata.txt
                     break
                 fi
             done

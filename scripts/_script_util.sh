@@ -22,7 +22,7 @@ _expand_files_to_copy() {
     if [[ ! -z "$COPY_DIR_PATH" ]]; then
         if [[ -d "$COPY_DIR_PATH" ]]; then
             echo "Files from $COPY_DIR_PATH will be copied to the VM."
-            for filename in $COPY_DIR_PATH/*
+            for filename in $(find $COPY_DIR_PATH -type f)
             do
                 if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
                     fn=$(basename ${filename})

@@ -152,6 +152,7 @@ resource "google_compute_instance_group_manager" "mig" {
     minimal_action        = "RESTART"
     max_unavailable_fixed = 1
     type                  = "OPPORTUNISTIC"
+    replacement_method    = "RECREATE" # Instance name will be preserved
   }
   zone               = var.zone
   wait_for_instances = true
@@ -161,6 +162,13 @@ resource "google_compute_instance_group_manager" "mig" {
   }
   target_size = var.instance_count
   depends_on = [var.network_self_link, var.network_storage]
+
+  lifecycle {
+    # Required so that new templates are created and MIG is updated before
+    # destroying the old template.
+    create_before_destroy = true
+  }
+
   timeouts {
     create = "30m"
     update = "30m"
