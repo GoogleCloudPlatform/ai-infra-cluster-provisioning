@@ -16,7 +16,7 @@ Optionally Users can provide a list of metadata that can be added to the VM.
 
 #### Sample config file that the user provides.
 ``` 
-# -----------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 # Required environment variables.
 
 # ACTION. This defines the intended action to perform. The supported values are: Create, Destroy
@@ -30,20 +30,34 @@ Optionally Users can provide a list of metadata that can be added to the VM.
 # INSTANCE_COUNT. This defines the VM instance count. The default value is 1 if not set.
 # GPU_COUNT. This defines the GPU count per VM. The default value is 2 if not set.
 # VM_TYPE. This defines the VM type. The default value is a2-highgpu-2g if not set.
-# CLEANUP_ON_EXIT. This defines the cleanup behaviour when the container exits. If set to 'yes' then the cluster is cleaned up when container exits. The supported values are: yes, no.
+# ACCELERATOR_TYPE. This defines the Accelerator type. The default value is nvidia-tesla-a100 if not set.
+# IMAGE_FAMILY_NAME. This defines the image family name for the VM. The default value is pytorch-1-12-gpu-debian-10 if not set. We support images only from ml-images project.
+# IMAGE_NAME. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-12-cu113-v20221107-debian-10 if not set. We support images only from ml-images project.
 # GCS_PATH. Google cloud storage bucket path to use for state management and copying scripts. Ex: gs://spani-tst
-# COPY_DIR_PATH. Local directory can be mounted to the docker container and path can be specified via COPY_DIR_PATH environment variable to copy files to the VM.
+# DISK_SIZE_GB. This defines the disk size in GB for the VMs. The default value is 2000 GB(2 TB) if not specified.
+# DISK_TYPE. This defines the disk type to use for VM creation. The default value is pd-ssd if not defined.
+# COPY_DIR_PATH. This defines the path of the directory in the container to copy file to the VM (under /tmp directory). 
+#                Local directory can be mounted to the docker container and path can be specified via COPY_DIR_PATH environment variable to copy files.
 # METADATA. This defines optional metadata to be set for the VM. Ex: { key1 = "val", key2 = "val2"}
-# -----------------------------------------------------------------------------------------------
+# LABELS. This defines key value pair to set as labels when the VMs are created. Ex: { key1 = "val", key2 = "val2"} 
+# STARTUP_SCRIPT. This defines the startup script to run when the VM starts up. Ex: python /usr/cp/train.py
+# STARTUP_SCRIPT_PATH. This defines the path of the startup script in the container. The script gets executed when the VM starts.
+#                      Local directory can be mounted into the container and the startup script path can be provided accordingly. Ex: /usr/cp/test.sh
+# SETUP_RAY. This controls if ray is setup on the VMs or not. If set to yes ray head node is setup on instance-0 and ray worker node is setup on other nodes. The supported values are: yes, no.
+# -------------------------------------------------------------------------------------------------
 
-ACTION=Destroy
+ACTION=Create
 PROJECT_ID=supercomputer-testing
 NAME_PREFIX=spani
 REGION=us-central1
 ZONE=us-central1-f
 GCS_PATH=gs://spani-tst
 COPY_DIR_PATH=/usr/cp
-METADATA={ key1 = "val", key2 = "val2"}
+STARTUP_SCRIPT=python /tmp/test.py
+METADATA={ meta1 = "val", meta2 = "val2" }
+LABELS={ label1 = "marker1" }
+SETUP_RAY=yes
+INSTANCE_COUNT=3
 ```
 
 ### Setting up Terraform to create resources
@@ -55,7 +69,6 @@ Using the provisioning tool the user can provide a GCS bucket path that the entr
 
 ### Resource cleanup
 Since the resource state is stored outside of the container, the GPU cluster lifespan is decoupled from the container’s lifespan. Now the user can run the container and provide ‘ACTION=Create’ in the config file to create the resources. They can run the container again and provide ‘ACTION=Destroy’ to destroy the container. The terraform state stored in the GCS bucket is cleared when the destroy operation is called.
-Users can alternatively set ‘CLEANUP_ON_EXIT=yes’ which triggers the resource cleanup when the container exits. In this case state management happens within the container and the state files are not stored in the GCS bucket.
 
 ## Instruction
 1. gcloud auth login.

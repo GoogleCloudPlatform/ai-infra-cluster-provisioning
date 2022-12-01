@@ -177,10 +177,4 @@ _set_terraform_env_var() {
     echo "disk_size_gb = $DISK_SIZE_GB" >> /usr/primary/tf.auto.tfvars
     echo "Setting disk type to $DISK_TYPE."
     echo "disk_type = \"$DISK_TYPE\"" >> /usr/primary/tf.auto.tfvars
-
-    # setting image name
-    if [[ -z "$SLEEP_DURATION_SEC" ]]; then
-        echo "SLEEP_DURATION_SEC environment variable not found. Default value is 300."
-        export SLEEP_DURATION_SEC=300
-    fi
 }
