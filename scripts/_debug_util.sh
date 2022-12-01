@@ -19,9 +19,9 @@
 # till the /tmp/debug_release file is not found
 #
 _debug_hold() {
-    echo "DEBUG_HOLD = $DEBUG_HOLD"
-    if [  ! -z "$DEBUG_HOLD" ]; then
-        echo "DEBUG_HOLD is set to $DEBUG_HOLD. Waiting for /tmp/debug_release file to be created."
+    if [[ ! -z "$ACTION" && "${ACTION,,}" == "debug" ]]; then
+        echo "Action is set to $ACTION. Waiting for /tmp/debug_release file to be created."
+        echo -e "${GREEN} Set Action by using \"export ACTION=create\" before proceed... ${NOC}"
         while [  ! -f /tmp/debug_release ] 
         do
             echo "Waiting 10 seconds for /tmp/debug_release file to be created..."
