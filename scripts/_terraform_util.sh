@@ -19,17 +19,11 @@
 #
 _terraform_setup() {
     terraform -chdir=/usr/primary validate
-    terraform -chdir=/usr/primary apply -input=false -auto-approve --parallelism=20
-    tf_appl_ret_val=$?
-    echo "Apply exit code $tf_appl_ret_val"
-    if [ $tf_appl_ret_val -eq 0 ]; then
+    apply_ret=0
+    terraform -chdir=/usr/primary apply -input=false -auto-approve || apply_ret=$?
+    if [ $apply_ret -eq 0 ]; then
         echo "Terraform apply finished successfully."
-        echo "Please use below commands to ssh into the VM instances."
-        accountName=`gcloud config get-value account`
-        username=${accountName%@*}
-        for ((i=0; i<${INSTANCE_COUNT}; i++)); do
-            echo "ssh -i ~/.ssh/google_compute_engine ${username}_google_com@nic0.${NAME_PREFIX}-$i.${ZONE}.c.${PROJECT_ID}.internal.gcpnode.com"
-        done
+        _Display_connection_info
         # setup auto clean is environment variable is set
         if [[ -z "$CLEANUP_ON_EXIT" ]]; then
             echo "Cluster will be available after container exits."
@@ -40,8 +34,37 @@ _terraform_setup() {
             fi
         fi
     else
-        echo "Terraform apply failed with error $tf_appl_ret_val."
-        exit $tf_appl_ret_val
+        echo "Terraform apply failed with error $apply_ret."
+        migErr=$(gcloud compute instance-groups managed list-errors $NAME_PREFIX-mig --zone $ZONE)
+        echo -e "${RED} $migErr ${NOP}"
+        exit $apply_ret
+    fi
+}
+
+#
+# method to display jupyter notebook connection endpoint.
+#
+_Display_connection_info() {
+    if [[ ! -z "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
+        echo "Not checking for proxy_url information."
+    else
+        for vm in $(gcloud compute instance-groups list-instances $NAME_PREFIX-mig --zone $ZONE --format="value(NAME)");
+        do
+            local attempt=1
+            local max_attempts=20
+            while [[ $attempt -lt $max_attempts ]]; 
+            do
+                local connStr=$(gcloud compute instances describe $vm --zone $ZONE --format='value[](metadata.items.proxy-url)')
+                if [[ -z "$connStr" ]]; then
+                    echo "Jupyter notebook endpoint not available yet. Sleeping 15 seconds."
+                    sleep 15s
+                    ((attempt++))
+                else
+                    echo "${vm} : ${connStr}" >> /usr/connectiondata.txt
+                    break
+                fi
+            done
+        done
     fi
 }
 
@@ -77,6 +100,17 @@ _perform_terraform_action() {
         terraform --version
         terraform -chdir=/usr/primary init -input=false
         _terraform_setup
+
+        if [ -f "/usr/tfstate.txt" ]; then
+            echo -e "${GREEN} Terraform state file location: ${NOC}"
+            cat /usr/tfstate.txt
+        fi
+
+        if [ -f "/usr/connectiondata.txt" ]; then
+            echo -e "${GREEN} Use below links to connect to the VMs: ${NOC}"
+            cat /usr/connectiondata.txt
+        fi
+        
         if [[ ! -z "$CLEANUP_ON_EXIT" && "$CLEANUP_ON_EXIT" == "yes" ]]; then
             echo "Sleeping for $SLEEP_DURATION_SEC seconds in main script ....."
             sleep $SLEEP_DURATION_SEC & wait
@@ -128,4 +162,6 @@ _create_terraform_backend_file() {
     echo "    prefix = \"$TF_STATE_PATH/state\"" >> /usr/primary/backend.tf
     echo "  }" >> /usr/primary/backend.tf
     echo "}" >> /usr/primary/backend.tf
+
+    echo "gs://$TF_BUCKET_NAME/$TF_STATE_PATH/state" >> /usr/tfstate.txt
 }
