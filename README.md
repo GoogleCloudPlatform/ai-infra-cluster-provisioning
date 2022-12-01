@@ -10,7 +10,7 @@ The AI Accelerator experience team provides docker images which provision the cl
 The baseline GPU cluster is the collection of resources recommended/supported by the AI accelerator experience team. Examples of that include Supported VM types, accelerator types, VM images, shared storage solutions like GCSFuse etc. These are first tested within the AI Accelerator experience team and then they are integrated with the cluster provisioning tool. The way they are incorporated into the tool is via Terraform configs packaged within the docker container. In some cases these features can be optional and users may choose to use it (eg: GCSFuse) but in some other cases they will be mandated by AI Accelerator exp. team (eg: DLVM image).  
 
 ### Configuration for Users
-Users have control to choose values for different fields for the resources. For example Project ID, Zone, Region, Name etc. Users can also enable/disable various features using feature flags in the config, for example: GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
+Users have control to choose values for different fields for the resources. For example Project ID, Zone, Name etc. Users can also enable/disable various features using feature flags in the config, for example: GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
 The Users can also mount a local directory in the container using ’docker run -v’ option. Then they can provide the path in the mounted volume using  ‘COPY_DIR_PATH’ and the provisioning tool will copy all the files in that location to the VM.
 Optionally Users can provide a list of metadata that can be added to the VM.
 
@@ -22,7 +22,6 @@ Optionally Users can provide a list of metadata that can be added to the VM.
 # ACTION. This defines the intended action to perform. The supported values are: Create, Destroy
 # PROJECT_ID. This is the project id to be used for creating resources. Ex: supercomputer-testing
 # NAME_PREFIX. This is the name prefix to be used for naming the resources. Ex: spani
-# REGION. This is the region for creating the resources. Ex: us-central1
 # ZONE. This is the Zone for creating the resources. Ex: us-central1-f
 
 # Optional Environment variables.
@@ -49,7 +48,6 @@ Optionally Users can provide a list of metadata that can be added to the VM.
 ACTION=Create
 PROJECT_ID=supercomputer-testing
 NAME_PREFIX=spani
-REGION=us-central1
 ZONE=us-central1-f
 GCS_PATH=gs://spani-tst
 COPY_DIR_PATH=/usr/cp

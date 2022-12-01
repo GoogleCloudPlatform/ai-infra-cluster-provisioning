@@ -72,13 +72,12 @@ _set_terraform_env_var() {
     fi
 
     # setting zone and region information
-    if [[ -z "$REGION" ]]; then
-        echo "REGION environment variable not found. Exiting.."
-        exit 1
-    elif [[ -z "$ZONE" ]]; then
+    if [[ -z "$ZONE" ]]; then
         echo "ZONE environment variable not found. Exiting.."
         exit 1
     else
+        shopt -s extglob
+        export REGION=${ZONE/%-+([a-z0-9])/}
         echo "Setting region to $REGION and zone to $ZONE."
         echo "zone = \"$ZONE\"" >> /usr/primary/tf.auto.tfvars
         echo "region = \"$REGION\"" >> /usr/primary/tf.auto.tfvars

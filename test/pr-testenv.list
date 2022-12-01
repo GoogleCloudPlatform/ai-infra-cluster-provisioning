@@ -4,7 +4,6 @@
 # ACTION. This defines the intended action to perform. The supported values are: Create, Destroy
 # PROJECT_ID. This is the project id to be used for creating resources. Ex: supercomputer-testing
 # NAME_PREFIX. This is the name prefix to be used for naming the resources. Ex: spani
-# REGION. This is the region for creating the resources. Ex: us-central1
 # ZONE. This is the Zone for creating the resources. Ex: us-central1-f
 
 # Optional Environment variables.
@@ -29,7 +28,6 @@
 
 PROJECT_ID=supercomputer-testing
 NAME_PREFIX=gcbpresub
-REGION=us-central1
 ZONE=us-central1-a
 GCS_PATH=gs://spani-tst/gcb-test
 METADATA={ key1 = "val", key2 = "val2"}
