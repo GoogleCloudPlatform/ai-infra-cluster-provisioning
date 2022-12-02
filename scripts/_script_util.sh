@@ -19,25 +19,31 @@
 #
 _expand_files_to_copy() {
     fileCopy=""
-    if [[ ! -z "$COPY_DIR_PATH" ]]; then
-        if [[ -d "$COPY_DIR_PATH" ]]; then
-            echo "Files from $COPY_DIR_PATH will be copied to the VM."
-            for filename in $(find $COPY_DIR_PATH -type f)
-            do
-                if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
-                    fn=$(basename ${filename})
-                    fileCopy+="    }, {\n"
-                    fileCopy+="    destination = \"/tmp/${fn}\"\n"
-                    fileCopy+="    source      = \"${filename}\"\n"
-                    fileCopy+="    type        = \"data\"\n" 
-                fi
-            done
-        else
-            echo "Directory $COPY_DIR_PATH not found to copy files."
-            exit 1
+
+    # if any volume is mounted at /usr/aiinfra/copy then copy those files
+    # to the VM.
+    COPY_SRC_PATH=/usr/aiinfra/copy
+    if [[  ! -d "$COPY_SRC_PATH" ]]; then
+        echo "Directory $COPY_SRC_PATH not found to copy files."
+    else
+        # default value of copy directory path on the vm is /usr/aiinfra/copy.
+        if [[ -z "$COPY_DIR_PATH" ]]; then
+            export COPY_DIR_PATH=$COPY_SRC_PATH
         fi
+
+        echo "Files from $COPY_SRC_PATH will be copied to $COPY_DIR_PATH in the VM."
+        for filename in $(find $COPY_SRC_PATH -type f)
+        do
+            if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
+                fn=$(basename ${filename})
+                fileCopy+="    }, {\n"
+                fileCopy+="    destination = \"$COPY_DIR_PATH/${fn}\"\n"
+                fileCopy+="    source      = \"${filename}\"\n"
+                fileCopy+="    type        = \"data\"\n" 
+            fi
+        done
     fi
-    
+
     sed -i 's|__REPLACE_FILES__|'"$fileCopy"'|' /usr/primary/main.tf
 }
 
