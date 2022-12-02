@@ -38,7 +38,9 @@ Optionally Users can provide a list of metadata that can be added to the VM.
 # COPY_DIR_PATH. This defines the path of the directory in the container to copy file to the VM (under /tmp directory). 
 #                Local directory can be mounted to the docker container and path can be specified via COPY_DIR_PATH environment variable to copy files.
 # METADATA. This defines optional metadata to be set for the VM. Ex: { key1 = "val", key2 = "val2"}
+#           If you are setting this environmanet variable manually then use export METADATA="{ key1 = \"val\", key2 = \"val2\"}"
 # LABELS. This defines key value pair to set as labels when the VMs are created. Ex: { key1 = "val", key2 = "val2"} 
+#         If you are setting this environmanet variable manually then use export LABELS="{ key1 = \"val\", key2 = \"val2\"}"
 # STARTUP_SCRIPT. This defines the startup script to run when the VM starts up. Ex: python /usr/cp/train.py
 # STARTUP_SCRIPT_PATH. This defines the path of the startup script in the container. The script gets executed when the VM starts.
 #                      Local directory can be mounted into the container and the startup script path can be provided accordingly. Ex: /usr/cp/test.sh
@@ -52,8 +54,8 @@ ZONE=us-central1-f
 GCS_PATH=gs://spani-tst
 COPY_DIR_PATH=/usr/cp
 STARTUP_SCRIPT=python /tmp/test.py
-METADATA={ meta1 = "val", meta2 = "val2" }
-LABELS={ label1 = "marker1" }
+METADATA={ meta1 = "val", meta2 = "val2" }     # export METADATA="{ meta1 = \"val\", meta2 = \"val2\" }" if variable is not getting set via docker.
+LABELS={ label1 = "marker1" }                  # export LABELS="{ label1 = \"marker1\" }" if variable is not getting set via docker.
 SETUP_RAY=yes
 INSTANCE_COUNT=3
 ```
