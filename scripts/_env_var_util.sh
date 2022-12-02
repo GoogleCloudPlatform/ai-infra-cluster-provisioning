@@ -23,7 +23,7 @@ _set_terraform_env_var() {
 
     # Check cluster provisioning action.
     if [[ -z "$ACTION" ]]; then
-        echo "Cluster provisioning action is not defined. Example: 'Create' or 'Destroy'. Exiting.."
+        echo -e "${RED} Cluster provisioning action is not defined. Please provide 'Create' or 'Destroy' in the 'docker run' command. Exiting.. ${NOC}"
         exit 1
     fi
 
@@ -72,13 +72,12 @@ _set_terraform_env_var() {
     fi
 
     # setting zone and region information
-    if [[ -z "$REGION" ]]; then
-        echo "REGION environment variable not found. Exiting.."
-        exit 1
-    elif [[ -z "$ZONE" ]]; then
+    if [[ -z "$ZONE" ]]; then
         echo "ZONE environment variable not found. Exiting.."
         exit 1
     else
+        shopt -s extglob
+        export REGION=${ZONE/%-+([a-z0-9])/}
         echo "Setting region to $REGION and zone to $ZONE."
         echo "zone = \"$ZONE\"" >> /usr/primary/tf.auto.tfvars
         echo "region = \"$REGION\"" >> /usr/primary/tf.auto.tfvars
@@ -177,10 +176,4 @@ _set_terraform_env_var() {
     echo "disk_size_gb = $DISK_SIZE_GB" >> /usr/primary/tf.auto.tfvars
     echo "Setting disk type to $DISK_TYPE."
     echo "disk_type = \"$DISK_TYPE\"" >> /usr/primary/tf.auto.tfvars
-
-    # setting image name
-    if [[ -z "$SLEEP_DURATION_SEC" ]]; then
-        echo "SLEEP_DURATION_SEC environment variable not found. Default value is 300."
-        export SLEEP_DURATION_SEC=300
-    fi
 }

@@ -60,7 +60,7 @@ _Display_connection_info() {
                     sleep 15s
                     ((attempt++))
                 else
-                    echo "${vm} : ${connStr}" >> /usr/connectiondata.txt
+                    echo "${vm} : https://${connStr}" >> /usr/connectiondata.txt
                     break
                 fi
             done
@@ -111,10 +111,6 @@ _perform_terraform_action() {
             cat /usr/connectiondata.txt
         fi
         
-        if [[ ! -z "$CLEANUP_ON_EXIT" && "$CLEANUP_ON_EXIT" == "yes" ]]; then
-            echo "Sleeping for $SLEEP_DURATION_SEC seconds in main script ....."
-            sleep $SLEEP_DURATION_SEC & wait
-        fi
     elif [[ "${ACTION,,}" == "destroy" ]]; then
         chk_statefile_ret=0
         gsutil ls gs://$TF_BUCKET_NAME/$TF_STATE_PATH/state/* || chk_statefile_ret=$?
