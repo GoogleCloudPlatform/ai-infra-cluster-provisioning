@@ -69,12 +69,12 @@ _expand_startup_script() {
     fi
 
     # Setup startup script if specified.
-    if [[ ! -z "$STARTUP_SCRIPT" ]]; then
-        echo "Setting up startup script to $STARTUP_SCRIPT."
+    if [[ ! -z "$STARTUP_COMMAND" ]]; then
+        echo "Setting up startup command to $STARTUP_COMMAND."
         startupScriptText+="    }, {\n"
         startupScriptText+="    type        = \"shell\"\n"
         startupScriptText+="    destination = \"/tmp/initializestartup.sh\"\n"
-        startupScriptText+="    content      = \"$STARTUP_SCRIPT\"\n"
+        startupScriptText+="    content      = \"$STARTUP_COMMAND\"\n"
     elif [[ ! -z "$STARTUP_SCRIPT_PATH" ]]; then
         if [[ -f "$STARTUP_SCRIPT_PATH" ]]; then
             echo "Setting start up script to $STARTUP_SCRIPT_PATH."
