@@ -53,14 +53,19 @@ _expand_files_to_copy() {
 _expand_startup_script() {
     startupScriptText=""
 
-    # Setup Ray if specified.
-    if [[ ! -z "$SETUP_RAY" && "$SETUP_RAY" == "yes" ]]; then
-        echo "Setting up ray."
+    # Setup Orchestrator if specified.
+    if [[ -z "$ORCHESTRATOR_TYPE" ]]; then
+        echo "Orchestrator type is not provided. Skip setting up Orchestrators..."
+    elif [[ "${ORCHESTRATOR_TYPE,,}" == "ray" ]]; then
+        echo "ORCHESTRATOR_TYPE provided is: $ORCHESTRATOR_TYPE. Setting up Ray..."
         startupScriptText+="    }, {\n"
         startupScriptText+="    type        = \"shell\"\n"
         startupScriptText+="    destination = \"/tmp/setup_ray.sh\"\n"
         startupScriptText+="    source      = \"/usr/setup_ray.sh\"\n"
         startupScriptText+="    args        = \"1.12.1 26379 $GPU_COUNT\"\n"
+    else
+        echo -e "${RED}ORCHESTRATOR_TYPE $ORCHESTRATOR_TYPE is not supported. Supported Orchestrators are: Ray. Please try again. ${NOC}"
+        exit 1
     fi
 
     # Setup startup script if specified.
