@@ -27,17 +27,17 @@ _expand_files_to_copy() {
         echo "Directory $COPY_SRC_PATH not found to copy files."
     else
         # default value of copy directory path on the vm is /usr/aiinfra/copy.
-        if [[ -z "$COPY_DIR_PATH" ]]; then
-            export COPY_DIR_PATH=$COPY_SRC_PATH
+        if [[ -z "$VM_LOCALFILE_DEST_PATH" ]]; then
+            export VM_LOCALFILE_DEST_PATH=$COPY_SRC_PATH
         fi
 
-        echo "Files from $COPY_SRC_PATH will be copied to $COPY_DIR_PATH in the VM."
+        echo "Files from $COPY_SRC_PATH will be copied to $VM_LOCALFILE_DEST_PATH in the VM."
         for filename in $(find $COPY_SRC_PATH -type f)
         do
             if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
                 fn=$(basename ${filename})
                 fileCopy+="    }, {\n"
-                fileCopy+="    destination = \"$COPY_DIR_PATH/${fn}\"\n"
+                fileCopy+="    destination = \"$VM_LOCALFILE_DEST_PATH/${fn}\"\n"
                 fileCopy+="    source      = \"${filename}\"\n"
                 fileCopy+="    type        = \"data\"\n" 
             fi
