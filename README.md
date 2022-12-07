@@ -9,10 +9,10 @@ The AI Accelerator experience team provides docker images which provision the cl
 ### Baseline cluster configuration
 The baseline GPU cluster is the collection of resources recommended/supported by the AI accelerator experience team. Examples of that include Supported VM types, accelerator types, VM images, shared storage solutions like GCSFuse etc. These are first tested within the AI Accelerator experience team and then they are integrated with the cluster provisioning tool. The way they are incorporated into the tool is via Terraform configs packaged within the docker container. In some cases these features can be optional and users may choose to use it (eg: GCSFuse) but in some other cases they will be mandated by AI Accelerator exp. team (eg: DLVM image).  
 
-The default GPU cluster that gets created by the cluster provisioning tool is a single instance VM of type “a2-highgpu-2g” with 2 “Nvidia-tesla-a100” GPUs attached to it. It uses pytorch-1-12-gpu-debian-10 image. There is no startup script or any orchestrator (like Ray) set up. The jupyter notebook endpoint is accessible for this VM instance. There is a bucket created in the project provided by the user to manage the terraform state.  Users can create more advanced clusters using configuration described below.  
+The default GPU cluster that gets created by the cluster provisioning tool is a single instance VM of type “a2-highgpu-2g” with 2 “Nvidia-tesla-a100” GPUs attached to it. It uses pytorch-1-12-gpu-debian-10 image. There is no startup script or any orchestrator (like Ray) set up. The jupyter notebook endpoint is accessible for this VM instance. There is a GCS bucket created in the project provided by the user to manage the terraform state.  Users can create more advanced clusters using configuration described below.  
 
 ### Configuration for Users
-Users have control to choose values for different fields for the resources. The mandated parameters are 
+Users have control to choose values for different fields for the resources. The mandatory parameters are 
 1. PROJECT_ID: The project ID to use for resource creation. 
 2. NAME_PREFIX: The name prefix to use for creating the resources. This is the unique ID for the clusters created using the provisioning tool. 
 3. ZONE: The zone to use for resource creation.
@@ -33,51 +33,13 @@ The optional parameters are
 13. ***STARTUP_COMMAND***. This defines the startup command to run when the VM starts up. Ex: python /usr/cp/train.py
 14. ***STARTUP_SCRIPT_PATH***. This defines the path of the startup script in the container. The script gets executed when the VM starts.Local directory can be mounted into the container and the startup script path can be provided accordingly. Ex: /usr/cp/test.sh
 15. ***ORCHESTRATOR_TYPE***. This defines the Orchestrator type to be set up on the VMs. The current supported orchestrator type is: Ray.
-16. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
+16. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
 
 The user needs to provide value for the above mandatory parameters. All other parameters are optional and default behaviour is described above. Users can also enable/disable various features using feature flags in the config, for example: ORCHESTRATOR_TYPE, SHOW_PROXY_URL, GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
 
-#### Sample config file that the user provides.
-``` 
-# -----------------------------------------------------------------------------------------------
-# Required environment variables.
+#### [Sample config file that the user provides](examples/env.list)
 
-# PROJECT_ID. This is the project id to be used for creating resources. Ex: supercomputer-testing
-# NAME_PREFIX. This is the name prefix to be used for naming the resources. Ex: spani
-# ZONE. This is the Zone for creating the resources. Ex: us-central1-f
 
-# Optional Environment variables.
-
-# INSTANCE_COUNT. This defines the VM instance count. The default value is 1 if not set.
-# GPU_COUNT. This defines the GPU count per VM. The default value is 2 if not set.
-# VM_TYPE. This defines the VM type. The default value is a2-highgpu-2g if not set.
-# ACCELERATOR_TYPE. This defines the Accelerator type. The default value is nvidia-tesla-a100 if not set.
-# IMAGE_FAMILY_NAME. This defines the image family name for the VM. The default value is pytorch-1-12-gpu-debian-10 if not set. We support images only from ml-images project.
-# IMAGE_NAME. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-11-cu113-v20220701-debian-10 if not set. We support images only from ml-images project.
-# DISK_SIZE_GB. This defines the disk size in GB for the VMs. The default value is 2000 GB(2 TB) if not specified.
-# DISK_TYPE. This defines the disk type to use for VM creation. The default value is pd-ssd if not defined.
-# GCS_PATH. Google cloud storage bucket path to use for state management and copying scripts. Ex: gs://spani-tst/deployment
-# COPY_DIR_PATH. This defines the destination directory path in the VM for file copy. If any local directory is mounted at "/usr/aiinfra/copy" in the docker container then all the files in that directory are copied to the COPY_DIR_PATH in the VM. If not specified the default value is '/usr/aiinfra/copy'. 
-# METADATA. This defines optional metadata to be set for the VM. Ex: { key1 = "val", key2 = "val2"}
-# LABELS. This defines key value pairs to set as labels when the VMs are created. Ex: { key1 = "val", key2 = "val2"} 
-# STARTUP_COMMAND. This defines the startup command to run when the VM starts up. Ex: python /usr/cp/train.py
-# STARTUP_SCRIPT_PATH. This defines the path of the startup script in the container. The script gets executed when the VM starts.Local directory can be mounted into the container and the startup script path can be provided accordingly. Ex: /usr/cp/test.sh
-# ORCHESTRATOR_TYPE. This defines the Orchestrator type to setup on the VMs. The current supported orchestrator type is: Ray.
-# SHOW_PROXY_URL. This controls if Jupyter notebook proxy url is retrieved for the cluster or not. If this is present and set to no, then connection information is not collected.The supported values are: yes, no.
-# -----------------------------------------------------------------------------------------------
-
-ACTION=Create
-PROJECT_ID=supercomputer-testing
-NAME_PREFIX=spani
-ZONE=us-central1-f
-GCS_PATH=gs://spani-tst
-COPY_DIR_PATH=/usr/cp
-STARTUP_COMMAND=python /tmp/test.py
-METADATA={ meta1 = "val", meta2 = "val2" }     # export METADATA="{ meta1 = \"val\", meta2 = \"val2\" }" if variable is not getting set via docker.
-LABELS={ label1 = "marker1" }                  # export LABELS="{ label1 = \"marker1\" }" if variable is not getting set via docker.
-ORCHESTRATOR_TYPE=Ray
-INSTANCE_COUNT=3
-```
 
 ### Setting up Terraform to create resources
 The user updates the config file and runs the docker image with the config file to create resources using the ‘docker run’ command. As part of the run command, users have to specify an action. The action can be Create, Destroy, Validate or Debug. The sample command looks like
@@ -152,9 +114,9 @@ The user can use this URL on their browser to connect to the jupyter notebook an
 There are some default training scripts provided in the VMs under location ‘/usr/aiinfra/sample’. Users can run those scripts after connecting to the VM to see them in action. This feature is under development and details will be provided once available. 
 
 ### Resource cleanup
-Since the resource state is stored outside of the container, the GPU cluster lifespan is decoupled from the container’s lifespan. Now the user can run the container and provide ‘ACTION=Create’ as part of the ‘docker run’ command to create the resources. They can run the container again and provide ‘ACTION=Destroy’ to destroy the container. The terraform state stored in the GCS bucket is cleared when the destroy operation is called.
+Since the resource state is stored outside of the container, the GPU cluster lifespan is decoupled from the container’s lifespan. Now the user can run the container and provide ‘Create’ as part of the ‘docker run’ command to create the resources. They can run the container again and provide ‘Destroy’ to destroy the container. The terraform state stored in the GCS bucket is cleared when the destroy operation is called.
 
-## Instruction
+## Instructions
 1. gcloud auth application-default login.
 2. gcloud auth configure-docker us-central1-docker.pkg.dev
 3. ***[`OPTIONAL - if project not set already`]*** gcloud config set account supercomputer-testing
