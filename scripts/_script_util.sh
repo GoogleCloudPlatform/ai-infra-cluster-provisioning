@@ -19,25 +19,31 @@
 #
 _expand_files_to_copy() {
     fileCopy=""
-    if [[ ! -z "$COPY_DIR_PATH" ]]; then
-        if [[ -d "$COPY_DIR_PATH" ]]; then
-            echo "Files from $COPY_DIR_PATH will be copied to the VM."
-            for filename in $(find $COPY_DIR_PATH -type f)
-            do
-                if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
-                    fn=$(basename ${filename})
-                    fileCopy+="    }, {\n"
-                    fileCopy+="    destination = \"/tmp/${fn}\"\n"
-                    fileCopy+="    source      = \"${filename}\"\n"
-                    fileCopy+="    type        = \"data\"\n" 
-                fi
-            done
-        else
-            echo "Directory $COPY_DIR_PATH not found to copy files."
-            exit 1
+
+    # if any volume is mounted at /usr/aiinfra/copy then copy those files
+    # to the VM.
+    COPY_SRC_PATH=/usr/aiinfra/copy
+    if [[  ! -d "$COPY_SRC_PATH" ]]; then
+        echo "Directory $COPY_SRC_PATH not found to copy files."
+    else
+        # default value of copy directory path on the vm is /usr/aiinfra/copy.
+        if [[ -z "$VM_LOCALFILE_DEST_PATH" ]]; then
+            export VM_LOCALFILE_DEST_PATH=$COPY_SRC_PATH
         fi
+
+        echo "Files from $COPY_SRC_PATH will be copied to $VM_LOCALFILE_DEST_PATH in the VM."
+        for filename in $(find $COPY_SRC_PATH -type f)
+        do
+            if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
+                fn=$(basename ${filename})
+                fileCopy+="    }, {\n"
+                fileCopy+="    destination = \"$VM_LOCALFILE_DEST_PATH/${fn}\"\n"
+                fileCopy+="    source      = \"${filename}\"\n"
+                fileCopy+="    type        = \"data\"\n" 
+            fi
+        done
     fi
-    
+
     sed -i 's|__REPLACE_FILES__|'"$fileCopy"'|' /usr/primary/main.tf
 }
 
@@ -47,23 +53,28 @@ _expand_files_to_copy() {
 _expand_startup_script() {
     startupScriptText=""
 
-    # Setup Ray if specified.
-    if [[ ! -z "$SETUP_RAY" && "$SETUP_RAY" == "yes" ]]; then
-        echo "Setting up ray."
+    # Setup Orchestrator if specified.
+    if [[ -z "$ORCHESTRATOR_TYPE" ]]; then
+        echo "Orchestrator type is not provided. Skip setting up Orchestrators..."
+    elif [[ "${ORCHESTRATOR_TYPE,,}" == "ray" ]]; then
+        echo "ORCHESTRATOR_TYPE provided is: $ORCHESTRATOR_TYPE. Setting up Ray..."
         startupScriptText+="    }, {\n"
         startupScriptText+="    type        = \"shell\"\n"
         startupScriptText+="    destination = \"/tmp/setup_ray.sh\"\n"
         startupScriptText+="    source      = \"/usr/setup_ray.sh\"\n"
         startupScriptText+="    args        = \"1.12.1 26379 $GPU_COUNT\"\n"
+    else
+        echo -e "${RED}ORCHESTRATOR_TYPE $ORCHESTRATOR_TYPE is not supported. Supported Orchestrators are: Ray. Please try again. ${NOC}"
+        exit 1
     fi
 
     # Setup startup script if specified.
-    if [[ ! -z "$STARTUP_SCRIPT" ]]; then
-        echo "Setting up startup script to $STARTUP_SCRIPT."
+    if [[ ! -z "$STARTUP_COMMAND" ]]; then
+        echo "Setting up startup command to $STARTUP_COMMAND."
         startupScriptText+="    }, {\n"
         startupScriptText+="    type        = \"shell\"\n"
         startupScriptText+="    destination = \"/tmp/initializestartup.sh\"\n"
-        startupScriptText+="    content      = \"$STARTUP_SCRIPT\"\n"
+        startupScriptText+="    content      = \"$STARTUP_COMMAND\"\n"
     elif [[ ! -z "$STARTUP_SCRIPT_PATH" ]]; then
         if [[ -f "$STARTUP_SCRIPT_PATH" ]]; then
             echo "Setting start up script to $STARTUP_SCRIPT_PATH."

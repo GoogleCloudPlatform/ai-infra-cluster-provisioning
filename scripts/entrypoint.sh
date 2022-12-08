@@ -41,4 +41,10 @@ _expand_startup_script
 
 _set_terraform_backend
 echo "====================================================================="
-_perform_terraform_action
+action_err=0
+_perform_terraform_action || action_err=$?
+if [ $action_err -eq 0 ]; then
+    echo -e "${GREEN}Cluster provisioning successful.. ${NOC}"
+else
+    echo -e "${RED}Cluster provisioning Failed.. ${NOC}"
+fi
