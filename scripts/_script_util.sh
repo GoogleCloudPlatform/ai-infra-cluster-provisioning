@@ -44,6 +44,32 @@ _expand_files_to_copy() {
         done
     fi
 
+    # copy example training script based on the image type.
+    if [[ ! -z "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"tf-"* ]] || [[ ! -z "$IMAGE_NAME" && "$IMAGE_NAME" == *"tf-"* ]]; then
+        echo "DLVM image used is a Tenserflow image. Copying the tenserflow exmple script."
+        export EXAMPLE_SCRIPT_SRC_PATH=/usr/examples/training_scripts/Tenserflow
+    elif [[ ! -z "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"pytorch-"* ]] || [[ ! -z "$IMAGE_NAME" && "$IMAGE_NAME" == *"pytorch-"* ]]; then
+        echo "DLVM image used is a Pytorch image. Copying the pytorch exmple script."
+        export EXAMPLE_SCRIPT_SRC_PATH=/usr/examples/training_scripts/PyTorch
+    else
+        echo -e "${RED}IMAGE_FAMILY_NAME=$IMAGE_FAMILY_NAME, IMAGE_NAME=$IMAGE_NAME. These images are neither Tenserflow nor Pytorch Image. ${NOC}"
+    fi
+
+    if [[ -z "$EXAMPLE_SCRIPT_SRC_PATH" ]]; then
+        echo "No example training script found for the image."
+    elif [[ ! -d "$EXAMPLE_SCRIPT_SRC_PATH" ]]; then
+        echo "Directory $EXAMPLE_SCRIPT_SRC_PATH not found to copy example training scripts."
+    else
+        for filename in $(find $EXAMPLE_SCRIPT_SRC_PATH -type f)
+        do
+            fn=$(basename ${filename})
+            fileCopy+="    }, {\n"
+            fileCopy+="    destination = \"/home/jupyter/aiinfra-sample/${fn}\"\n"
+            fileCopy+="    source      = \"${filename}\"\n"
+            fileCopy+="    type        = \"data\"\n" 
+        done
+    fi
+
     sed -i 's|__REPLACE_FILES__|'"$fileCopy"'|' /usr/primary/main.tf
 }
 
