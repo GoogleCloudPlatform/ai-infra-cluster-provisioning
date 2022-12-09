@@ -8,12 +8,12 @@ The baseline GPU cluster is the collection of resources recommended/supported by
 The default GPU cluster that gets created by the cluster provisioning tool is a single instance VM of type “a2-highgpu-2g” with 2 “Nvidia-tesla-a100” GPUs attached to it. It uses pytorch-1-12-gpu-debian-10 image. There is no startup script or any orchestrator (like Ray) set up. The jupyter notebook endpoint is accessible for this VM instance. There is a GCS bucket created in the project provided by the user to manage the terraform state.  Users can create more advanced clusters using configuration described below.  
 
 ### Configuration for Users
-Users have control to choose values for different fields for the resources. The mandatory parameters are 
-1. PROJECT_ID: The project ID to use for resource creation. 
-2. NAME_PREFIX: The name prefix to use for creating the resources. This is the unique ID for the clusters created using the provisioning tool. 
-3. ZONE: The zone to use for resource creation.
+Users have control to choose values for different fields for the resources. The mandatory parameters are:
+1. **PROJECT_ID**: The project ID to use for resource creation. 
+2. **NAME_PREFIX**: The name prefix to use for creating the resources. This is the unique ID for the clusters created using the provisioning tool. 
+3. **ZONE**: The zone to use for resource creation.
 
-The optional parameters are
+The optional parameters are:
 1. ***INSTANCE_COUNT***. This defines the VM instance count. The default value is 1 if not set.
 2. ***GPU_COUNT***. This defines the GPU count per VM. The default value is 2 if not set.
 3. ***VM_TYPE***. This defines the VM type. The default value is a2-highgpu-2g if not set.
