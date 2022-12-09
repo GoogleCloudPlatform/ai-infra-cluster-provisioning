@@ -105,7 +105,7 @@ spani4-vm-gh9l:https://1896669fce99a2c1-dot-us-central1.notebooks.googleusercont
 spani4-vm-nrcv:https://11a0dd452fdf76d3-dot-us-central1.notebooks.googleusercontent.com
 ```
 The user can use this URL on their browser to connect to the jupyter notebook and execute their training script.
-There are some default training scripts provided in the VMs under location `/home/jupyter/aiinfra-sample`. Users can run those scripts after connecting to the VM to see them in action. The example scripts use `Ray` for multi node trainings. So please use `ORCHESTRATOR_TYPE=Ray` while creating the cluster to run the script for ulti-node training. 
+There are some default training scripts provided in the VMs under location `/home/jupyter/aiinfra-sample`. Users can run those scripts after connecting to the VM to see them in action. The example scripts use `Ray` for multi node trainings. So please use `ORCHESTRATOR_TYPE=Ray` while creating the cluster to run the script for multi-node training. 
 ![image](files/../docs/images/example_script.png)
 
 ### Resource cleanup
