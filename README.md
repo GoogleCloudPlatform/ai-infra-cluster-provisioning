@@ -9,9 +9,9 @@ The default GPU cluster that gets created by the cluster provisioning tool is a 
 
 ### Configuration for Users
 Users have control to choose values for different fields for the resources. The mandatory parameters are 
-1. PROJECT_ID: The project ID to use for resource creation. 
-2. NAME_PREFIX: The name prefix to use for creating the resources. This is the unique ID for the clusters created using the provisioning tool. 
-3. ZONE: The zone to use for resource creation.
+1. **PROJECT_ID**: The project ID to use for resource creation. 
+2. **NAME_PREFIX**: The name prefix to use for creating the resources. This is the unique ID for the clusters created using the provisioning tool. 
+3. **ZONE**: The zone to use for resource creation.
 
 The optional parameters are
 1. ***INSTANCE_COUNT***. This defines the VM instance count. The default value is 1 if not set.
