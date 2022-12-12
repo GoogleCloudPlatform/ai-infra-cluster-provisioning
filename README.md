@@ -130,5 +130,8 @@ Since the resource state is stored outside of the container, the GPU cluster lif
     > Need storage object owner access if you don't already have a storage bucket to reuse.
 
 ## Known Issues
-1. Error: Error waiting for Deleting Network: The network resource 'projects/xxx' is already being used by 'projects/firewall-yyy’
-This is due to a known bug in VPC b/186792016.
+1. Error: Error waiting for Deleting Network: The network resource 'projects/xxx' is already being used by 'projects/firewall-yyy’.
+   - This error is due to a known bug in VPC b/186792016.
+2. Error: Failed to get existing workspaces: querying Cloud Storage failed: Get "https://storage.googleapis.com/storage/v1/...": metadata: GCE metadata "instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control" not defined
+   - This error indicates that the user does not have storage object owner access in the project. Please get the storage object owner access or use `GCS_PATH=gs://<bucketname>/<foldername>` in the configuration.
+   
