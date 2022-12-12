@@ -58,6 +58,7 @@ _set_terraform_env_var() {
         project_email=$project_num-compute@developer.gserviceaccount.com
         echo "Exporting service account as $project_email"
         echo "service_account = \"$project_email\"" >> /usr/primary/tf.auto.tfvars
+        val=`gcloud config set project $PROJECT_ID`
     fi
 
     # setting name prefix and deployment name information.
@@ -130,7 +131,7 @@ _set_terraform_env_var() {
     # setting image name
     if [[ -z "$IMAGE_FAMILY_NAME" ]]; then
         if [[ -z "$IMAGE_NAME" ]]; then
-            echo "IMAGE_NAME environment variable not found. Default imafe family pytorch-1-12-gpu-debian-10 will be used."
+            echo "IMAGE_NAME environment variable not found. Default image family pytorch-1-12-gpu-debian-10 will be used."
             export IMAGE_FAMILY_NAME=pytorch-1-12-gpu-debian-10
             echo "instance_image = {" >> /usr/primary/tf.auto.tfvars
             echo "  family  = \"$IMAGE_FAMILY_NAME\"" >> /usr/primary/tf.auto.tfvars
