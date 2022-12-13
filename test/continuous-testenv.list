@@ -1,6 +1,6 @@
-PROJECT_ID=supercomputer-testing
+PROJECT_ID=gce-ai-infra
 ZONE=us-central1-a
-GCS_PATH=gs://spani-tst/gcb-test
+GCS_PATH=gs://aiinfra-terraform-gce-ai-infra/gcb-continuous
 METADATA={ key1 = "val", key2 = "val2"}
 INSTANCE_COUNT=2
 ORCHESTRATOR_TYPE=Ray
