@@ -18,17 +18,17 @@ steps:
 # See https://cloud.google.com/build/docs/speeding-up-builds#using_a_cached_docker_image
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  args: ['-c', 'docker pull us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest || exit 0']
+  args: ['-c', 'docker pull us-central1-docker.pkg.dev/${PROJECT_ID}/cluster-provision-repo/cluster-provision-image:latest || exit 0']
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          '--cache-from', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+  args: [ 'build', '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/cluster-provision-repo/cluster-provision-image:latest',
+          '--cache-from', 'us-central1-docker.pkg.dev/${PROJECT_ID}/cluster-provision-repo/cluster-provision-image:latest',
           '-f', 'Dockerfile', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
           '--env-file', 'test/pr-testenv.list',
           '--env', 'NAME_PREFIX=pr${_PR_NUMBER}',
           '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+          'us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest',
           'Validate' ]
 
 timeout: 900s
