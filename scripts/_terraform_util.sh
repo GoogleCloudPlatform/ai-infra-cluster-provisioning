@@ -101,15 +101,16 @@ _perform_terraform_action() {
         terraform -chdir=/usr/primary init -input=false
         _terraform_setup
 
-        if [ -f "/usr/tfstate.txt" ]; then
-            echo -e "${GREEN} Terraform state file location: ${NOC}"
-            cat /usr/tfstate.txt
+        echo -e "${GREEN}=======================GPU cluster Information========================${NOC}"
+        if [ -f "/usr/info.txt" ]; then
+            cat /usr/info.txt
         fi
 
         if [ -f "/usr/connectiondata.txt" ]; then
             echo -e "${GREEN} Use below links to connect to the VMs: ${NOC}"
             cat /usr/connectiondata.txt
         fi
+        echo -e "${GREEN}=======================================================================${NOC}"
         
     elif [[ "${ACTION,,}" == "destroy" ]]; then
         chk_statefile_ret=0
@@ -159,5 +160,5 @@ _create_terraform_backend_file() {
     echo "  }" >> /usr/primary/backend.tf
     echo "}" >> /usr/primary/backend.tf
 
-    echo "gs://$TF_BUCKET_NAME/$TF_STATE_PATH/state" >> /usr/tfstate.txt
+    echo "Terraform state file location: gs://$TF_BUCKET_NAME/$TF_STATE_PATH/state" >> /usr/info.txt
 }

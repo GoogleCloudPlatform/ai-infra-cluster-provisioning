@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Training script for ResNet on ImageNet.
-
-IMPORTANT: Do not OSS this sample without removing references to the ImageNet
-filepatterns below!
-"""
 import json
 import os
 from typing import Any, Dict, Tuple

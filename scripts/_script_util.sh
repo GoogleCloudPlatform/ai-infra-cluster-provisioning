@@ -32,6 +32,7 @@ _expand_files_to_copy() {
         fi
 
         echo "Files from $COPY_SRC_PATH will be copied to $VM_LOCALFILE_DEST_PATH in the VM."
+        echo "Local file location in the VM: $VM_LOCALFILE_DEST_PATH." >> /usr/info.txt
         for filename in $(find $COPY_SRC_PATH -type f)
         do
             if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
