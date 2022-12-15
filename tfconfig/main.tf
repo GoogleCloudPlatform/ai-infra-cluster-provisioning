@@ -70,7 +70,7 @@ module "compute-vm-1" {
   deployment_name = var.deployment_name
 }
 
-module "sp-compute-hpc-dash" {
+module "aiinfra-default-dashboard" {
   source          = "./modules/dashboard"
   project_id      = var.project_id
   deployment_name = var.deployment_name

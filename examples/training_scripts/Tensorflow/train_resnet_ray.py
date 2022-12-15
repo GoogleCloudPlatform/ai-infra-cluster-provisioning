@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Training script for ResNet on ImageNet.
-
-IMPORTANT: Do not OSS this sample without removing references to the ImageNet
-filepatterns below!
-"""
 import json
 import os
 from typing import Any, Dict, Tuple
@@ -39,16 +34,18 @@ _PER_REPLICA_BATCH_SIZE = flags.DEFINE_integer(
 _NUM_TRAIN_EPOCHS = flags.DEFINE_integer('num_train_epochs', 10,
                                          'Number of training epochs to run.')
 
-# Working on creating a public GSC Bucket to host this data.
-# Once the public GCS bucket is available, this will be modified to point that.
+# Using a randomly generated fake dataset to test the model 
+# from gs://cloud-tpu-test-datasets/fake_imagenet/
+# https://github.com/tensorflow/tpu/blob/master/models/official/resnet/README.md
+
 _TRAINING_FILEPATTERN = flags.DEFINE_string(
     'training_filepattern',
-    'gs://supercomputer-dev-us-east1/imagenet/train/train-000*',
+    'gs://cloud-tpu-test-datasets/fake_imagenet/train-000*',
     'Filepattern for TFRecords with ImageNet data for training.')
 
 _VALIDATION_FILEPATTERN = flags.DEFINE_string(
     'validation_filepattern',
-    'gs://supercomputer-dev-us-east1/imagenet/validation/validation-000*',
+    'gs://cloud-tpu-test-datasets/fake_imagenet/validation-000*',
     'Filepattern for TFRecords with ImageNet data for validation.')
 
 

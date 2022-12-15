@@ -32,6 +32,7 @@ _expand_files_to_copy() {
         fi
 
         echo "Files from $COPY_SRC_PATH will be copied to $VM_LOCALFILE_DEST_PATH in the VM."
+        echo "Local file location in the VM: $VM_LOCALFILE_DEST_PATH." >> /usr/info.txt
         for filename in $(find $COPY_SRC_PATH -type f)
         do
             if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
@@ -46,13 +47,13 @@ _expand_files_to_copy() {
 
     # copy example training script based on the image type.
     if [[ ! -z "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"tf-"* ]] || [[ ! -z "$IMAGE_NAME" && "$IMAGE_NAME" == *"tf-"* ]]; then
-        echo "DLVM image used is a Tenserflow image. Copying the tenserflow exmple script."
-        export EXAMPLE_SCRIPT_SRC_PATH=/usr/examples/training_scripts/Tenserflow
+        echo "DLVM image used is a TensorFlow image. Copying the TensorFlow example script."
+        export EXAMPLE_SCRIPT_SRC_PATH=/usr/examples/training_scripts/Tensorflow
     elif [[ ! -z "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"pytorch-"* ]] || [[ ! -z "$IMAGE_NAME" && "$IMAGE_NAME" == *"pytorch-"* ]]; then
         echo "DLVM image used is a Pytorch image. Copying the pytorch exmple script."
         export EXAMPLE_SCRIPT_SRC_PATH=/usr/examples/training_scripts/PyTorch
     else
-        echo -e "${RED}IMAGE_FAMILY_NAME=$IMAGE_FAMILY_NAME, IMAGE_NAME=$IMAGE_NAME. These images are neither Tenserflow nor Pytorch Image. ${NOC}"
+        echo -e "${RED}IMAGE_FAMILY_NAME=$IMAGE_FAMILY_NAME, IMAGE_NAME=$IMAGE_NAME. These images are neither Tensorflow nor Pytorch Image. ${NOC}"
     fi
 
     if [[ -z "$EXAMPLE_SCRIPT_SRC_PATH" ]]; then
