@@ -96,7 +96,7 @@ _terraform_cleanup() {
 #
 _perform_terraform_action() {
     if [[ "${ACTION,,}" == "create" ]]; then
-        echo "Uploading env.list file to gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH"
+        echo "Uploading environment variables to gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH"
         printenv >> /usr/$NAME_PREFIX-env.list
         gsutil cp /usr/$NAME_PREFIX-env.list gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH
         echo "Parameter file location: gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH/$NAME_PREFIX-env.list" >> /usr/info.txt 

@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# minor change introduce
 set -e
 
 source /usr/_env_var_util.sh
