@@ -41,7 +41,8 @@ _create_gcs_bucket_for_terraform() {
             exit $create_tf_bucket_ret
         fi
     fi
-    export TF_STATE_PATH=$NAME_PREFIX-deployment/terraform
+    export TF_DEPLOYMENT_PATH=$NAME_PREFIX-deployment
+    export TF_STATE_PATH=$TF_DEPLOYMENT_PATH/terraform
 }
 
 #
@@ -60,10 +61,11 @@ _validate_gcs_path_for_terraform() {
         if [[ "$GCS_PATH" =~ ^gs://([^/]*)/*(.*) ]]; then
             export TF_BUCKET_NAME=${BASH_REMATCH[1]}
             if [[ -z "${BASH_REMATCH[2]}" ]]; then
-                export TF_STATE_PATH=terraform
+                export TF_DEPLOYMENT_PATH=$NAME_PREFIX-deployment
             else
-                export TF_STATE_PATH=${BASH_REMATCH[2]}/terraform
+                export TF_DEPLOYMENT_PATH=${BASH_REMATCH[2]}/$NAME_PREFIX-deployment
             fi
+            export TF_STATE_PATH=$TF_DEPLOYMENT_PATH/terraform
             echo "The GCS_PATH is $GCS_PATH. Terraform bucket is $TF_BUCKET_NAME. Terraform state path is $TF_STATE_PATH."
         else
             echo "ERROR...The GCS_PATH $GCS_PATH is in incorrect format."
