@@ -49,7 +49,7 @@ The cluster provisioning tool interacts with GCP to create cloud resources on be
 
 1. Cloud shell: In the cloud shell environment, the default cloud authentication token is available that cluster provisioning tool uses for resource creation. No additional action is needed from the user. 
 2. User machine with gcloud authentication: In the case where the user is running the cluster provisioning tool on their machine, they need to be authenticated with GCP for resource creation. There are 2 ways to do this.
-   - Running ‘gcloud auth application-default login’ and mounting the local gcloud config to the container. For that use the  ‘docker run’ command with option ‘-v ~/.config/gcloud:/root/.config/gcloud ’.
+   - Running ‘gcloud auth application-default login’ and mounting the local gcloud config to the container. For that use the  `docker run` command with option `-v ~/.config/gcloud:/root/.config/gcloud` for Linux or option `-v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud` for windows.
    - Simply run the container image using ‘docker run’. When the cluster provisioning tool does not find any default authentication token it asks for manual authentication. Follow the prompt and provide the authorization code. The authorization prompt looks like below which is the same as gcloud authorization prompt.
     ```
     ================SETTING UP ENVIRONMENT FOR TERRAFORM================
@@ -125,7 +125,9 @@ Since the resource state is stored outside of the container, the GPU cluster lif
 8. ***[`OPTIONAL - Mount local directory`]*** 
    > docker run -v /usr/soumyapani/test:/usr/aiinfra/copy -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
 9.  ***[`OPTIONAL - Mount gcloud config for auth token`]*** 
-    > docker run -v ~/.config/gcloud:/root/.config/gcloud -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
+    > `Linux` docker run -v ~/.config/gcloud:/root/.config/gcloud -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
+    
+    > `Windows` docker run -v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
 10. ***[`OPTIONAL - GCS bucket not provided`]*** 
     > Need storage object owner access if you don't already have a storage bucket to reuse.
 
