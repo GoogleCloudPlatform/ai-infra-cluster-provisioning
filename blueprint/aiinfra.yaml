@@ -39,7 +39,7 @@ vars:
 deployment_groups:
 - group: primary
   modules:
-  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=c1f4a44"
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
     kind: terraform
     id: network1
     settings:
@@ -47,7 +47,7 @@ deployment_groups:
 
 
   ## File Systems
-  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44"
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
     kind: terraform
     id: homefs
     use: [network1]
@@ -55,7 +55,7 @@ deployment_groups:
       local_mount: "/home"
 
 
-  - source: /Users/soumyapani/Desktop/repo1/tfconfig/modules/startup-script
+  - source: ../tfconfig/modules/startup-script
     kind: terraform
     id: startup
     settings:
@@ -69,7 +69,7 @@ deployment_groups:
       gcs_bucket: $(vars.gcs_bucket)
 
 
-  - source: /usr/local/google/home/soumyapani/hpc-toolkit/community/modules/aiinfra/vm-instance-group
+  - source: ../tfconfig/modules/vm-instance-group
     kind: terraform
     id: compute-mig-1
     use:
@@ -110,6 +110,6 @@ deployment_groups:
       deployment_name: $(vars.deployment_name)
 
 
-  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44"
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
     kind: terraform
     id: sp-compute-hpc-dash
