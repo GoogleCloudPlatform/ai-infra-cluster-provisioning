@@ -38,9 +38,9 @@ The user needs to provide value for the above mandatory parameters. All other pa
 ### Setting up Terraform to create resources
 The user updates the config file and runs the docker image with the config file to create resources using the ‘docker run’ command. As part of the run command, users have to specify an action. The action can be Create, Destroy, Validate or Debug. The sample command looks like
 ```
-docker run -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
+docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
 
-docker run -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Destroy
+docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Destroy
 ```
 All the setup needed before calling terraform to create resources is handled by entrypoint.sh script. This is packaged in the docker image and gets executed when the container starts. The entrypoint script validates environment variables and errors out if required ones are not provided. After that it uses the environment variables values to create the ‘tf.auto.tfvar’ file which is used by terraform to create the resources.
 
@@ -117,17 +117,17 @@ Since the resource state is stored outside of the container, the GPU cluster lif
 3. ***[`OPTIONAL - if project not set already`]*** gcloud config set account supercomputer-testing
 4. Create env.list file. The sample env.list can be found [here](#sample-config-file-that-the-user-provides). 
 5. ***[`SIMPLE CREATE`]*** 
-   > docker run -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
+   > docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
 6. ***[`SIMPLE DESTROY`]*** 
-   > docker run -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Destroy
+   > docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Destroy
 7. ***[`OPTIONAL - Pull docker image before hand`]*** 
-   > docker pull us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest
+   > docker pull us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest
 8. ***[`OPTIONAL - Mount local directory`]*** 
-   > docker run -v /usr/soumyapani/test:/usr/aiinfra/copy -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
+   > docker run -v /usr/soumyapani/test:/usr/aiinfra/copy -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
 9.  ***[`OPTIONAL - Mount gcloud config for auth token`]*** 
-    > `Linux` docker run -v ~/.config/gcloud:/root/.config/gcloud -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
+    > `Linux` docker run -v ~/.config/gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
     
-    > `Windows` docker run -v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud -it --env-file env.list us-central1-docker.pkg.dev/supercomputer-testing/cluster-provision-repo/cluster-provision-image:latest Create
+    > `Windows` docker run -v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
 10. ***[`OPTIONAL - GCS bucket not provided`]*** 
     > Need storage object owner access if you don't already have a storage bucket to reuse.
 
