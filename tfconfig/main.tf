@@ -15,7 +15,7 @@
   */
 
 module "network1" {
-  source     = "./modules/pre-existing-vpc"
+  source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id = var.project_id
   region     = var.region
 }
@@ -71,7 +71,7 @@ module "compute-vm-1" {
 }
 
 module "aiinfra-default-dashboard" {
-  source          = "./modules/dashboard"
+  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id      = var.project_id
   deployment_name = var.deployment_name
   title           = "AI Accelerator Experience Dashboard"

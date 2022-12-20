@@ -1,0 +1,115 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+blueprint_name: ai-infra
+
+vars:
+  project_id:  ## Set GCP Project ID Here ##
+  deployment_name: hpctest1
+  region: us-central1
+  zone: us-central1-a
+  instance_count: 2
+  name_prefix: hpctest1
+  machine_type: a2-highgpu-2g
+  accelerator_type: nvidia-tesla-a100
+  gpu_per_vm: 2
+  service_account: "58760558617-compute@developer.gserviceaccount.com"
+  instance_image:
+    name: null
+    family: pytorch-1-10-gpu-debian-10
+    project: ml-images
+  disk_size_gb: 2000
+  disk_type: pd-ssd
+  gcs_path: gs://aiinfra-terraform-soumyapani-testing/hpctest
+  gcs_bucket: aiinfra-terraform-soumyapani-testing
+  
+deployment_groups:
+- group: primary
+  modules:
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
+    kind: terraform
+    id: network1
+    settings:
+        project_id: $(vars.project_id)
+
+
+  ## File Systems
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
+    kind: terraform
+    id: homefs
+    use: [network1]
+    settings:
+      local_mount: "/home"
+
+
+  - source: ../tfconfig/modules/startup-script
+    kind: terraform
+    id: startup
+    settings:
+      runners:
+      - $(homefs.install_nfs_client_runner)
+      - $(homefs.mount_runner)
+      - type: shell
+        source: modules/startup-script/examples/install_ansible.sh
+        destination: install_ansible.sh
+      gcs_path: $(vars.gcs_path)
+      gcs_bucket: $(vars.gcs_bucket)
+
+
+  - source: ../tfconfig/modules/vm-instance-group
+    kind: terraform
+    id: compute-mig-1
+    use:
+    - network1
+    - homefs
+    - startup
+    settings:
+      subnetwork_self_link: $(network1.subnetwork_self_link)
+      service_account:
+        email: $(vars.service_account)
+        scopes: ["cloud-platform"]
+      instance_count: $(vars.instance_count)
+      project_id: $(vars.project_id)
+      disk_size_gb: $(vars.disk_size_gb)
+      disk_type: $(vars.disk_type)
+      network_self_link: $(network1.network_self_link)
+      placement_policy:
+        availability_domain_count: null
+        collocation:               "COLLOCATED"
+        vm_count:                  $(vars.instance_count)
+      instance_image: $(vars.instance_image)
+      on_host_maintenance: "TERMINATE"
+      machine_type: $(vars.machine_type)
+      zone: $(vars.zone)
+      region: $(vars.region)
+      startup_script: $(startup.startup_script)
+      metadata: 
+        VmDnsSetting: "ZonalPreferred"
+        enable-oslogin: "TRUE"
+        install-nvidia-driver: "True"
+        proxy-mode: "project_editors"
+      labels: 
+        aiinfra_role: "compute"
+      name_prefix: $(vars.name_prefix)
+      guest_accelerator:
+      - count: $(vars.gpu_per_vm)
+        type: $(vars.accelerator_type)
+      deployment_name: $(vars.deployment_name)
+
+
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
+    kind: terraform
+    id: sp-compute-hpc-dash
