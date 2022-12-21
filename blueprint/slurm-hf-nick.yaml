@@ -1,0 +1,170 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+ 
+---
+ 
+blueprint_name: huggingface
+ 
+vars:
+  project_id:  benchmark-cluster-science
+  deployment_name: huggingface-cluster2
+  region: us-central1
+  zone: us-central1-c
+  instance_count: 2
+  name_prefix: huggingface-setup
+  vm_type: a2-ultragpu-8g
+  accelerator_type: nvidia-a100-80gb
+  gpu_per_vm: 8
+  # instance_image:
+  #   name: schedmd-v5-slurm-22-05-6-hpc-centos-7
+  #   project: projects/schedmd-slurm-public/global/images/family
+  instance_image:
+    name: slurm-v5-hpc-centos7-cuda11-5-v1
+    project: projects/benchmark-cluster-science/global/images
+  disksize_gb: 10240
+  home_ip: 10.131.128.210
+  gpfswork_ip: 10.245.53.66
+  
+deployment_groups:
+- group: primary
+  modules:
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=c1f4a44"
+    id: network1
+ 
+  # - id: cuda-setup
+  #   source: modules/scripts/startup-script
+  #   settings:
+  #     runners:
+  #     - type: shell
+  #       destination: install-qsim.sh
+  #       content: |
+  #         #!/bin/bash
+  #         # This script implements https://quantumai.google/qsim/tutorials/gcp_gpu
+  #         set -e -o pipefail
+  #         curl -O https://raw.githubusercontent.com/GoogleCloudPlatform/compute-gpu-installation/main/linux/install_gpu_driver.py
+  #         python3 install_gpu_driver.py --force
+  #         # curl -O https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh
+  #         # bash Miniconda3-py39_4.12.0-Linux-x86_64.sh -b -p /opt/conda
+  #         # source /opt/conda/bin/activate base
+  #         # conda init --system
+  #         # # following channel ordering is important! use strict_priority!
+  #         # # cuquantum comes from cuquantum label in nvidia channel
+  #         # # libcutensor comes from main (default) label in nvidia channel
+  #         # # cuda and all toolkit comes from cuda-11.5.2 label in nvidia channel
+  #         # # everything else comes from conda-forge
+  #         # conda config --system --set channel_priority strict
+  #         # conda config --system --remove channels defaults
+  #         # conda config --system --add channels conda-forge
+  #         # conda config --system --add channels nvidia
+  #         # conda config --system --add channels nvidia/label/cuda-11.5.2
+  #         # conda config --system --add channels nvidia/label/cuquantum-22.07.1
+  #         # conda update -n base conda --yes
+  #         # conda create -n qsim python=3.9 --yes
+  #         # conda install -n qsim cuda cuquantum make cmake cxx-compiler=1.5.1 --yes
+  #         # echo "cuda ==11.5.*" > /opt/conda/envs/qsim/conda-meta/pinned
+  #         # conda clean -p -t --yes
+  #         # conda activate qsim
+ 
+  # - source: modules/compute/vm-instance
+  #   id: workstation
+  #   use:
+  #   - network1
+  #   - cuda-setup
+  #   settings:
+  #     name_prefix: image-create
+  #     instance_count: 1      
+  #     machine_type: a2-ultragpu-1g
+  #     instance_image:
+  #       family: schedmd-v5-slurm-22-05-6-hpc-centos-7
+  #       project: schedmd-slurm-public
+  #     guest_accelerator:
+  #     - type: nvidia-a100-80gb
+  #       count: 1
+ 
+  # - id: homefs
+  #   source: modules/file-system/pre-existing-network-storage
+  #   settings:
+  #     server_ip: $(vars.home_ip)
+  #     remote_mount: nfsshare
+  #     local_mount: /home
+  #     fs_type: nfs
+ 
+  # - id: gpfsworkfs
+  #   source: modules/file-system/pre-existing-network-storage
+  #   settings:
+  #     server_ip: $(vars.gpfswork_ip)
+  #     remote_mount: nfsshare
+  #     local_mount: /gpfswork
+  #     fs_type: nfs
+ 
+  - id: compute_partition_node_group
+    source: "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group//?ref=7210cd3"
+    settings:
+      bandwidth_tier: gvnic_enabled # not supported by slurm debian image
+      node_count_dynamic_max: 50
+      node_count_static: $(vars.instance_count)
+      machine_type: $(vars.vm_type)
+      gpu:
+        count: $(vars.gpu_per_vm) 
+        type: $(vars.accelerator_type)
+      metadata:
+        VmDnsSetting: "ZonalPreferred"
+        enable-oslogin: "TRUE"
+        install-nvidia-driver: "True"
+        proxy-mode: "project_editors"
+      instance_image: $(vars.instance_image)
+      disk_size_gb: $(vars.disksize_gb)
+      disk_type: pd-ssd
+ 
+  - id: compute_partition
+    source: "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition//?ref=7210cd3"
+    use:
+    - network1
+    - compute_partition_node_group
+    # - homefs
+    # - gpfsworkfs
+    settings:
+      partition_name: compute
+      exclusive: true
+      enable_placement: true
+      # slurm_cluster_name: v5cluster
+ 
+  - id: slurm_controller
+    source: "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller//?ref=7210cd3"
+    use:
+    - network1
+    - compute_partition
+    # - homefs
+    # - gpfsworkfs
+    settings:
+      machine_type: n2-standard-16
+      compute_startup_scripts_timeout: 0
+      disable_controller_public_ips: false
+      disk_size_gb: 200
+      # slurm_cluster_name: v5cluster
+      cloud_parameters:
+        resume_rate: 0
+        resume_timeout: 1200
+        suspend_rate: 0
+        suspend_timeout: 450
+ 
+  # - id: slurm_login
+  #   source: community/modules/scheduler/schedmd-slurm-gcp-v5-login
+  #   use:
+  #   - network1
+  #   - slurm_controller
+  #   - homefs
+  #   - gpfsworkfs
+  #   settings:
+  #     machine_type: n2-standard-8
