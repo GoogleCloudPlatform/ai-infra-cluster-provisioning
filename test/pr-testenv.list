@@ -1,5 +1,5 @@
 PROJECT_ID=gce-ai-infra
 ZONE=us-central1-a
-GCS_PATH=gs://aiinfra-terraform-gce-ai-infra/gcb-pr
+TERRAFORM_GCS_PATH=gs://aiinfra-terraform-gce-ai-infra/gcb-pr
 METADATA={ key1 = "val", key2 = "val2"}
 INSTANCE_COUNT=1

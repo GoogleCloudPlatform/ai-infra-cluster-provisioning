@@ -141,7 +141,7 @@ _perform_terraform_action() {
 # method to set up backend for terraform to manage state
 #
 _set_terraform_backend() {
-    if [[ -z "$GCS_PATH" ]]; then
+    if [[ -z "$TERRAFORM_GCS_PATH" ]]; then
         _create_gcs_bucket_for_terraform
     else
         _validate_gcs_path_for_terraform

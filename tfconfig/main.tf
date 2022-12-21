@@ -20,6 +20,8 @@ module "network1" {
   region     = var.region
 }
 
+__REPLACE_GCS_BUCKET_MOUNT_MODULE__
+
 module "startup" {
   source     = "./modules/startup-script"
   project_id = var.project_id
@@ -29,7 +31,7 @@ module "startup" {
     type        = "shell"
 __REPLACE_FILES__
 __REPLACE_STARTUP_SCRIPT__
-  }]
+  }__REPLACE_GCS_BUCKET_MOUNT_SCRIPT__]
   labels          = merge(var.labels, { ghpc_role = "scripts",})
   deployment_name = var.deployment_name
   gcs_path        = var.gcs_path

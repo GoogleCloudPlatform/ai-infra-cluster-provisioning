@@ -22,14 +22,15 @@ The optional parameters are:
 6. ***IMAGE_NAME***. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-12-cu113-v20221107-debian-10 if not set. We support images only from ml-images project.
 7. ***DISK_SIZE_GB***. This defines the disk size in GB for the VMs. The default value is 2000 GB(2 TB) if not specified.
 8. ***DISK_TYPE***. This defines the disk type to use for VM creation. The default value is pd-ssd if not defined.
-9. ***GCS_PATH***. Google cloud storage bucket path to use for state management and copying scripts. If not provided then a default GCS bucket is created in the project. The name of the bucket is ‘aiinfra-terraform-<PROJECT_ID>’. For each deployment a separate folder is created under this GCS bucket in the name ‘<NAME_PREFIX-deployment>’. Ex: gs://spani-tst/deployment
+9. ***TERRAFORM_GCS_PATH***. Google cloud storage bucket path to use for state management and copying scripts. If not provided then a default GCS bucket is created in the project. The name of the bucket is ‘aiinfra-terraform-<PROJECT_ID>’. For each deployment a separate folder is created under this GCS bucket in the name ‘<NAME_PREFIX-deployment>’. Ex: gs://spani-tst/deployment
 10. ***VM_LOCALFILE_DEST_PATH***. This defines the destination directory path in the VM for file copy. If any local directory is mounted at "/usr/aiinfra/copy" in the docker container then all the files in that directory are copied to the VM_LOCALFILE_DEST_PATH in the VM. If not specified the default value is '/usr/aiinfra/copy'.
 11. ***METADATA***. This defines optional metadata to be set for the VM. Ex: { key1 = "val", key2 = "val2"}
 12. ***LABELS***. This defines key value pairs to set as labels when the VMs are created. Ex: { key1 = "val", key2 = "val2"} 
 13. ***STARTUP_COMMAND***. This defines the startup command to run when the VM starts up. Ex: python /usr/cp/train.py
 14. ***STARTUP_SCRIPT_PATH***. This defines the path of the startup script in the container. The script gets executed when the VM starts.Local directory can be mounted into the container and the startup script path can be provided accordingly. Ex: /usr/cp/test.sh
 15. ***ORCHESTRATOR_TYPE***. This defines the Orchestrator type to be set up on the VMs. The current supported orchestrator type is: Ray.
-16. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
+16. ***GCS_MOUNT_LIST***. This defines the list GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
+17. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
 
 The user needs to provide value for the above mandatory parameters. All other parameters are optional and default behaviour is described above. Users can also enable/disable various features using feature flags in the config, for example: ORCHESTRATOR_TYPE, SHOW_PROXY_URL, GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
 
@@ -84,10 +85,10 @@ Using the provisioning tool the user can provide a GCS bucket path that the entr
 
 ### Copying AI/ML training script to the GPU cluster
 There are 2 supported ways to copy training scripts to the GPU cluster. 
-1. The first way is via copying scripts from the local directory. For that
+1. The first and preferred method is via GCSFuse. Users can simply provide their GCS bucket where they can have training scripts and data via the ‘GCS_MOUNT_LIST’ parameter. Cluster provisioning tool will mount the GCS bucket in the VM as a local volume using GCSFuse.
+2. The second way is via copying scripts from the local directory. For that
    - First the user needs to mount a local directory containing training scripts to ‘/usr/aiinfra/copy ’ location. To do that use the ‘docker run’ command with option ‘-v /localdirpath:/usr/aiinfra/copy ’
-   - Then the user needs to provide the destination location as ‘COPY_DIR_PATH’ parameter. All the files under the mounted local directory will be copied to all the VMs under the path provided. If COPY_DIR_PATH’  is not provided then the default destination path is ‘/usr/aiinfra/copy ’ in the VM. 
-2. The second method is via GCSFuse. Users can simply provide their GCS bucket where they can have training scripts and data via the ‘GCS_PATH’ parameter. Cluster provisioning tool will mount the GCS bucket in the VM as a local volume using GCSFuse. This feature is under development and details will be provided once available. 
+   - Then the user needs to provide the destination location as ‘COPY_DIR_PATH’ parameter. All the files under the mounted local directory will be copied to all the VMs under the path provided. If COPY_DIR_PATH’  is not provided then the default destination path is ‘/usr/aiinfra/copy ’ in the VM.
 #### Multi-node training
 For multi-node training, we need to set up an orchestrator on all the VMs of the GPU cluster. Users can choose the orchestrator via ‘ORCHESTRATOR_TYPE’ parameter. Currently we support only Ray as our orchestrator. We will be adding support for more orchestrator types like Slurm shortly.
 
@@ -135,5 +136,5 @@ Since the resource state is stored outside of the container, the GPU cluster lif
 1. Error: Error waiting for Deleting Network: The network resource 'projects/xxx' is already being used by 'projects/firewall-yyy’.
    - This error is due to a known bug in VPC b/186792016.
 2. Error: Failed to get existing workspaces: querying Cloud Storage failed: Get "https://storage.googleapis.com/storage/v1/...": metadata: GCE metadata "instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control" not defined
-   - This error indicates that the user does not have storage object owner access in the project. Please get the storage object owner access or use `GCS_PATH=gs://<bucketname>/<foldername>` in the configuration.
+   - This error indicates that the user does not have storage object owner access in the project. Please get the storage object owner access or use `TERRAFORM_GCS_PATH=gs://<bucketname>/<foldername>` in the configuration.
    
