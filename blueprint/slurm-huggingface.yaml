@@ -23,7 +23,7 @@ vars:
   zone: us-central1-c
   name_prefix: huggingface-setup
   instance_image:
-    name: schedmd-v5-slurm-22-05-4-debian-10
+    name: schedmd-v5-slurm-22-05-6-ubuntu-2004-lts
     project: projects/schedmd-slurm-public/global/images/family
   
 deployment_groups:
@@ -38,13 +38,23 @@ deployment_groups:
     id: homefs
     use: [network1]
     settings:
-      local_mount: "/home"
+      size_gb: 2560
+      filestore_tier: BASIC_SSD
+      local_mount: /home
+  
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44"
+    id: workfs
+    use: [network1]
+    settings:
+      size_gb: 15360
+      filestore_tier: HIGH_SCALE_SSD
+      local_mount: /gpfswork
 
   - id: datafs
     source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/pre-existing-network-storage//?ref=c1f4a44"
     settings:
       remote_mount: bloom-dataset
-      local_mount: /gpfswork
+      local_mount: /dataset
       fs_type: gcsfuse
       mount_options: defaults,_netdev,implicit_dirs
 
@@ -56,6 +66,8 @@ deployment_groups:
       runners:
       - $(homefs.install_nfs_client_runner)
       - $(homefs.mount_runner)
+      - $(workfs.install_nfs_client_runner)
+      - $(workfs.mount_runner)
       - $(datafs.client_install_runner)
       - $(datafs.mount_runner)
 
@@ -64,7 +76,7 @@ deployment_groups:
     settings:
       bandwidth_tier: gvnic_enabled
       node_count_dynamic_max: 0
-      node_count_static: 2
+      node_count_static: 48
       machine_type: a2-ultragpu-8g
       gpu:
         count: 8
@@ -75,8 +87,8 @@ deployment_groups:
         install-nvidia-driver: "True"
         proxy-mode: "project_editors"
       instance_image: $(vars.instance_image)
-      disk_size_gb: 2000
-      disk_type: pd-ssd
+      disk_size_gb: 1024
+      disk_type: pd-standard
 
  
   - id: compute_partition
@@ -87,6 +99,7 @@ deployment_groups:
     - startup
     - datafs
     - homefs
+    - workfs
     settings:
       partition_name: compute
       exclusive: true
@@ -100,6 +113,7 @@ deployment_groups:
     - compute_partition
     - datafs
     - homefs
+    - workfs
     settings:
       machine_type: n2-standard-16
       compute_startup_scripts_timeout: 0
@@ -117,6 +131,7 @@ deployment_groups:
     - slurm_controller
     - datafs
     - homefs
+    - workfs
     settings:
       machine_type: n2-standard-8
       #disable_login_public_ips: false
