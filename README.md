@@ -85,7 +85,7 @@ Using the provisioning tool the user can provide a GCS bucket path that the entr
 
 ### Copying AI/ML training script to the GPU cluster
 There are 2 supported ways to copy training scripts to the GPU cluster. 
-1. The first and preferred method is via GCSFuse. Users can simply provide their GCS bucket where they can have training scripts and data via the ‘GCS_MOUNT_LIST’ parameter. Cluster provisioning tool will mount the GCS bucket in the VM as a local volume using GCSFuse.
+1. The first and preferred method is via GCSFuse. Users can simply provide their GCS bucket where they can store training scripts and data via the ‘GCS_MOUNT_LIST’ parameter. Cluster provisioning tool will mount the GCS bucket in the VM as a local volume using GCSFuse.
 2. The second way is via copying scripts from the local directory. For that
    - First the user needs to mount a local directory containing training scripts to ‘/usr/aiinfra/copy ’ location. To do that use the ‘docker run’ command with option ‘-v /localdirpath:/usr/aiinfra/copy ’
    - Then the user needs to provide the destination location as ‘COPY_DIR_PATH’ parameter. All the files under the mounted local directory will be copied to all the VMs under the path provided. If COPY_DIR_PATH’  is not provided then the default destination path is ‘/usr/aiinfra/copy ’ in the VM.
