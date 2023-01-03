@@ -129,6 +129,11 @@ _set_terraform_env_var() {
     echo "accelerator_type = \"$ACCELERATOR_TYPE\"" >> /usr/primary/tf.auto.tfvars
 
     # setting image name
+    if [[ ! -z "$IMAGE_FAMILY_NAME" ]] && [[ ! -z "$IMAGE_NAME" ]]; then
+        echo -e "${RED} Please provide either IMAGE_NAME or IMAGE_FAMILY_NAME. Exiting.. ${NOC}"
+        exit 1
+    fi
+
     if [[ -z "$IMAGE_FAMILY_NAME" ]]; then
         if [[ -z "$IMAGE_NAME" ]]; then
             echo "IMAGE_NAME environment variable not found. Default image family pytorch-1-12-gpu-debian-10 will be used."

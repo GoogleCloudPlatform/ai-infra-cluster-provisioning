@@ -49,16 +49,16 @@ _create_gcs_bucket_for_terraform() {
 # method to validate GCS path
 #
 _validate_gcs_path_for_terraform() {
-    if [[ ${GCS_PATH: -1} == "/" ]]; then
-        echo "ERROR...The GCS_PATH $GCS_PATH is in incorrect format. Remove trailing /"
+    if [[ ${TERRAFORM_GCS_PATH: -1} == "/" ]]; then
+        echo "ERROR...The TERRAFORM_GCS_PATH $TERRAFORM_GCS_PATH is in incorrect format. Remove trailing /"
         exit 1
     fi
 
     validate_gcs_bucket_ret=0
-    validate_gcs_bucket_out=`gsutil ls $GCS_PATH` || validate_gcs_bucket_ret=$?
+    validate_gcs_bucket_out=`gsutil ls $TERRAFORM_GCS_PATH` || validate_gcs_bucket_ret=$?
     if [ $validate_gcs_bucket_ret -eq 0 ]; then
         echo "GCS bucket validated. Return: $validate_gcs_bucket_out"
-        if [[ "$GCS_PATH" =~ ^gs://([^/]*)/*(.*) ]]; then
+        if [[ "$TERRAFORM_GCS_PATH" =~ ^gs://([^/]*)/*(.*) ]]; then
             export TF_BUCKET_NAME=${BASH_REMATCH[1]}
             if [[ -z "${BASH_REMATCH[2]}" ]]; then
                 export TF_DEPLOYMENT_PATH=$NAME_PREFIX-deployment
@@ -66,9 +66,9 @@ _validate_gcs_path_for_terraform() {
                 export TF_DEPLOYMENT_PATH=${BASH_REMATCH[2]}/$NAME_PREFIX-deployment
             fi
             export TF_STATE_PATH=$TF_DEPLOYMENT_PATH/terraform
-            echo "The GCS_PATH is $GCS_PATH. Terraform bucket is $TF_BUCKET_NAME. Terraform state path is $TF_STATE_PATH."
+            echo "The TERRAFORM_GCS_PATH is $TERRAFORM_GCS_PATH. Terraform bucket is $TF_BUCKET_NAME. Terraform state path is $TF_STATE_PATH."
         else
-            echo "ERROR...The GCS_PATH $GCS_PATH is in incorrect format."
+            echo "ERROR...The TERRAFORM_GCS_PATH $TERRAFORM_GCS_PATH is in incorrect format."
             exit 1
         fi
     else
