@@ -1,16 +1,6 @@
-FROM debian:stable-slim
+FROM gcr.io/google.com/cloudsdktool/cloud-sdk
 
 RUN apt-get update && apt-get install git bash curl python3 software-properties-common wget ca-certificates zip -y
-
-##########################################################################################
-# Install gcloud
-##########################################################################################
-RUN curl https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > /tmp/google-cloud-sdk.tar.gz
-
-# Install the package
-RUN mkdir -p /usr/local/gcloud \
-  && tar -C /usr/local/gcloud -xvf /tmp/google-cloud-sdk.tar.gz \
-  && /usr/local/gcloud/google-cloud-sdk/install.sh
 
 ##########################################################################################
 # Install terraform
