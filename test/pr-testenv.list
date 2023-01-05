@@ -1,5 +1,5 @@
-PROJECT_ID=gce-ai-infra
+PROJECT_ID=supercomputer-testing
 ZONE=us-central1-a
-TERRAFORM_GCS_PATH=gs://aiinfra-terraform-gce-ai-infra/gcb-pr
+TERRAFORM_GCS_PATH=gs://aiinfra-terraform-supercomputer-testing
 METADATA={ key1 = "val", key2 = "val2"}
 INSTANCE_COUNT=1
