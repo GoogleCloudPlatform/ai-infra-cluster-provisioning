@@ -69,12 +69,7 @@ variable "deployment_name" {
   type        = string
 }
 
-variable "gcs_path" {
-  description = ""
-  type        = string
-}
-
-variable "gcs_bucket" {
+variable "gcs_bucket_path" {
   description = ""
   type        = string
 }
