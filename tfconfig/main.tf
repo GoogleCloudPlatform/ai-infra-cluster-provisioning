@@ -75,6 +75,7 @@ module "aiinfra-default-dashboard" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id      = var.project_id
   deployment_name = var.deployment_name
+  base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
 }
 

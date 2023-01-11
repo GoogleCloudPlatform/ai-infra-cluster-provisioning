@@ -46,8 +46,7 @@ _set_terraform_env_var() {
                 exit $auth_ret
             elif [ -z "$auth_res" ]; then
                 echo "No authenticated account found."
-                gcloud auth login
-                gcloud auth application-default login
+                gcloud auth login --update-adc
                 val=`gcloud config set project $PROJECT_ID` 
                 auth_res=`gcloud auth list --format="value(ACCOUNT)"` || auth_ret=$?
                 echo "Logged in as $auth_res"

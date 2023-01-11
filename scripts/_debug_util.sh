@@ -21,7 +21,7 @@
 _debug_hold() {
     if [[ ! -z "$ACTION" && "${ACTION,,}" == "debug" ]]; then
         echo "Action is set to $ACTION. Waiting for /tmp/debug_release file to be created."
-        echo -e "${GREEN} Set Action by using \"export ACTION=create\" before proceed... ${NOC}"
+        echo -e "${GREEN} Perform any cction by calling \"/usr/entrypoint.sh create\" or \"/usr/entrypoint.sh destroy\" ${NOC}"
         while [  ! -f /tmp/debug_release ] 
         do
             echo "Waiting 10 seconds for /tmp/debug_release file to be created..."
