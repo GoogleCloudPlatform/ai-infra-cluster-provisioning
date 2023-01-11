@@ -23,19 +23,18 @@ module "network1" {
 __REPLACE_GCS_BUCKET_MOUNT_MODULE__
 
 module "startup" {
-  source     = "./modules/startup-script"
-  project_id = var.project_id
+  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
+  project_id      = var.project_id
   runners = [{
     destination = "install_cloud_ops_agent.sh"
-    source      = "modules/startup-script/examples/install_cloud_ops_agent.sh"
+    source      = "/usr/install_cloud_ops_agent.sh"
     type        = "shell"
 __REPLACE_FILES__
 __REPLACE_STARTUP_SCRIPT__
   }__REPLACE_GCS_BUCKET_MOUNT_SCRIPT__]
   labels          = merge(var.labels, { ghpc_role = "scripts",})
   deployment_name = var.deployment_name
-  gcs_path        = var.gcs_path
-  gcs_bucket      = var.gcs_bucket
+  gcs_bucket_path = var.gcs_bucket_path
   region          = var.region
 }
 
@@ -76,6 +75,7 @@ module "aiinfra-default-dashboard" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id      = var.project_id
   deployment_name = var.deployment_name
+  base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
 }
 

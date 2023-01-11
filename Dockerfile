@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install git bash curl python3 software-properties-
 # Install terraform
 ##########################################################################################
 
-ENV TERRAFORM_VERSION="1.3.0"
+ENV TERRAFORM_VERSION="1.3.7"
 
 RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && unzip terraform* && mv terraform /usr/local/bin/terraform \
     && chmod +x /usr/local/bin/terraform && rm terraform* 

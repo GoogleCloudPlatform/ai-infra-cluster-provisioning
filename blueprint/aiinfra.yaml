@@ -34,7 +34,6 @@ vars:
   disk_size_gb: 2000
   disk_type: pd-ssd
   gcs_path: gs://aiinfra-terraform-soumyapani-testing/hpctest
-  gcs_bucket: aiinfra-terraform-soumyapani-testing
   
 deployment_groups:
 - group: primary
@@ -55,18 +54,17 @@ deployment_groups:
       local_mount: "/home"
 
 
-  - source: ../tfconfig/modules/startup-script
+  - source: "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
     kind: terraform
     id: startup
     settings:
+      gcs_bucket_path: $(vars.gcs_path)
       runners:
       - $(homefs.install_nfs_client_runner)
       - $(homefs.mount_runner)
       - type: shell
         source: modules/startup-script/examples/install_ansible.sh
         destination: install_ansible.sh
-      gcs_path: $(vars.gcs_path)
-      gcs_bucket: $(vars.gcs_bucket)
 
 
   - source: ../tfconfig/modules/vm-instance-group

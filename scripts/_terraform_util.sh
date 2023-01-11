@@ -18,7 +18,6 @@
 # method to perform terraform init and apply to create resources.
 #
 _terraform_setup() {
-    terraform -chdir=/usr/primary validate
     apply_ret=0
     terraform -chdir=/usr/primary apply -input=false -auto-approve || apply_ret=$?
     if [ $apply_ret -eq 0 ]; then
@@ -147,8 +146,7 @@ _set_terraform_backend() {
         _validate_gcs_path_for_terraform
     fi
 
-    echo "gcs_path = \"$TF_STATE_PATH\"" >> /usr/primary/tf.auto.tfvars
-    echo "gcs_bucket = \"$TF_BUCKET_NAME\"" >> /usr/primary/tf.auto.tfvars
+    echo "gcs_bucket_path = \"gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH\"" >> /usr/primary/tf.auto.tfvars
     echo "Terraform state management files are created on cloud storage."
     _create_terraform_backend_file
 }
