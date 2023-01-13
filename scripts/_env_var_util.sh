@@ -182,20 +182,30 @@ _set_terraform_env_var() {
     echo "Setting disk type to $DISK_TYPE."
     echo "disk_type = \"$DISK_TYPE\"" >> /usr/primary/tf.auto.tfvars
 
-    # handling cluster properties
-    if [[ -n "$CLUSTER_PROPERTIES" ]]; then
-        for val in ${CLUSTER_PROPERTIES//,/ }
-        do
-            if [[ -n ${val} ]]; then
-                trimmedVal=${val##*( )}
-                trimmedVal=${trimmedVal%%*( )}
-                case "${trimmedVal,,}" in
-                   "multi_nic") 
-                       echo "Found property ${trimmedVal}. Enabling multi-nic."
-                       echo "enable_multi_nic = true" >> /usr/primary/tf.auto.tfvars
-                   ;;
-                esac
-            fi
-        done
+    # setting network configuration
+    if [[ -z "$NETWORK_CONFIG" ]]; then
+        echo "Using default VPC."
+        echo "network_config = \"default_network\"" >> /usr/primary/tf.auto.tfvars
+    else
+        trimmednetConfig=${NETWORK_CONFIG##*( )}
+        trimmednetConfig=${trimmednetConfig%%*( )}
+        case "${trimmednetConfig,,}" in
+           "default_network") 
+               echo "Network configuration is $NETWORK_CONFIG. Using default VPC."
+               echo "network_config = \"${trimmednetConfig,,}\"" >> /usr/primary/tf.auto.tfvars
+               ;;
+            "new_network") 
+               echo "Network configuration is $NETWORK_CONFIG. Creating new private VPC."
+               echo "network_config = \"${trimmednetConfig,,}\"" >> /usr/primary/tf.auto.tfvars
+               ;;
+            "multi_nic_network") 
+               echo "Network configuration is $NETWORK_CONFIG. Creating multi-nic VPC."
+               echo "network_config = \"${trimmednetConfig,,}\"" >> /usr/primary/tf.auto.tfvars
+               ;;
+           *)
+               echo -e "${RED} Network config $NETWORK_CONFIG not supported. Supported values are \"new_network\" or \"multi_nic_network\". Exiting.. ${NOC}"
+               exit 1
+               ;;
+        esac
     fi
 }

@@ -133,8 +133,10 @@ Since the resource state is stored outside of the container, the GPU cluster lif
     > Need storage object owner access if you don't already have a storage bucket to reuse.
 
 ## Known Issues
-1. Error: Error waiting for Deleting Network: The network resource 'projects/xxx' is already being used by 'projects/firewall-yyy’.
+1. ❗Error: Error waiting for Deleting Network: The network resource 'projects/xxx' is already being used by 'projects/firewall-yyy’.
    - This error is due to a known bug in VPC b/186792016.
-2. Error: Failed to get existing workspaces: querying Cloud Storage failed: Get "https://storage.googleapis.com/storage/v1/...": metadata: GCE metadata "instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control" not defined
+2. ❗Error: Failed to get existing workspaces: querying Cloud Storage failed: Get "https://storage.googleapis.com/storage/v1/...": metadata: GCE metadata "instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control" not defined
    - This error indicates that the user does not have storage object owner access in the project. Please get the storage object owner access or use `TERRAFORM_GCS_PATH=gs://<bucketname>/<foldername>` in the configuration.
-   
+3. ❗Error: Failed to get existing workspaces: querying Cloud Storage failed: googleapi: Error 403: username@google.com does not have serviceusage.services.use access to the Google Cloud project. Permission 'serviceusage.services.use' denied on resource (or it may not exist)., forbidden
+   - This error indicates that the gcloud auth token provided as `-v ~/.config/gcloud:/root/.config/gcloud` or `-v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud` has expired. Please renew the auth token by calling `gcloud auth application-default login` command or use without passing the auth token in docker run command like 
+     > `docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create`

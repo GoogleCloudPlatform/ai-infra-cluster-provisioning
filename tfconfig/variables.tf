@@ -94,8 +94,7 @@ variable "disk_type" {
   type        = string
 }
 
-variable "enable_multi_nic" {
+variable "network_config" {
   description = ""
-  type        = bool
-  default     = false
+  type        = string
 }
