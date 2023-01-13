@@ -14,18 +14,17 @@
  * limitations under the License.
 */
 
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 3.83"
-    }
+variable "project_id" {
+  description = "Project in which the HPC deployment will be created"
+  type        = string
+}
 
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 4.12"
-    }
-  }
+variable "region" {
+  description = "Region in which the HPC deployment will be created"
+  type        = string
+}
 
-  required_version = ">= 0.14.0"
+variable "deployment_name" {
+  description = "Name of the deployment, used to name the cluster"
+  type        = string
 }

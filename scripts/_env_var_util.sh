@@ -181,4 +181,21 @@ _set_terraform_env_var() {
     echo "disk_size_gb = $DISK_SIZE_GB" >> /usr/primary/tf.auto.tfvars
     echo "Setting disk type to $DISK_TYPE."
     echo "disk_type = \"$DISK_TYPE\"" >> /usr/primary/tf.auto.tfvars
+
+    # handling cluster properties
+    if [[ -n "$CLUSTER_PROPERTIES" ]]; then
+        for val in ${CLUSTER_PROPERTIES//,/ }
+        do
+            if [[ -n ${val} ]]; then
+                trimmedVal=${val##*( )}
+                trimmedVal=${trimmedVal%%*( )}
+                case "${trimmedVal,,}" in
+                   "multi_nic") 
+                       echo "Found property ${trimmedVal}. Enabling multi-nic."
+                       echo "enable_multi_nic = true" >> /usr/primary/tf.auto.tfvars
+                   ;;
+                esac
+            fi
+        done
+    fi
 }

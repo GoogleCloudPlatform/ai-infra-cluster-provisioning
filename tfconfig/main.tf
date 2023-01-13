@@ -14,10 +14,18 @@
   * limitations under the License.
   */
 
-module "network1" {
+module "primary_network" {
   source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id = var.project_id
   region     = var.region
+}
+
+module "multi-nic-network" {
+  count           = var.enable_multi_nic ? 1 : 0
+  source          = "./modules/multi-nic-network"
+  project_id      = var.project_id
+  region          = var.region
+  deployment_name = var.deployment_name
 }
 
 __REPLACE_GCS_BUCKET_MOUNT_MODULE__
@@ -40,7 +48,7 @@ __REPLACE_STARTUP_SCRIPT__
 
 module "compute-vm-1" {
   source               = "./modules/vm-instance-group"
-  subnetwork_self_link = module.network1.subnetwork_self_link
+  subnetwork_self_link = module.primary_network.subnetwork_self_link
   service_account = {
     email  = var.service_account
     scopes = ["cloud-platform"]
@@ -49,7 +57,7 @@ module "compute-vm-1" {
   project_id        = var.project_id
   disk_size_gb      = var.disk_size_gb
   disk_type         = var.disk_type
-  network_self_link = module.network1.network_self_link
+  network_self_link = module.primary_network.network_self_link
   placement_policy = {
     availability_domain_count = null
     collocation               = "COLLOCATED"
@@ -69,8 +77,16 @@ module "compute-vm-1" {
     type  = var.accelerator_type
   }]
   deployment_name = var.deployment_name
+  network_interfaces = var.enable_multi_nic ? module.multi-nic-network[0].multi_network_interface : []
+  depends_on = [
+    module.primary_network,
+    module.multi-nic-network
+  ]
 }
 
+/*
+* Reverted to Empty dashboard due to bug https://buganizer.corp.google.com/issues/265388683.
+*/
 module "aiinfra-default-dashboard" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id      = var.project_id

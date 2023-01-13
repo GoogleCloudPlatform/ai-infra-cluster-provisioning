@@ -93,3 +93,9 @@ variable "disk_type" {
   description = ""
   type        = string
 }
+
+variable "enable_multi_nic" {
+  description = ""
+  type        = bool
+  default     = false
+}
