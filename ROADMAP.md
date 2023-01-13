@@ -41,12 +41,12 @@ We will work on creating the MVP of cluster provisioning tool and work on integr
 | :---: | :--- | --- | :---: |
 | 🟢 | MVP for cluster provisioning tool <ul><li>VM instance creation via MIG</li><li>Ray cluster setup</li><li>Copy local script to VM and define startup script.</li><li>Flexible GPU and VM configuration</li></ul> | [Bug Tracking](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning/issues) | - |
 | 🟢 | Integration with LLM pipeline | `Done` | - |
-| 🟢 | Jupyter notebook endpoint for connecting to the cluster | `InProgress` | Dec 09, 2022 |
-| 🟢 | Integration and presubmit validations | `InProgress` | Dec 09, 2022 |
-| 🟢 | Create artifact repository and release private image | `InProgress` | Dec 16, 2022 |
-| 🟢 | Example scripts to run multinode training | `NotStarted` | - |
+| 🟢 | Jupyter notebook endpoint for connecting to the cluster | `Done` | - |
+| 🟢 | Integration and presubmit validations | `Done` | - |
+| 🟢 | Create artifact repository and release private image | `Done` | - |
+| 🟢 | Example scripts to run multinode training | `Done` | - |
 | 🔴 | Monitoring pipeline integration with cluster provisioning tool | `NotStarted` | - |
-| 🟢 | Create artifact repository and release public image | `NotStarted` | - |
+| 🟢 | Create artifact repository and release public image | `Done` | - |
 | 🔴 | Public blog for the cluster provisioning tool. | `NotStarted` | - |
 
 
@@ -55,7 +55,7 @@ We will work on creating the MVP of cluster provisioning tool and work on integr
 
 | Status | Goal | Remarks | ETA |
 | :---: | :--- | --- | :---: |
-| 🟡 | Integration with HPC toolkit | | - |
+| 🟢 | Integration with HPC toolkit | `Done` | - |
 | 🔴 | Multi NIC instance support | | - |
 | 🟢 | GCSFuse support | | - |
 | 🔴 | Add automatic placement policy for large number of VMs | | - |
