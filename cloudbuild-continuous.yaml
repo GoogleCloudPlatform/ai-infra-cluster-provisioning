@@ -26,21 +26,21 @@ steps:
           '-f', 'Dockerfile', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
-          '--env-file', 'test/continuous-testenv.list',
+          '--env-file', 'test/continuous/default-vpc-env.list',
           '--env', 'NAME_PREFIX=continuous${SHORT_SHA}',
           '--network=cloudbuild',
           'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
           'Destroy' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
-          '--env-file', 'test/continuous-testenv.list',
+          '--env-file', 'test/continuous/default-vpc-env.list',
           '--env', 'NAME_PREFIX=continuous${SHORT_SHA}',
           '--network=cloudbuild',
           'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
           'Create' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
-          '--env-file', 'test/continuous-testenv.list',
+          '--env-file', 'test/continuous/default-vpc-env.list',
           '--env', 'NAME_PREFIX=continuous${SHORT_SHA}',
           '--network=cloudbuild',
           'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',

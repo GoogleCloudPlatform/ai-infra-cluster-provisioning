@@ -25,8 +25,15 @@ steps:
           '-f', 'Dockerfile', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run',
-          '--env-file', 'test/pr-testenv.list',
-          '--env', 'NAME_PREFIX=pr${_PR_NUMBER}',
+          '--env-file', 'test/pr/default-vpc-env.list',
+          '--env', 'NAME_PREFIX=pr${_PR_NUMBER}-defaultvpc',
+          '--network=cloudbuild',
+          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+          'Validate' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'run',
+          '--env-file', 'test/pr/multinic-vpc-env.list',
+          '--env', 'NAME_PREFIX=pr${_PR_NUMBER}-multinic',
           '--network=cloudbuild',
           'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
           'Validate' ]
