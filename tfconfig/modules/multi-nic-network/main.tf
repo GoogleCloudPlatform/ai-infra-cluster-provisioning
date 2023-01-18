@@ -16,70 +16,15 @@
 
 module "network1" {
   source                = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=866de32de9c3cf7ea8fa20f377d62aa80a07b8b3"
-  network_address_range = "10.0.0.0/16"
+  count                 = var.nic_count
+  network_address_range = "10.${count.index}.0.0/16"
   subnetworks = [{
     new_bits      = 8
-    subnet_name   = "primary-subnet-one"
+    subnet_name   = "primary-subnet-${count.index}"
     subnet_region = var.region
   }]
   region          = var.region
   deployment_name = var.deployment_name
   project_id      = var.project_id
-  network_name    = "${var.deployment_name}-net-1"
-}
-
-module "network2" {
-  source                = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=866de32de9c3cf7ea8fa20f377d62aa80a07b8b3"
-  network_address_range = "10.1.0.0/16"
-  subnetworks = [{
-    new_bits      = 8
-    subnet_name   = "primary-subnet-two"
-    subnet_region = var.region
-  }]
-  region          = var.region
-  deployment_name = var.deployment_name
-  project_id      = var.project_id
-  network_name    = "${var.deployment_name}-net-2"
-}
-
-module "network3" {
-  source                = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=866de32de9c3cf7ea8fa20f377d62aa80a07b8b3"
-  network_address_range = "10.2.0.0/16"
-  subnetworks = [{
-    new_bits      = 8
-    subnet_name   = "primary-subnet-three"
-    subnet_region = var.region
-  }]
-  region          = var.region
-  deployment_name = var.deployment_name
-  project_id      = var.project_id
-  network_name    = "${var.deployment_name}-net-3"
-}
-
-module "network4" {
-  source                = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=866de32de9c3cf7ea8fa20f377d62aa80a07b8b3"
-  network_address_range = "10.3.0.0/16"
-  subnetworks = [{
-    new_bits      = 8
-    subnet_name   = "primary-subnet-four"
-    subnet_region = var.region
-  }]
-  region          = var.region
-  deployment_name = var.deployment_name
-  project_id      = var.project_id
-  network_name    = "${var.deployment_name}-net-4"
-}
-
-module "network5" {
-  source                = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=866de32de9c3cf7ea8fa20f377d62aa80a07b8b3"
-  network_address_range = "10.4.0.0/16"
-  subnetworks = [{
-    new_bits      = 8
-    subnet_name   = "primary-subnet-five"
-    subnet_region = var.region
-  }]
-  region          = var.region
-  deployment_name = var.deployment_name
-  project_id      = var.project_id
-  network_name    = "${var.deployment_name}-net-5"
+  network_name    = "${var.deployment_name}-net-${count.index}"
 }

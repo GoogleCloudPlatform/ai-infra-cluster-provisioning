@@ -98,7 +98,7 @@ module "compute-vm-1" {
 }
 
 /*
-* Reverted to Empty dashboard due to bug https://buganizer.corp.google.com/issues/265388683.
+* The dashboard needs to include GPU metrics from new ops agent.
 */
 module "aiinfra-default-dashboard" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"

@@ -109,7 +109,6 @@ resource "google_compute_instance_template" "compute_vm_template" {
 
   dynamic "network_interface" {
     for_each = local.network_interfaces
-
     content {
       network            = network_interface.value.network
       subnetwork         = network_interface.value.subnetwork

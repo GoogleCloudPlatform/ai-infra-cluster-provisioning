@@ -28,3 +28,9 @@ variable "deployment_name" {
   description = "Name of the deployment, used to name the cluster"
   type        = string
 }
+
+variable "nic_count" {
+  description = "The NIC count"
+  type        = number
+  default     = 5
+}

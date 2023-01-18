@@ -262,7 +262,7 @@ variable "network_interfaces" {
     condition = alltrue([
       for ni in var.network_interfaces : (ni.network == null) != (ni.subnetwork == null)
     ])
-    error_message = "All additional network interfaces must define exactly one of \"network\" or \"subnetwork\"."
+    error_message = "All additional network interfaces must define either \"network\" or \"subnetwork\", but not both."
   }
   validation {
     condition = alltrue([
