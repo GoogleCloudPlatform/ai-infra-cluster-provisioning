@@ -31,6 +31,11 @@ The optional parameters are:
 15. ***ORCHESTRATOR_TYPE***. This defines the Orchestrator type to be set up on the VMs. The current supported orchestrator type is: Ray.
 16. ***GCS_MOUNT_LIST***. This defines the list GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
 17. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
+18. ***NETWORK_CONFIG***. This controls the VPC type to be used for the MIG. The supported values are default_network, new_network and multi_nic_network. The dault value is default_network. The behaviour is 
+    -  __default_network__: MIG uses the default VPC in the project.
+    -  __new_network__: A new VPC is created for the MIG.
+    -  __multi_nic_network__: New VPCs are created and used by all the VMs in the MIG. By default 5 new VPCs are created and 5 NICs are used for the MIG but that value is configurable.
+
 
 The user needs to provide value for the above mandatory parameters. All other parameters are optional and default behaviour is described above. Users can also enable/disable various features using feature flags in the config, for example: ORCHESTRATOR_TYPE, SHOW_PROXY_URL, GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
 
@@ -133,8 +138,10 @@ Since the resource state is stored outside of the container, the GPU cluster lif
     > Need storage object owner access if you don't already have a storage bucket to reuse.
 
 ## Known Issues
-1. Error: Error waiting for Deleting Network: The network resource 'projects/xxx' is already being used by 'projects/firewall-yyy’.
+1. ❗Error: Error waiting for Deleting Network: The network resource 'projects/xxx' is already being used by 'projects/firewall-yyy’.
    - This error is due to a known bug in VPC b/186792016.
-2. Error: Failed to get existing workspaces: querying Cloud Storage failed: Get "https://storage.googleapis.com/storage/v1/...": metadata: GCE metadata "instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control" not defined
+2. ❗Error: Failed to get existing workspaces: querying Cloud Storage failed: Get "https://storage.googleapis.com/storage/v1/...": metadata: GCE metadata "instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control" not defined
    - This error indicates that the user does not have storage object owner access in the project. Please get the storage object owner access or use `TERRAFORM_GCS_PATH=gs://<bucketname>/<foldername>` in the configuration.
-   
+3. ❗Error: Failed to get existing workspaces: querying Cloud Storage failed: googleapi: Error 403: username@google.com does not have serviceusage.services.use access to the Google Cloud project. Permission 'serviceusage.services.use' denied on resource (or it may not exist)., forbidden
+   - This error indicates that the gcloud auth token provided as `-v ~/.config/gcloud:/root/.config/gcloud` or `-v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud` has expired. Please renew the auth token by calling `gcloud auth application-default login` command or use without passing the auth token in docker run command like 
+     > `docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create`

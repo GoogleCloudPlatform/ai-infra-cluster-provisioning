@@ -93,3 +93,8 @@ variable "disk_type" {
   description = ""
   type        = string
 }
+
+variable "network_config" {
+  description = ""
+  type        = string
+}

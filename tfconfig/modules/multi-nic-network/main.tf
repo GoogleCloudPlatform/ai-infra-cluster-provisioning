@@ -14,18 +14,17 @@
  * limitations under the License.
 */
 
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 3.83"
-    }
-
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 4.12"
-    }
-  }
-
-  required_version = ">= 0.14.0"
+module "network1" {
+  source                = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=866de32de9c3cf7ea8fa20f377d62aa80a07b8b3"
+  count                 = var.nic_count
+  network_address_range = "10.${count.index}.0.0/16"
+  subnetworks = [{
+    new_bits      = 8
+    subnet_name   = "primary-subnet-${count.index}"
+    subnet_region = var.region
+  }]
+  region          = var.region
+  deployment_name = var.deployment_name
+  project_id      = var.project_id
+  network_name    = "${var.deployment_name}-net-${count.index}"
 }

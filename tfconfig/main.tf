@@ -14,10 +14,31 @@
   * limitations under the License.
   */
 
-module "network1" {
+locals {
+  trimmed_net_config = lower(trimspace(var.network_config))
+  primary_network    = coalesce(one(module.new_primary_network), one(module.default_primary_network))
+}
+module "default_primary_network" {
+  count      = local.trimmed_net_config != "new_network" ? 1 : 0
   source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id = var.project_id
   region     = var.region
+}
+
+module "new_primary_network" {
+  count           = local.trimmed_net_config == "new_network" ? 1 : 0
+  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
+  project_id      = var.project_id
+  region          = var.region
+  deployment_name = var.deployment_name
+}
+
+module "multi-nic-network" {
+  count           = local.trimmed_net_config == "multi_nic_network" ? 1 : 0
+  source          = "./modules/multi-nic-network"
+  project_id      = var.project_id
+  region          = var.region
+  deployment_name = var.deployment_name
 }
 
 __REPLACE_GCS_BUCKET_MOUNT_MODULE__
@@ -40,7 +61,7 @@ __REPLACE_STARTUP_SCRIPT__
 
 module "compute-vm-1" {
   source               = "./modules/vm-instance-group"
-  subnetwork_self_link = module.network1.subnetwork_self_link
+  subnetwork_self_link = local.primary_network.subnetwork_self_link
   service_account = {
     email  = var.service_account
     scopes = ["cloud-platform"]
@@ -49,7 +70,7 @@ module "compute-vm-1" {
   project_id        = var.project_id
   disk_size_gb      = var.disk_size_gb
   disk_type         = var.disk_type
-  network_self_link = module.network1.network_self_link
+  network_self_link = local.primary_network.network_self_link
   placement_policy = {
     availability_domain_count = null
     collocation               = "COLLOCATED"
@@ -69,8 +90,16 @@ module "compute-vm-1" {
     type  = var.accelerator_type
   }]
   deployment_name = var.deployment_name
+  network_interfaces = local.trimmed_net_config == "multi_nic_network" ? module.multi-nic-network[0].multi_network_interface : []
+  depends_on = [
+    local.primary_network,
+    module.multi-nic-network
+  ]
 }
 
+/*
+* The dashboard needs to include GPU metrics from new ops agent.
+*/
 module "aiinfra-default-dashboard" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id      = var.project_id
@@ -78,4 +107,3 @@ module "aiinfra-default-dashboard" {
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
 }
-

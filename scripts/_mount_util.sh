@@ -37,7 +37,7 @@ _expand_mount_gcs_bucket() {
                 mountGcsModule+="module \"$modulename\" {\n"
                 mountGcsModule+="    source        = \"github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/pre-existing-network-storage//?ref=c1f4a44\"\n"
                 mountGcsModule+="    fs_type       = \"gcsfuse\"\n"
-                mountGcsModule+="    mount_options = \"defaults,_netdev,implicit_dirs\"\n"
+                mountGcsModule+="    mount_options = \"defaults,_netdev,implicit_dirs,allow_other\"\n"
                 mountGcsModule+="    remote_mount  = \"$bucketName\"\n"
                 mountGcsModule+="    local_mount   = \"$mountpath\"\n"
                 mountGcsModule+="}\n"

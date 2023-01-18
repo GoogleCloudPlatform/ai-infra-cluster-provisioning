@@ -12,20 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 3.83"
+output "multi_network_interface" {
+  description = "The network interface that includes all VPC subnets"
+  value       = [for idx in range(var.nic_count) : {
+      access_config      = []
+      alias_ip_range     = []
+      ipv6_access_config = []
+      network            = null
+      network_ip         = null
+      queue_count        = null
+      stack_type         = null
+      nic_type           = "GVNIC"
+      subnetwork         = module.network1[idx].subnetwork_self_link
+      subnetwork_project = var.project_id
     }
+  ]
 
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 4.12"
-    }
-  }
-
-  required_version = ">= 0.14.0"
+  depends_on  = [module.network1]
 }
