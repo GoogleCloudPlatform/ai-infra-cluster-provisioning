@@ -17,6 +17,7 @@
 locals {
   trimmed_net_config = lower(trimspace(var.network_config))
   primary_network    = coalesce(one(module.new_primary_network), one(module.default_primary_network))
+  gcs_mount_arr      = compact(split(",", trimspace(var.gcs_mount_list)))
 }
 module "default_primary_network" {
   count      = local.trimmed_net_config != "new_network" ? 1 : 0
@@ -41,18 +42,26 @@ module "multi-nic-network" {
   deployment_name = var.deployment_name
 }
 
-__REPLACE_GCS_BUCKET_MOUNT_MODULE__
+module "gcsfuse_mount" {
+  source        = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/pre-existing-network-storage//?ref=c1f4a44"
+  count         = length(local.gcs_mount_arr)
+  fs_type       = "gcsfuse"
+  mount_options = "defaults,_netdev,implicit_dirs,allow_other"
+  remote_mount  = split(":", trimspace(local.gcs_mount_arr[count.index]))[0]
+  local_mount   = split(":", trimspace(local.gcs_mount_arr[count.index]))[1]
+}
 
 module "startup" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
   project_id      = var.project_id
-  runners = [{
+  runners = concat([{
     destination = "install_cloud_ops_agent.sh"
     source      = "/usr/install_cloud_ops_agent.sh"
     type        = "shell"
 __REPLACE_FILES__
 __REPLACE_STARTUP_SCRIPT__
-  }__REPLACE_GCS_BUCKET_MOUNT_SCRIPT__]
+  }]
+  , module.gcsfuse_mount[*].client_install_runner, module.gcsfuse_mount[*].mount_runner)
   labels          = merge(var.labels, { ghpc_role = "scripts",})
   deployment_name = var.deployment_name
   gcs_bucket_path = var.gcs_bucket_path

@@ -208,4 +208,9 @@ _set_terraform_env_var() {
                ;;
         esac
     fi
+
+    # setting GCS mount list
+    if [[ -n "$GCS_MOUNT_LIST" ]]; then
+        echo "gcs_mount_list= \"$GCS_MOUNT_LIST\"" >> /usr/primary/tf.auto.tfvars
+    fi
 }

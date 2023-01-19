@@ -21,7 +21,6 @@ source /usr/_terraform_util.sh
 source /usr/_storage_util.sh
 source /usr/_script_util.sh
 source /usr/_debug_util.sh
-source /usr/_mount_util.sh
 
 trap _terraform_cleanup EXIT SIGTERM SIGINT
 
@@ -39,7 +38,6 @@ _debug_hold
 _set_terraform_env_var
 _expand_files_to_copy
 _expand_startup_script
-_expand_mount_gcs_bucket
 
 _set_terraform_backend
 echo "====================================================================="
