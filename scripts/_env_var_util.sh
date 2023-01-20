@@ -213,4 +213,8 @@ _set_terraform_env_var() {
     if [[ -n "$GCS_MOUNT_LIST" ]]; then
         echo "gcs_mount_list= \"$GCS_MOUNT_LIST\"" >> /usr/primary/tf.auto.tfvars
     fi
+    
+    if [[ -n "$NFS_FILESHARE_LIST" ]]; then
+        echo "nfs_fileshare_list= \"$NFS_FILESHARE_LIST\"" >> /usr/primary/tf.auto.tfvars
+    fi
 }

@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
+output "network_name" {
+  description = "The name of the primary network of all the VPCs created."
+  value       = module.network1[0].network_name
+}
+
+output "subnetwork_self_link" {
+  description = "The subnetwork_self_link of the primary network of all the VPCs created."
+  value       = module.network1[0].subnetwork_self_link
+}
+
+output "network_self_link" {
+  description = "The network_self_link of the primary network of all the VPCs created."
+  value       = module.network1[0].network_self_link
+}
+
 output "multi_network_interface" {
-  description = "The network interface that includes all VPC subnets"
+  description = "The network interface that includes all VPC subnets."
   value       = [for idx in range(var.nic_count) : {
       access_config      = []
       alias_ip_range     = []

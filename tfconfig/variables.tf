@@ -102,4 +102,11 @@ variable "network_config" {
 variable "gcs_mount_list" {
   description = ""
   type        = string
+  default     = ""
+}
+
+variable "nfs_fileshare_list" {
+  description = ""
+  type        = string
+  default     = ""
 }
