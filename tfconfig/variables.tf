@@ -98,3 +98,15 @@ variable "network_config" {
   description = ""
   type        = string
 }
+
+variable "gcs_mount_list" {
+  description = ""
+  type        = string
+  default     = ""
+}
+
+variable "nfs_fileshare_list" {
+  description = ""
+  type        = string
+  default     = ""
+}
