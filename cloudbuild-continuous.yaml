@@ -22,6 +22,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
           '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:${SHORT_SHA}',
+          '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:${_VERSION}',
           '--cache-from', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
           '-f', 'Dockerfile', '.' ]
 # Test for default VPC
@@ -73,3 +74,6 @@ images:
 - 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image'
 
 timeout: 1800s
+
+substitutions:
+  _VERSION: 'v0.1.0'
