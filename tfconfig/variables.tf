@@ -105,7 +105,7 @@ variable "gcs_mount_list" {
   default     = ""
 }
 
-variable "nfs_fileshare_list" {
+variable "nfs_filestore_list" {
   description = ""
   type        = string
   default     = ""

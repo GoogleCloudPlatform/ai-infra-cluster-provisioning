@@ -16,34 +16,34 @@
 
 output "network_name" {
   description = "The name of the primary network of all the VPCs created."
-  value       = module.network1[0].network_name
+  value       = local.primary_network.network_name
 }
 
 output "subnetwork_self_link" {
   description = "The subnetwork_self_link of the primary network of all the VPCs created."
-  value       = module.network1[0].subnetwork_self_link
+  value       = local.primary_network.subnetwork_self_link
 }
 
 output "network_self_link" {
   description = "The network_self_link of the primary network of all the VPCs created."
-  value       = module.network1[0].network_self_link
+  value       = local.primary_network.network_self_link
 }
 
-output "multi_network_interface" {
+output "network_interfaces" {
   description = "The network interface that includes all VPC subnets."
-  value       = [for idx in range(var.nic_count) : {
-      access_config      = []
-      alias_ip_range     = []
-      ipv6_access_config = []
-      network            = null
-      network_ip         = null
-      queue_count        = null
-      stack_type         = null
-      nic_type           = "GVNIC"
-      subnetwork         = module.network1[idx].subnetwork_self_link
-      subnetwork_project = var.project_id
+  value = local.trimmed_net_config == "multi_nic_network" ? [for idx in range(var.nic_count) : {
+    access_config      = []
+    alias_ip_range     = []
+    ipv6_access_config = []
+    network            = null
+    network_ip         = null
+    queue_count        = null
+    stack_type         = null
+    nic_type           = "GVNIC"
+    subnetwork         = module.multinic_vpc[idx].subnetwork_self_link
+    subnetwork_project = var.project_id
     }
-  ]
+  ] : []
 
-  depends_on  = [module.network1]
+  depends_on = [module.multinic_vpc]
 }
