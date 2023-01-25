@@ -122,7 +122,7 @@ Since the resource state is stored outside of the container, the GPU cluster lif
 
 ## Instructions
 1. gcloud auth application-default login.
-2. gcloud auth configure-docker us-central1-docker.pkg.dev
+2. gcloud auth configure-docker us-docker.pkg.dev
 3. ***[`OPTIONAL - if project not set already`]*** gcloud config set account supercomputer-testing
 4. Create env.list file. The sample env.list can be found [here](#sample-config-file-that-the-user-provides). 
 5. ***[`SIMPLE CREATE`]*** 
