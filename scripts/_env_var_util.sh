@@ -215,6 +215,6 @@ _set_terraform_env_var() {
     fi
     
     if [[ -n "$NFS_FILESHARE_LIST" ]]; then
-        echo "nfs_fileshare_list= \"$NFS_FILESHARE_LIST\"" >> /usr/primary/tf.auto.tfvars
+        echo "nfs_filestore_list= \"$NFS_FILESHARE_LIST\"" >> /usr/primary/tf.auto.tfvars
     fi
 }
