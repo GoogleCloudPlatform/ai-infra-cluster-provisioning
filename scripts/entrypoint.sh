@@ -37,7 +37,6 @@ fi
 _debug_hold
 _set_terraform_env_var
 _expand_files_to_copy
-_expand_startup_script
 
 _set_terraform_backend
 echo "====================================================================="

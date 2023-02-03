@@ -90,23 +90,58 @@ variable "disk_size_gb" {
 }
 
 variable "disk_type" {
-  description = ""
+  description = "Boot disk type, can be either pd-ssd, local-ssd, or pd-standard."
   type        = string
+  default     = "pd-standard"
+
+  validation {
+    condition     = contains(["pd-ssd", "local-ssd", "pd-standard"], var.disk_type)
+    error_message = "Variable disk_type must be one of pd-ssd, local-ssd, or pd-standard."
+  }
 }
 
 variable "network_config" {
-  description = ""
+  description = "The network configuration to specify the type of VPC to be used"
   type        = string
+  default     = "default_network"
+
+  validation {
+    condition     = contains(["default_network", "new_network", "multi_nic_network"], var.network_config)
+    error_message = "Variable network_config must be one of default_network, new_network, or multi_nic_network."
+  }
 }
 
 variable "gcs_mount_list" {
-  description = ""
+  description = "Comma separate list of GCS buckets to be mounted in the VMs."
   type        = string
   default     = ""
 }
 
 variable "nfs_filestore_list" {
-  description = ""
+  description = "Comma separated list of NFS filestore paths to be created for the VMs."
   type        = string
   default     = ""
+}
+
+variable "local_filepath_list_to_copy" {
+  description = "Comma separated list of local file paths to copy to the VMs."
+  type        = string
+  default     = ""
+}
+
+variable "orchestrator_type" {
+  description = "The job orchestrator to be used"
+  type        = string
+  default     = "ray"
+
+  validation {
+    condition     = contains(["ray", "slurm"], var.orchestrator_type)
+    error_message = "Variable orchestrator_type must be either ray or slurm."
+  }
+}
+
+variable "startup_command" {
+  description = "The startup command to be executed when the VM starts up."
+  type        = string
+  default = ""
 }
