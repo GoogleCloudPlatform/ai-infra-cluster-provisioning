@@ -145,3 +145,16 @@ variable "startup_command" {
   type        = string
   default = ""
 }
+
+variable "local_dir_copy_list" {
+  description = "The comma separated list of local directories to copy and destination path on the VMs. E.G.: <local/dir/path>:<dest/path>,"
+  type        = string
+  default     = ""
+
+  validation {
+    condition = alltrue([
+      for part in compact(split(",", trimspace(var.local_dir_copy_list))) : length(trimspace(part)) == 0 || (can(fileset("${split(":", trimspace(part))[0]}", "**")) && length(split(":", trimspace(part))[1]) > 0)
+    ])
+    error_message = "All directory paths should be full path and exist on the machine. Destination path should be provided for all directory paths."
+  }
+}

@@ -18,20 +18,31 @@ locals {
   gcs_mount_arr         = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr     = compact(split(",", trimspace(var.nfs_filestore_list)))
   
+  dir_copy_arr         = compact(split(",", trimspace(var.local_dir_copy_list)))
+  dir_copy_setup       = flatten([
+    for path in local.dir_copy_arr : [
+      for file in fileset("${split(":", trimspace(path))[0]}", "**") : {
+        "destination"   = "${split(":", trimspace(path))[1]}/${basename("${file}")}"
+        "source"        = "${split(":", trimspace(path))[0]}/${basename("${file}")}"
+        "type"          = "data" 
+      }
+    ]
+  ])
+  
   ray_setup             = var.orchestrator_type == "ray" ? [
     {
-      "type"        = "shell"
-      "destination" = "/tmp/setup_ray.sh"
-      "source"      = "/usr/setup_ray.sh"
-      "args"        = "1.12.1 26379 ${var.gpu_per_vm}"
+      "type"            = "shell"
+      "destination"     = "/tmp/setup_ray.sh"
+      "source"          = "/usr/setup_ray.sh"
+      "args"            = "1.12.1 26379 ${var.gpu_per_vm}"
     }
   ] : []
 
   startup_command_setup = var.startup_command != "" ? [
     {
-      "type"        = "shell"
-      "destination" = "/tmp/initializestartup.sh"
-      "content"     = "${var.startup_command}"
+      "type"            = "shell"
+      "destination"     = "/tmp/initializestartup.sh"
+      "content"         = "${var.startup_command}"
     }
   ] : []
   
@@ -80,8 +91,8 @@ module "startup" {
     destination = "install_cloud_ops_agent.sh"
     source      = "/usr/install_cloud_ops_agent.sh"
     type        = "shell"
-__REPLACE_FILES__
   }]
+  , local.dir_copy_setup
   , module.gcsfuse_mount[*].client_install_runner
   , module.gcsfuse_mount[*].mount_runner
   , module.nfs_filestore[*].install_nfs_client_runner

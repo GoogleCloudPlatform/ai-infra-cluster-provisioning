@@ -33,16 +33,7 @@ _expand_files_to_copy() {
 
         echo "Files from $COPY_SRC_PATH will be copied to $VM_LOCALFILE_DEST_PATH in the VM."
         echo "Local file location in the VM: $VM_LOCALFILE_DEST_PATH." >> /usr/info.txt
-        for filename in $(find $COPY_SRC_PATH -type f)
-        do
-            if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
-                fn=$(basename ${filename})
-                fileCopy+="    }, {\n"
-                fileCopy+="    destination = \"$VM_LOCALFILE_DEST_PATH/${fn}\"\n"
-                fileCopy+="    source      = \"${filename}\"\n"
-                fileCopy+="    type        = \"data\"\n" 
-            fi
-        done
+        FILELIST="$COPY_SRC_PATH:$VM_LOCALFILE_DEST_PATH"
     fi
 
     # copy example training script based on the image type.
@@ -61,15 +52,8 @@ _expand_files_to_copy() {
     elif [[ ! -d "$EXAMPLE_SCRIPT_SRC_PATH" ]]; then
         echo "Directory $EXAMPLE_SCRIPT_SRC_PATH not found to copy example training scripts."
     else
-        for filename in $(find $EXAMPLE_SCRIPT_SRC_PATH -type f)
-        do
-            fn=$(basename ${filename})
-            fileCopy+="    }, {\n"
-            fileCopy+="    destination = \"/home/jupyter/aiinfra-sample/${fn}\"\n"
-            fileCopy+="    source      = \"${filename}\"\n"
-            fileCopy+="    type        = \"data\"\n" 
-        done
+        FILELIST+=",$EXAMPLE_SCRIPT_SRC_PATH:/home/jupyter/aiinfra-sample"
     fi
 
-    sed -i 's|__REPLACE_FILES__|'"$fileCopy"'|' /usr/primary/main.tf
+    echo "local_dir_copy_list = \"$FILELIST\"" >> /usr/primary/tf.auto.tfvars
 }
