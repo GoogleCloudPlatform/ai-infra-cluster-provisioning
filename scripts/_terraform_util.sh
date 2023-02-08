@@ -20,8 +20,8 @@
 _terraform_setup() {
     apply_ret=0
 
-    # change terraform verbosity based on SHOW_PROXY_URL environment variable.
-    if [[ ! -z "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
+    # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
+    if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
         echo "Redirecting terraform apply output to $TERRAFORM_LOG_PATH."
         terraform -chdir=/usr/primary apply -input=false -auto-approve > $TERRAFORM_LOG_PATH || apply_ret=$?
     else
@@ -52,7 +52,7 @@ _terraform_setup() {
 # method to display jupyter notebook connection endpoint.
 #
 _Display_connection_info() {
-    if [[ ! -z "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
+    if [[ -n "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
         echo "Not checking for proxy_url information."
     else
         for vm in $(gcloud compute instance-groups list-instances $NAME_PREFIX-mig --zone $ZONE --format="value(NAME)");
@@ -87,8 +87,8 @@ _terraform_cleanup() {
             echo "Calling terraform destroy..."
             destroy_ret=0
 
-            # change terraform verbosity based on SHOW_PROXY_URL environment variable.
-            if [[ ! -z "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
+            # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
+            if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
                 echo "Redirecting terraform destroy output to $TERRAFORM_LOG_PATH."
                 terraform -chdir=/usr/primary destroy -input=false -auto-approve > $TERRAFORM_LOG_PATH || destroy_ret=$?
             else
