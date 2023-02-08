@@ -22,7 +22,7 @@ _terraform_setup() {
 
     # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
     if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
-        echo "Redirecting terraform apply output to $TERRAFORM_LOG_PATH."
+        echo "Redirecting 'terraform apply' output to $TERRAFORM_LOG_PATH."
         terraform -chdir=/usr/primary apply -input=false -auto-approve > $TERRAFORM_LOG_PATH || apply_ret=$?
     else
         terraform -chdir=/usr/primary apply -input=false -auto-approve || apply_ret=$?
