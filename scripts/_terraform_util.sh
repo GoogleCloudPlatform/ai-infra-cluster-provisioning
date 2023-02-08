@@ -154,7 +154,7 @@ _perform_terraform_action() {
 
     if [ -f "$TERRAFORM_LOG_PATH" ]; then
         echo -e "${GREEN}Copying terraform output file from $TERRAFORM_LOG_PATH ${NOC}"
-        gsutil -m cp $TERRAFORM_LOG_PATH gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH/$NAME_PREFIX-terraformlog.txt
+        gsutil -m cp $TERRAFORM_LOG_PATH gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH/$NAME_PREFIX-terraform.log
     fi
 }
 
