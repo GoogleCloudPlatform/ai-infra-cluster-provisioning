@@ -15,32 +15,16 @@
   */
 
 locals {
-  trimmed_net_config = lower(trimspace(var.network_config))
-  primary_network    = coalesce(one(module.new_primary_network), one(module.multi-nic-network), one(module.default_primary_network))
   gcs_mount_arr      = compact(split(",", trimspace(var.gcs_mount_list)))
-  nfs_fileshare_arr  = compact(split(",", trimspace(var.nfs_fileshare_list)))
-}
-module "default_primary_network" {
-  count      = local.trimmed_net_config != "new_network" ? 1 : 0
-  source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
-  project_id = var.project_id
-  region     = var.region
+  nfs_filestore_arr  = compact(split(",", trimspace(var.nfs_filestore_list)))
 }
 
-module "new_primary_network" {
-  count           = local.trimmed_net_config == "new_network" ? 1 : 0
-  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
+module "aiinfra-network" {
+  source          = "./modules/aiinfra-network"
   project_id      = var.project_id
   region          = var.region
   deployment_name = var.deployment_name
-}
-
-module "multi-nic-network" {
-  count           = local.trimmed_net_config == "multi_nic_network" ? 1 : 0
-  source          = "./modules/multi-nic-network"
-  project_id      = var.project_id
-  region          = var.region
-  deployment_name = var.deployment_name
+  network_config  = var.network_config
 }
 
 module "gcsfuse_mount" {
@@ -52,22 +36,21 @@ module "gcsfuse_mount" {
   local_mount   = split(":", trimspace(local.gcs_mount_arr[count.index]))[1]
 }
 
-module "nfs_fileshare" {
+module "nfs_filestore" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44"
-  count           = length(local.nfs_fileshare_arr)
+  count           = length(local.nfs_filestore_arr)
   project_id      = var.project_id
   region          = var.region
   zone            = var.zone
   deployment_name = var.deployment_name
-  network_name    = local.primary_network.network_name
+  network_name    = module.aiinfra-network.network_name
   filestore_share_name = "nfsshare_${count.index}"
-  labels          = merge(var.labels, { ghpc_role = "aiinfra-fileshare",})
-  local_mount     = split(":", trimspace(local.nfs_fileshare_arr[count.index]))[0]
-  filestore_tier  = split(":", trimspace(local.nfs_fileshare_arr[count.index]))[1]
-  size_gb         = length(split(":", trimspace(local.nfs_fileshare_arr[count.index]))) > 2 ? split(":", trimspace(local.nfs_fileshare_arr[count.index]))[2] : 2560
+  labels          = merge(var.labels, { ghpc_role = "aiinfra-filestore",})
+  local_mount     = split(":", trimspace(local.nfs_filestore_arr[count.index]))[0]
+  filestore_tier  = split(":", trimspace(local.nfs_filestore_arr[count.index]))[1]
+  size_gb         = length(split(":", trimspace(local.nfs_filestore_arr[count.index]))) > 2 ? split(":", trimspace(local.nfs_filestore_arr[count.index]))[2] : 2560
   depends_on = [
-    local.primary_network,
-    module.multi-nic-network
+    module.aiinfra-network
   ]
 }
 
@@ -83,17 +66,17 @@ __REPLACE_STARTUP_SCRIPT__
   }]
   , module.gcsfuse_mount[*].client_install_runner
   , module.gcsfuse_mount[*].mount_runner
-  , module.nfs_fileshare[*].install_nfs_client_runner
-  , module.nfs_fileshare[*].mount_runner)
+  , module.nfs_filestore[*].install_nfs_client_runner
+  , module.nfs_filestore[*].mount_runner)
   labels          = merge(var.labels, { ghpc_role = "scripts",})
   deployment_name = var.deployment_name
   gcs_bucket_path = var.gcs_bucket_path
   region          = var.region
 }
 
-module "compute-vm-1" {
+module "aiinfra-mig" {
   source               = "./modules/vm-instance-group"
-  subnetwork_self_link = local.primary_network.subnetwork_self_link
+  subnetwork_self_link = module.aiinfra-network.subnetwork_self_link
   service_account = {
     email  = var.service_account
     scopes = ["cloud-platform"]
@@ -102,7 +85,7 @@ module "compute-vm-1" {
   project_id        = var.project_id
   disk_size_gb      = var.disk_size_gb
   disk_type         = var.disk_type
-  network_self_link = local.primary_network.network_self_link
+  network_self_link = module.aiinfra-network.network_self_link
   placement_policy = {
     availability_domain_count = null
     collocation               = "COLLOCATED"
@@ -122,10 +105,9 @@ module "compute-vm-1" {
     type  = var.accelerator_type
   }]
   deployment_name = var.deployment_name
-  network_interfaces = local.trimmed_net_config == "multi_nic_network" ? module.multi-nic-network[0].multi_network_interface : []
+  network_interfaces = module.aiinfra-network.network_interfaces
   depends_on = [
-    local.primary_network,
-    module.multi-nic-network
+    module.aiinfra-network
   ]
 }
 

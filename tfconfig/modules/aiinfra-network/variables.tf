@@ -34,3 +34,9 @@ variable "nic_count" {
   type        = number
   default     = 5
 }
+
+variable "network_config" {
+  description = ""
+  type        = string
+  default     = "default_network"
+}
