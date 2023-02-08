@@ -19,7 +19,15 @@
 #
 _terraform_setup() {
     apply_ret=0
-    terraform -chdir=/usr/primary apply -input=false -auto-approve || apply_ret=$?
+
+    # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
+    if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
+        echo "Redirecting 'terraform apply' output to $TERRAFORM_LOG_PATH."
+        terraform -chdir=/usr/primary apply -input=false -auto-approve > $TERRAFORM_LOG_PATH || apply_ret=$?
+    else
+        terraform -chdir=/usr/primary apply -input=false -auto-approve || apply_ret=$?
+    fi
+
     if [ $apply_ret -eq 0 ]; then
         echo "Terraform apply finished successfully."
         _Display_connection_info
@@ -44,7 +52,7 @@ _terraform_setup() {
 # method to display jupyter notebook connection endpoint.
 #
 _Display_connection_info() {
-    if [[ ! -z "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
+    if [[ -n "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
         echo "Not checking for proxy_url information."
     else
         for vm in $(gcloud compute instance-groups list-instances $NAME_PREFIX-mig --zone $ZONE --format="value(NAME)");
@@ -78,7 +86,15 @@ _terraform_cleanup() {
             export IS_CLEANUP_NEEDED="no"
             echo "Calling terraform destroy..."
             destroy_ret=0
-            terraform -chdir=/usr/primary destroy -input=false -auto-approve || destroy_ret=$?
+
+            # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
+            if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
+                echo "Redirecting 'terraform destroy' output to $TERRAFORM_LOG_PATH."
+                terraform -chdir=/usr/primary destroy -input=false -auto-approve > $TERRAFORM_LOG_PATH || destroy_ret=$?
+            else
+                terraform -chdir=/usr/primary destroy -input=false -auto-approve || destroy_ret=$?
+            fi
+
             del_state_ret=0
             if [ $destroy_ret -eq 0 ]; then
                 echo "Successfully destroyed resources. Cleaning up the terraform state."
@@ -94,10 +110,11 @@ _terraform_cleanup() {
 # method to perform terraform action to create or destroy cluster
 #
 _perform_terraform_action() {
+    export TERRAFORM_LOG_PATH=/usr/terraformlog.txt
     if [[ "${ACTION,,}" == "create" ]]; then
         echo "Uploading environment variables to gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH"
         printenv >> /usr/$NAME_PREFIX-env.list
-        gsutil cp /usr/$NAME_PREFIX-env.list gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH
+        gsutil -m cp /usr/$NAME_PREFIX-env.list gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH/$NAME_PREFIX-env.list
         echo "Parameter file location: gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH/$NAME_PREFIX-env.list" >> /usr/info.txt 
         echo "Creating cluster..."
         terraform --version
@@ -133,6 +150,11 @@ _perform_terraform_action() {
         terraform -chdir=/usr/primary validate
     else
         echo "Action $ACTION is not supported..."
+    fi
+
+    if [ -f "$TERRAFORM_LOG_PATH" ]; then
+        echo -e "${GREEN}Copying terraform output file from $TERRAFORM_LOG_PATH ${NOC}"
+        gsutil -m cp $TERRAFORM_LOG_PATH gs://$TF_BUCKET_NAME/$TF_DEPLOYMENT_PATH/$NAME_PREFIX-terraform.log
     fi
 }
 
