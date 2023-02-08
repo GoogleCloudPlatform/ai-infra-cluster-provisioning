@@ -89,7 +89,7 @@ _terraform_cleanup() {
 
             # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
             if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
-                echo "Redirecting terraform destroy output to $TERRAFORM_LOG_PATH."
+                echo "Redirecting 'terraform destroy' output to $TERRAFORM_LOG_PATH."
                 terraform -chdir=/usr/primary destroy -input=false -auto-approve > $TERRAFORM_LOG_PATH || destroy_ret=$?
             else
                 terraform -chdir=/usr/primary destroy -input=false -auto-approve || destroy_ret=$?
