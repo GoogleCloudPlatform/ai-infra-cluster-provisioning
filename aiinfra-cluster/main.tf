@@ -33,7 +33,7 @@ locals {
     {
       "type"            = "shell"
       "destination"     = "/tmp/setup_ray.sh"
-      "source"          = "/usr/setup_ray.sh"
+      "source"          = "${path.module}/installation_scripts/setup_ray.sh"
       "args"            = "1.12.1 26379 ${var.gpu_per_vm}"
     }
   ] : []
@@ -89,7 +89,7 @@ module "startup" {
   project_id      = var.project_id
   runners = concat([{
     destination = "install_cloud_ops_agent.sh"
-    source      = "/usr/install_cloud_ops_agent.sh"
+    source      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
     type        = "shell"
   }]
   , local.dir_copy_setup

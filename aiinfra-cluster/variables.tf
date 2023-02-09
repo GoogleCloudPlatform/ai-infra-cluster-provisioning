@@ -123,12 +123,6 @@ variable "nfs_filestore_list" {
   default     = ""
 }
 
-variable "local_filepath_list_to_copy" {
-  description = "Comma separated list of local file paths to copy to the VMs."
-  type        = string
-  default     = ""
-}
-
 variable "orchestrator_type" {
   description = "The job orchestrator to be used"
   type        = string
