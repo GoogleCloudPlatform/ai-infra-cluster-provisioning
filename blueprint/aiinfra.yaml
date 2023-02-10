@@ -67,7 +67,7 @@ deployment_groups:
         destination: install_ansible.sh
 
 
-  - source: ../tfconfig/modules/vm-instance-group
+  - source: ../aiinfra-cluster/modules/vm-instance-group
     kind: terraform
     id: compute-mig-1
     use:

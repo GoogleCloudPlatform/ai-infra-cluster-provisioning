@@ -33,16 +33,7 @@ _expand_files_to_copy() {
 
         echo "Files from $COPY_SRC_PATH will be copied to $VM_LOCALFILE_DEST_PATH in the VM."
         echo "Local file location in the VM: $VM_LOCALFILE_DEST_PATH." >> /usr/info.txt
-        for filename in $(find $COPY_SRC_PATH -type f)
-        do
-            if [[ -z "$STARTUP_SCRIPT_PATH" || ${filename,,} != ${STARTUP_SCRIPT_PATH,,} ]]; then
-                fn=$(basename ${filename})
-                fileCopy+="    }, {\n"
-                fileCopy+="    destination = \"$VM_LOCALFILE_DEST_PATH/${fn}\"\n"
-                fileCopy+="    source      = \"${filename}\"\n"
-                fileCopy+="    type        = \"data\"\n" 
-            fi
-        done
+        FILELIST="$COPY_SRC_PATH:$VM_LOCALFILE_DEST_PATH"
     fi
 
     # copy example training script based on the image type.
@@ -61,60 +52,8 @@ _expand_files_to_copy() {
     elif [[ ! -d "$EXAMPLE_SCRIPT_SRC_PATH" ]]; then
         echo "Directory $EXAMPLE_SCRIPT_SRC_PATH not found to copy example training scripts."
     else
-        for filename in $(find $EXAMPLE_SCRIPT_SRC_PATH -type f)
-        do
-            fn=$(basename ${filename})
-            fileCopy+="    }, {\n"
-            fileCopy+="    destination = \"/home/jupyter/aiinfra-sample/${fn}\"\n"
-            fileCopy+="    source      = \"${filename}\"\n"
-            fileCopy+="    type        = \"data\"\n" 
-        done
+        FILELIST+=",$EXAMPLE_SCRIPT_SRC_PATH:/home/jupyter/aiinfra-sample"
     fi
 
-    sed -i 's|__REPLACE_FILES__|'"$fileCopy"'|' /usr/primary/main.tf
-}
-
-#
-# method to expand startup script.
-#
-_expand_startup_script() {
-    startupScriptText=""
-
-    # Setup Orchestrator if specified.
-    if [[ -z "$ORCHESTRATOR_TYPE" ]]; then
-        echo "Orchestrator type is not provided. Skip setting up Orchestrators..."
-    elif [[ "${ORCHESTRATOR_TYPE,,}" == "ray" ]]; then
-        echo "ORCHESTRATOR_TYPE provided is: $ORCHESTRATOR_TYPE. Setting up Ray..."
-        startupScriptText+="    }, {\n"
-        startupScriptText+="    type        = \"shell\"\n"
-        startupScriptText+="    destination = \"/tmp/setup_ray.sh\"\n"
-        startupScriptText+="    source      = \"/usr/setup_ray.sh\"\n"
-        startupScriptText+="    args        = \"1.12.1 26379 $GPU_COUNT\"\n"
-    else
-        echo -e "${RED}ORCHESTRATOR_TYPE $ORCHESTRATOR_TYPE is not supported. Supported Orchestrators are: Ray. Please try again. ${NOC}"
-        exit 1
-    fi
-
-    # Setup startup script if specified.
-    if [[ ! -z "$STARTUP_COMMAND" ]]; then
-        echo "Setting up startup command to $STARTUP_COMMAND."
-        startupScriptText+="    }, {\n"
-        startupScriptText+="    type        = \"shell\"\n"
-        startupScriptText+="    destination = \"/tmp/initializestartup.sh\"\n"
-        startupScriptText+="    content      = \"$STARTUP_COMMAND\"\n"
-    elif [[ ! -z "$STARTUP_SCRIPT_PATH" ]]; then
-        if [[ -f "$STARTUP_SCRIPT_PATH" ]]; then
-            echo "Setting start up script to $STARTUP_SCRIPT_PATH."
-            scName=$(basename ${STARTUP_SCRIPT_PATH})
-            startupScriptText+="    }, {\n"
-            startupScriptText+="    type        = \"shell\"\n"
-            startupScriptText+="    destination = \"/tmp/${scName}\"\n"
-            startupScriptText+="    source      = \"$STARTUP_SCRIPT_PATH\"\n"
-        else
-            echo "The startup script file $STARTUP_SCRIPT_PATH does not exit."
-            exit 1
-        fi
-    fi
-
-    sed -i 's|__REPLACE_STARTUP_SCRIPT__|'"$startupScriptText"'|' /usr/primary/main.tf
+    echo "local_dir_copy_list = \"$FILELIST\"" >> /usr/primary/tf.auto.tfvars
 }
