@@ -90,7 +90,7 @@ variable "disk_size_gb" {
 }
 
 variable "disk_type" {
-  description = "Boot disk type, can be either pd-ssd, local-ssd, or pd-standard."
+  description = "Boot disk type, can be either pd-ssd, local-ssd, or pd-standard (default)."
   type        = string
   default     = "pd-standard"
 
