@@ -101,7 +101,7 @@ variable "disk_type" {
 }
 
 variable "network_config" {
-  description = "The network configuration to specify the type of VPC to be used"
+  description = "The network configuration to specify the type of VPC to be used, can be either default_network (default), new_network or multi_nic_network"
   type        = string
   default     = "default_network"
 
@@ -124,7 +124,7 @@ variable "nfs_filestore_list" {
 }
 
 variable "orchestrator_type" {
-  description = "The job orchestrator to be used"
+  description = "The job orchestrator to be used, can be either ray (default) or slurm."
   type        = string
   default     = "ray"
 
