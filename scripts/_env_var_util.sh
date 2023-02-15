@@ -211,10 +211,21 @@ _set_terraform_env_var() {
 
     # setting GCS mount list
     if [[ -n "$GCS_MOUNT_LIST" ]]; then
-        echo "gcs_mount_list= \"$GCS_MOUNT_LIST\"" >> /usr/primary/tf.auto.tfvars
+        echo "gcs_mount_list = \"$GCS_MOUNT_LIST\"" >> /usr/primary/tf.auto.tfvars
     fi
     
+    # setting MFS filestore list
     if [[ -n "$NFS_FILESHARE_LIST" ]]; then
-        echo "nfs_filestore_list= \"$NFS_FILESHARE_LIST\"" >> /usr/primary/tf.auto.tfvars
+        echo "nfs_filestore_list = \"$NFS_FILESHARE_LIST\"" >> /usr/primary/tf.auto.tfvars
+    fi
+
+    # setting orchestrator type
+    if [[ -n "$ORCHESTRATOR_TYPE" ]]; then
+        echo "orchestrator_type = \"${ORCHESTRATOR_TYPE,,}\"" >> /usr/primary/tf.auto.tfvars
+    fi
+
+    # seting startup command
+    if [[ -n "$STARTUP_COMMAND" ]]; then
+        echo "startup_command = \"$STARTUP_COMMAND\"" >> /usr/primary/tf.auto.tfvars
     fi
 }

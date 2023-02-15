@@ -36,7 +36,12 @@ variable "nic_count" {
 }
 
 variable "network_config" {
-  description = ""
+  description = "The network configuration to specify the type of VPC to be used"
   type        = string
   default     = "default_network"
+
+  validation {
+    condition     = contains(["default_network", "new_network", "multi_nic_network"], var.network_config)
+    error_message = "Variable network_config must be one of default_network, new_network, or multi_nic_network."
+  }
 }

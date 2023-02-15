@@ -15,8 +15,38 @@
   */
 
 locals {
-  gcs_mount_arr      = compact(split(",", trimspace(var.gcs_mount_list)))
-  nfs_filestore_arr  = compact(split(",", trimspace(var.nfs_filestore_list)))
+  gcs_mount_arr         = compact(split(",", trimspace(var.gcs_mount_list)))
+  nfs_filestore_arr     = compact(split(",", trimspace(var.nfs_filestore_list)))
+  
+  dir_copy_arr         = compact(split(",", trimspace(var.local_dir_copy_list)))
+  dir_copy_setup       = flatten([
+    for path in local.dir_copy_arr : [
+      for file in fileset("${split(":", trimspace(path))[0]}", "**") : {
+        "destination"   = "${split(":", trimspace(path))[1]}/${basename("${file}")}"
+        "source"        = "${split(":", trimspace(path))[0]}/${basename("${file}")}"
+        "type"          = "data" 
+      }
+    ]
+  ])
+  
+  ray_setup             = var.orchestrator_type == "ray" ? [
+    {
+      "type"            = "shell"
+      "destination"     = "/tmp/setup_ray.sh"
+      "source"          = "${path.module}/installation_scripts/setup_ray.sh"
+      "args"            = "1.12.1 26379 ${var.gpu_per_vm}"
+    }
+  ] : []
+
+  startup_command_setup = var.startup_command != "" ? [
+    {
+      "type"            = "shell"
+      "destination"     = "/tmp/initializestartup.sh"
+      "content"         = "${var.startup_command}"
+    }
+  ] : []
+  
+  vm_startup_setup      = concat(local.ray_setup, local.startup_command_setup)
 }
 
 module "aiinfra-network" {
@@ -57,17 +87,12 @@ module "nfs_filestore" {
 module "startup" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
   project_id      = var.project_id
-  runners = concat([{
-    destination = "install_cloud_ops_agent.sh"
-    source      = "/usr/install_cloud_ops_agent.sh"
-    type        = "shell"
-__REPLACE_FILES__
-__REPLACE_STARTUP_SCRIPT__
-  }]
+  runners = concat(local.dir_copy_setup
   , module.gcsfuse_mount[*].client_install_runner
   , module.gcsfuse_mount[*].mount_runner
   , module.nfs_filestore[*].install_nfs_client_runner
-  , module.nfs_filestore[*].mount_runner)
+  , module.nfs_filestore[*].mount_runner
+  , local.vm_startup_setup)
   labels          = merge(var.labels, { ghpc_role = "scripts",})
   deployment_name = var.deployment_name
   gcs_bucket_path = var.gcs_bucket_path
