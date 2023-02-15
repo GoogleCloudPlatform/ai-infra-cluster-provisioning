@@ -76,4 +76,4 @@ images:
 timeout: 1800s
 
 substitutions:
-  _VERSION: 'v0.2.0'
+  _VERSION: 'v0.3.0'
