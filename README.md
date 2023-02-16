@@ -1,13 +1,16 @@
 ## Overview
+
 The Cluster provisioning tool aims to provide a solution for the external users to provision a GPU cluster quickly and efficiently and run their AI/ML workload in minutes. Similarly it aims to provide an automated way of providing GPU clusters for the internal AI/ML pipeline. 
 The cluster provisioning tool is a docker images which provision the cluster when run as a container. The docker image is self contained to create all the necessary resources for a GPU cluster. It has all the configs prepackaged and the tools installed. The configs packaged inside the image define the baseline GPU cluster. 
 
 ### Baseline cluster configuration
+
 The baseline GPU cluster is the collection of resources recommended/supported by the AI accelerator experience team. Examples of that include Supported VM types, accelerator types, VM images, shared storage solutions like GCSFuse etc. These are first tested within the AI Accelerator experience team and then they are integrated with the cluster provisioning tool. The way they are incorporated into the tool is via Terraform configs packaged within the docker container. In some cases these features can be optional and users may choose to use it (eg: GCSFuse) but in some other cases they will be mandated by AI Accelerator exp. team (eg: DLVM image).  
 
 The default GPU cluster that gets created by the cluster provisioning tool is a single instance VM of type “a2-highgpu-2g” with 2 “Nvidia-tesla-a100” GPUs attached to it. It uses pytorch-1-12-gpu-debian-10 image. There is no startup script or any orchestrator (like Ray) set up. The jupyter notebook endpoint is accessible for this VM instance. There is a GCS bucket created in the project provided by the user to manage the terraform state.  Users can create more advanced clusters using configuration described below.  
 
 ### Configuration for Users
+
 Users have control to choose values for different fields for the resources. The mandatory parameters are:
 1. **PROJECT_ID**: The project ID to use for resource creation. 
 2. **NAME_PREFIX**: The name prefix to use for creating the resources. This is the unique ID for the clusters created using the provisioning tool. 
@@ -45,6 +48,7 @@ The user needs to provide value for the above mandatory parameters. All other pa
 #### [Sample config file that the user provides](examples/env.list)
 
 ### Setting up Terraform to create resources
+
 The user updates the config file and runs the docker image with the config file to create resources using the ‘docker run’ command. As part of the run command, users have to specify an action. The action can be Create, Destroy, Validate or Debug. The sample command looks like
 ```
 docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
@@ -54,6 +58,7 @@ docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provis
 All the setup needed before calling terraform to create resources is handled by entrypoint.sh script. This is packaged in the docker image and gets executed when the container starts. The entrypoint script validates environment variables and errors out if required ones are not provided. After that it uses the environment variables values to create the ‘tf.auto.tfvar’ file which is used by terraform to create the resources.
 
 ### User Authentication
+
 The cluster provisioning tool interacts with GCP to create cloud resources on behalf of the user. So for doing that it needs the user’s authentication token with GCP. There are 3 environments where we expect the cluster provisioning tool to run. They are
 
 1. Cloud shell: In the cloud shell environment, the default cloud authentication token is available that cluster provisioning tool uses for resource creation. No additional action is needed from the user. 
@@ -88,10 +93,12 @@ The cluster provisioning tool interacts with GCP to create cloud resources on be
 
 
 ### State management across sessions
+
 When terraform is executed to create the resources, it creates state files to keep track of the created resources. While changing or destroying resources, terraform uses these statefiles. If these state files are created within the container, then they will be lost when the container exits. That will result in leaking of the resources. Having the state files in the container forces cleanup resources before the container exits. This ties the cluster lifespan to that of the container. So to have better control over the resources we need to have the state files managed in cloud storage. That way multiple runs of the container can use the same state files to manage the resources. 
 Using the provisioning tool the user can provide a GCS bucket path that the entrypoint.sh script uses for managing the terraform state and sets it as the backend for terraform. If the user does not provide a GCS bucket path then the provisioning tool creates a GCS bucket for managing terraform state, but for this the user needs to have permission to create a GCS bucket in the project they are using.
 
 ### Copying AI/ML training script to the GPU cluster
+
 There are 2 supported ways to copy training scripts to the GPU cluster. 
 1. The first and preferred method is via GCSFuse. Users can simply provide their GCS bucket where they can store training scripts and data via the ‘GCS_MOUNT_LIST’ parameter. Cluster provisioning tool will mount the GCS bucket in the VM as a local volume using GCSFuse.
 2. The second way is via copying scripts from the local directory. For that
@@ -99,12 +106,15 @@ There are 2 supported ways to copy training scripts to the GPU cluster.
    - Then the user needs to provide the destination location as `VM_LOCALFILE_DEST_PATH` parameter. All the files under the mounted local directory will be copied to all the VMs under the path provided. If `VM_LOCALFILE_DEST_PATH`  is not provided then the default destination path is `"/usr/aiinfra/copy"` in the VM.
 
 ### Multi-node training
+
 For multi-node training, we need to set up an orchestrator on all the VMs of the GPU cluster. Users can choose the orchestrator via ‘ORCHESTRATOR_TYPE’ parameter. Currently we support only Ray as our orchestrator. We will be adding support for more orchestrator types like Slurm shortly.
 
 ### Shared Filesystem
+
 For sharing data across machines running AI workload, users can use a shared file system. Currently we are using NFS filestore or GCS bucket as shared file system across machines. Users can use the `GCS_MOUNT_LIST` parameter to provide a comma separated list of GCS buckets and their mount paths. Similarly they can use `NFS_FILESHARE_LIST` parameter to provide comma separated list of paths. For each filestore path, a new filestore will be created and mounted to the path specified on every VM in the cluster.
 
 ### Connecting to the GPU cluster and running the training script
+
 Jupyter notebook is the default and recommended way to connect to the GPU cluster. All the VMs that get created through the cluster provisioning tool have proxy enabled for jupyter notebook. As part of the DLVM image, jupyter notebook server is started when the VM is created and a proxy url is created to access the notebook endpoint. After successfully creating the VMs, the cluster provisioning tool waits for the jupyter notebook server to be up and provides the url to connect, which looks like below. 
 ```
 Apply complete! Resources: 7 added, 0 changed, 0 destroyed.
@@ -122,9 +132,11 @@ There are some default training scripts provided in the VMs under location `/hom
 ![image](files/../docs/images/example_script.png)
 
 ### Resource cleanup
+
 Since the resource state is stored outside of the container, the GPU cluster lifespan is decoupled from the container’s lifespan. Now the user can run the container and provide ‘Create’ as part of the ‘docker run’ command to create the resources. They can run the container again and provide ‘Destroy’ to destroy the container. The terraform state stored in the GCS bucket is cleared when the destroy operation is called.
 
 ## Instructions
+
 1. gcloud auth application-default login.
 2. gcloud auth configure-docker us-docker.pkg.dev
 3. ***[`OPTIONAL - if project not set already`]*** gcloud config set account supercomputer-testing
@@ -144,7 +156,29 @@ Since the resource state is stored outside of the container, the GPU cluster lif
 10. ***[`OPTIONAL - GCS bucket not provided`]*** 
     > Need storage object owner access if you don't already have a storage bucket to reuse.
 
+
+## Billing Reports
+
+You can view your billing reports for your HPC cluster on the
+[Cloud Billing Reports](https://cloud.google.com/billing/docs/how-to/reports)
+page. ​​To view the Cloud Billing reports for your Cloud Billing account,
+including viewing the cost information for all of the Cloud projects that are
+linked to the account, you need a role that includes the
+`billing.accounts.getSpendingInformation` permission on your Cloud Billing
+account.
+
+To view the Cloud Billing reports for your Cloud Billing account:
+
+1. In the Google Cloud Console, go to `Navigation Menu` >
+   [`Billing`](https://console.cloud.google.com/billing/overview).
+2. At the prompt, choose the Cloud Billing account for which you'd like to view
+   reports. The Billing Overview page opens for the selected billing account.
+3. In the Billing navigation menu, select `Reports`.
+
+In the right side, expand the Filters view and then filter by label, specifying the key `aiinfra-cluster` and the desired value.
+
 ## Known Issues
+
 1. ❗Error: Error waiting for Deleting Network: The network resource 'projects/xxx' is already being used by 'projects/firewall-yyy’.
    - This error is due to a known bug in VPC b/186792016.
 2. ❗Error: Failed to get existing workspaces: querying Cloud Storage failed: Get "https://storage.googleapis.com/storage/v1/...": metadata: GCE metadata "instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdevstorage.full_control" not defined
