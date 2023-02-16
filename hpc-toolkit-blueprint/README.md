@@ -4,13 +4,14 @@ The cluster provisioning tool exposes the functionalities to provisioning a GPU
 cluster via Terraform modules. So the GPU cluster provisioning functionalities can 
 be directly integrated with HPC toolkit.
 
-This directory provides 
+This directory contains HPC toolkit blueprints that uses aiinfra-cluster module to create 
+GPU clusters.
 
 Below is a short introduction to [HPC toolkit](https://cloud.google.com/hpc-toolkit/docs/overview) and the resource materials for it.
 
-## [HPC Toolkit](https://cloud.google.com/hpc-toolkit/docs/overview)
+## HPC Toolkit
 
-HPC Toolkit is an open-source software offered by Google Cloud which makes it
+[HPC toolkit](https://cloud.google.com/hpc-toolkit/docs/overview) is an open-source software offered by Google Cloud which makes it
 easy for customers to deploy HPC environments on Google Cloud.
 
 HPC Toolkit allows customers to deploy turnkey HPC environments (compute,
