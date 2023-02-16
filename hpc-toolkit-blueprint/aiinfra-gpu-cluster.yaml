@@ -17,7 +17,7 @@
 blueprint_name: aiinfra-gpu-cluster
 
 vars:
-  project_id: soumyapani-testing
+  project_id: test-project
   name_prefix: sp-aiinfra
   region: us-central1
   zone: us-central1-a
@@ -38,9 +38,9 @@ vars:
   metadata: 
     meta1: "val"
     meta2: "val2"
-  gcs_bucket_path: "gs://aiinfra-terraform-soumyapani-testing/spani5-deployment"
+  gcs_bucket_path: "gs://test-bucket/test-dir"
   network_config: multi_nic_network
-  gcs_mount_list: "spani-mount-test:/usr/trainfiles"
+  gcs_mount_list: "test-bucket:/usr/trainfiles"
   nfs_filestore_list: ""
   orchestrator_type: "ray"
   startup_command: "echo \"Hello World\""

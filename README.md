@@ -25,7 +25,7 @@ The optional parameters are:
 6. ***IMAGE_NAME***. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-12-cu113-v20221107-debian-10 if not set. We support images only from ml-images project.
 7. ***DISK_SIZE_GB***. This defines the disk size in GB for the VMs. The default value is 2000 GB(2 TB) if not specified.
 8. ***DISK_TYPE***. This defines the disk type to use for VM creation. The default value is pd-ssd if not defined.
-9. ***TERRAFORM_GCS_PATH***. Google cloud storage bucket path to use for state management and copying scripts. If not provided then a default GCS bucket is created in the project. The name of the bucket is ‘aiinfra-terraform-<PROJECT_ID>’. For each deployment a separate folder is created under this GCS bucket in the name ‘<NAME_PREFIX-deployment>’. Ex: gs://spani-tst/deployment
+9. ***TERRAFORM_GCS_PATH***. Google cloud storage bucket path to use for state management and copying scripts. If not provided then a default GCS bucket is created in the project. The name of the bucket is ‘aiinfra-terraform-<PROJECT_ID>’. For each deployment a separate folder is created under this GCS bucket in the name ‘<NAME_PREFIX-deployment>’. Ex: gs://test-bucket/deployment
 10. ***VM_LOCALFILE_DEST_PATH***. This defines the destination directory path in the VM for file copy. If any local directory is mounted at "/usr/aiinfra/copy" in the docker container then all the files in that directory are copied to the VM_LOCALFILE_DEST_PATH in the VM. If not specified the default value is '/usr/aiinfra/copy'.
 11. ***METADATA***. This defines optional metadata to be set for the VM. Ex: { key1 = "val", key2 = "val2"}
 12. ***LABELS***. This defines key value pairs to set as labels when the VMs are created. Ex: { key1 = "val", key2 = "val2"} 
@@ -68,7 +68,7 @@ The cluster provisioning tool interacts with GCP to create cloud resources on be
     ```
     ================SETTING UP ENVIRONMENT FOR TERRAFORM================
     Setting Action to destroy
-    Found Project ID soumyapani-testing
+    Found Project ID test-project
     ERROR: (gcloud.projects.describe) You do not currently have an active account selected.
     Please run:
     
@@ -122,10 +122,10 @@ Terraform apply finished successfully.
 Jupyter notebook endpoint not available yet. Sleeping 15 seconds.
 Jupyter notebook endpoint not available yet. Sleeping 15 seconds.
  Terraform state file location: 
-gs://aiinfra-terraform-soumyapani-testing/spani4-deployment/terraform/state
+gs://test-bucket/test-dir/terraform/state
  Use below links to connect to the VMs: 
-spani4-vm-gh9l:https://1896669fce99a2c1-dot-us-central1.notebooks.googleusercontent.com
-spani4-vm-nrcv:https://11a0dd452fdf76d3-dot-us-central1.notebooks.googleusercontent.com
+test-vm-gh9l:https://1896669fce99a2c1-dot-us-central1.notebooks.googleusercontent.com
+test-vm-nrcv:https://11a0dd452fdf76d3-dot-us-central1.notebooks.googleusercontent.com
 ```
 The user can use this URL on their browser to connect to the jupyter notebook and execute their training script.
 There are some default training scripts provided in the VMs under location `/home/jupyter/aiinfra-sample`. Users can run those scripts after connecting to the VM to see them in action. The example scripts use `Ray` for multi node trainings. So please use `ORCHESTRATOR_TYPE=Ray` while creating the cluster to run the script for multi-node training. 
@@ -148,7 +148,7 @@ Since the resource state is stored outside of the container, the GPU cluster lif
 7. ***[`OPTIONAL - Pull docker image before hand`]*** 
    > docker pull us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest
 8. ***[`OPTIONAL - Mount local directory`]*** 
-   > docker run -v /usr/soumyapani/test:/usr/aiinfra/copy -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
+   > docker run -v /usr/username/test:/usr/aiinfra/copy -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
 9.  ***[`OPTIONAL - Mount gcloud config for auth token`]*** 
     > `Linux` docker run -v ~/.config/gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
     
