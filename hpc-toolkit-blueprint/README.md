@@ -30,6 +30,6 @@ The HPC Toolkit Repo is open-source and available [here](https://github.com/Goog
 6. [Installing Go](https://go.dev/doc/install)
 7. [HPC toolkit Troubleshooting](https://github.com/GoogleCloudPlatform/hpc-toolkit#troubleshooting)
 
-## HPC toolkit Blueprints
+## HPC toolkit Blueprints in this repo
 
 ### [aiinfra-GPU-cluster](../hpc-toolkit-blueprint/aiinfra-gpu-cluster.yaml)
