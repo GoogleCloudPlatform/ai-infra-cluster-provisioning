@@ -48,6 +48,7 @@ locals {
   ] : []
   
   vm_startup_setup      = concat(local.ray_setup, local.startup_command_setup)
+
 }
 
 module "aiinfra-network" {
@@ -88,7 +89,12 @@ module "nfs_filestore" {
 module "startup" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
   project_id      = var.project_id
-  runners = concat(local.dir_copy_setup
+  runners = concat([{
+    destination = "install_cloud_ops_agent.sh"
+    source      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
+    type        = "shell"
+  }]
+  , local.dir_copy_setup
   , module.gcsfuse_mount[*].client_install_runner
   , module.gcsfuse_mount[*].mount_runner
   , module.nfs_filestore[*].install_nfs_client_runner
@@ -137,6 +143,10 @@ module "aiinfra-mig" {
   ]
 }
 
+module "dashboard" {
+  source               = "./modules/dashboard"
+}
+
 /*
 * The dashboard needs to include GPU metrics from new ops agent.
 */
@@ -146,4 +156,7 @@ module "aiinfra-default-dashboard" {
   deployment_name = local.depl_name
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
+  widgets         = [
+    for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
+  ]
 }

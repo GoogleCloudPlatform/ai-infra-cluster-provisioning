@@ -19,8 +19,102 @@ OPSAGENT_PACKAGE='google-cloud-ops-agent'
 
 fail() {
     echo >&2 "[$(date +'%Y-%m-%dT%H:%M:%S%z')] $*"
-    exit 1
+    [ "${ON_INSTALL_OPS_AGENT_FAILURE}" == "continue" ]
+    exit $?
 }
+
+# starting with `b^0==1` and ending with `b^(n-1)==y`,
+# this function chooses base `b==y^(1/(n-1))` in order to
+# output `n` values increasing exponentially from `1` to `y`
+gen_exponential () {
+    local n="${1}"
+    local y="${2}"
+
+    if [ "${n}" -eq 1 ]; then
+        # edge case
+        if [ "${y}" -eq 1 ]; then
+            echo 1
+            return 0
+        else
+            echo >&2 "${0}: n may not be 1 while y is not 1"
+            return 1
+        fi
+    fi
+
+    if [ "${n}" -le 1 ]; then
+        echo >&2 "${0}: invalid n (${n}) -- must be greater than 1"
+        return 1
+    fi
+
+    if [ "${y}" -lt 1 ]; then
+        echo >&2 "${0}: invalid y (${y}) -- must be greater than or equal to 1"
+        return 1
+    fi
+
+    awk -v n="${n}" -v y="${y}" \
+        'BEGIN {
+            b=(y^(1/((n - 1))));
+            for (k=0; k<n; ++k) {
+                y=b^k;
+                printf("%.1f\n", y);
+            }
+        }'
+}
+
+# generate backoff times the way [this blog post]
+# (https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)
+# describes. Slight modification with the calculation of `base` that makes the
+# `rand_between` upper bound output random numbers with maximums exponentially
+# increasing to `max_backoff` over `retry_count` intervals.
+gen_backoff_times () {
+    local retry_count="${1}"
+    local max_backoff="${2}"
+
+    if [ "${retry_count}" -eq 0 ]; then
+        return 0
+    fi
+
+    {
+        if [ "${retry_count}" -eq 1 ]; then
+            echo "${max_backoff}"
+        else
+            gen_exponential "${retry_count}" "${max_backoff}"
+        fi;
+    } | awk -v s="${RANDOM}" 'BEGIN {srand(s)} {printf("%.1f\n", rand()*$0)}'
+}
+
+# attempt a command at most `attempt_count` times with backoff times generated
+# with `gen_backoff_times` above.
+retry_with_backoff () {
+    local attempt_count="${1}"
+    local max_backoff="${2}"
+    local command_to_attempt="${3}"
+
+    # attempt outside the retry loop first
+    local attempt=1
+    echo "${command_to_attempt}: (attempt ${attempt} / ${attempt_count})..."
+    if ${command_to_attempt}; then
+        echo "${command_to_attempt}: success"
+        return 0
+    fi
+
+    # retry up to `attempt_count - 1` times
+    while read time_to_sleep; do
+        ((++attempt))
+        echo "${command_to_attempt}: sleeping ${time_to_sleep}s until next attempt"
+        sleep "${time_to_sleep}"
+
+        echo "${command_to_attempt}: (attempt ${attempt} / ${attempt_count})..."
+        if ${command_to_attempt}; then
+            echo "${command_to_attempt}: success"
+            return 0
+        fi
+    done < <(gen_backoff_times "$((attempt_count - 1))" "${max_backoff}")
+
+    echo >&2 "${command_to_attempt}: max attempts (${attempt_count}) exceeded"
+    return 1
+}
+
 
 handle_debian() {
     is_legacy_monitoring_installed() {
@@ -43,7 +137,43 @@ handle_debian() {
     }
 
     install_opsagent() {
-        curl -s https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh | bash -s -- --also-install
+        curl -s https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh |
+            REPO_SUFFIX=20230214-1.1.1 bash -s -- --also-install
+    }
+
+    install_dcgm() {
+        echo 'nvidia-uvm' >>/etc/modules
+
+        # TODO: move to GCS
+        cat >/etc/google-cloud-ops-agent/config.yaml <<EOF
+metrics:
+  receivers:
+    hostmetrics:
+      type: hostmetrics
+      collection_interval: 10s
+    nvml:
+      type: nvml
+      collection_interval: 10s
+    dcgm:
+      type: dcgm
+      collection_interval: 10s
+  service:
+    pipelines:
+      dcgm:
+        receivers:
+          - dcgm
+EOF
+        systemctl restart google-cloud-ops-agent
+
+        local distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g')
+        echo "Installing DCGM for distribution '${distribution}'"
+        wget "https://developer.download.nvidia.com/compute/cuda/repos/${distribution}/x86_64/cuda-keyring_1.0-1_all.deb"
+        dpkg -i cuda-keyring_1.0-1_all.deb && rm cuda-keyring_1.0-1_all.deb
+        apt-get update
+        apt-get install -y datacenter-gpu-manager
+
+        sed -i '/\[Service\]/a RestartSec=2' /lib/systemd/system/nvidia-dcgm.service
+        systemctl start nvidia-dcgm
     }
 }
 
@@ -70,6 +200,10 @@ handle_redhat() {
     install_opsagent() {
         curl -s https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh | bash -s -- --also-install
     }
+
+    install_dcgm() {
+        fail "install_dcgm: not implemented for redhat"
+    }
 }
 
 main() {
@@ -85,7 +219,11 @@ main() {
         fail "Legacy or Ops Agent is already installed."
     fi
 
-    install_opsagent
+    echo "Install Ops Agent"
+    retry_with_backoff 10 32 install_opsagent
+
+    echo "Install DCGM"
+    install_dcgm
 }
 
 main
