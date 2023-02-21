@@ -40,7 +40,7 @@ module "multinic_vpc" {
   network_address_range = "10.${count.index}.0.0/16"
   subnetworks = [{
     new_bits      = 8
-    subnet_name   = "primary-subnet-${count.index}"
+    subnet_name   = "${var.deployment_name}-primary-subnet-${count.index}"
     subnet_region = var.region
   }]
   region                = var.region
