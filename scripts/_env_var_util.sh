@@ -56,7 +56,19 @@ _set_terraform_env_var() {
         echo "Project number is $project_num"
         project_email=$project_num-compute@developer.gserviceaccount.com
         echo "Exporting service account as $project_email"
-        echo "service_account = \"$project_email\"" >> /usr/primary/tf.auto.tfvars
+        cat >>/usr/primary/tf.auto.tfvars <<EOF
+service_account = {
+  email = "${project_email}"
+  scopes = [
+    "https://www.googleapis.com/auth/devstorage.read_write",
+    "https://www.googleapis.com/auth/logging.write",
+    "https://www.googleapis.com/auth/monitoring.write",
+    "https://www.googleapis.com/auth/servicecontrol",
+    "https://www.googleapis.com/auth/service.management.readonly",
+    "https://www.googleapis.com/auth/trace.append"
+  ]
+}
+EOF
         val=`gcloud config set project $PROJECT_ID`
     fi
 

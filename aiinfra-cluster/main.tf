@@ -104,7 +104,7 @@ module "aiinfra-mig" {
   source               = "./modules/vm-instance-group"
   subnetwork_self_link = module.aiinfra-network.subnetwork_self_link
   service_account = {
-    email  = var.service_account
+    email  = var.service_account.email
     scopes = ["cloud-platform"]
   }
   instance_count    = var.instance_count
