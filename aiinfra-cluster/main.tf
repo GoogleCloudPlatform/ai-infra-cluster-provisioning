@@ -15,7 +15,7 @@
   */
 
 locals {
-  depl_name = var.deployment_name != "" ? var.deployment_name : "${var.name_prefix}-depl"
+  depl_name = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
   gcs_mount_arr         = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr     = compact(split(",", trimspace(var.nfs_filestore_list)))
   

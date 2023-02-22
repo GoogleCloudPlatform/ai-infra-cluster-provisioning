@@ -44,7 +44,7 @@ variable "name_prefix" {
 variable "deployment_name" {
   description = "The deployment name. Default value is name_prefix-depl."
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "region" {
