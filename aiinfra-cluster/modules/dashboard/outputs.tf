@@ -14,6 +14,9 @@
   * limitations under the License.
   */
 
+// reference:
+// https://github.com/GoogleCloudPlatform/monitoring-dashboard-samples/tree/master/dashboards/nvidia-gpu
+
 output "widget_objects" {
   description = ""
   value = [
@@ -22,7 +25,12 @@ output "widget_objects" {
         dataSets = [
           {
             timeSeriesQuery = {
-              timeSeriesQueryLanguage = "fetch gce_instance\n| metric 'agent.googleapis.com/gpu/utilization'\n| map [Model: metric.model, UUID: metric.uuid, Instance: metadata.system.name, GPU: metric.gpu_number]\n| value cast_units(int_round(value.utilization), \"%\")"
+              timeSeriesQueryLanguage = <<EOF
+                fetch gce_instance
+                | metric 'agent.googleapis.com/gpu/utilization'
+                | map [Model: metric.model, UUID: metric.uuid, Instance: metadata.system.name, GPU: metric.gpu_number]
+                | value cast_units(int_round(value.utilization), "%")
+                EOF
             }
           },
         ]
@@ -35,7 +43,13 @@ output "widget_objects" {
         dataSets = [
           {
             timeSeriesQuery = {
-              timeSeriesQueryLanguage = "fetch gce_instance\n| metric 'agent.googleapis.com/gpu/utilization'\n| map [Model: metric.model, Instance: metadata.system.name, GPU: metric.gpu_number]\n| value [value.utilization: 1.0]\n| group_by [Model], [capacity: sum(value.utilization)]"
+              timeSeriesQueryLanguage = <<EOF
+                fetch gce_instance
+                | metric 'agent.googleapis.com/gpu/utilization'
+                | map [Model: metric.model, Instance: metadata.system.name, GPU: metric.gpu_number]
+                | value [value.utilization: 1.0]
+                | group_by [Model], [capacity: sum(value.utilization)]
+                EOF
             }
           }
         ],
@@ -48,7 +62,12 @@ output "widget_objects" {
         dataSets = [
           {
             timeSeriesQuery = {
-              timeSeriesQueryLanguage = "fetch gce_instance\n| metric 'agent.googleapis.com/gpu/utilization'\n| map [Model: metric.model, Instance: metadata.system.name, GPU: metric.gpu_number]\n| group_by [Model], [capacity: sum(cast_units(value.utilization/100.0, \"1\"))]"
+              timeSeriesQueryLanguage = <<EOF
+                fetch gce_instance
+                | metric 'agent.googleapis.com/gpu/utilization'
+                | map [Model: metric.model, Instance: metadata.system.name, GPU: metric.gpu_number]
+                | group_by [Model], [capacity: sum(cast_units(value.utilization/100.0, "1"))]
+                EOF
             }
           }
         ],
@@ -75,7 +94,16 @@ output "widget_objects" {
         dataSets = [
           {
             timeSeriesQuery = {
-              timeSeriesQueryLanguage = "fetch gce_instance\n| metric 'agent.googleapis.com/gpu/processes/utilization'\n| map [Instance: metadata.system.name,\n    GPU: metric.gpu_number,\n    PID: metric.pid,\n    Owner: metric.owner,\n    Command: metric.command_line], \n| value cast_units(int_round(value.utilization), \"%\")"
+              timeSeriesQueryLanguage = <<EOF
+                fetch gce_instance
+                | metric 'agent.googleapis.com/gpu/processes/utilization'
+                | map [Instance: metadata.system.name,
+                    GPU: metric.gpu_number,
+                    PID: metric.pid,
+                    Owner: metric.owner,
+                    Command: metric.command_line], 
+                | value cast_units(int_round(value.utilization), "%")
+                EOF
             }
           }
         ],
@@ -88,7 +116,15 @@ output "widget_objects" {
         dataSets = [
           {
             timeSeriesQuery = {
-              timeSeriesQueryLanguage = "fetch gce_instance\n| metric 'agent.googleapis.com/gpu/processes/max_bytes_used'\n| map [Instance: metadata.system.name,\n    GPU: metric.gpu_number,\n    PID: metric.pid,\n    Owner: metric.owner,\n    Command: metric.command_line]"
+              timeSeriesQueryLanguage = <<EOF
+                fetch gce_instance
+                | metric 'agent.googleapis.com/gpu/processes/max_bytes_used'
+                | map [Instance: metadata.system.name,
+                    GPU: metric.gpu_number,
+                    PID: metric.pid,
+                    Owner: metric.owner,
+                    Command: metric.command_line]
+                EOF
             }
           }
         ],
@@ -107,7 +143,14 @@ output "widget_objects" {
             plotType = "LINE",
             targetAxis = "Y1",
             timeSeriesQuery = {
-              timeSeriesQueryLanguage = "fetch gce_instance\n| metric 'compute.googleapis.com/instance/cpu/utilization'\n| group_by 1m, [value_utilization_mean: mean(value.utilization)]\n| every 1m\n| group_by [metadata.system.name: metadata.system_labels.name],\n    [value_utilization_mean_mean: mean(value_utilization_mean)]"
+              timeSeriesQueryLanguage = <<EOF
+                fetch gce_instance
+                | metric 'compute.googleapis.com/instance/cpu/utilization'
+                | group_by 1m, [value_utilization_mean: mean(value.utilization)]
+                | every 1m
+                | group_by [metadata.system.name: metadata.system_labels.name],
+                    [value_utilization_mean_mean: mean(value_utilization_mean)]
+                EOF
             }
           }
         ],
@@ -306,7 +349,17 @@ output "widget_objects" {
             plotType = "LINE",
             targetAxis = "Y1",
             timeSeriesQuery = {
-              timeSeriesQueryLanguage = "fetch gce_instance\n| metric 'workload.googleapis.com/dcgm.gpu.nvlink_traffic_rate'\n| group_by 1m, [value_nvlink_traffic_rate_mean: mean(cast_units(value.nvlink_traffic_rate, \"By/s\"))]\n| every 1m\n| group_by\n    [Instance: metadata.system_labels.name, GPU: metric.gpu_number, Direction: metric.direction,\n     ],\n    [value_nvlink_traffic_rate_mean_aggregate:\n       aggregate(value_nvlink_traffic_rate_mean)]"
+              timeSeriesQueryLanguage = <<EOF
+                fetch gce_instance
+                | metric 'workload.googleapis.com/dcgm.gpu.nvlink_traffic_rate'
+                | group_by 1m, [value_nvlink_traffic_rate_mean: mean(cast_units(value.nvlink_traffic_rate, "By/s"))]
+                | every 1m
+                | group_by
+                    [Instance: metadata.system_labels.name, GPU: metric.gpu_number, Direction: metric.direction,
+                     ],
+                    [value_nvlink_traffic_rate_mean_aggregate:
+                       aggregate(value_nvlink_traffic_rate_mean)]
+                EOF
             }
           }
         ],
@@ -367,7 +420,17 @@ output "widget_objects" {
             plotType = "LINE",
             targetAxis = "Y1",
             timeSeriesQuery = {
-              timeSeriesQueryLanguage = "fetch gce_instance\n| metric 'workload.googleapis.com/dcgm.gpu.pcie_traffic_rate'\n| group_by 1m, [value_pcie_traffic_rate_mean: mean(cast_units(value.pcie_traffic_rate, \"By/s\"))]\n| every 1m\n| group_by\n    [Instance: metadata.system_labels.name, GPU: metric.gpu_number, Direction: metric.direction,\n     ],\n    [value_pcie_traffic_rate_mean_aggregate:\n       aggregate(value_pcie_traffic_rate_mean)]"
+              timeSeriesQueryLanguage = <<EOF
+                fetch gce_instance
+                | metric 'workload.googleapis.com/dcgm.gpu.pcie_traffic_rate'
+                | group_by 1m, [value_pcie_traffic_rate_mean: mean(cast_units(value.pcie_traffic_rate, "By/s"))]
+                | every 1m
+                | group_by
+                    [Instance: metadata.system_labels.name, GPU: metric.gpu_number, Direction: metric.direction,
+                     ],
+                    [value_pcie_traffic_rate_mean_aggregate:
+                       aggregate(value_pcie_traffic_rate_mean)]
+                EOF
             }
           }
         ],

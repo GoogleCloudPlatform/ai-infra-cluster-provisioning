@@ -89,7 +89,12 @@ module "nfs_filestore" {
 module "startup" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
   project_id      = var.project_id
-  runners = concat(local.dir_copy_setup
+  runners = concat([{
+    destination = "install_cloud_ops_agent.sh"
+    source      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
+    type        = "shell"
+  }]
+  , local.dir_copy_setup
   , module.gcsfuse_mount[*].client_install_runner
   , module.gcsfuse_mount[*].mount_runner
   , module.nfs_filestore[*].install_nfs_client_runner
