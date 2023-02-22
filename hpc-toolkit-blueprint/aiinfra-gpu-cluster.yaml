@@ -18,7 +18,6 @@ blueprint_name: aiinfra-gpu-cluster
 
 vars:
   project_id: test-project
-  service_account:  testprojectnum123-compute@developer.gserviceaccount.com
   name_prefix: sp-aiinfra
   region: us-central1
   zone: us-central1-a

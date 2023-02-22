@@ -21,7 +21,19 @@ variable "project_id" {
 
 variable "service_account" {
   description = "Service account to attach to the instance. See https://www.terraform.io/docs/providers/google/r/compute_instance_template.html#service_account."
-  type        = string
+  type = object({
+    email  = string,
+    scopes = set(string)
+  })
+  default = {
+    email = null
+    scopes = ["https://www.googleapis.com/auth/devstorage.read_write",
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring.write",
+      "https://www.googleapis.com/auth/servicecontrol",
+      "https://www.googleapis.com/auth/service.management.readonly",
+    "https://www.googleapis.com/auth/trace.append"]
+  }
 }
 
 variable "name_prefix" {
