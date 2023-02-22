@@ -19,7 +19,8 @@ OPSAGENT_PACKAGE='google-cloud-ops-agent'
 
 fail() {
     echo >&2 "[$(date +'%Y-%m-%dT%H:%M:%S%z')] $*"
-    exit 1
+    [ "${ON_INSTALL_OPS_AGENT_FAILURE}" == "continue" ]
+    exit $?
 }
 
 # generate backoff times the way [this blog post]
