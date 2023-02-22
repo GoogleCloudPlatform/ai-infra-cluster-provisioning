@@ -32,7 +32,7 @@ output "network_self_link" {
 output "network_interfaces" {
   description = "The network interface that includes all VPC subnets."
   value = local.trimmed_net_config == "multi_nic_network" ? [for idx in range(var.nic_count) : {
-    access_config      = []
+    access_config      = idx == 0 ? [local.empty_access_config] : []
     alias_ip_range     = []
     ipv6_access_config = []
     network            = null

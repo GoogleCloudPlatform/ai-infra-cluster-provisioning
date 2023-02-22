@@ -17,6 +17,11 @@
 locals {
   trimmed_net_config = lower(trimspace(var.network_config))
   primary_network    = coalesce(one(module.new_vpc), try(module.multinic_vpc[0], null), one(module.default_vpc))
+  empty_access_config = {
+    nat_ip                 = null,
+    public_ptr_domain_name = null,
+    network_tier           = null
+  }
 }
 
 module "default_vpc" {
@@ -43,6 +48,7 @@ module "multinic_vpc" {
     subnet_name   = "${var.deployment_name}-primary-subnet-${count.index}"
     subnet_region = var.region
   }]
+  ips_per_nat           = count.index == 0 ? 2 : 0
   region                = var.region
   deployment_name       = var.deployment_name
   project_id            = var.project_id
