@@ -23,59 +23,96 @@ fail() {
     exit $?
 }
 
-# generate backoff times the way [this blog post]
-# (https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)
-# describes. Slight modification  with the calculation of `base` that makes the
-# output random numbers with maximums exponentially increasing to `max_backoff`
-# over `max_attempts` intervals.
-gen_backoff_times () {
-    local max_attempts="${1}"
-    local max_backoff="${2}"
+# starting with `b^0==1` and ending with `b^(n-1)==y`,
+# this function chooses base `b==y^(1/(n-1))` in order to
+# output `n` values increasing exponentially from `1` to `y`
+gen_exponential () {
+    local n="${1}"
+    local y="${2}"
 
-    if [ "${max_attempts}" -le 1 ]; then
-        fail "${0}: invalid max_attempts (${max_attempts}) -- must be greater than 1"
+    if [ "${n}" -eq 1 ]; then
+        # edge case
+        if [ "${y}" -eq 1 ]; then
+            echo 1
+            return 0
+        else
+            echo >&2 "${0}: n may not be 1 while y is not 1"
+            return 1
+        fi
     fi
 
-    if [ "${max_backoff}" -le 1 ]; then
-        fail "${0}: invalid max_backoff (${max_backoff}) -- must be greater than 1"
+    if [ "${n}" -le 1 ]; then
+        echo >&2 "${0}: invalid n (${n}) -- must be greater than 1"
+        return 1
     fi
 
-    awk \
-        -v max_attempts="${max_attempts}" \
-        -v max_backoff="${max_backoff}" \
-        -v seed="${RANDOM}" \
+    if [ "${y}" -lt 1 ]; then
+        echo >&2 "${0}: invalid y (${y}) -- must be greater than or equal to 1"
+        return 1
+    fi
+
+    awk -v n="${n}" -v y="${y}" \
         'BEGIN {
-            srand(seed);
-            base=(max_backoff^(1/((max_attempts - 1))));
-            for (attempt=0; attempt<max_attempts; ++attempt) {
-                time_to_sleep=(rand() * base^attempt);
-                printf("%.1f\n", time_to_sleep);
+            b=(y^(1/((n - 1))));
+            for (k=0; k<n; ++k) {
+                y=b^k;
+                printf("%.1f\n", y);
             }
         }'
 }
 
-# attempt a command at most `max_attempts` times with backoff times generated from `gen_backoff_times` above.
-attempt () {
-    local max_attempts="${1}"
+# generate backoff times the way [this blog post]
+# (https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)
+# describes. Slight modification with the calculation of `base` that makes the
+# `rand_between` upper bound output random numbers with maximums exponentially
+# increasing to `max_backoff` over `retry_count` intervals.
+gen_backoff_times () {
+    local retry_count="${1}"
+    local max_backoff="${2}"
+
+    if [ "${retry_count}" -eq 0 ]; then
+        return 0
+    fi
+
+    {
+        if [ "${retry_count}" -eq 1 ]; then
+            echo "${max_backoff}"
+        else
+            gen_exponential "${retry_count}" "${max_backoff}"
+        fi;
+    } | awk -v s="${RANDOM}" 'BEGIN {srand(s)} {printf("%.1f\n", rand()*$0)}'
+}
+
+# attempt a command at most `attempt_count` times with backoff times generated
+# with `gen_backoff_times` above.
+retry_with_backoff () {
+    local attempt_count="${1}"
     local max_backoff="${2}"
     local command_to_attempt="${3}"
 
+    # attempt outside the retry loop first
     local attempt=1
-    gen_backoff_times "${max_attempts}" "${max_backoff}" \
-    | while read time_to_sleep; do
-            echo "${command_to_attempt}: (attempt ${attempt} / ${max_attempts})..."
-            if ${command_to_attempt}; then
-                echo "${command_to_attempt}: success"
-                return 0
-            fi
-            echo "${command_to_attempt}: sleeping ${time_to_sleep}s until next attempt"
-            sleep "${time_to_sleep}"
-            ((++attempt))
-        done
-
-    if [ "${attempt}" -gt "${max_attempts}" ]; then
-        fail "${command_to_attempt}: max attempts (${max_attempts}) exceeded"
+    echo "${command_to_attempt}: (attempt ${attempt} / ${attempt_count})..."
+    if ${command_to_attempt}; then
+        echo "${command_to_attempt}: success"
+        return 0
     fi
+
+    # retry up to `attempt_count - 1` times
+    while read time_to_sleep; do
+        ((++attempt))
+        echo "${command_to_attempt}: sleeping ${time_to_sleep}s until next attempt"
+        sleep "${time_to_sleep}"
+
+        echo "${command_to_attempt}: (attempt ${attempt} / ${attempt_count})..."
+        if ${command_to_attempt}; then
+            echo "${command_to_attempt}: success"
+            return 0
+        fi
+    done < <(gen_backoff_times "$((attempt_count - 1))" "${max_backoff}")
+
+    echo >&2 "${command_to_attempt}: max attempts (${attempt_count}) exceeded"
+    return 1
 }
 
 
@@ -183,7 +220,7 @@ main() {
     fi
 
     echo "Install Ops Agent"
-    attempt 10 32 install_opsagent
+    retry_with_backoff 10 32 install_opsagent
 
     echo "Install DCGM"
     install_dcgm
