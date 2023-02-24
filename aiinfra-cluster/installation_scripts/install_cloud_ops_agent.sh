@@ -220,7 +220,9 @@ main() {
     fi
 
     echo "Install Ops Agent"
-    retry_with_backoff 10 32 install_opsagent
+    if ! retry_with_backoff 10 32 install_opsagent; then
+        fail "Unable to install Ops Agent"
+    fi
 
     echo "Install DCGM"
     install_dcgm
