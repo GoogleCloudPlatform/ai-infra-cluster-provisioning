@@ -89,7 +89,7 @@ module "nfs_filestore" {
 module "startup" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
   project_id      = var.project_id
-  runners = concat([{
+  runners = concat(var.disable_ops_agent ? [] : [{
     destination = "install_cloud_ops_agent.sh"
     source      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
     type        = "shell"

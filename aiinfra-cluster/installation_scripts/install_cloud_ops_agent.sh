@@ -19,8 +19,7 @@ OPSAGENT_PACKAGE='google-cloud-ops-agent'
 
 fail() {
     echo >&2 "[$(date +'%Y-%m-%dT%H:%M:%S%z')] $*"
-    [ "${ON_INSTALL_OPS_AGENT_FAILURE}" == "continue" ]
-    exit $?
+    exit 1
 }
 
 # starting with `b^0==1` and ending with `b^(n-1)==y`,
