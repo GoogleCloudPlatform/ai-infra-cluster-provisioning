@@ -1,0 +1,4 @@
+PROJECT_ID=supercomputer-testing
+NAME_PREFIX=ci
+ZONE=us-central1-a
+DISABLE_OPS_AGENT=true

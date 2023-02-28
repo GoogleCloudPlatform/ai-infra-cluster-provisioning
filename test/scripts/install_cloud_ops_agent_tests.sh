@@ -1,4 +1,4 @@
-. <(grep -v '^main$' ./install_cloud_ops_agent.sh)
+. <(grep -v '^main$' /usr/primary/installation_scripts/install_cloud_ops_agent.sh)
 
 # gen_exponential
 
@@ -7,9 +7,8 @@ test::gen_exponential::fails_on_n_eq_one_y_ne_one () {
 }
 
 test::gen_exponential::gens_powers_of_two () {
-    local expected output
-    declare -a expected=(1.0 2.0 4.0 8.0)
-    declare -a output=($(gen_exponential 4 8))
+    declare -ar expected=(1.0 2.0 4.0 8.0)
+    declare -ar output=($(gen_exponential 4 8))
     EXPECT_ARREQ expected output
 }
 
@@ -20,17 +19,18 @@ test::gen_backoff_times::gens_nothing_when_count_eq_zero () {
 }
 
 test::gen_backoff_times::gens_under_max_when_count_eq_one () {
-    local t=8 output
-    declare -a output=($(gen_backoff_times 1 ${t}))
+    local -r t=8
+    declare -ar output=($(gen_backoff_times 1 ${t}))
     EXPECT_SUCCEED [ "${#output[@]}" -eq 1 ]
     EXPECT_SUCCEED [ $(echo "0 <= ${output[0]}" | bc -l) -eq 1 ]
     EXPECT_SUCCEED [ $(echo "${output[0]} <= ${t}" | bc -l) -eq 1 ]
 }
 
 test::gen_backoff_times::gens_under_exponential_when_count_gt_one () {
-    local n=4 t=8 output maximums
-    declare -a output=($(gen_backoff_times ${n} ${t}))
-    declare -a maximums=($(gen_exponential ${n} ${t}))
+    local -r n=4
+    local -r t=8
+    declare -ar output=($(gen_backoff_times ${n} ${t}))
+    declare -ar maximums=($(gen_exponential ${n} ${t}))
     EXPECT_SUCCEED [ "${#output[@]}" -eq ${n} ]
     for i in $(seq 0 "$((n - 1))"); do
         EXPECT_SUCCEED [ $(echo "0 <= ${output[$i]}" | bc -l) -eq 1 ]
@@ -41,12 +41,12 @@ test::gen_backoff_times::gens_under_exponential_when_count_gt_one () {
 # retry_with_backoff
 
 decrement_to_zero () {
-    local var_name="${1}"
+    local -r var_name="${1}"
     [ "$((--${var_name}))" -le 0 ]
 }
 
 test::retry_with_backoff::passes_when_one_attempt_given_and_one_needed () {
-    counter=1
+    local counter=1
     EXPECT_SUCCEED retry_with_backoff 1 1 decrement_to_zero counter
 }
 

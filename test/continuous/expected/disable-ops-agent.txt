@@ -1,0 +1,216 @@
+module.aiinfra-network.module.default_vpc[0].data.google_compute_network.vpc: Reading...
+module.aiinfra-network.module.default_vpc[0].data.google_compute_subnetwork.primary_subnetwork: Reading...
+module.startup.data.google_storage_bucket.existing_bucket[0]: Reading...
+module.aiinfra-network.module.default_vpc[0].data.google_compute_subnetwork.primary_subnetwork: Read complete after 0s [id=projects/supercomputer-testing/regions/us-central1/subnetworks/default]
+module.aiinfra-network.module.default_vpc[0].data.google_compute_network.vpc: Read complete after 0s [id=projects/supercomputer-testing/global/networks/default]
+module.aiinfra-compute.data.google_compute_image.compute_image: Reading...
+module.startup.data.google_storage_bucket.existing_bucket[0]: Read complete after 0s [id=aiinfra-terraform-supercomputer-testing]
+module.aiinfra-compute.data.google_compute_image.compute_image: Read complete after 0s [id=projects/ml-images/global/images/c2-deeplearning-pytorch-1-12-cu113-v20230126-debian-10]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.aiinfra-compute.google_compute_instance_group_manager.mig[0] will be created
+  + resource "google_compute_instance_group_manager" "mig" {
+      + base_instance_name             = "ci-vm"
+      + fingerprint                    = (known after apply)
+      + id                             = (known after apply)
+      + instance_group                 = (known after apply)
+      + list_managed_instances_results = "PAGELESS"
+      + name                           = "ci-mig"
+      + operation                      = (known after apply)
+      + project                        = "supercomputer-testing"
+      + self_link                      = (known after apply)
+      + status                         = (known after apply)
+      + target_size                    = 1
+      + wait_for_instances             = true
+      + wait_for_instances_status      = "STABLE"
+      + zone                           = "us-central1-a"
+
+      + instance_lifecycle_policy {
+          + force_update_on_repair = (known after apply)
+        }
+
+      + timeouts {
+          + create = "30m"
+          + update = "30m"
+        }
+
+      + update_policy {
+          + max_surge_fixed       = (known after apply)
+          + max_unavailable_fixed = 1
+          + minimal_action        = "RESTART"
+          + replacement_method    = "RECREATE"
+          + type                  = "OPPORTUNISTIC"
+        }
+
+      + version {
+          + instance_template = (known after apply)
+          + name              = "default"
+        }
+    }
+
+  # module.aiinfra-compute.google_compute_instance_template.compute_vm_template[0] will be created
+  + resource "google_compute_instance_template" "compute_vm_template" {
+      + can_ip_forward       = false
+      + id                   = (known after apply)
+      + labels               = {
+          + "aiinfra-cluster" = "13e916"
+          + "aiinfra_role"    = "compute"
+        }
+      + machine_type         = "a2-highgpu-2g"
+      + metadata             = (known after apply)
+      + metadata_fingerprint = (known after apply)
+      + name                 = (known after apply)
+      + name_prefix          = "ci"
+      + project              = "supercomputer-testing"
+      + region               = "us-central1"
+      + self_link            = (known after apply)
+      + tags_fingerprint     = (known after apply)
+
+      + confidential_instance_config {
+          + enable_confidential_compute = (known after apply)
+        }
+
+      + disk {
+          + auto_delete  = true
+          + boot         = true
+          + device_name  = (known after apply)
+          + disk_size_gb = 2000
+          + disk_type    = "pd-ssd"
+          + interface    = (known after apply)
+          + labels       = {
+              + "aiinfra-cluster" = "13e916"
+              + "aiinfra_role"    = "compute"
+            }
+          + mode         = (known after apply)
+          + source_image = "https://www.googleapis.com/compute/v1/projects/ml-images/global/images/c2-deeplearning-pytorch-1-12-cu113-v20230126-debian-10"
+          + type         = (known after apply)
+        }
+
+      + guest_accelerator {
+          + count = 2
+          + type  = "nvidia-tesla-a100"
+        }
+
+      + network_interface {
+          + ipv6_access_type   = (known after apply)
+          + name               = (known after apply)
+          + network            = "https://www.googleapis.com/compute/v1/projects/supercomputer-testing/global/networks/default"
+          + nic_type           = "GVNIC"
+          + stack_type         = (known after apply)
+          + subnetwork         = "https://www.googleapis.com/compute/v1/projects/supercomputer-testing/regions/us-central1/subnetworks/default"
+          + subnetwork_project = "supercomputer-testing"
+
+          + access_config {
+              + nat_ip                 = (known after apply)
+              + network_tier           = (known after apply)
+              + public_ptr_domain_name = (known after apply)
+            }
+        }
+
+      + network_performance_config {
+          + total_egress_bandwidth_tier = "DEFAULT"
+        }
+
+      + scheduling {
+          + automatic_restart   = false
+          + on_host_maintenance = "TERMINATE"
+          + preemptible         = false
+          + provisioning_model  = (known after apply)
+        }
+
+      + service_account {
+          + email  = "455207029971-compute@developer.gserviceaccount.com"
+          + scopes = [
+              + "https://www.googleapis.com/auth/cloud-platform",
+            ]
+        }
+    }
+
+  # module.aiinfra-default-dashboard.google_monitoring_dashboard.dashboard will be created
+  + resource "google_monitoring_dashboard" "dashboard" {
+      + dashboard_json = jsonencode(
+            {
+              + displayName = "AI Accelerator Experience Dashboard: ci-dpl"
+              + gridLayout  = {
+                  + columns = 2
+                  + widgets = [
+                      + {
+                          + text  = {
+                              + content = "Metrics from the ci-dpl deployment of the HPC Toolkit."
+                              + format  = "MARKDOWN"
+                            }
+                          + title = "AI Accelerator Experience Dashboard"
+                        },
+                    ]
+                }
+            }
+        )
+      + id             = (known after apply)
+      + project        = "supercomputer-testing"
+    }
+
+  # module.startup.google_storage_bucket_object.scripts["pytorch_resnet_ray.py"] will be created
+  + resource "google_storage_bucket_object" "scripts" {
+      + bucket         = "aiinfra-terraform-supercomputer-testing"
+      + content_type   = (known after apply)
+      + crc32c         = (known after apply)
+      + detect_md5hash = "different hash"
+      + id             = (known after apply)
+      + kms_key_name   = (known after apply)
+      + md5hash        = (known after apply)
+      + media_link     = (known after apply)
+      + name           = "ci-deployment/pytorch_resnet_ray.py"
+      + output_name    = (known after apply)
+      + self_link      = (known after apply)
+      + source         = "/usr/examples/training_scripts/PyTorch/pytorch_resnet_ray.py"
+      + storage_class  = (known after apply)
+
+      + timeouts {
+          + create = "10m"
+          + update = "10m"
+        }
+    }
+
+  # module.startup.google_storage_bucket_object.scripts["setup_ray.sh"] will be created
+  + resource "google_storage_bucket_object" "scripts" {
+      + bucket         = "aiinfra-terraform-supercomputer-testing"
+      + content_type   = (known after apply)
+      + crc32c         = (known after apply)
+      + detect_md5hash = "different hash"
+      + id             = (known after apply)
+      + kms_key_name   = (known after apply)
+      + md5hash        = (known after apply)
+      + media_link     = (known after apply)
+      + name           = "ci-deployment/setup_ray.sh"
+      + output_name    = (known after apply)
+      + self_link      = (known after apply)
+      + source         = "./installation_scripts/setup_ray.sh"
+      + storage_class  = (known after apply)
+
+      + timeouts {
+          + create = "10m"
+          + update = "10m"
+        }
+    }
+
+  # module.startup.random_id.resource_name_suffix will be created
+  + resource "random_id" "resource_name_suffix" {
+      + b64_std     = (known after apply)
+      + b64_url     = (known after apply)
+      + byte_length = 4
+      + dec         = (known after apply)
+      + hex         = (known after apply)
+      + id          = (known after apply)
+    }
+
+Plan: 6 to add, 0 to change, 0 to destroy.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

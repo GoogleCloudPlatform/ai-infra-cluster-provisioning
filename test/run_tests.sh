@@ -1,7 +1,8 @@
 #!/bin/bash
 
 declare -a TEST_FILES=(
-    ./install_cloud_ops_agent_tests.sh)
+    ./test/scripts/install_cloud_ops_agent_tests.sh
+    ./test/scripts/terraform_plan.sh)
 
 err_prefix () {
     local fn_name="${1}"
@@ -69,18 +70,24 @@ run_tests () {
     local failure=false
     local test_command
 
-    while read test_command; do
+    local test_regex='test::.*'
+    if [ "${#}" -eq 1 ]; then
+        test_regex="${1}"
+    fi
+
+    test_commands=($(declare -F | awk "/${test_regex}/"'{print $NF}'))
+    for test_command in "${test_commands[@]}"; do
         if (${test_command} >/dev/null); then
             echo -e "${test_command} ${COLOR_GRN}succeeded${COLOR_RST}"
         else
             echo -e "${test_command} ${COLOR_RED}failed${COLOR_RST}"
             failure=true
         fi
-    done < <(declare -F | awk '/test::/{print $NF}')
+    done
 
     [ "${failure}" == false ]
 }
 
 . <(cat "${TEST_FILES[@]}")
 
-run_tests
+run_tests "${@}"
