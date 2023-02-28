@@ -244,4 +244,6 @@ main() {
     install_dcgm || { echo >&2 'Failed to install DCGM'; return 1; }
 }
 
-main
+if [ "${SOURCING}" != true ]; then
+    main
+fi

@@ -1,0 +1,659 @@
+module.aiinfra-network.module.default_vpc[0].data.google_compute_subnetwork.primary_subnetwork: Reading...
+module.aiinfra-network.module.default_vpc[0].data.google_compute_network.vpc: Reading...
+module.startup.data.google_storage_bucket.existing_bucket[0]: Reading...
+module.startup.data.google_storage_bucket.existing_bucket[0]: Read complete after 0s [id=aiinfra-terraform-gce-ai-infra]
+module.aiinfra-network.module.default_vpc[0].data.google_compute_network.vpc: Read complete after 0s [id=projects/gce-ai-infra/global/networks/default]
+module.aiinfra-network.module.default_vpc[0].data.google_compute_subnetwork.primary_subnetwork: Read complete after 0s [id=projects/gce-ai-infra/regions/us-central1/subnetworks/default]
+module.aiinfra-mig.data.google_compute_image.compute_image: Reading...
+module.aiinfra-mig.data.google_compute_image.compute_image: Read complete after 1s [id=projects/ml-images/global/images/c2-deeplearning-pytorch-1-12-cu113-v20230126-debian-10]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.aiinfra-default-dashboard.google_monitoring_dashboard.dashboard will be created
+  + resource "google_monitoring_dashboard" "dashboard" {
+      + dashboard_json = jsonencode(
+            {
+              + displayName = "AI Accelerator Experience Dashboard: ci-dpl"
+              + gridLayout  = {
+                  + columns = 2
+                  + widgets = [
+                      + {
+                          + text  = {
+                              + content = "Metrics from the ci-dpl deployment of the HPC Toolkit."
+                              + format  = "MARKDOWN"
+                            }
+                          + title = "AI Accelerator Experience Dashboard"
+                        },
+                      + {
+                          + timeSeriesTable = {
+                              + dataSets            = [
+                                  + {
+                                      + timeSeriesQuery = {
+                                          + timeSeriesQueryLanguage = <<-EOT
+                                                                fetch gce_instance
+                                                                | metric 'agent.googleapis.com/gpu/utilization'
+                                                                | map [Model: metric.model, UUID: metric.uuid, Instance: metadata.system.name, GPU: metric.gpu_number]
+                                                                | value cast_units(int_round(value.utilization), "%")
+                                            EOT
+                                        }
+                                    },
+                                ]
+                              + metricVisualization = "NUMBER"
+                            }
+                          + title           = "Observed GPU utilization per GPU (NVML reported)"
+                        },
+                      + {
+                          + timeSeriesTable = {
+                              + dataSets            = [
+                                  + {
+                                      + timeSeriesQuery = {
+                                          + timeSeriesQueryLanguage = <<-EOT
+                                                                fetch gce_instance
+                                                                | metric 'agent.googleapis.com/gpu/utilization'
+                                                                | map [Model: metric.model, Instance: metadata.system.name, GPU: metric.gpu_number]
+                                                                | value [value.utilization: 1.0]
+                                                                | group_by [Model], [capacity: sum(value.utilization)]
+                                            EOT
+                                        }
+                                    },
+                                ]
+                              + metricVisualization = "NUMBER"
+                            }
+                          + title           = "Observed GPU Capacity"
+                        },
+                      + {
+                          + timeSeriesTable = {
+                              + dataSets            = [
+                                  + {
+                                      + timeSeriesQuery = {
+                                          + timeSeriesQueryLanguage = <<-EOT
+                                                                fetch gce_instance
+                                                                | metric 'agent.googleapis.com/gpu/utilization'
+                                                                | map [Model: metric.model, Instance: metadata.system.name, GPU: metric.gpu_number]
+                                                                | group_by [Model], [capacity: sum(cast_units(value.utilization/100.0, "1"))]
+                                            EOT
+                                        }
+                                    },
+                                ]
+                              + metricVisualization = "NUMBER"
+                            }
+                          + title           = "Observed GPU Utilization (NVML reported)"
+                        },
+                      + {
+                          + timeSeriesTable = {
+                              + columnSettings      = [
+                                  + {
+                                      + column  = "Name (from instance_id)"
+                                      + visible = true
+                                    },
+                                  + {
+                                      + column  = "zone"
+                                      + visible = true
+                                    },
+                                  + {
+                                      + column  = "instance_name"
+                                      + visible = true
+                                    },
+                                ]
+                              + dataSets            = [
+                                  + {
+                                      + timeSeriesQuery = {
+                                          + timeSeriesQueryLanguage = <<-EOT
+                                                                fetch gce_instance
+                                                                | metric 'agent.googleapis.com/gpu/processes/utilization'
+                                                                | map [Instance: metadata.system.name,
+                                                                    GPU: metric.gpu_number,
+                                                                    PID: metric.pid,
+                                                                    Owner: metric.owner,
+                                                                    Command: metric.command_line],
+                                                                | value cast_units(int_round(value.utilization), "%")
+                                            EOT
+                                        }
+                                    },
+                                ]
+                              + metricVisualization = "NUMBER"
+                            }
+                          + title           = "Recently Observed GPU Processes - Lifetime GPU Utilization (NVML reported)"
+                        },
+                      + {
+                          + timeSeriesTable = {
+                              + dataSets            = [
+                                  + {
+                                      + timeSeriesQuery = {
+                                          + timeSeriesQueryLanguage = <<-EOT
+                                                                fetch gce_instance
+                                                                | metric 'agent.googleapis.com/gpu/processes/max_bytes_used'
+                                                                | map [Instance: metadata.system.name,
+                                                                    GPU: metric.gpu_number,
+                                                                    PID: metric.pid,
+                                                                    Owner: metric.owner,
+                                                                    Command: metric.command_line]
+                                            EOT
+                                        }
+                                    },
+                                ]
+                              + metricVisualization = "NUMBER"
+                            }
+                          + title           = "Recently Observed GPU Processes - Lifetime Max GPU Memory Used (NVML reported)"
+                        },
+                      + {
+                          + title   = "CPU Utilization (Hypervisor Reported)"
+                          + xyChart = {
+                              + chartOptions      = {
+                                  + mode = "COLOR"
+                                }
+                              + dataSets          = [
+                                  + {
+                                      + plotType        = "LINE"
+                                      + targetAxis      = "Y1"
+                                      + timeSeriesQuery = {
+                                          + timeSeriesQueryLanguage = <<-EOT
+                                                                fetch gce_instance
+                                                                | metric 'compute.googleapis.com/instance/cpu/utilization'
+                                                                | group_by 1m, [value_utilization_mean: mean(value.utilization)]
+                                                                | every 1m
+                                                                | group_by [metadata.system.name: metadata.system_labels.name],
+                                                                    [value_utilization_mean_mean: mean(value_utilization_mean)]
+                                            EOT
+                                        }
+                                    },
+                                ]
+                              + thresholds        = []
+                              + timeshiftDuration = "0s"
+                              + yAxis             = {
+                                  + label = "y1Axis"
+                                  + scale = "LINEAR"
+                                }
+                            }
+                        },
+                      + {
+                          + title   = "NIC Traffic Rate (OS reported)"
+                          + xyChart = {
+                              + chartOptions      = {
+                                  + mode = "COLOR"
+                                }
+                              + dataSets          = [
+                                  + {
+                                      + legendTemplate     = "${metadata.system_labels\\.name} Device ${metric.labels.device} Direction ${metric.labels.direction} NIC "
+                                      + minAlignmentPeriod = "60s"
+                                      + plotType           = "LINE"
+                                      + targetAxis         = "Y1"
+                                      + timeSeriesQuery    = {
+                                          + apiSource        = "DEFAULT_CLOUD"
+                                          + timeSeriesFilter = {
+                                              + aggregation          = {
+                                                  + alignmentPeriod    = "60s"
+                                                  + crossSeriesReducer = "REDUCE_NONE"
+                                                  + perSeriesAligner   = "ALIGN_RATE"
+                                                }
+                                              + filter               = "metric.type=\"agent.googleapis.com/interface/traffic\" resource.type=\"gce_instance\" metric.label.\"device\"!=\"lo\" metric.label.\"device\"!=\"docker0\""
+                                              + secondaryAggregation = {
+                                                  + alignmentPeriod    = "60s"
+                                                  + crossSeriesReducer = "REDUCE_SUM"
+                                                  + groupByFields      = [
+                                                      + "metric.label.\"device\"",
+                                                      + "metric.label.\"direction\"",
+                                                      + "metadata.system_labels.\"name\"",
+                                                    ]
+                                                  + perSeriesAligner   = "ALIGN_NONE"
+                                                }
+                                            }
+                                        }
+                                    },
+                                ]
+                              + thresholds        = []
+                              + timeshiftDuration = "0s"
+                              + yAxis             = {
+                                  + label = "y1Axis"
+                                  + scale = "LINEAR"
+                                }
+                            }
+                        },
+                      + {
+                          + title   = "GPU Utilization (NVML reported)"
+                          + xyChart = {
+                              + chartOptions      = {
+                                  + mode = "COLOR"
+                                }
+                              + dataSets          = [
+                                  + {
+                                      + legendTemplate     = "${metadata.system_labels\\.name} GPU ${metric.labels.gpu_number} Non-Idle"
+                                      + minAlignmentPeriod = "60s"
+                                      + plotType           = "LINE"
+                                      + targetAxis         = "Y1"
+                                      + timeSeriesQuery    = {
+                                          + apiSource        = "DEFAULT_CLOUD"
+                                          + timeSeriesFilter = {
+                                              + aggregation = {
+                                                  + alignmentPeriod    = "60s"
+                                                  + crossSeriesReducer = "REDUCE_MEAN"
+                                                  + groupByFields      = [
+                                                      + "metric.label.\"gpu_number\"",
+                                                      + "metadata.system_labels.\"name\"",
+                                                    ]
+                                                  + perSeriesAligner   = "ALIGN_MEAN"
+                                                }
+                                              + filter      = "metric.type=\"agent.googleapis.com/gpu/utilization\" resource.type=\"gce_instance\""
+                                            }
+                                        }
+                                    },
+                                ]
+                              + thresholds        = []
+                              + timeshiftDuration = "0s"
+                              + yAxis             = {
+                                  + label = "y1Axis"
+                                  + scale = "LINEAR"
+                                }
+                            }
+                        },
+                      + {
+                          + title   = "GPU Memory Usage (NVML reported)"
+                          + xyChart = {
+                              + chartOptions      = {
+                                  + mode = "COLOR"
+                                }
+                              + dataSets          = [
+                                  + {
+                                      + legendTemplate     = "${metadata.system_labels\\.name} GPU ${metric.labels.gpu_number} ${metric.labels.memory_state}"
+                                      + minAlignmentPeriod = "60s"
+                                      + plotType           = "LINE"
+                                      + targetAxis         = "Y1"
+                                      + timeSeriesQuery    = {
+                                          + apiSource        = "DEFAULT_CLOUD"
+                                          + timeSeriesFilter = {
+                                              + aggregation = {
+                                                  + alignmentPeriod    = "60s"
+                                                  + crossSeriesReducer = "REDUCE_SUM"
+                                                  + groupByFields      = [
+                                                      + "metric.label.\"memory_state\"",
+                                                      + "metric.label.\"gpu_number\"",
+                                                      + "metadata.system_labels.\"name\"",
+                                                    ]
+                                                  + perSeriesAligner   = "ALIGN_MEAN"
+                                                }
+                                              + filter      = "metric.type=\"agent.googleapis.com/gpu/memory/bytes_used\" resource.type=\"gce_instance\" metric.label.\"memory_state\"=\"used\""
+                                            }
+                                        }
+                                    },
+                                ]
+                              + thresholds        = []
+                              + timeshiftDuration = "0s"
+                              + yAxis             = {
+                                  + label = "y1Axis"
+                                  + scale = "LINEAR"
+                                }
+                            }
+                        },
+                      + {
+                          + title   = "SM Utilization and SM occupancy (DCGM reported)"
+                          + xyChart = {
+                              + chartOptions      = {
+                                  + mode = "COLOR"
+                                }
+                              + dataSets          = [
+                                  + {
+                                      + legendTemplate     = "${metadata.system_labels\\.name} GPU ${metric.labels.gpu_number} SM utilization"
+                                      + minAlignmentPeriod = "60s"
+                                      + plotType           = "LINE"
+                                      + targetAxis         = "Y1"
+                                      + timeSeriesQuery    = {
+                                          + apiSource        = "DEFAULT_CLOUD"
+                                          + timeSeriesFilter = {
+                                              + aggregation = {
+                                                  + alignmentPeriod    = "60s"
+                                                  + crossSeriesReducer = "REDUCE_SUM"
+                                                  + groupByFields      = [
+                                                      + "metric.label.\"gpu_number\"",
+                                                      + "metadata.system_labels.\"name\"",
+                                                    ]
+                                                  + perSeriesAligner   = "ALIGN_MEAN"
+                                                }
+                                              + filter      = "metric.type=\"workload.googleapis.com/dcgm.gpu.sm_utilization\" resource.type=\"gce_instance\""
+                                            }
+                                        }
+                                    },
+                                  + {
+                                      + legendTemplate     = "${metadata.system_labels\\.name} GPU ${metric.labels.gpu_number} SM occpancy"
+                                      + minAlignmentPeriod = "60s"
+                                      + plotType           = "LINE"
+                                      + targetAxis         = "Y1"
+                                      + timeSeriesQuery    = {
+                                          + apiSource        = "DEFAULT_CLOUD"
+                                          + timeSeriesFilter = {
+                                              + aggregation = {
+                                                  + alignmentPeriod    = "60s"
+                                                  + crossSeriesReducer = "REDUCE_SUM"
+                                                  + groupByFields      = [
+                                                      + "metric.label.\"gpu_number\"",
+                                                      + "metadata.system_labels.\"name\"",
+                                                    ]
+                                                  + perSeriesAligner   = "ALIGN_MEAN"
+                                                }
+                                              + filter      = "metric.type=\"workload.googleapis.com/dcgm.gpu.sm_occupancy\" resource.type=\"gce_instance\""
+                                            }
+                                        }
+                                    },
+                                ]
+                              + thresholds        = []
+                              + timeshiftDuration = "0s"
+                              + yAxis             = {
+                                  + label = "y1Axis"
+                                  + scale = "LINEAR"
+                                }
+                            }
+                        },
+                      + {
+                          + title   = "NVLink Traffic Rate (DCGM reported)"
+                          + xyChart = {
+                              + chartOptions      = {
+                                  + mode = "COLOR"
+                                }
+                              + dataSets          = [
+                                  + {
+                                      + plotType        = "LINE"
+                                      + targetAxis      = "Y1"
+                                      + timeSeriesQuery = {
+                                          + timeSeriesQueryLanguage = <<-EOT
+                                                                fetch gce_instance
+                                                                | metric 'workload.googleapis.com/dcgm.gpu.nvlink_traffic_rate'
+                                                                | group_by 1m, [value_nvlink_traffic_rate_mean: mean(cast_units(value.nvlink_traffic_rate, "By/s"))]
+                                                                | every 1m
+                                                                | group_by
+                                                                    [Instance: metadata.system_labels.name, GPU: metric.gpu_number, Direction: metric.direction,
+                                                                     ],
+                                                                    [value_nvlink_traffic_rate_mean_aggregate:
+                                                                       aggregate(value_nvlink_traffic_rate_mean)]
+                                            EOT
+                                        }
+                                    },
+                                ]
+                              + thresholds        = []
+                              + timeshiftDuration = "0s"
+                              + yAxis             = {
+                                  + label = "y1Axis"
+                                  + scale = "LINEAR"
+                                }
+                            }
+                        },
+                      + {
+                          + title   = "Pipe Utilization (DCGM reported)"
+                          + xyChart = {
+                              + chartOptions      = {
+                                  + mode = "COLOR"
+                                }
+                              + dataSets          = [
+                                  + {
+                                      + legendTemplate     = "${metadata.system_labels\\.name} GPU ${metric.labels.gpu_number} Pipe ${metric.labels.pipe}"
+                                      + minAlignmentPeriod = "60s"
+                                      + plotType           = "LINE"
+                                      + targetAxis         = "Y1"
+                                      + timeSeriesQuery    = {
+                                          + apiSource        = "DEFAULT_CLOUD"
+                                          + timeSeriesFilter = {
+                                              + aggregation = {
+                                                  + alignmentPeriod    = "60s"
+                                                  + crossSeriesReducer = "REDUCE_SUM"
+                                                  + groupByFields      = [
+                                                      + "metric.label.\"pipe\"",
+                                                      + "metric.label.\"gpu_number\"",
+                                                      + "metadata.system_labels.\"name\"",
+                                                    ]
+                                                  + perSeriesAligner   = "ALIGN_MEAN"
+                                                }
+                                              + filter      = "metric.type=\"workload.googleapis.com/dcgm.gpu.pipe_utilization\" resource.type=\"gce_instance\""
+                                            }
+                                        }
+                                    },
+                                ]
+                              + thresholds        = []
+                              + timeshiftDuration = "0s"
+                              + yAxis             = {
+                                  + label = "y1Axis"
+                                  + scale = "LINEAR"
+                                }
+                            }
+                        },
+                      + {
+                          + title   = "PCIe Traffic Rate (DCGM reported)"
+                          + xyChart = {
+                              + chartOptions      = {
+                                  + mode = "COLOR"
+                                }
+                              + dataSets          = [
+                                  + {
+                                      + plotType        = "LINE"
+                                      + targetAxis      = "Y1"
+                                      + timeSeriesQuery = {
+                                          + timeSeriesQueryLanguage = <<-EOT
+                                                                fetch gce_instance
+                                                                | metric 'workload.googleapis.com/dcgm.gpu.pcie_traffic_rate'
+                                                                | group_by 1m, [value_pcie_traffic_rate_mean: mean(cast_units(value.pcie_traffic_rate, "By/s"))]
+                                                                | every 1m
+                                                                | group_by
+                                                                    [Instance: metadata.system_labels.name, GPU: metric.gpu_number, Direction: metric.direction,
+                                                                     ],
+                                                                    [value_pcie_traffic_rate_mean_aggregate:
+                                                                       aggregate(value_pcie_traffic_rate_mean)]
+                                            EOT
+                                        }
+                                    },
+                                ]
+                              + thresholds        = []
+                              + timeshiftDuration = "0s"
+                              + yAxis             = {
+                                  + label = "y1Axis"
+                                  + scale = "LINEAR"
+                                }
+                            }
+                        },
+                    ]
+                }
+            }
+        )
+      + id             = (known after apply)
+      + project        = "gce-ai-infra"
+    }
+
+  # module.aiinfra-mig.google_compute_instance_group_manager.mig will be created
+  + resource "google_compute_instance_group_manager" "mig" {
+      + base_instance_name             = "ci-vm"
+      + fingerprint                    = (known after apply)
+      + id                             = (known after apply)
+      + instance_group                 = (known after apply)
+      + list_managed_instances_results = "PAGELESS"
+      + name                           = "ci-mig"
+      + operation                      = (known after apply)
+      + project                        = "gce-ai-infra"
+      + self_link                      = (known after apply)
+      + status                         = (known after apply)
+      + target_size                    = 1
+      + wait_for_instances             = true
+      + wait_for_instances_status      = "STABLE"
+      + zone                           = "us-central1-a"
+
+      + instance_lifecycle_policy {
+          + force_update_on_repair = (known after apply)
+        }
+
+      + timeouts {
+          + create = "30m"
+          + update = "30m"
+        }
+
+      + update_policy {
+          + max_surge_fixed       = (known after apply)
+          + max_unavailable_fixed = 1
+          + minimal_action        = "RESTART"
+          + replacement_method    = "RECREATE"
+          + type                  = "OPPORTUNISTIC"
+        }
+
+      + version {
+          + instance_template = (known after apply)
+          + name              = "default"
+        }
+    }
+
+  # module.aiinfra-mig.google_compute_instance_template.compute_vm_template will be created
+  + resource "google_compute_instance_template" "compute_vm_template" {
+      + can_ip_forward       = false
+      + id                   = (known after apply)
+      + labels               = {
+          + "aiinfra-cluster" = "7f2dba"
+          + "aiinfra_role"    = "compute"
+        }
+      + machine_type         = "a2-highgpu-2g"
+      + metadata             = (known after apply)
+      + metadata_fingerprint = (known after apply)
+      + name                 = (known after apply)
+      + name_prefix          = "ci"
+      + project              = "gce-ai-infra"
+      + region               = "us-central1"
+      + self_link            = (known after apply)
+      + tags_fingerprint     = (known after apply)
+
+      + confidential_instance_config {
+          + enable_confidential_compute = (known after apply)
+        }
+
+      + disk {
+          + auto_delete  = true
+          + boot         = true
+          + device_name  = (known after apply)
+          + disk_size_gb = 2000
+          + disk_type    = "pd-ssd"
+          + interface    = (known after apply)
+          + labels       = {
+              + "aiinfra-cluster" = "7f2dba"
+              + "aiinfra_role"    = "compute"
+            }
+          + mode         = (known after apply)
+          + source_image = "https://www.googleapis.com/compute/v1/projects/ml-images/global/images/c2-deeplearning-pytorch-1-12-cu113-v20230126-debian-10"
+          + type         = (known after apply)
+        }
+
+      + guest_accelerator {
+          + count = 2
+          + type  = "nvidia-tesla-a100"
+        }
+
+      + network_interface {
+          + ipv6_access_type   = (known after apply)
+          + name               = (known after apply)
+          + network            = "https://www.googleapis.com/compute/v1/projects/gce-ai-infra/global/networks/default"
+          + stack_type         = (known after apply)
+          + subnetwork         = "https://www.googleapis.com/compute/v1/projects/gce-ai-infra/regions/us-central1/subnetworks/default"
+          + subnetwork_project = "gce-ai-infra"
+
+          + access_config {
+              + nat_ip                 = (known after apply)
+              + network_tier           = (known after apply)
+              + public_ptr_domain_name = (known after apply)
+            }
+        }
+
+      + network_performance_config {
+          + total_egress_bandwidth_tier = "DEFAULT"
+        }
+
+      + scheduling {
+          + automatic_restart   = false
+          + on_host_maintenance = "TERMINATE"
+          + preemptible         = false
+          + provisioning_model  = (known after apply)
+        }
+
+      + service_account {
+          + email  = "510080789794-compute@developer.gserviceaccount.com"
+          + scopes = [
+              + "https://www.googleapis.com/auth/cloud-platform",
+            ]
+        }
+    }
+
+  # module.startup.google_storage_bucket_object.scripts["install_cloud_ops_agent.sh"] will be created
+  + resource "google_storage_bucket_object" "scripts" {
+      + bucket         = "aiinfra-terraform-gce-ai-infra"
+      + content_type   = (known after apply)
+      + crc32c         = (known after apply)
+      + detect_md5hash = "different hash"
+      + id             = (known after apply)
+      + kms_key_name   = (known after apply)
+      + md5hash        = (known after apply)
+      + media_link     = (known after apply)
+      + name           = "gcb-pr/ci-deployment/install_cloud_ops_agent.sh"
+      + output_name    = (known after apply)
+      + self_link      = (known after apply)
+      + source         = "./installation_scripts/install_cloud_ops_agent.sh"
+      + storage_class  = (known after apply)
+
+      + timeouts {
+          + create = "10m"
+          + update = "10m"
+        }
+    }
+
+  # module.startup.google_storage_bucket_object.scripts["pytorch_resnet_ray.py"] will be created
+  + resource "google_storage_bucket_object" "scripts" {
+      + bucket         = "aiinfra-terraform-gce-ai-infra"
+      + content_type   = (known after apply)
+      + crc32c         = (known after apply)
+      + detect_md5hash = "different hash"
+      + id             = (known after apply)
+      + kms_key_name   = (known after apply)
+      + md5hash        = (known after apply)
+      + media_link     = (known after apply)
+      + name           = "gcb-pr/ci-deployment/pytorch_resnet_ray.py"
+      + output_name    = (known after apply)
+      + self_link      = (known after apply)
+      + source         = "/usr/examples/training_scripts/PyTorch/pytorch_resnet_ray.py"
+      + storage_class  = (known after apply)
+
+      + timeouts {
+          + create = "10m"
+          + update = "10m"
+        }
+    }
+
+  # module.startup.google_storage_bucket_object.scripts["setup_ray.sh"] will be created
+  + resource "google_storage_bucket_object" "scripts" {
+      + bucket         = "aiinfra-terraform-gce-ai-infra"
+      + content_type   = (known after apply)
+      + crc32c         = (known after apply)
+      + detect_md5hash = "different hash"
+      + id             = (known after apply)
+      + kms_key_name   = (known after apply)
+      + md5hash        = (known after apply)
+      + media_link     = (known after apply)
+      + name           = "gcb-pr/ci-deployment/setup_ray.sh"
+      + output_name    = (known after apply)
+      + self_link      = (known after apply)
+      + source         = "./installation_scripts/setup_ray.sh"
+      + storage_class  = (known after apply)
+
+      + timeouts {
+          + create = "10m"
+          + update = "10m"
+        }
+    }
+
+  # module.startup.random_id.resource_name_suffix will be created
+  + resource "random_id" "resource_name_suffix" {
+      + b64_std     = (known after apply)
+      + b64_url     = (known after apply)
+      + byte_length = 4
+      + dec         = (known after apply)
+      + hex         = (known after apply)
+      + id          = (known after apply)
+    }
+
+Plan: 7 to add, 0 to change, 0 to destroy.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

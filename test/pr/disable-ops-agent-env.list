@@ -1,0 +1,5 @@
+PROJECT_ID=gce-ai-infra
+NAME_PREFIX=ci
+ZONE=us-central1-a
+DISABLE_OPS_AGENT=true
+TERRAFORM_GCS_PATH=gs://aiinfra-terraform-gce-ai-infra/gcb-pr
