@@ -143,7 +143,6 @@ handle_debian() {
     install_dcgm() {
         echo 'nvidia-uvm' >>/etc/modules
 
-        # TODO: move to GCS
         cat >/etc/google-cloud-ops-agent/config.yaml <<EOF
 metrics:
   receivers:
@@ -162,7 +161,6 @@ metrics:
         receivers:
           - dcgm
 EOF
-        systemctl restart google-cloud-ops-agent
 
         local distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g')
         echo "Installing DCGM for distribution '${distribution}'"
@@ -173,6 +171,7 @@ EOF
 
         sed -i '/\[Service\]/a RestartSec=2' /lib/systemd/system/nvidia-dcgm.service
         systemctl start nvidia-dcgm
+        systemctl restart google-cloud-ops-agent
     }
 }
 
