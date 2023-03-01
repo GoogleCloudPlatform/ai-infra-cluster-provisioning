@@ -277,3 +277,9 @@ variable "network_interfaces" {
     error_message = "In the variable network_interfaces, field \"stack_type\" must be either \"IPV4_ONLY\", \"IPV4_IPV6\" or null."
   }
 }
+
+variable "enable_gke" {
+  description = "Flag to enable GKE cluster creation instead of MIG."
+  type        = bool
+  default     = false
+}

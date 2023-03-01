@@ -91,6 +91,7 @@ data "google_compute_image" "compute_image" {
 resource "google_compute_instance_template" "compute_vm_template" {
   project        = var.project_id
   provider       = google-beta
+  count          = var.enable_gke ? 0 : 1
   name_prefix    = "${local.resource_prefix}"
   machine_type   = var.machine_type
   region         = var.region
@@ -186,6 +187,7 @@ resource "google_compute_instance_template" "compute_vm_template" {
 
 resource "google_compute_instance_group_manager" "mig" {
   provider           = google-beta
+  count              = var.enable_gke ? 0 : 1
   name               = "${local.resource_prefix}-mig"
   base_instance_name = "${local.resource_prefix}-vm"
   project            = var.project_id
@@ -199,7 +201,7 @@ resource "google_compute_instance_group_manager" "mig" {
   wait_for_instances = true
   version {
     name              = "default"
-    instance_template = google_compute_instance_template.compute_vm_template.id
+    instance_template = one(google_compute_instance_template.compute_vm_template[*].id)
   }
   target_size = var.instance_count
   depends_on = [var.network_self_link, var.network_storage]
@@ -207,4 +209,27 @@ resource "google_compute_instance_group_manager" "mig" {
     create = "30m"
     update = "30m"
   }
+}
+
+module "aiinfra-gke" {
+  source                   = "../gke-cluster"
+  count                    = var.enable_gke ? 1 : 0
+  project                  = var.project_id
+  region                   = var.region
+  zone                     = var.zone
+  name                     = "${local.resource_prefix}-gke"
+  network_self_link        = var.network_self_link
+  subnetwork_self_link     = var.subnetwork_self_link
+  node_service_account     = lookup(var.service_account, "email", null)
+  node_pools               = [
+    {
+      name                    = "system-nodes"
+      nodes_initial           = var.instance_count
+      nodes_min               = 1
+      nodes_max               = var.instance_count
+      machine_type            = var.machine_type
+      guest_accelerator_count = var.guest_accelerator[0].count
+      guest_accelerator_type  = var.guest_accelerator[0].type
+    }
+  ]
 }

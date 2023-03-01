@@ -100,8 +100,8 @@ module "startup" {
   region          = var.region
 }
 
-module "aiinfra-mig" {
-  source               = "./modules/vm-instance-group"
+module "aiinfra-compute" {
+  source               = "./modules/aiinfra-compute"
   subnetwork_self_link = module.aiinfra-network.subnetwork_self_link
   service_account = {
     email  = var.service_account.email
@@ -123,18 +123,19 @@ module "aiinfra-mig" {
   zone                = var.zone
   region              = var.region
   startup_script      = module.startup.startup_script
-  metadata = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode="project_editors", })
-  labels      = merge(var.labels, { aiinfra_role = "compute",})
-  name_prefix = var.name_prefix
-  guest_accelerator = [{
+  metadata            = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode="project_editors", })
+  labels              = merge(var.labels, { aiinfra_role = "compute",})
+  name_prefix         = var.name_prefix
+  guest_accelerator   = [{
     count = var.gpu_per_vm
     type  = var.accelerator_type
   }]
-  deployment_name = local.depl_name
-  network_interfaces = module.aiinfra-network.network_interfaces
-  depends_on = [
+  deployment_name     = local.depl_name
+  network_interfaces  = module.aiinfra-network.network_interfaces
+  depends_on          = [
     module.aiinfra-network
   ]
+  enable_gke          = var.orchestrator_type == "gke"
 }
 
 /*
