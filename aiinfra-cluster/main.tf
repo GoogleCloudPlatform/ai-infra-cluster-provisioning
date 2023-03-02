@@ -55,7 +55,7 @@ locals {
     }
   ] : []
   
-  vm_startup_setup      = concat(local.ray_setup, local.startup_command_setup, local.install_ops_agent)
+  vm_startup_setup      = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
 }
 
