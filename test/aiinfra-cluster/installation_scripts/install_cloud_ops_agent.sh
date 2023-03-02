@@ -1,5 +1,8 @@
 . ./test/helpers.sh
-. <(grep -v '^main$' /usr/primary/installation_scripts/install_cloud_ops_agent.sh)
+
+SOURCING=true
+. ./usr/primary/installation_scripts/install_cloud_ops_agent.sh
+unset SOURCING
 
 # gen_exponential
 
