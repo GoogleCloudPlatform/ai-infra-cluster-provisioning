@@ -5,10 +5,8 @@ declare -a TEST_FILES=(
     ./test/scripts/terraform_plan.sh)
 
 err_prefix () {
-    local fn_name="${1}"
-    local params
-
-    declare -a params=("${@:2}")
+    local -r fn_name="${1}"
+    declare -ar params=("${@:2}")
     local params_str=""
 
     if [ "${#params[@]}" -ge 1 ]; then
@@ -40,18 +38,18 @@ EXPECT_FAIL () {
 }
 
 EXPECT_ARREQ () {
-    local left_name="${1}"
-    local right_name="${2}"
-    local -n left="${left_name}"
-    local -n right="${right_name}"
-    local err_prefix=$(err_prefix EXPECT_ARREQ "${left_name}" "${right_name}")
+    local -r left_name="${1}"
+    local -r right_name="${2}"
+    local -nr left="${left_name}"
+    local -nr right="${right_name}"
+    local -r err_prefix=$(err_prefix EXPECT_ARREQ "${left_name}" "${right_name}")
 
     if [ "${#left[@]}" -ne "${#right[@]}" ]; then
         echo >&2 "${err_prefix}" "unequal lengths (${#left[@]}, ${#right[@]})"
         exit 1
     fi
 
-    local arr_length="${#left[@]}"
+    local -r arr_length="${#left[@]}"
     local i
     for i in $(seq 0 $((arr_length - 1))); do
         if [ "${left[$i]}" != "${right[$i]}" ]; then
@@ -63,10 +61,38 @@ EXPECT_ARREQ () {
     return 0
 }
 
+EXPECT_EQ () {
+    local -r left="${1}"
+    local -r right="${2}"
+    if [ "${left}" -ne "${right}" ]; then
+        echo >&2 $(err_prefix EXPECT_EQ "${left}" "${right}") "not equal"
+        exit 1
+    fi
+    return 0
+}
+
+EXPECT_STR_EMPTY () {
+    local -r str="${1}"
+    if [ -n "${str}" ]; then
+        echo >&2 $(err_prefix EXPECT_EQ "${str}") "not empty"
+        exit 1
+    fi
+    return 0
+}
+
+EXPECT_FILE_REGULAR () {
+    local -r filename="${1}"
+    if ! [ -f "${filename}" ]; then
+        echo >&2 $(err_prefix EXPECT_EQ "${str}") "not regular file"
+        exit 1
+    fi
+    return 0
+}
+
 run_tests () {
-    local COLOR_GRN='\e[1;32m'
-    local COLOR_RED='\e[0;31m'
-    local COLOR_RST='\e[0m'
+    local -r COLOR_GRN='\e[1;32m'
+    local -r COLOR_RED='\e[0;31m'
+    local -r COLOR_RST='\e[0m'
     local failure=false
     local test_command
 
@@ -75,7 +101,7 @@ run_tests () {
         test_regex="${1}"
     fi
 
-    test_commands=($(declare -F | awk "/${test_regex}/"'{print $NF}'))
+    declare -ar test_commands=($(declare -F | awk "/${test_regex}/"'{print $NF}'))
     for test_command in "${test_commands[@]}"; do
         if (${test_command} >/dev/null); then
             echo -e "${test_command} ${COLOR_GRN}succeeded${COLOR_RST}"

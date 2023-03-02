@@ -4,8 +4,8 @@ readonly EXPECTED_DIR="./test/continuous/expected"
 terraform_plan () {
     local -r env_list="${1}"
     local -r expected_output="${2}"
-    EXPECT_SUCCEED [ -f "${env_list}" ]
-    EXPECT_SUCCEED [ -f "${expected_output}" ]
+    EXPECT_FILE_REGULAR "${env_list}"
+    EXPECT_FILE_REGULAR "${expected_output}"
 
     local -r actual_output="/out/tfplan"
     EXPECT_SUCCEED mkdir -p "$(dirname "${actual_output}")"
@@ -26,7 +26,7 @@ terraform_plan () {
             -e '/"aiinfra-cluster" = "[a-f[:digit:]]\{,6\}"/d' \
             -e '/Command: metric.command_line],/d'
     }
-    diff \
+    EXPECT_SUCCEED diff \
         <(filter "${expected_output}") \
         <(filter "${actual_output}") >&2
 }

@@ -15,15 +15,15 @@ test::gen_exponential::gens_powers_of_two () {
 # gen_backoff_times
 
 test::gen_backoff_times::gens_nothing_when_count_eq_zero () {
-    EXPECT_SUCCEED [ -z "$(gen_backoff_times 0 8)" ]
+    EXPECT_STR_EMPTY "$(gen_backoff_times 0 8)"
 }
 
 test::gen_backoff_times::gens_under_max_when_count_eq_one () {
     local -r t=8
     declare -ar output=($(gen_backoff_times 1 ${t}))
-    EXPECT_SUCCEED [ "${#output[@]}" -eq 1 ]
-    EXPECT_SUCCEED [ $(echo "0 <= ${output[0]}" | bc -l) -eq 1 ]
-    EXPECT_SUCCEED [ $(echo "${output[0]} <= ${t}" | bc -l) -eq 1 ]
+    EXPECT_EQ "${#output[@]}" 1
+    EXPECT_EQ "$(echo "0 <= ${output[0]}" | bc -l)" 1
+    EXPECT_EQ "$(echo "${output[0]} <= ${t}" | bc -l)" 1
 }
 
 test::gen_backoff_times::gens_under_exponential_when_count_gt_one () {
@@ -31,10 +31,10 @@ test::gen_backoff_times::gens_under_exponential_when_count_gt_one () {
     local -r t=8
     declare -ar output=($(gen_backoff_times ${n} ${t}))
     declare -ar maximums=($(gen_exponential ${n} ${t}))
-    EXPECT_SUCCEED [ "${#output[@]}" -eq ${n} ]
+    EXPECT_EQ "${#output[@]}" "${n}"
     for i in $(seq 0 "$((n - 1))"); do
-        EXPECT_SUCCEED [ $(echo "0 <= ${output[$i]}" | bc -l) -eq 1 ]
-        EXPECT_SUCCEED [ $(echo "${output[$i]} <= ${t}" | bc -l) -eq 1 ]
+        EXPECT_EQ "$(echo "0 <= ${output[$i]}" | bc -l)" 1
+        EXPECT_EQ "$(echo "${output[$i]} <= ${t}" | bc -l)" 1
     done
 }
 
@@ -53,7 +53,7 @@ test::retry_with_backoff::passes_when_one_attempt_given_and_one_needed () {
 test::retry_with_backoff::fails_when_one_attempt_given_and_two_needed () {
     local counter=2
     EXPECT_FAIL retry_with_backoff 1 1 decrement_to_zero counter
-    EXPECT_SUCCEED [ "${counter}" -eq 1 ]
+    EXPECT_EQ "${counter}" 1
 }
 
 test::retry_with_backoff::passes_when_less_attempts_needed_than_given () {
@@ -64,5 +64,5 @@ test::retry_with_backoff::passes_when_less_attempts_needed_than_given () {
 test::retry_with_backoff::fails_when_more_attempts_needed_than_given () {
     local counter=3
     EXPECT_FAIL retry_with_backoff 2 1 decrement_to_zero counter
-    EXPECT_SUCCEED [ "${counter}" -eq 1 ]
+    EXPECT_EQ "${counter}" 1
 }
