@@ -46,8 +46,17 @@ locals {
       "content"         = "${var.startup_command}"
     }
   ] : []
+
+  install_ops_agent = !var.disable_ops_agent ? [
+    {
+      "type"        = "shell"
+      "destination" = "install_cloud_ops_agent.sh"
+      "source"      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
+    }
+  ] : []
   
-  vm_startup_setup      = concat(local.ray_setup, local.startup_command_setup)
+  vm_startup_setup      = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
+
 }
 
 module "aiinfra-network" {
@@ -137,6 +146,10 @@ module "aiinfra-mig" {
   ]
 }
 
+module "dashboard" {
+  source               = "./modules/dashboard"
+}
+
 /*
 * The dashboard needs to include GPU metrics from new ops agent.
 */
@@ -146,4 +159,7 @@ module "aiinfra-default-dashboard" {
   deployment_name = local.depl_name
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
+  widgets         = [
+    for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
+  ]
 }

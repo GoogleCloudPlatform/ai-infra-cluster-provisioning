@@ -31,7 +31,7 @@ _terraform_setup() {
     if [ $apply_ret -eq 0 ]; then
         echo "Terraform apply finished successfully."
         _Display_connection_info
-        # setup auto clean is environment variable is set
+        # setup auto clean if environment variable is set
         if [[ -z "$CLEANUP_ON_EXIT" ]]; then
             echo "Cluster will be available after container exits."
         else
