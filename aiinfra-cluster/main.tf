@@ -46,8 +46,16 @@ locals {
       "content"         = "${var.startup_command}"
     }
   ] : []
+
+  install_ops_agent = !var.disable_ops_agent ? [
+    {
+      "type"        = "shell"
+      "destination" = "install_cloud_ops_agent.sh"
+      "source"      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
+    }
+  ] : []
   
-  vm_startup_setup      = concat(local.ray_setup, local.startup_command_setup)
+  vm_startup_setup      = concat(local.ray_setup, local.startup_command_setup, local.install_ops_agent)
 
 }
 
@@ -89,12 +97,7 @@ module "nfs_filestore" {
 module "startup" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
   project_id      = var.project_id
-  runners = concat(var.disable_ops_agent ? [] : [{
-    destination = "install_cloud_ops_agent.sh"
-    source      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
-    type        = "shell"
-  }]
-  , local.dir_copy_setup
+  runners = concat(local.dir_copy_setup
   , module.gcsfuse_mount[*].client_install_runner
   , module.gcsfuse_mount[*].mount_runner
   , module.nfs_filestore[*].install_nfs_client_runner

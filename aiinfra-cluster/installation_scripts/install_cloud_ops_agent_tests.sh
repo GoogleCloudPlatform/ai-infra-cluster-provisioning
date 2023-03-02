@@ -40,28 +40,29 @@ test::gen_backoff_times::gens_under_exponential_when_count_gt_one () {
 
 # retry_with_backoff
 
-decrement_counter_to_zero () {
-    [ "$((--counter))" -le 0 ]
+decrement_to_zero () {
+    local var_name="${1}"
+    [ "$((--${var_name}))" -le 0 ]
 }
 
 test::retry_with_backoff::passes_when_one_attempt_given_and_one_needed () {
-    local counter=1
-    EXPECT_SUCCEED retry_with_backoff 1 1 decrement_counter_to_zero
+    counter=1
+    EXPECT_SUCCEED retry_with_backoff 1 1 decrement_to_zero counter
 }
 
 test::retry_with_backoff::fails_when_one_attempt_given_and_two_needed () {
     local counter=2
-    EXPECT_FAIL retry_with_backoff 1 1 decrement_counter_to_zero
+    EXPECT_FAIL retry_with_backoff 1 1 decrement_to_zero counter
     EXPECT_SUCCEED [ "${counter}" -eq 1 ]
 }
 
 test::retry_with_backoff::passes_when_less_attempts_needed_than_given () {
     local counter=3
-    EXPECT_SUCCEED retry_with_backoff 4 1 decrement_counter_to_zero
+    EXPECT_SUCCEED retry_with_backoff 4 1 decrement_to_zero counter
 }
 
 test::retry_with_backoff::fails_when_more_attempts_needed_than_given () {
     local counter=3
-    EXPECT_FAIL retry_with_backoff 2 1 decrement_counter_to_zero
+    EXPECT_FAIL retry_with_backoff 2 1 decrement_to_zero counter
     EXPECT_SUCCEED [ "${counter}" -eq 1 ]
 }

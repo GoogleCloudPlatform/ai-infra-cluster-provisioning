@@ -1,3 +1,5 @@
+#!/bin/bash
+
 declare -a TEST_FILES=(
     ./install_cloud_ops_agent_tests.sh)
 
