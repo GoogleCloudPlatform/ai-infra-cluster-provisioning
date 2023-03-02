@@ -1,3 +1,4 @@
+. ./test/helpers.sh
 . <(grep -v '^main$' /usr/primary/installation_scripts/install_cloud_ops_agent.sh)
 
 # gen_exponential
