@@ -151,7 +151,13 @@ variable "orchestrator_type" {
 variable "startup_command" {
   description = "The startup command to be executed when the VM starts up."
   type        = string
-  default = ""
+  default     = ""
+}
+
+variable "disable_ops_agent" {
+  description = ""
+  type        = bool
+  default     = false
 }
 
 variable "local_dir_copy_list" {

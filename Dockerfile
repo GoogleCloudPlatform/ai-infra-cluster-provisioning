@@ -1,4 +1,4 @@
-FROM gcr.io/google.com/cloudsdktool/cloud-sdk
+FROM gcr.io/google.com/cloudsdktool/cloud-sdk as base
 
 RUN apt-get update && apt-get install git bash curl python3 software-properties-common wget ca-certificates zip -y
 
@@ -16,6 +16,18 @@ RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
 ##########################################################################################
 RUN apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
+FROM base as test
+WORKDIR /test
+RUN apt-get update \
+    && apt-get install -y bc \
+    && apt-get clean autoclean \
+    && apt-get autoremove --yes \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/
+COPY aiinfra-cluster/installation_scripts/ /test
+RUN chmod +x /test/run_tests.sh
+ENTRYPOINT ["./run_tests.sh"]
+
+FROM base as deploy
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 COPY aiinfra-cluster/ /usr/primary/
 COPY scripts/ /usr/

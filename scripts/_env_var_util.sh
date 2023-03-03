@@ -236,9 +236,14 @@ EOF
         echo "orchestrator_type = \"${ORCHESTRATOR_TYPE,,}\"" >> /usr/primary/tf.auto.tfvars
     fi
 
-    # seting startup command
+    # setting startup command
     if [[ -n "$STARTUP_COMMAND" ]]; then
         echo "startup_command = \"$STARTUP_COMMAND\"" >> /usr/primary/tf.auto.tfvars
+    fi
+
+    # setting disable ops agent
+    if [[ -n "$DISABLE_OPS_AGENT" ]]; then
+      echo "disable_ops_agent = \"${DISABLE_OPS_AGENT,,}\"" >> /usr/primary/tf.auto.tfvars
     fi
 }
 
