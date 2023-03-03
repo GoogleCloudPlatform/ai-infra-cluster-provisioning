@@ -138,7 +138,7 @@ variable "startup_script" {
 }
 
 variable "guest_accelerator" {
-  description = "The type and count of accelerator cards attached to the instance."
+  description = "The type and count of accelerator card attached to the instance."
   type = object({
     type  = string,
     count = number
