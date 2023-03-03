@@ -46,6 +46,19 @@ locals {
       "content"         = "${var.startup_command}"
     }
   ] : []
+
+  gke_node_pools             = var.orchestrator_type == "gke" ? [ 
+    for np in compact(var.node_pools) :
+    {
+      name                    = split(":", trimspace(np))[0]
+      nodes_initial           = split(":", trimspace(np))[1]
+      nodes_min               = split(":", trimspace(np))[1]
+      nodes_max               = split(":", trimspace(np))[2]
+      machine_type            = var.machine_type
+      guest_accelerator_count = var.gpu_per_vm
+      guest_accelerator_type  = var.accelerator_type
+    }
+  ] : []
   
   vm_startup_setup      = concat(local.ray_setup, local.startup_command_setup)
 }
@@ -126,16 +139,17 @@ module "aiinfra-compute" {
   metadata            = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode="project_editors", })
   labels              = merge(var.labels, { aiinfra_role = "compute",})
   name_prefix         = var.name_prefix
-  guest_accelerator   = [{
+  guest_accelerator   = {
     count = var.gpu_per_vm
     type  = var.accelerator_type
-  }]
+  }
   deployment_name     = local.depl_name
   network_interfaces  = module.aiinfra-network.network_interfaces
   depends_on          = [
     module.aiinfra-network
   ]
   enable_gke          = var.orchestrator_type == "gke"
+  node_pools          = local.gke_node_pools
 }
 
 /*

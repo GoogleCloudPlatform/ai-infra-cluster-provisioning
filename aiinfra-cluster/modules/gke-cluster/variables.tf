@@ -120,6 +120,7 @@ variable "scopes" {
 }
 
 variable "node_pools" {
+  description = "The list of nodepools for the GKE cluster."
   type = list(object({
     name          = string
     nodes_initial = number

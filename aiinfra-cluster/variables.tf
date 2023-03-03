@@ -166,3 +166,16 @@ variable "local_dir_copy_list" {
     error_message = "All directory paths should be full path and exist on the machine. Destination path should be provided for all directory paths."
   }
 }
+
+variable "node_pools" {
+  description               = "The list of nodepools for the GKE cluster."
+  type                      = list(string)
+  default                   = []
+  
+  validation {
+    condition = alltrue([
+      for np in var.node_pools : length(trimspace(np)) == 0 || (can(split(":", trimspace(np))) && length(split(":", trimspace(np))) == 3)
+    ])
+    error_message = "The node pools variable should be a list of sting and each node pool string should be in the format <node_pool_name>:<min_node>:<max_node>."
+  }
+}

@@ -241,3 +241,11 @@ EOF
         echo "startup_command = \"$STARTUP_COMMAND\"" >> /usr/primary/tf.auto.tfvars
     fi
 }
+
+_set_node_pools_for_gke() {
+    node_pool_str=""
+    for np in "${!NODE_POOL_@}"; do
+        node_pool_str+="\"${!np}\","
+    done
+    echo "node_pools = [$node_pool_str]" >> /usr/primary/tf.auto.tfvars
+}

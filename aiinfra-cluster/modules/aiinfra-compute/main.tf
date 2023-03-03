@@ -31,7 +31,7 @@ locals {
   # compact_placement : true when placement policy is provided and collocation set; false if unset
   compact_placement = try(var.placement_policy.collocation, null) != null
 
-  gpu_attached = contains(["a2"], local.machine_family) || length(var.guest_accelerator) > 0
+  gpu_attached = contains(["a2"], local.machine_family) || var.guest_accelerator != null
 
   # both of these must be false if either compact placement or preemptible/spot instances are used
   # automatic restart is tolerant of GPUs while on host maintenance is not
@@ -67,7 +67,8 @@ locals {
     public_ptr_domain_name = null,
     network_tier           = null
   }
-  default_network_interface = {
+
+  default_network_interface = [{
     network            = var.network_self_link
     subnetwork         = var.subnetwork_self_link
     subnetwork_project = var.project_id
@@ -78,8 +79,20 @@ locals {
     access_config      = var.disable_public_ips ? [] : [local.empty_access_config]
     ipv6_access_config = []
     alias_ip_range     = []
-  }
-  network_interfaces = coalescelist(var.network_interfaces, [local.default_network_interface])
+  }]
+
+  network_interfaces = coalescelist(var.network_interfaces, local.default_network_interface)
+
+  default_node_pool         = [{
+    name                    = "system-nodes"
+    nodes_initial           = var.instance_count
+    nodes_min               = var.instance_count
+    nodes_max               = var.instance_count
+    machine_type            = var.machine_type
+    guest_accelerator_count = var.guest_accelerator.count
+    guest_accelerator_type  = var.guest_accelerator.type
+  }]
+  gke_node_pools            = coalescelist(var.node_pools, local.default_node_pool)
 }
 
 data "google_compute_image" "compute_image" {
@@ -153,12 +166,9 @@ resource "google_compute_instance_template" "compute_vm_template" {
     }
   }
 
-  dynamic "guest_accelerator" {
-    for_each = var.guest_accelerator[*]
-    content {
-      type  = guest_accelerator.value.type
-      count = guest_accelerator.value.count
-    }
+  guest_accelerator {
+    type  = var.guest_accelerator.type
+    count = var.guest_accelerator.count
   }
 
   scheduling {
@@ -221,15 +231,5 @@ module "aiinfra-gke" {
   network_self_link        = var.network_self_link
   subnetwork_self_link     = var.subnetwork_self_link
   node_service_account     = lookup(var.service_account, "email", null)
-  node_pools               = [
-    {
-      name                    = "system-nodes"
-      nodes_initial           = var.instance_count
-      nodes_min               = 1
-      nodes_max               = var.instance_count
-      machine_type            = var.machine_type
-      guest_accelerator_count = var.guest_accelerator[0].count
-      guest_accelerator_type  = var.guest_accelerator[0].type
-    }
-  ]
+  node_pools               = local.gke_node_pools
 }

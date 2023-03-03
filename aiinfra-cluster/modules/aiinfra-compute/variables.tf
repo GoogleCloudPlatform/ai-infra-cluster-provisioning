@@ -138,12 +138,12 @@ variable "startup_script" {
 }
 
 variable "guest_accelerator" {
-  description = "List of the type and count of accelerator cards attached to the instance."
-  type = list(object({
+  description = "The type and count of accelerator cards attached to the instance."
+  type = object({
     type  = string,
     count = number
-  }))
-  default = []
+  })
+  default = null
 }
 
 variable "on_host_maintenance" {
@@ -282,4 +282,18 @@ variable "enable_gke" {
   description = "Flag to enable GKE cluster creation instead of MIG."
   type        = bool
   default     = false
+}
+
+variable "node_pools" {
+  description               = "The list of nodepools for the GKE cluster."
+  type                      = list(object({
+    name                    = string
+    nodes_initial           = number
+    nodes_min               = number
+    nodes_max               = number
+    machine_type            = string
+    guest_accelerator_count = number
+    guest_accelerator_type  = string
+  }))
+  default                   = []
 }
