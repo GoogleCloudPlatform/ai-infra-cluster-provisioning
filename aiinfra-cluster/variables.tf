@@ -173,15 +173,20 @@ variable "local_dir_copy_list" {
   }
 }
 
-variable "node_pools" {
-  description               = "The list of nodepools for the GKE cluster."
-  type                      = list(string)
-  default                   = []
-  
-  validation {
-    condition = alltrue([
-      for np in var.node_pools : length(trimspace(np)) == 0 || (can(split(":", trimspace(np))) && length(split(":", trimspace(np))) == 3)
-    ])
-    error_message = "The node pools variable should be a list of sting and each node pool string should be in the format <node_pool_name>:<min_node>:<max_node>."
-  }
+variable "gke_node_pool_count" {
+  description = "The number of homogeneous node pools for GKE cluster."
+  type        = number
+  default     = 0
+}
+
+variable "gke_min_node_count" {
+  description = "The min node count for node pools for GKE cluster."
+  type        = number
+  default     = 0
+}
+
+variable "gke_max_node_count" {
+  description = "The max node count for node pools for GKE cluster."
+  type        = number
+  default     = 0
 }

@@ -133,9 +133,10 @@ resource "google_container_cluster" "gke-cluster" {
   # Allow planned maintenance during this time period.
   maintenance_policy {
     recurring_window {
-      start_time = "2019-01-01T09:00:00Z"
-      end_time = "2019-01-01T17:00:00Z"
-      recurrence = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
+      start_time = "2023-01-01T09:00:00Z"
+      end_time = "2025-01-01T17:00:00Z"
+      # On the 1st Tuesday of every 6 months.
+      recurrence = "FREQ=MONTHLY;INTERVAL=6;BYDAY=1TU"
     }
   }
 

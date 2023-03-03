@@ -55,17 +55,21 @@ locals {
     }
   ] : []
 
-  gke_node_pools             = var.orchestrator_type == "gke" ? [ 
-    for np in compact(var.node_pools) :
+  gke_node_pools = var.orchestrator_type == "gke" ? [ 
+    for idx in range(var.gke_node_pool_count) :
     {
-      name                    = split(":", trimspace(np))[0]
-      nodes_initial           = split(":", trimspace(np))[1]
-      nodes_min               = split(":", trimspace(np))[1]
-      nodes_max               = split(":", trimspace(np))[2]
+      name                    = "${var.name_prefix}-nodepool-${idx}"
+      nodes_initial           = var.gke_min_node_count
+      nodes_min               = var.gke_min_node_count
+      nodes_max               = var.gke_max_node_count
       machine_type            = var.machine_type
       guest_accelerator_count = var.gpu_per_vm
       guest_accelerator_type  = var.accelerator_type
     }
+  ] : []
+
+  widgets = (var.orchestrator_type != "gke" && !var.disable_ops_agent) ? [
+    for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
   ] : []
   
   vm_startup_setup      = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
@@ -174,7 +178,5 @@ module "aiinfra-default-dashboard" {
   deployment_name = local.depl_name
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
-  widgets         = [
-    for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
-  ]
+  widgets         = local.widgets
 }
