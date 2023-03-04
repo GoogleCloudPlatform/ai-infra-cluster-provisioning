@@ -34,8 +34,8 @@ The optional parameters are:
     -  __ray__: A Ray cluster is created using the MIG instances.
     -  __gke__: A private GKE cluster is created with private nodepool following the recommendations from the GKE team.
 15. ***GKE_NODE_POOL_COUNT***: The number of homogeneous node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
-16. ***GKE_MIN_NODE_COUNT***: The number of homogeneous node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
-17. ***GKE_MAX_NODE_COUNT***:
+16. ***GKE_MIN_NODE_COUNT***: The minimum node count of the node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
+17. ***GKE_MAX_NODE_COUNT***:The maximum node count of the node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
 18. ***GCS_MOUNT_LIST***. This defines the list of GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
 19. ***NFS_FILESHARE_LIST***. This defines the list of NFS file shares to mount. The format is `</mount/path1>:<NFS fileshare type>,</mount/path2>:<NFS fileshare type>:<NFS fileshare size in GB>`. For example: NFS_FILESHARE_LIST=/usr/nfsshare1:BASIC_SSD
     -  The `<NFS fileshare type>` cannot be empty. The supported values are `BASIC_HDD`,`BASIC_SSD`,`HIGH_SCALE_SSD` and `ENTERPRISE`.
