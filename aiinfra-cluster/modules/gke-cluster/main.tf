@@ -149,7 +149,7 @@ resource "google_container_cluster" "gke-cluster" {
     # go/gke-cluster-pattern#req5.2.1 for internal traffic, and satified
     # only if var.enable_istio = "true".
     istio_config {
-      # Awkward disable flag.
+      # Awkward flag to enable istio_config.
       disabled = false
       auth     = "AUTH_MUTUAL_TLS"
     }
