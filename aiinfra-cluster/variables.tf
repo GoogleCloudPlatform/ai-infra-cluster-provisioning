@@ -180,7 +180,7 @@ variable "gke_node_pool_count" {
 }
 
 variable "gke_min_node_count" {
-  description = "The min node count for node pools for GKE cluster."
+  description = "The min node count for node pools for GKE cluster. Creation will fail if at least this number of Nodes cannot be created."
   type        = number
   default     = 0
 }
