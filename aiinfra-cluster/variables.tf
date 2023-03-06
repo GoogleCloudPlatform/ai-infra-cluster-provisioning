@@ -186,7 +186,7 @@ variable "gke_min_node_count" {
 }
 
 variable "gke_max_node_count" {
-  description = "The max node count for node pools for GKE cluster."
+  description = "The max node count for node pools for GKE cluster. This is the actual desired number of nodes, but it may be reached eventually, not at creation time."
   type        = number
   default     = 0
 }
