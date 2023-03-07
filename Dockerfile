@@ -14,7 +14,7 @@ RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
 ##########################################################################################
 # Clean Up Container
 ##########################################################################################
-RUN apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/
+RUN apt-get --quiet clean autoclean && apt-get --quiet autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 COPY aiinfra-cluster/ /usr/primary/
 COPY scripts/ /usr/

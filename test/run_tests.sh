@@ -4,9 +4,10 @@
 . ./test/aiinfra-cluster/terraform.sh
 
 run_tests () {
-    local -r COLOR_GRN='\e[1;32m'
-    local -r COLOR_RED='\e[0;31m'
     local -r COLOR_RST='\e[0m'
+    local -r COLOR_RED='\e[1;31m'
+    local -r COLOR_GRN='\e[1;32m'
+    local -r COLOR_YLW='\e[1;33m'
     local failure=false
     local test_command
 
@@ -17,10 +18,15 @@ run_tests () {
 
     declare -ar test_commands=($(declare -F | awk "/${test_regex}/"'{print $NF}'))
     for test_command in "${test_commands[@]}"; do
+        if grep -q '^disabled::test::' <<< "${test_command}"; then
+            echo -e "> ${test_command#disabled::} ${COLOR_YLW}disabled${COLOR_RST}"
+            continue
+        fi
+
         if (${test_command} >/dev/null); then
-            echo -e "${test_command} ${COLOR_GRN}succeeded${COLOR_RST}"
+            echo -e "> ${test_command} ${COLOR_GRN}succeeded${COLOR_RST}"
         else
-            echo -e "${test_command} ${COLOR_RED}failed${COLOR_RST}"
+            echo -e "> ${test_command} ${COLOR_RED}failed${COLOR_RST}"
             failure=true
         fi
     done
