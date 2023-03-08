@@ -15,35 +15,35 @@
   */
 
 locals {
-  depl_name = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
-  gcs_mount_arr         = compact(split(",", trimspace(var.gcs_mount_list)))
-  nfs_filestore_arr     = compact(split(",", trimspace(var.nfs_filestore_list)))
-  
-  dir_copy_arr         = compact(split(",", trimspace(var.local_dir_copy_list)))
-  dir_copy_setup       = flatten([
+  depl_name         = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
+  gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
+  nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
+
+  dir_copy_arr = compact(split(",", trimspace(var.local_dir_copy_list)))
+  dir_copy_setup = flatten([
     for path in local.dir_copy_arr : [
       for file in fileset("${split(":", trimspace(path))[0]}", "**") : {
-        "destination"   = "${split(":", trimspace(path))[1]}/${basename("${file}")}"
-        "source"        = "${split(":", trimspace(path))[0]}/${basename("${file}")}"
-        "type"          = "data" 
+        "destination" = "${split(":", trimspace(path))[1]}/${basename("${file}")}"
+        "source"      = "${split(":", trimspace(path))[0]}/${basename("${file}")}"
+        "type"        = "data"
       }
     ]
   ])
-  
-  ray_setup             = var.orchestrator_type == "ray" ? [
+
+  ray_setup = var.orchestrator_type == "ray" ? [
     {
-      "type"            = "shell"
-      "destination"     = "/tmp/setup_ray.sh"
-      "source"          = "${path.module}/installation_scripts/setup_ray.sh"
-      "args"            = "1.12.1 26379 ${var.gpu_per_vm}"
+      "type"        = "shell"
+      "destination" = "/tmp/setup_ray.sh"
+      "source"      = "${path.module}/installation_scripts/setup_ray.sh"
+      "args"        = "1.12.1 26379 ${var.gpu_per_vm}"
     }
   ] : []
 
   startup_command_setup = var.startup_command != "" ? [
     {
-      "type"            = "shell"
-      "destination"     = "/tmp/initializestartup.sh"
-      "content"         = "${var.startup_command}"
+      "type"        = "shell"
+      "destination" = "/tmp/initializestartup.sh"
+      "content"     = "${var.startup_command}"
     }
   ] : []
 
@@ -55,7 +55,7 @@ locals {
     }
   ] : []
 
-  gke_node_pools = var.orchestrator_type == "gke" ? [ 
+  basic_node_pools = var.orchestrator_type == "gke" ? [
     for idx in range(var.gke_node_pool_count) :
     {
       name                    = "${var.name_prefix}-nodepool-${idx}"
@@ -68,11 +68,16 @@ locals {
     }
   ] : []
 
+  // Terraform does not provide a way to validate multiple variables in variable validation block.
+  // Using this type of validation as per https://github.com/hashicorp/terraform/issues/25609#issuecomment-1057614400
+  validate_basic_node_pool = (var.orchestrator_type != "gke" && (var.gke_node_pool_count > 0 || var.gke_min_node_count > 0 || var.gke_max_node_count > 0)) ? tobool("Orchestrator type is not GKE. Please remove gke_node_pool_count, gke_min_node_count or gke_min_node_count variables.") : true
+  validate_custom_node_pool = (length(var.custom_node_pools) > 0 && (var.gke_node_pool_count > 0 || var.gke_min_node_count > 0 || var.gke_max_node_count > 0)) ? tobool("Custom node pools are provided. Please do not use gke_node_pool_count, gke_min_node_count or gke_min_node_count variables.") : true
+  
   widgets = (var.orchestrator_type != "gke" && !var.disable_ops_agent) ? [
     for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
   ] : []
-  
-  vm_startup_setup      = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
+
+  vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
 }
 
@@ -94,33 +99,33 @@ module "gcsfuse_mount" {
 }
 
 module "nfs_filestore" {
-  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44"
-  count           = length(local.nfs_filestore_arr)
-  project_id      = var.project_id
-  region          = var.region
-  zone            = var.zone
-  deployment_name = local.depl_name
-  network_name    = module.aiinfra-network.network_name
+  source               = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44"
+  count                = length(local.nfs_filestore_arr)
+  project_id           = var.project_id
+  region               = var.region
+  zone                 = var.zone
+  deployment_name      = local.depl_name
+  network_name         = module.aiinfra-network.network_name
   filestore_share_name = "nfsshare_${count.index}"
-  labels          = merge(var.labels, { ghpc_role = "aiinfra-filestore",})
-  local_mount     = split(":", trimspace(local.nfs_filestore_arr[count.index]))[0]
-  filestore_tier  = split(":", trimspace(local.nfs_filestore_arr[count.index]))[1]
-  size_gb         = length(split(":", trimspace(local.nfs_filestore_arr[count.index]))) > 2 ? split(":", trimspace(local.nfs_filestore_arr[count.index]))[2] : 2560
+  labels               = merge(var.labels, { ghpc_role = "aiinfra-filestore", })
+  local_mount          = split(":", trimspace(local.nfs_filestore_arr[count.index]))[0]
+  filestore_tier       = split(":", trimspace(local.nfs_filestore_arr[count.index]))[1]
+  size_gb              = length(split(":", trimspace(local.nfs_filestore_arr[count.index]))) > 2 ? split(":", trimspace(local.nfs_filestore_arr[count.index]))[2] : 2560
   depends_on = [
     module.aiinfra-network
   ]
 }
 
 module "startup" {
-  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
-  project_id      = var.project_id
+  source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
+  project_id = var.project_id
   runners = concat(local.dir_copy_setup
-  , module.gcsfuse_mount[*].client_install_runner
-  , module.gcsfuse_mount[*].mount_runner
-  , module.nfs_filestore[*].install_nfs_client_runner
-  , module.nfs_filestore[*].mount_runner
+    , module.gcsfuse_mount[*].client_install_runner
+    , module.gcsfuse_mount[*].mount_runner
+    , module.nfs_filestore[*].install_nfs_client_runner
+    , module.nfs_filestore[*].mount_runner
   , local.vm_startup_setup)
-  labels          = merge(var.labels, { ghpc_role = "scripts",})
+  labels          = merge(var.labels, { ghpc_role = "scripts", })
   deployment_name = local.depl_name
   gcs_bucket_path = var.gcs_bucket_path
   region          = var.region
@@ -149,24 +154,24 @@ module "aiinfra-compute" {
   zone                = var.zone
   region              = var.region
   startup_script      = module.startup.startup_script
-  metadata            = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode="project_editors", })
-  labels              = merge(var.labels, { aiinfra_role = "compute",})
+  metadata            = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode = "project_editors", })
+  labels              = merge(var.labels, { aiinfra_role = "compute", })
   name_prefix         = var.name_prefix
-  guest_accelerator   = {
+  guest_accelerator = {
     count = var.gpu_per_vm
     type  = var.accelerator_type
   }
-  deployment_name     = local.depl_name
-  network_interfaces  = module.aiinfra-network.network_interfaces
-  depends_on          = [
+  deployment_name    = local.depl_name
+  network_interfaces = module.aiinfra-network.network_interfaces
+  depends_on = [
     module.aiinfra-network
   ]
-  enable_gke          = var.orchestrator_type == "gke"
-  node_pools          = local.gke_node_pools
+  enable_gke = var.orchestrator_type == "gke"
+  node_pools = coalesce(jsonencode(var.custom_node_pools), local.basic_node_pools)
 }
 
 module "dashboard" {
-  source               = "./modules/dashboard"
+  source = "./modules/dashboard"
 }
 
 /*

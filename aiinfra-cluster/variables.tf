@@ -190,3 +190,17 @@ variable "gke_max_node_count" {
   type        = number
   default     = 0
 }
+
+variable "custom_node_pools" {
+  description               = "The list of custom nodepools for the GKE cluster."
+  type                      = list(object({
+    name                    = string
+    nodes_initial           = number
+    nodes_min               = number
+    nodes_max               = number
+    machine_type            = string
+    guest_accelerator_count = number
+    guest_accelerator_type  = string
+  }))
+  default                   = []
+}
