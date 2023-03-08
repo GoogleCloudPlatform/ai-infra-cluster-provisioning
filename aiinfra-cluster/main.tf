@@ -55,7 +55,7 @@ locals {
     }
   ] : []
 
-  basic_node_pools = var.orchestrator_type == "gke" ? [
+  basic_node_pools = (var.orchestrator_type == "gke" && var.gke_node_pool_count > 0) ? [
     for idx in range(var.gke_node_pool_count) :
     {
       name                    = "${var.name_prefix}-nodepool-${idx}"
@@ -66,7 +66,7 @@ locals {
       guest_accelerator_count = var.gpu_per_vm
       guest_accelerator_type  = var.accelerator_type
     }
-  ] : []
+  ] : null
 
   // Terraform does not provide a way to validate multiple variables in variable validation block.
   // Using this type of validation as per https://github.com/hashicorp/terraform/issues/25609#issuecomment-1057614400
@@ -167,7 +167,7 @@ module "aiinfra-compute" {
     module.aiinfra-network
   ]
   enable_gke = var.orchestrator_type == "gke"
-  node_pools = coalesce(jsonencode(var.custom_node_pools), local.basic_node_pools)
+  node_pools = coalescelist(var.custom_node_pools, local.basic_node_pools)
 }
 
 module "dashboard" {
