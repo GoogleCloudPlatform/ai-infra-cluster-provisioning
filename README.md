@@ -44,7 +44,9 @@ The optional parameters are:
 20. ***DISABLE_OPS_AGENT***. Can be one of:
     - `false` (default): Install Ops Agent with random-backoff retries
     - `true`: Do not install Ops Agent
-
+21. ***DISABLE_NOTEBOOK***. Can be one of:
+    - `false` (default): Sets up jupyter notebook for the vm instances.
+    - `true`: Do not set up jupyter notebook.
 
 The user needs to provide value for the above mandatory parameters. All other parameters are optional and default behaviour is described above. Users can also enable/disable various features using feature flags in the config, for example: ORCHESTRATOR_TYPE, SHOW_PROXY_URL, GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
 

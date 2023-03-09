@@ -155,7 +155,13 @@ variable "startup_command" {
 }
 
 variable "disable_ops_agent" {
-  description = ""
+  description = "The flag to disable Ops agent installation."
+  type        = bool
+  default     = false
+}
+
+variable "disable_notebook" {
+  description = "The flag to disable jupyter notebook initialization."
   type        = bool
   default     = false
 }
