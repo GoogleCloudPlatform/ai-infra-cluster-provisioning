@@ -15,6 +15,11 @@
   */
 
 locals {
+  depl_name = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
+
+  default_metadata = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", })
+  metadata = var.enable_notebook ? merge(local.default_metadata, { proxy-mode="project_editors", }) : local.default_metadata
+
   gcs_mount_arr         = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr     = compact(split(",", trimspace(var.nfs_filestore_list)))
   
@@ -45,15 +50,24 @@ locals {
       "content"         = "${var.startup_command}"
     }
   ] : []
+
+  install_ops_agent = var.enable_ops_agent ? [
+    {
+      "type"        = "shell"
+      "destination" = "install_cloud_ops_agent.sh"
+      "source"      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
+    }
+  ] : []
   
-  vm_startup_setup      = concat(local.ray_setup, local.startup_command_setup)
+  vm_startup_setup      = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
+
 }
 
 module "aiinfra-network" {
   source          = "./modules/aiinfra-network"
   project_id      = var.project_id
   region          = var.region
-  deployment_name = var.deployment_name
+  deployment_name = local.depl_name
   network_config  = var.network_config
 }
 
@@ -72,7 +86,7 @@ module "nfs_filestore" {
   project_id      = var.project_id
   region          = var.region
   zone            = var.zone
-  deployment_name = var.deployment_name
+  deployment_name = local.depl_name
   network_name    = module.aiinfra-network.network_name
   filestore_share_name = "nfsshare_${count.index}"
   labels          = merge(var.labels, { ghpc_role = "aiinfra-filestore",})
@@ -94,7 +108,7 @@ module "startup" {
   , module.nfs_filestore[*].mount_runner
   , local.vm_startup_setup)
   labels          = merge(var.labels, { ghpc_role = "scripts",})
-  deployment_name = var.deployment_name
+  deployment_name = local.depl_name
   gcs_bucket_path = var.gcs_bucket_path
   region          = var.region
 }
@@ -103,7 +117,7 @@ module "aiinfra-mig" {
   source               = "./modules/vm-instance-group"
   subnetwork_self_link = module.aiinfra-network.subnetwork_self_link
   service_account = {
-    email  = var.service_account
+    email  = var.service_account.email
     scopes = ["cloud-platform"]
   }
   instance_count    = var.instance_count
@@ -122,18 +136,22 @@ module "aiinfra-mig" {
   zone                = var.zone
   region              = var.region
   startup_script      = module.startup.startup_script
-  metadata = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode="project_editors", })
+  metadata = local.metadata
   labels      = merge(var.labels, { aiinfra_role = "compute",})
   name_prefix = var.name_prefix
   guest_accelerator = [{
     count = var.gpu_per_vm
     type  = var.accelerator_type
   }]
-  deployment_name = var.deployment_name
+  deployment_name = local.depl_name
   network_interfaces = module.aiinfra-network.network_interfaces
   depends_on = [
     module.aiinfra-network
   ]
+}
+
+module "dashboard" {
+  source               = "./modules/dashboard"
 }
 
 /*
@@ -142,7 +160,10 @@ module "aiinfra-mig" {
 module "aiinfra-default-dashboard" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
   project_id      = var.project_id
-  deployment_name = var.deployment_name
+  deployment_name = local.depl_name
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
+  widgets         = [
+    for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
+  ]
 }

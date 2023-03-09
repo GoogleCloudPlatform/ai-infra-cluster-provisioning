@@ -14,79 +14,78 @@
   * limitations under the License.
   */
 
-variable "name_prefix" {
-  description = ""
+variable "project_id" {
+  description = "The project_id to create the resources for GPU cluster."
   type        = string
-}
-
-variable "gpu_per_vm" {
-  description = ""
-  type        = number
 }
 
 variable "service_account" {
-  description = ""
+  description = "Service account to attach to the instance. See https://www.terraform.io/docs/providers/google/r/compute_instance_template.html#service_account."
+  type = object({
+    email  = string,
+    scopes = set(string)
+  })
+  default = {
+    email = null
+    scopes = ["https://www.googleapis.com/auth/devstorage.read_write",
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring.write",
+      "https://www.googleapis.com/auth/servicecontrol",
+      "https://www.googleapis.com/auth/service.management.readonly",
+    "https://www.googleapis.com/auth/trace.append"]
+  }
+}
+
+variable "name_prefix" {
+  description = "The name prefix to be used for creating resources."
   type        = string
 }
 
-variable "project_id" {
-  description = ""
+variable "deployment_name" {
+  description = "The deployment name. Default value is name_prefix-depl."
   type        = string
+  default     = null
 }
 
-variable "instance_count" {
-  description = ""
-  type        = number
+variable "region" {
+  description = "The region to create the GPU cluster."
+  type        = string
 }
 
 variable "zone" {
-  description = ""
+  description = "The zone to create the GPU cluster."
   type        = string
 }
 
 variable "machine_type" {
-  description = ""
+  description = "The VM type to use for compute."
   type        = string
 }
 
-variable "instance_image" {
-  description = ""
-  type        = map
-}
-
-variable "labels" {
-  description = ""
-  type        = map
-}
-
-variable "metadata" {
-  description = ""
-  type        = map
-}
-
-variable "deployment_name" {
-  description = ""
-  type        = string
-}
-
-variable "gcs_bucket_path" {
-  description = ""
-  type        = string
-}
-
-variable "region" {
-  description = ""
-  type        = string
+variable "instance_count" {
+  description = "The number of VM instances."
+  type        = number
 }
 
 variable "accelerator_type" {
-  description = ""
+  description = "The accelerator (GPU) type."
   type        = string
 }
 
-variable "disk_size_gb" {
-  description = ""
+variable "gpu_per_vm" {
+  description = "The number of GPUs per VM."
   type        = number
+}
+
+variable "instance_image" {
+  description = "The VM instance image."
+  type        = map
+}
+
+variable "disk_size_gb" {
+  description = "Size of disk for VM instances."
+  type        = number
+  default     = 1000
 }
 
 variable "disk_type" {
@@ -98,6 +97,21 @@ variable "disk_type" {
     condition     = contains(["pd-ssd", "local-ssd", "pd-standard"], var.disk_type)
     error_message = "Variable disk_type must be one of pd-ssd, local-ssd, or pd-standard."
   }
+}
+
+variable "labels" {
+  description = "Lables for the GPU cluster resources."
+  type        = map
+}
+
+variable "metadata" {
+  description = "Metadata for the VM instance."
+  type        = map
+}
+
+variable "gcs_bucket_path" {
+  description = "The GCS bucket path to use for startup scripts."
+  type        = string
 }
 
 variable "network_config" {
@@ -126,18 +140,30 @@ variable "nfs_filestore_list" {
 variable "orchestrator_type" {
   description = "The job orchestrator to be used, can be either ray (default) or slurm."
   type        = string
-  default     = "ray"
+  default     = "none"
 
   validation {
-    condition     = contains(["ray", "slurm"], var.orchestrator_type)
-    error_message = "Variable orchestrator_type must be either ray or slurm."
+    condition     = contains(["ray", "slurm", "none"], var.orchestrator_type)
+    error_message = "Variable orchestrator_type must be either ray, slurm or none."
   }
 }
 
 variable "startup_command" {
   description = "The startup command to be executed when the VM starts up."
   type        = string
-  default = ""
+  default     = ""
+}
+
+variable "enable_ops_agent" {
+  description = "The flag to enable Ops agent installation."
+  type        = bool
+  default     = true
+}
+
+variable "enable_notebook" {
+  description = "The flag to enable jupyter notebook initialization."
+  type        = bool
+  default     = true
 }
 
 variable "local_dir_copy_list" {

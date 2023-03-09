@@ -56,7 +56,19 @@ _set_terraform_env_var() {
         echo "Project number is $project_num"
         project_email=$project_num-compute@developer.gserviceaccount.com
         echo "Exporting service account as $project_email"
-        echo "service_account = \"$project_email\"" >> /usr/primary/tf.auto.tfvars
+        cat >>/usr/primary/tf.auto.tfvars <<EOF
+service_account = {
+  email = "${project_email}"
+  scopes = [
+    "https://www.googleapis.com/auth/devstorage.read_write",
+    "https://www.googleapis.com/auth/logging.write",
+    "https://www.googleapis.com/auth/monitoring.write",
+    "https://www.googleapis.com/auth/servicecontrol",
+    "https://www.googleapis.com/auth/service.management.readonly",
+    "https://www.googleapis.com/auth/trace.append"
+  ]
+}
+EOF
         val=`gcloud config set project $PROJECT_ID`
     fi
 
@@ -224,8 +236,18 @@ _set_terraform_env_var() {
         echo "orchestrator_type = \"${ORCHESTRATOR_TYPE,,}\"" >> /usr/primary/tf.auto.tfvars
     fi
 
-    # seting startup command
+    # setting startup command
     if [[ -n "$STARTUP_COMMAND" ]]; then
         echo "startup_command = \"$STARTUP_COMMAND\"" >> /usr/primary/tf.auto.tfvars
+    fi
+
+    # setting enable ops agent
+    if [[ -n "$ENABLE_OPS_AGENT" ]]; then
+      echo "enable_ops_agent = \"${ENABLE_OPS_AGENT,,}\"" >> /usr/primary/tf.auto.tfvars
+    fi
+
+    # setting disable ops agent
+    if [[ -n "$ENABLE_NOTEBOOK" ]]; then
+      echo "enable_notebook = \"${ENABLE_NOTEBOOK,,}\"" >> /usr/primary/tf.auto.tfvars
     fi
 }

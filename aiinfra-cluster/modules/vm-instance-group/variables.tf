@@ -164,7 +164,7 @@ variable "bandwidth_tier" {
   Note that TIER_1 only works with specific machine families & shapes and must be using an image that supports gVNIC. See [official docs](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration) for more details.
   EOT
   type        = string
-  default     = "gvnic_enabled"
+  default     = "not_enabled"
 
   validation {
     condition     = contains(["not_enabled", "gvnic_enabled", "tier_1_enabled"], var.bandwidth_tier)

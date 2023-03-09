@@ -32,14 +32,15 @@ output "network_self_link" {
 output "network_interfaces" {
   description = "The network interface that includes all VPC subnets."
   value = local.trimmed_net_config == "multi_nic_network" ? [for idx in range(var.nic_count) : {
-    access_config      = []
+    access_config      = idx == 0 ? [local.empty_access_config] : []
     alias_ip_range     = []
     ipv6_access_config = []
     network            = null
     network_ip         = null
     queue_count        = null
     stack_type         = null
-    nic_type           = "GVNIC"
+    # Disabling GVNIC until we have the DLVM fix.
+    nic_type           = null
     subnetwork         = module.multinic_vpc[idx].subnetwork_self_link
     subnetwork_project = var.project_id
     }
