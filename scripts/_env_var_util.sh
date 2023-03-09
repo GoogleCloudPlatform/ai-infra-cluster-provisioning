@@ -241,7 +241,7 @@ EOF
         echo "startup_command = \"$STARTUP_COMMAND\"" >> /usr/primary/tf.auto.tfvars
     fi
 
-    # setting disable ops agent
+    # setting enable ops agent
     if [[ -n "$ENABLE_OPS_AGENT" ]]; then
       echo "enable_ops_agent = \"${ENABLE_OPS_AGENT,,}\"" >> /usr/primary/tf.auto.tfvars
     fi
