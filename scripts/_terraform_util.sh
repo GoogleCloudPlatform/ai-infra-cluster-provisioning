@@ -54,7 +54,7 @@ _terraform_setup() {
 _Display_connection_info() {
     if [[ -n "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
         echo "Not checking for proxy_url information."
-    elif [[ -n "$DISABLE_NOTEBOOK" && "${DISABLE_NOTEBOOK,,}" == "true" ]]; then
+    elif [[ -n "$ENABLE_NOTEBOOK" && "${ENABLE_NOTEBOOK,,}" == "false" ]]; then
         echo "Jupyter notebook is disabled."
     else
         for vm in $(gcloud compute instance-groups list-instances $NAME_PREFIX-mig --zone $ZONE --format="value(NAME)");

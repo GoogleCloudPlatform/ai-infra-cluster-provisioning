@@ -41,12 +41,12 @@ The optional parameters are:
     -  __default_network__: MIG uses the default VPC in the project.
     -  __new_network__: A new VPC is created for the MIG.
     -  __multi_nic_network__: New VPCs are created and used by all the VMs in the MIG. By default 5 new VPCs are created and 5 NICs are used for the MIG but that value is configurable.
-20. ***DISABLE_OPS_AGENT***. Can be one of:
-    - `false` (default): Install Ops Agent with random-backoff retries
-    - `true`: Do not install Ops Agent
-21. ***DISABLE_NOTEBOOK***. Can be one of:
-    - `false` (default): Sets up jupyter notebook for the vm instances.
-    - `true`: Do not set up jupyter notebook.
+20. ***ENABLE_OPS_AGENT***. Can be one of:
+    - `true` (default): Install Ops Agent with random-backoff retries
+    - `false`: Do not install Ops Agent
+21. ***ENABLE_NOTEBOOK***. Can be one of:
+    - `true` (default): Sets up jupyter notebook for the vm instances.
+    - `false`: Do not set up jupyter notebook.
 
 The user needs to provide value for the above mandatory parameters. All other parameters are optional and default behaviour is described above. Users can also enable/disable various features using feature flags in the config, for example: ORCHESTRATOR_TYPE, SHOW_PROXY_URL, GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
 

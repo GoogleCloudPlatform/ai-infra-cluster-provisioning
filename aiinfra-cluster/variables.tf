@@ -154,16 +154,16 @@ variable "startup_command" {
   default     = ""
 }
 
-variable "disable_ops_agent" {
-  description = "The flag to disable Ops agent installation."
+variable "enable_ops_agent" {
+  description = "The flag to enable Ops agent installation."
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "disable_notebook" {
-  description = "The flag to disable jupyter notebook initialization."
+variable "enable_notebook" {
+  description = "The flag to enable jupyter notebook initialization."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "local_dir_copy_list" {
