@@ -140,11 +140,11 @@ variable "nfs_filestore_list" {
 variable "orchestrator_type" {
   description = "The job orchestrator to be used, can be either ray (default) or slurm."
   type        = string
-  default     = "ray"
+  default     = "none"
 
   validation {
-    condition     = contains(["ray", "slurm"], var.orchestrator_type)
-    error_message = "Variable orchestrator_type must be either ray or slurm."
+    condition     = contains(["ray", "slurm", "none"], var.orchestrator_type)
+    error_message = "Variable orchestrator_type must be either ray, slurm or none."
   }
 }
 
