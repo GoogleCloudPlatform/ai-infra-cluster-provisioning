@@ -241,8 +241,13 @@ EOF
         echo "startup_command = \"$STARTUP_COMMAND\"" >> /usr/primary/tf.auto.tfvars
     fi
 
+    # setting enable ops agent
+    if [[ -n "$ENABLE_OPS_AGENT" ]]; then
+      echo "enable_ops_agent = \"${ENABLE_OPS_AGENT,,}\"" >> /usr/primary/tf.auto.tfvars
+    fi
+
     # setting disable ops agent
-    if [[ -n "$DISABLE_OPS_AGENT" ]]; then
-      echo "disable_ops_agent = \"${DISABLE_OPS_AGENT,,}\"" >> /usr/primary/tf.auto.tfvars
+    if [[ -n "$ENABLE_NOTEBOOK" ]]; then
+      echo "enable_notebook = \"${ENABLE_NOTEBOOK,,}\"" >> /usr/primary/tf.auto.tfvars
     fi
 }
