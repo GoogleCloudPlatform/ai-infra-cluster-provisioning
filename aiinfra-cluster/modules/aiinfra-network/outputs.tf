@@ -39,7 +39,8 @@ output "network_interfaces" {
     network_ip         = null
     queue_count        = null
     stack_type         = null
-    nic_type           = "GVNIC"
+    # Disabling GVNIC until we have the DLVM fix.
+    nic_type           = null
     subnetwork         = module.multinic_vpc[idx].subnetwork_self_link
     subnetwork_project = var.project_id
     }

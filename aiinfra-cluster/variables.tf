@@ -140,11 +140,11 @@ variable "nfs_filestore_list" {
 variable "orchestrator_type" {
   description = "The job orchestrator to be used, can be either ray (default), slurm or gke."
   type        = string
-  default     = "ray"
+  default     = "none"
 
   validation {
-    condition     = contains(["ray", "slurm", "gke"], var.orchestrator_type)
-    error_message = "Variable orchestrator_type must be either ray, slurm or gke."
+    condition     = contains(["ray", "slurm", "gke", "none"], var.orchestrator_type)
+    error_message = "Variable orchestrator_type must be either ray, slurm, gke or none."
   }
 }
 
@@ -154,10 +154,16 @@ variable "startup_command" {
   default     = ""
 }
 
-variable "disable_ops_agent" {
-  description = ""
+variable "enable_ops_agent" {
+  description = "The flag to enable Ops agent installation."
   type        = bool
-  default     = false
+  default     = true
+}
+
+variable "enable_notebook" {
+  description = "The flag to enable jupyter notebook initialization."
+  type        = bool
+  default     = true
 }
 
 variable "local_dir_copy_list" {

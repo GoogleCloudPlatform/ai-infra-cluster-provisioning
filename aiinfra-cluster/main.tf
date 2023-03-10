@@ -16,6 +16,10 @@
 
 locals {
   depl_name         = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
+
+  default_metadata  = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", })
+  metadata          = var.enable_notebook ? merge(local.default_metadata, { proxy-mode="project_editors", }) : local.default_metadata
+
   gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
 
@@ -47,7 +51,7 @@ locals {
     }
   ] : []
 
-  install_ops_agent = !var.disable_ops_agent ? [
+  install_ops_agent = var.enable_ops_agent ? [
     {
       "type"        = "shell"
       "destination" = "install_cloud_ops_agent.sh"
@@ -154,7 +158,7 @@ module "aiinfra-compute" {
   zone                = var.zone
   region              = var.region
   startup_script      = module.startup.startup_script
-  metadata            = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", proxy-mode = "project_editors", })
+  metadata            = local.metadata
   labels              = merge(var.labels, { aiinfra_role = "compute", })
   name_prefix         = var.name_prefix
   guest_accelerator = {
