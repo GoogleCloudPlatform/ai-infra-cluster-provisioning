@@ -208,5 +208,5 @@ variable "custom_node_pools" {
     guest_accelerator_count = number
     guest_accelerator_type  = string
   }))
-  default                   = null
+  default                   = []
 }

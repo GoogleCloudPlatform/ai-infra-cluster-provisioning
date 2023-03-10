@@ -265,7 +265,7 @@ _set_node_pools_for_gke() {
         echo "gke_max_node_count = $GKE_MAX_NODE_COUNT" >> /usr/primary/tf.auto.tfvars
     fi
 
-    if [[ -n "$CUSTOM_NODE_POOL_YAML" ]]; then
-        echo "custom_node_pools = $CUSTOM_NODE_POOL_YAML" >> /usr/primary/tf.auto.tfvars
+    if [[ -n "$CUSTOM_NODE_POOL" ]]; then
+        echo "custom_node_pools = $CUSTOM_NODE_POOL" >> /usr/primary/tf.auto.tfvars
     fi
 }
