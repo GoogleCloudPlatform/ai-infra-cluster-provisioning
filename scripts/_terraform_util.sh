@@ -103,7 +103,7 @@ _terraform_cleanup() {
                 gsutil rm -r gs://$TF_BUCKET_NAME/$TF_STATE_PATH/ || del_state_ret=$?
             fi
          else
-            echo "Terraform destroy is alredy executed."
+            echo "Terraform destroy is already executed."
          fi
     fi
 }
