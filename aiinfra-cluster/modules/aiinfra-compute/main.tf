@@ -37,7 +37,7 @@ locals {
   # compact_placement : true when placement policy is provided and collocation set; false if unset
   compact_placement = try(var.placement_policy.collocation, null) != null
 
-  gpu_attached = contains(["a2"], local.machine_family) || length(var.guest_accelerator) > 0
+  gpu_attached = contains(["a2"], local.machine_family) || var.guest_accelerator != null
 
   # both of these must be false if either compact placement or preemptible/spot instances are used
   # automatic restart is tolerant of GPUs while on host maintenance is not
@@ -73,7 +73,8 @@ locals {
     public_ptr_domain_name = null,
     network_tier           = null
   }
-  default_network_interface = {
+
+  default_network_interface = [{
     network            = var.network_self_link
     subnetwork         = var.subnetwork_self_link
     subnetwork_project = var.project_id
@@ -84,8 +85,20 @@ locals {
     access_config      = var.disable_public_ips ? [] : [local.empty_access_config]
     ipv6_access_config = []
     alias_ip_range     = []
-  }
-  network_interfaces = coalescelist(var.network_interfaces, [local.default_network_interface])
+  }]
+
+  network_interfaces = coalescelist(var.network_interfaces, local.default_network_interface)
+
+  default_node_pool         = [{
+    name                    = "system-nodes"
+    nodes_initial           = var.instance_count
+    nodes_min               = var.instance_count
+    nodes_max               = var.instance_count
+    machine_type            = var.machine_type
+    guest_accelerator_count = var.guest_accelerator.count
+    guest_accelerator_type  = var.guest_accelerator.type
+  }]
+  gke_node_pools            = coalescelist(var.node_pools, local.default_node_pool)
 }
 
 data "google_compute_image" "compute_image" {
@@ -97,6 +110,7 @@ data "google_compute_image" "compute_image" {
 resource "google_compute_instance_template" "compute_vm_template" {
   project        = var.project_id
   provider       = google-beta
+  count          = var.enable_gke ? 0 : 1
   name_prefix    = "${local.resource_prefix}"
   machine_type   = var.machine_type
   region         = var.region
@@ -158,12 +172,9 @@ resource "google_compute_instance_template" "compute_vm_template" {
     }
   }
 
-  dynamic "guest_accelerator" {
-    for_each = var.guest_accelerator[*]
-    content {
-      type  = guest_accelerator.value.type
-      count = guest_accelerator.value.count
-    }
+  guest_accelerator {
+    type  = var.guest_accelerator.type
+    count = var.guest_accelerator.count
   }
 
   scheduling {
@@ -192,6 +203,7 @@ resource "google_compute_instance_template" "compute_vm_template" {
 
 resource "google_compute_instance_group_manager" "mig" {
   provider           = google-beta
+  count              = var.enable_gke ? 0 : 1
   name               = "${local.resource_prefix}-mig"
   base_instance_name = "${local.resource_prefix}-vm"
   project            = var.project_id
@@ -205,7 +217,7 @@ resource "google_compute_instance_group_manager" "mig" {
   wait_for_instances = true
   version {
     name              = "default"
-    instance_template = google_compute_instance_template.compute_vm_template.id
+    instance_template = one(google_compute_instance_template.compute_vm_template[*].id)
   }
   target_size = var.instance_count
   depends_on = [var.network_self_link, var.network_storage]
@@ -213,4 +225,17 @@ resource "google_compute_instance_group_manager" "mig" {
     create = "30m"
     update = "30m"
   }
+}
+
+module "aiinfra-gke" {
+  source                   = "../gke-cluster"
+  count                    = var.enable_gke ? 1 : 0
+  project                  = var.project_id
+  region                   = var.region
+  zone                     = var.zone
+  name                     = "${local.resource_prefix}-gke"
+  network_self_link        = var.network_self_link
+  subnetwork_self_link     = var.subnetwork_self_link
+  node_service_account     = lookup(var.service_account, "email", null)
+  node_pools               = local.gke_node_pools
 }

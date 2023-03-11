@@ -36,6 +36,7 @@ fi
 
 _debug_hold
 _set_terraform_env_var
+_set_node_pools_for_gke
 _expand_files_to_copy
 
 _set_terraform_backend

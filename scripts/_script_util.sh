@@ -18,7 +18,7 @@
 # method to expand files to copy.
 #
 _expand_files_to_copy() {
-    fileCopy=""
+    FILELIST=""
 
     # if any volume is mounted at /usr/aiinfra/copy then copy those files
     # to the VM.
