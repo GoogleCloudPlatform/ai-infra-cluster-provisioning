@@ -171,7 +171,7 @@ module "aiinfra-compute" {
     module.aiinfra-network
   ]
   enable_gke = var.orchestrator_type == "gke"
-  node_pools = coalescelist(var.custom_node_pools, local.basic_node_pools)
+  node_pools = length(var.custom_node_pools) != 0 || length(local.basic_node_pools) != 0 ? coalescelist(var.custom_node_pools, local.basic_node_pools) : []
 }
 
 module "dashboard" {
