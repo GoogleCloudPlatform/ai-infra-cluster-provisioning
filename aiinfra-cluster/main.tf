@@ -167,4 +167,5 @@ module "aiinfra-default-dashboard" {
   widgets         = [
     for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
   ]
+  depends_on      = [module.dashboard]
 }
