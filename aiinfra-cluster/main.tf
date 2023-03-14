@@ -179,7 +179,6 @@ module "aiinfra-default-dashboard" {
   count           = var.enable_ops_agent ? 1 : 0
   project_id      = var.project_id
   deployment_name = local.depl_name
-  base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
   widgets         = local.widgets
   depends_on      = [module.dashboard-metric-descriptor]

@@ -128,6 +128,11 @@ _perform_terraform_action() {
             cat /usr/info.txt
         fi
 
+        # print dashboard access instructions
+        terraform -chdir=/usr/primary output -json \
+            | jq -r '.dashboard_instructions.value' \
+            | sed '/^$/d'
+
         if [ -f "/usr/connectiondata.txt" ]; then
             echo -e "${GREEN} Use below links to connect to the VMs: ${NOC}"
             cat /usr/connectiondata.txt
