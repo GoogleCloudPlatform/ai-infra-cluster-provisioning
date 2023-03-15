@@ -257,12 +257,8 @@ _set_node_pools_for_gke() {
         echo "gke_node_pool_count = $GKE_NODE_POOL_COUNT" >> /usr/primary/tf.auto.tfvars
     fi
 
-    if [[ -n "$GKE_MIN_NODE_COUNT" ]]; then
-        echo "gke_min_node_count = $GKE_MIN_NODE_COUNT" >> /usr/primary/tf.auto.tfvars
-    fi
-
-    if [[ -n "$GKE_MAX_NODE_COUNT" ]]; then
-        echo "gke_max_node_count = $GKE_MAX_NODE_COUNT" >> /usr/primary/tf.auto.tfvars
+    if [[ -n "$GKE_NODE_COUNT" ]]; then
+        echo "gke_node_count = $GKE_NODE_COUNT" >> /usr/primary/tf.auto.tfvars
     fi
 
     if [[ -n "$CUSTOM_NODE_POOL" ]]; then

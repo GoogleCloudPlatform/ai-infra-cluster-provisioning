@@ -184,7 +184,7 @@ resource "google_container_node_pool" "gke-node-pools" {
   name               = each.value.name
   cluster            = google_container_cluster.gke-cluster.name
   location           = var.zone
-  initial_node_count = each.value.nodes_initial
+  node_count         = each.value.node_count
 
   upgrade_settings {
     max_surge       = 0
@@ -195,12 +195,6 @@ resource "google_container_node_pool" "gke-node-pools" {
     auto_repair  = false
     # auto_upgrade needs to be true for release cahnnel "Regular"
     auto_upgrade = true
-  }
-
-  autoscaling {
-    min_node_count  = each.value.nodes_min
-    max_node_count  = each.value.nodes_max
-    location_policy = "BALANCED"
   }
 
   node_config {

@@ -185,14 +185,8 @@ variable "gke_node_pool_count" {
   default     = 0
 }
 
-variable "gke_min_node_count" {
-  description = "The min node count for node pools for GKE cluster. Creation will fail if at least this number of Nodes cannot be created."
-  type        = number
-  default     = 0
-}
-
-variable "gke_max_node_count" {
-  description = "The max node count for node pools for GKE cluster. This is the actual desired number of nodes, but it may be reached eventually, not at creation time."
+variable "gke_node_count" {
+  description = "The desired node count for node pools for GKE cluster. Creation will fail if at least this number of Nodes cannot be created."
   type        = number
   default     = 0
 }
@@ -201,9 +195,7 @@ variable "custom_node_pools" {
   description               = "The list of custom nodepools for the GKE cluster."
   type                      = list(object({
     name                    = string
-    nodes_initial           = number
-    nodes_min               = number
-    nodes_max               = number
+    node_count              = number
     machine_type            = string
     guest_accelerator_count = number
     guest_accelerator_type  = string
