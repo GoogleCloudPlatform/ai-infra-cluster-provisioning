@@ -34,34 +34,31 @@ The optional parameters are:
     -  __ray__: A Ray cluster is created using the MIG instances.
     -  __gke__: A private GKE cluster is created with private node pool following the recommendations from the GKE team.
 15. ***GKE_NODE_POOL_COUNT***: The number of homogeneous node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
-16. ***GKE_MIN_NODE_COUNT***: The minimum node count of the node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
-17. ***GKE_MAX_NODE_COUNT***:The maximum node count of the node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
-18. ***CUSTOM_NODE_POOL***: The custom node pool description for GKE. The structure of the custom node pool is list of node pool objects. The node pool object is 
+16. ***GKE_NODE_COUNT***: The desired node count of the node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
+17. ***CUSTOM_NODE_POOL***: The custom node pool description for GKE. The structure of the custom node pool is list of node pool objects. The node pool object is 
     ```
     name                    = string
-    nodes_initial           = number
-    nodes_min               = number
-    nodes_max               = number
+    node_count              = number
     machine_type            = string
     guest_accelerator_count = number
     guest_accelerator_type  = string
     ```
     
-    Example: `CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","nodes_initial"=2,"nodes_min"=2,"nodes_max"=3,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","nodes_initial"=2,"nodes_min"=2,"nodes_max"=3,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]`
-19. ***GCS_MOUNT_LIST***. This defines the list of GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
-20. ***NFS_FILESHARE_LIST***. This defines the list of NFS file shares to mount. The format is `</mount/path1>:<NFS fileshare type>,</mount/path2>:<NFS fileshare type>:<NFS fileshare size in GB>`. For example: NFS_FILESHARE_LIST=/usr/nfsshare1:BASIC_SSD
+    Example: `CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]`
+18. ***GCS_MOUNT_LIST***. This defines the list of GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
+19. ***NFS_FILESHARE_LIST***. This defines the list of NFS file shares to mount. The format is `</mount/path1>:<NFS fileshare type>,</mount/path2>:<NFS fileshare type>:<NFS fileshare size in GB>`. For example: NFS_FILESHARE_LIST=/usr/nfsshare1:BASIC_SSD
     -  The `<NFS fileshare type>` cannot be empty. The supported values are `BASIC_HDD`,`BASIC_SSD`,`HIGH_SCALE_SSD` and `ENTERPRISE`.
     -  The `<NFS fileshare size in GB>` can be empty and the default value is 2560 GB (2.5 TB).
-21. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
-22. ***MINIMIZE_TERRAFORM_LOGGING***. This controls the verbosity of terraform logs. When any value is set for this parameter, the terraform output is redirected to a local file and not printed on syserr. The log file is then uploaded to storage account. Any value can be set for this parameter, e.g.: yes, true.
-23. ***NETWORK_CONFIG***. This controls the VPC type to be used for the MIG. The supported values are default_network, new_network and multi_nic_network. The default value is default_network. The behavior is 
+20. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
+21. ***MINIMIZE_TERRAFORM_LOGGING***. This controls the verbosity of terraform logs. When any value is set for this parameter, the terraform output is redirected to a local file and not printed on syserr. The log file is then uploaded to storage account. Any value can be set for this parameter, e.g.: yes, true.
+22. ***NETWORK_CONFIG***. This controls the VPC type to be used for the MIG. The supported values are default_network, new_network and multi_nic_network. The default value is default_network. The behavior is 
     -  __default_network__: MIG uses the default VPC in the project.
     -  __new_network__: A new VPC is created for the MIG.
     -  __multi_nic_network__: New VPCs are created and used by all the VMs in the MIG. By default 5 new VPCs are created and 5 NICs are used for the MIG but that value is configurable.
-24. ***ENABLE_OPS_AGENT***. Can be one of:
+23. ***ENABLE_OPS_AGENT***. Can be one of:
     - `true` (default): Install Ops Agent with random-backoff retries
     - `false`: Do not install Ops Agent
-25. ***ENABLE_NOTEBOOK***. Can be one of:
+24. ***ENABLE_NOTEBOOK***. Can be one of:
     - `true` (default): Sets up jupyter notebook for the vm instances.
     - `false`: Do not set up jupyter notebook.
 
