@@ -95,14 +95,15 @@ EOF
         echo "region = \"$REGION\"" >> /usr/primary/tf.auto.tfvars
     fi
 
-    # setting instance count
-    if [[ -z "$INSTANCE_COUNT" ]]; then
-        echo "INSTANCE_COUNT environment variable not found. Default value is 1"
+    # setting instance count default to 1 if orchestrator type is not GKE
+    if [[ -z "$INSTANCE_COUNT" ]] && [[ -z "$ORCHESTRATOR_TYPE" || "${ORCHESTRATOR_TYPE,,}" != "gke" ]]; then
+        echo "INSTANCE_COUNT environment variable not found. Default value is 1."
         export INSTANCE_COUNT=1
-    else
-        echo "Setting instance count to $INSTANCE_COUNT"
     fi
-    echo "instance_count = $INSTANCE_COUNT" >> /usr/primary/tf.auto.tfvars
+    if [[ -n "$INSTANCE_COUNT" ]]; then
+        echo "Setting instance count to $INSTANCE_COUNT"
+        echo "instance_count = $INSTANCE_COUNT" >> /usr/primary/tf.auto.tfvars
+    fi
 
     # setting gpu count
     if [[ -z "$GPU_COUNT" ]]; then
@@ -257,12 +258,8 @@ _set_node_pools_for_gke() {
         echo "gke_node_pool_count = $GKE_NODE_POOL_COUNT" >> /usr/primary/tf.auto.tfvars
     fi
 
-    if [[ -n "$GKE_MIN_NODE_COUNT" ]]; then
-        echo "gke_min_node_count = $GKE_MIN_NODE_COUNT" >> /usr/primary/tf.auto.tfvars
-    fi
-
-    if [[ -n "$GKE_MAX_NODE_COUNT" ]]; then
-        echo "gke_max_node_count = $GKE_MAX_NODE_COUNT" >> /usr/primary/tf.auto.tfvars
+    if [[ -n "$GKE_NODE_COUNT_PER_NODE_POOL" ]]; then
+        echo "gke_node_count_per_node_pool = $GKE_NODE_COUNT_PER_NODE_POOL" >> /usr/primary/tf.auto.tfvars
     fi
 
     if [[ -n "$CUSTOM_NODE_POOL" ]]; then
