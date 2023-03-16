@@ -7,4 +7,3 @@ NETWORK_CONFIG=default_network
 GPU_COUNT=2
 GKE_NODE_POOL_COUNT=2
 GKE_NODE_COUNT_PER_NODE_POOL=2
-# CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]

@@ -65,6 +65,7 @@ variable "machine_type" {
 variable "instance_count" {
   description = "The number of VM instances."
   type        = number
+  default     = 0
 }
 
 variable "accelerator_type" {
@@ -75,6 +76,7 @@ variable "accelerator_type" {
 variable "gpu_per_vm" {
   description = "The number of GPUs per VM."
   type        = number
+  default     = 0
 }
 
 variable "instance_image" {

@@ -95,14 +95,15 @@ EOF
         echo "region = \"$REGION\"" >> /usr/primary/tf.auto.tfvars
     fi
 
-    # setting instance count
-    if [[ -z "$INSTANCE_COUNT" ]]; then
-        echo "INSTANCE_COUNT environment variable not found. Default value is 0."
-        export INSTANCE_COUNT=0
-    else
-        echo "Setting instance count to $INSTANCE_COUNT"
+    # setting instance count default to 1 if orchestrator type is not GKE
+    if [[ -z "$INSTANCE_COUNT" ]] && [[ -z "$ORCHESTRATOR_TYPE" || "${ORCHESTRATOR_TYPE,,}" != "gke" ]]; then
+        echo "INSTANCE_COUNT environment variable not found. Default value is 1."
+        export INSTANCE_COUNT=1
     fi
-    echo "instance_count = $INSTANCE_COUNT" >> /usr/primary/tf.auto.tfvars
+    if [[ -n "$INSTANCE_COUNT" ]]; then
+        echo "Setting instance count to $INSTANCE_COUNT"
+        echo "instance_count = $INSTANCE_COUNT" >> /usr/primary/tf.auto.tfvars
+    fi
 
     # setting gpu count
     if [[ -z "$GPU_COUNT" ]]; then
