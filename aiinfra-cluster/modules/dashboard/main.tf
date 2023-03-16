@@ -55,15 +55,12 @@ resource "google_monitoring_metric_descriptor" "sm_utilization" {
   unit         = "1"
   labels {
     key         = local.attributes.model.key
-    description = local.attributes.model.description
   }
   labels {
     key         = local.attributes.gpu_number.key
-    description = local.attributes.gpu_number.description
   }
   labels {
     key         = local.attributes.uuid.key
-    description = local.attributes.uuid.description
   }
   launch_stage = "BETA"
   metadata {
@@ -81,15 +78,12 @@ resource "google_monitoring_metric_descriptor" "sm_occupancy" {
   unit         = "1"
   labels {
     key         = local.attributes.model.key
-    description = local.attributes.model.description
   }
   labels {
     key         = local.attributes.gpu_number.key
-    description = local.attributes.gpu_number.description
   }
   labels {
     key         = local.attributes.uuid.key
-    description = local.attributes.uuid.description
   }
   launch_stage = "BETA"
   metadata {
@@ -107,19 +101,15 @@ resource "google_monitoring_metric_descriptor" "pipe_utilization" {
   unit         = "1"
   labels {
     key         = local.attributes.model.key
-    description = local.attributes.model.description
   }
   labels {
     key         = local.attributes.gpu_number.key
-    description = local.attributes.gpu_number.description
   }
   labels {
     key         = local.attributes.uuid.key
-    description = local.attributes.uuid.description
   }
   labels {
     key         = local.attributes.pipe.key
-    description = local.attributes.pipe.description
   }
   launch_stage = "BETA"
   metadata {
@@ -137,15 +127,12 @@ resource "google_monitoring_metric_descriptor" "dram_utilization" {
   unit         = "1"
   labels {
     key         = local.attributes.model.key
-    description = local.attributes.model.description
   }
   labels {
     key         = local.attributes.gpu_number.key
-    description = local.attributes.gpu_number.description
   }
   labels {
     key         = local.attributes.uuid.key
-    description = local.attributes.uuid.description
   }
   launch_stage = "BETA"
   metadata {
@@ -163,19 +150,15 @@ resource "google_monitoring_metric_descriptor" "pcie_traffic_rate" {
   unit         = "By/s"
   labels {
     key         = local.attributes.model.key
-    description = local.attributes.model.description
   }
   labels {
     key         = local.attributes.gpu_number.key
-    description = local.attributes.gpu_number.description
   }
   labels {
     key         = local.attributes.uuid.key
-    description = local.attributes.uuid.description
   }
   labels {
     key         = local.attributes.direction.key
-    description = local.attributes.direction.description
   }
   launch_stage = "BETA"
   metadata {
@@ -193,19 +176,15 @@ resource "google_monitoring_metric_descriptor" "nvlink_traffic_rate" {
   unit         = "By/s"
   labels {
     key         = local.attributes.model.key
-    description = local.attributes.model.description
   }
   labels {
     key         = local.attributes.gpu_number.key
-    description = local.attributes.gpu_number.description
   }
   labels {
     key         = local.attributes.uuid.key
-    description = local.attributes.uuid.description
   }
   labels {
     key         = local.attributes.direction.key
-    description = local.attributes.direction.description
   }
   launch_stage = "BETA"
   metadata {
