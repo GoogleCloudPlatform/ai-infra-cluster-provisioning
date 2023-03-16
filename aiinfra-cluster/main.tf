@@ -159,6 +159,7 @@ module "dashboard" {
 */
 module "aiinfra-default-dashboard" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
+  count           = var.enable_ops_agent ? 1 : 0
   project_id      = var.project_id
   deployment_name = local.depl_name
   base_dashboard  = "Empty"
