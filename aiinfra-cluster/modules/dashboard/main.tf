@@ -66,6 +66,10 @@ resource "google_monitoring_metric_descriptor" "sm_utilization" {
     description = local.attributes.uuid.description
   }
   launch_stage = "BETA"
+  metadata {
+    sample_period = "60s"
+    ingest_delay  = "30s"
+  }
 }
 
 resource "google_monitoring_metric_descriptor" "sm_occupancy" {
@@ -88,6 +92,10 @@ resource "google_monitoring_metric_descriptor" "sm_occupancy" {
     description = local.attributes.uuid.description
   }
   launch_stage = "BETA"
+  metadata {
+    sample_period = "60s"
+    ingest_delay  = "30s"
+  }
 }
 
 resource "google_monitoring_metric_descriptor" "pipe_utilization" {
@@ -114,6 +122,10 @@ resource "google_monitoring_metric_descriptor" "pipe_utilization" {
     description = local.attributes.pipe.description
   }
   launch_stage = "BETA"
+  metadata {
+    sample_period = "60s"
+    ingest_delay  = "30s"
+  }
 }
 
 resource "google_monitoring_metric_descriptor" "dram_utilization" {
@@ -136,6 +148,10 @@ resource "google_monitoring_metric_descriptor" "dram_utilization" {
     description = local.attributes.uuid.description
   }
   launch_stage = "BETA"
+  metadata {
+    sample_period = "60s"
+    ingest_delay  = "30s"
+  }
 }
 
 resource "google_monitoring_metric_descriptor" "pcie_traffic_rate" {
@@ -143,7 +159,7 @@ resource "google_monitoring_metric_descriptor" "pcie_traffic_rate" {
   type         = "workload.googleapis.com/dcgm.gpu.pcie_traffic_rate"
   description  = "The average rate of bytes sent from the GPU over the PCIe bus over the sample period, including both protocol headers and data payloads."
   metric_kind  = "GAUGE"
-  value_type   = "DOUBLE"
+  value_type   = "INT64"
   unit         = "By/s"
   labels {
     key         = local.attributes.model.key
@@ -162,6 +178,10 @@ resource "google_monitoring_metric_descriptor" "pcie_traffic_rate" {
     description = local.attributes.direction.description
   }
   launch_stage = "BETA"
+  metadata {
+    sample_period = "60s"
+    ingest_delay  = "30s"
+  }
 }
 
 resource "google_monitoring_metric_descriptor" "nvlink_traffic_rate" {
@@ -169,7 +189,7 @@ resource "google_monitoring_metric_descriptor" "nvlink_traffic_rate" {
   type         = "workload.googleapis.com/dcgm.gpu.nvlink_traffic_rate"
   description  = "The average rate of bytes received from the GPU over NVLink over the sample period, not including protocol headers."
   metric_kind  = "GAUGE"
-  value_type   = "DOUBLE"
+  value_type   = "INT64"
   unit         = "By/s"
   labels {
     key         = local.attributes.model.key
@@ -188,5 +208,9 @@ resource "google_monitoring_metric_descriptor" "nvlink_traffic_rate" {
     description = local.attributes.direction.description
   }
   launch_stage = "BETA"
+  metadata {
+    sample_period = "60s"
+    ingest_delay  = "30s"
+  }
 }
 
