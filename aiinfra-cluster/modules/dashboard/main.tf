@@ -54,13 +54,13 @@ resource "google_monitoring_metric_descriptor" "sm_utilization" {
   value_type   = "DOUBLE"
   unit         = "1"
   labels {
-    key         = local.attributes.model.key
+    key = local.attributes.model.key
   }
   labels {
-    key         = local.attributes.gpu_number.key
+    key = local.attributes.gpu_number.key
   }
   labels {
-    key         = local.attributes.uuid.key
+    key = local.attributes.uuid.key
   }
   launch_stage = "BETA"
   metadata {
@@ -77,13 +77,13 @@ resource "google_monitoring_metric_descriptor" "sm_occupancy" {
   value_type   = "DOUBLE"
   unit         = "1"
   labels {
-    key         = local.attributes.model.key
+    key = local.attributes.model.key
   }
   labels {
-    key         = local.attributes.gpu_number.key
+    key = local.attributes.gpu_number.key
   }
   labels {
-    key         = local.attributes.uuid.key
+    key = local.attributes.uuid.key
   }
   launch_stage = "BETA"
   metadata {
@@ -100,16 +100,16 @@ resource "google_monitoring_metric_descriptor" "pipe_utilization" {
   value_type   = "DOUBLE"
   unit         = "1"
   labels {
-    key         = local.attributes.model.key
+    key = local.attributes.model.key
   }
   labels {
-    key         = local.attributes.gpu_number.key
+    key = local.attributes.gpu_number.key
   }
   labels {
-    key         = local.attributes.uuid.key
+    key = local.attributes.uuid.key
   }
   labels {
-    key         = local.attributes.pipe.key
+    key = local.attributes.pipe.key
   }
   launch_stage = "BETA"
   metadata {
@@ -126,13 +126,13 @@ resource "google_monitoring_metric_descriptor" "dram_utilization" {
   value_type   = "DOUBLE"
   unit         = "1"
   labels {
-    key         = local.attributes.model.key
+    key = local.attributes.model.key
   }
   labels {
-    key         = local.attributes.gpu_number.key
+    key = local.attributes.gpu_number.key
   }
   labels {
-    key         = local.attributes.uuid.key
+    key = local.attributes.uuid.key
   }
   launch_stage = "BETA"
   metadata {
@@ -149,16 +149,16 @@ resource "google_monitoring_metric_descriptor" "pcie_traffic_rate" {
   value_type   = "INT64"
   unit         = "By/s"
   labels {
-    key         = local.attributes.model.key
+    key = local.attributes.model.key
   }
   labels {
-    key         = local.attributes.gpu_number.key
+    key = local.attributes.gpu_number.key
   }
   labels {
-    key         = local.attributes.uuid.key
+    key = local.attributes.uuid.key
   }
   labels {
-    key         = local.attributes.direction.key
+    key = local.attributes.direction.key
   }
   launch_stage = "BETA"
   metadata {
@@ -175,16 +175,16 @@ resource "google_monitoring_metric_descriptor" "nvlink_traffic_rate" {
   value_type   = "INT64"
   unit         = "By/s"
   labels {
-    key         = local.attributes.model.key
+    key = local.attributes.model.key
   }
   labels {
-    key         = local.attributes.gpu_number.key
+    key = local.attributes.gpu_number.key
   }
   labels {
-    key         = local.attributes.uuid.key
+    key = local.attributes.uuid.key
   }
   labels {
-    key         = local.attributes.direction.key
+    key = local.attributes.direction.key
   }
   launch_stage = "BETA"
   metadata {
