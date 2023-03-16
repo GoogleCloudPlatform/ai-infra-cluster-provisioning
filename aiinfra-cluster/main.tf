@@ -63,18 +63,13 @@ locals {
     for idx in range(var.gke_node_pool_count) :
     {
       name                    = "${var.name_prefix}-nodepool-${idx}"
-      node_count              = var.gke_node_count
+      node_count              = var.gke_node_count_per_node_pool
       machine_type            = var.machine_type
       guest_accelerator_count = var.gpu_per_vm
       guest_accelerator_type  = var.accelerator_type
     }
   ] : []
 
-  // Terraform does not provide a way to validate multiple variables in variable validation block.
-  // Using this type of validation as per https://github.com/hashicorp/terraform/issues/25609#issuecomment-1057614400
-  validate_basic_node_pool = (var.orchestrator_type != "gke" && (var.gke_node_pool_count > 0 || var.gke_node_count > 0)) ? tobool("Orchestrator type is not GKE. Please remove gke_node_pool_count and gke_node_count variables.") : true
-  validate_custom_node_pool = (length(var.custom_node_pools) > 0 && (var.gke_node_pool_count > 0 || var.gke_node_count > 0)) ? tobool("Custom node pools are provided. Please do not use gke_node_pool_count and gke_node_count variables.") : true
-  
   widgets = (var.orchestrator_type != "gke" && var.enable_ops_agent) ? [
     for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
   ] : []

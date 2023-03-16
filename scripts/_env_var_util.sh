@@ -97,8 +97,8 @@ EOF
 
     # setting instance count
     if [[ -z "$INSTANCE_COUNT" ]]; then
-        echo "INSTANCE_COUNT environment variable not found. Default value is 1"
-        export INSTANCE_COUNT=1
+        echo "INSTANCE_COUNT environment variable not found. Default value is 0."
+        export INSTANCE_COUNT=0
     else
         echo "Setting instance count to $INSTANCE_COUNT"
     fi
@@ -257,8 +257,8 @@ _set_node_pools_for_gke() {
         echo "gke_node_pool_count = $GKE_NODE_POOL_COUNT" >> /usr/primary/tf.auto.tfvars
     fi
 
-    if [[ -n "$GKE_NODE_COUNT" ]]; then
-        echo "gke_node_count = $GKE_NODE_COUNT" >> /usr/primary/tf.auto.tfvars
+    if [[ -n "$GKE_NODE_COUNT_PER_NODE_POOL" ]]; then
+        echo "gke_node_count_per_node_pool = $GKE_NODE_COUNT_PER_NODE_POOL" >> /usr/primary/tf.auto.tfvars
     fi
 
     if [[ -n "$CUSTOM_NODE_POOL" ]]; then

@@ -185,8 +185,8 @@ variable "gke_node_pool_count" {
   default     = 0
 }
 
-variable "gke_node_count" {
-  description = "The desired node count for node pools for GKE cluster. Creation will fail if at least this number of Nodes cannot be created."
+variable "gke_node_count_per_node_pool" {
+  description = "The desired node count per node pool for GKE cluster. Creation will fail if at least this number of Nodes cannot be created."
   type        = number
   default     = 0
 }

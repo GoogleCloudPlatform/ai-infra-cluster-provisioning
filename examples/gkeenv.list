@@ -2,12 +2,9 @@ PROJECT_ID=testing-project-id
 NAME_PREFIX=test-aiinfra-gke
 ZONE=us-central1-a
 ACCELERATOR_TYPE=nvidia-tesla-a100
-METADATA={ meta1 = "val", meta2 = "val2" }
-LABELS={ label1 = "marker1" }
 ORCHESTRATOR_TYPE=gke
-INSTANCE_COUNT=1
 NETWORK_CONFIG=default_network
 GPU_COUNT=2
 GKE_NODE_POOL_COUNT=2
-GKE_NODE_COUNT=2
-CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]
+GKE_NODE_COUNT_PER_NODE_POOL=2
+# CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]

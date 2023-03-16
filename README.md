@@ -34,7 +34,7 @@ The optional parameters are:
     -  __ray__: A Ray cluster is created using the MIG instances.
     -  __gke__: A private GKE cluster is created with private node pool following the recommendations from the GKE team.
 15. ***GKE_NODE_POOL_COUNT***: The number of homogeneous node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
-16. ***GKE_NODE_COUNT***: The desired node count of the node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
+16. ***GKE_NODE_COUNT_PER_NODE_POOL***: The desired node count per node pool for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
 17. ***CUSTOM_NODE_POOL***: The custom node pool description for GKE. The structure of the custom node pool is list of node pool objects. The node pool object is 
     ```
     name                    = string
