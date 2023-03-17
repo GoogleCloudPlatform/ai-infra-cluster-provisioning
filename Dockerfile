@@ -1,6 +1,6 @@
 FROM gcr.io/google.com/cloudsdktool/cloud-sdk as base
 
-RUN apt-get update && apt-get install git bash bc curl python3 software-properties-common wget ca-certificates zip -y
+RUN apt-get update && apt-get install git bash bc curl jq python3 software-properties-common wget ca-certificates zip -y
 
 ##########################################################################################
 # Install terraform

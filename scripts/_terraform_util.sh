@@ -152,15 +152,15 @@ _perform_terraform_action() {
         terraform -chdir=/usr/primary validate
     elif [[ "${ACTION,,}" == "plan" ]]; then
         terraform --version
-        if ! terraform -chdir=/usr/primary init -input=false >/dev/null; then
+        if ! terraform -chdir=/usr/primary init -input=false; then
             echo >&2 'terraform init failure'
             exit 1
         fi
-        if ! terraform -chdir=/usr/primary validate >/dev/null; then
+        if ! terraform -chdir=/usr/primary validate; then
             echo >&2 'terraform validate failure'
             exit 1
         fi
-        if ! terraform -chdir=/usr/primary plan -no-color -input=false >/out/tfplan; then
+        if ! terraform -chdir=/usr/primary plan -no-color -input=false -out=/out/tfplan; then
             echo >&2 'terraform plan failure'
             exit 1
         fi

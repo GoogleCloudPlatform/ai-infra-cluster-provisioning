@@ -1,20 +1,48 @@
 . ./test/helpers.sh
 
-readonly ENV_DIR="./test/pr"
-readonly EXPECTED_DIR="./test/pr/expected"
+readonly SRC_DIR='/usr/primary'
+# needs to be PWD because of the -chdir in the terraform commands
+readonly DATA_DIR="${PWD}/test/aiinfra-cluster/cases"
 
 skip::test::aiinfra-cluster::fmt () {
     EXPECT_SUCCEED terraform fmt -check -recursive /usr/primary
 }
 
-test::aiinfra-cluster::simple () {
-    EXPECT_SUCCEED terraform_plan \
-        "${ENV_DIR}/simple-env.list" \
-        "${EXPECTED_DIR}/simple.txt"
+terraform_plan () {
+    local -r var_file="${1}"
+    local -r tmp_file="${2}"
+    terraform -chdir="${SRC_DIR}" plan \
+        -no-color -json -parallelism=$(nproc) -lock=false \
+        -var-file="${var_file}" -out="${tmp_file}" >/dev/null
 }
 
-test::aiinfra-cluster::disable_ops_agent () {
+terraform_show () {
+    local -r tmp_file="${1}"
+    terraform -chdir="${SRC_DIR}" show -no-color -json "${tmp_file}"
+}
+
+json_contains () {
+    element_file="${1}"
+    input_file="${2}"
+    # reference for `contains(element)` function:
+    # https://stedolan.github.io/jq/manual/#Builtinoperatorsandfunctions
+    jq "if contains($(cat ${element_file})) then empty else halt_error end" \
+        "${input_file}"
+}
+
+test::aiinfra-cluster::passes_on_default_vars () {
+    tfplan=$(mktemp)
     EXPECT_SUCCEED terraform_plan \
-        "${ENV_DIR}/disable-ops-agent-env.list" \
-        "${EXPECTED_DIR}/disable-ops-agent.txt"
+        "${DATA_DIR}/passes_on_default_vars.tfvars" \
+        "${tfplan}"
+    EXPECT_SUCCEED json_contains \
+        "${DATA_DIR}/passes_on_default_vars.json" \
+        <(terraform_show "${tfplan}")
+}
+
+test::aiinfra-cluster::fails_on_empty_vars () {
+    EXPECT_FAIL terraform_plan \
+        "${DATA_DIR}/fails_on_empty_vars.tfvars" \
+        "$(mktemp)"
+    #| jq 'if ."@level" == "error" then halt_error else empty end'
 }
