@@ -1,10 +1,18 @@
 # How to run
 
-To run all tests, run `bash ./test/run_tests.sh`. Note that you must be in the
-top-level directory of the repository in order to run this script. This is
-because paths passed to the `source` command are relative to the directory from
-which you are executing. The top level was chosen in order to eliminate having
-to follow a bunch of `../../../`s.
+In order to run the tests, you must be in the top-level directory of the
+repository. This is because paths passed to the `source` command are relative to
+the directory from which you are executing. The top level was chosen in order to
+eliminate having to follow a bunch of `../../../`s.
+
+The only way for that to happen right now is to run the docker container.
+Support for host-machine running will come later. For now, this is the docker
+command:
+```bash
+tag='prov-test' # or whatever
+docker build --pull --target test --tag "${tag}" .
+docker run -it -v "${HOME}/.config/gcloud:/root/.config/gcloud:ro" "${tag}"
+```
 
 # Structure
 
