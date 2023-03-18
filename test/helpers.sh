@@ -74,6 +74,16 @@ EXPECT_STR_EMPTY () {
     return 0
 }
 
+EXPECT_STREQ () {
+    local -r left="${1}"
+    local -r right="${2}"
+    if [ "${left}" != "${right}" ]; then
+        echo >&2 $(get_error_prefix EXPECT_STREQ "${left}" "${right}") "not equal"
+        exit 1
+    fi
+    return 0
+}
+
 EXPECT_FILE_REGULAR () {
     local -r filename="${1}"
     if ! [ -f "${filename}" ]; then

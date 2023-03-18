@@ -42,6 +42,10 @@ run_tests () {
             continue
         fi
 
+        if ! grep -q '^test::' <<< "${test_command}"; then
+            continue
+        fi
+
         print_test running "${test_command}"
         if (${test_command}); then
             tests_passed+=("${test_command}")
