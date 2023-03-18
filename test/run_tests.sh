@@ -54,17 +54,18 @@ run_tests () {
 
     echo -e '\n==== RESULTS ===='
 
-    echo -e "${#tests_passed[@]} of ${#test_commands[@]} tests ${pretty_wrap[passed]}"
+    local -r test_count=$((${#tests_passed[@]} + ${#tests_skipped[@]} + ${#tests_failed[@]}))
+    echo -e "${#tests_passed[@]} of ${test_count} tests ${pretty_wrap[passed]}"
 
     if [ "${#tests_skipped[@]}" -ne 0 ]; then
-        echo -e "${#tests_skipped[@]} of ${#test_commands[@]} tests ${pretty_wrap[skipped]}"
+        echo -e "${#tests_skipped[@]} of ${test_count} tests ${pretty_wrap[skipped]}"
         for skipped_test in "${tests_skipped[@]}"; do
             print_test skipped "${skipped_test}"
         done
     fi
 
     if [ "${#tests_failed[@]}" -ne 0 ]; then
-        echo -e "${#tests_failed[@]} of ${#test_commands[@]} tests ${pretty_wrap[failed]}"
+        echo -e "${#tests_failed[@]} of ${test_count} tests ${pretty_wrap[failed]}"
         for failed_test in "${tests_failed[@]}"; do
             print_test failed "${failed_test}"
         done
