@@ -62,11 +62,6 @@ resource "google_monitoring_metric_descriptor" "sm_utilization" {
   labels {
     key = local.attributes.uuid.key
   }
-  launch_stage = "BETA"
-  metadata {
-    sample_period = "60s"
-    ingest_delay  = "30s"
-  }
 }
 
 resource "google_monitoring_metric_descriptor" "sm_occupancy" {
@@ -84,11 +79,6 @@ resource "google_monitoring_metric_descriptor" "sm_occupancy" {
   }
   labels {
     key = local.attributes.uuid.key
-  }
-  launch_stage = "BETA"
-  metadata {
-    sample_period = "60s"
-    ingest_delay  = "30s"
   }
 }
 
@@ -111,11 +101,6 @@ resource "google_monitoring_metric_descriptor" "pipe_utilization" {
   labels {
     key = local.attributes.pipe.key
   }
-  launch_stage = "BETA"
-  metadata {
-    sample_period = "60s"
-    ingest_delay  = "30s"
-  }
 }
 
 resource "google_monitoring_metric_descriptor" "dram_utilization" {
@@ -133,11 +118,6 @@ resource "google_monitoring_metric_descriptor" "dram_utilization" {
   }
   labels {
     key = local.attributes.uuid.key
-  }
-  launch_stage = "BETA"
-  metadata {
-    sample_period = "60s"
-    ingest_delay  = "30s"
   }
 }
 
@@ -160,11 +140,6 @@ resource "google_monitoring_metric_descriptor" "pcie_traffic_rate" {
   labels {
     key = local.attributes.direction.key
   }
-  launch_stage = "BETA"
-  metadata {
-    sample_period = "60s"
-    ingest_delay  = "30s"
-  }
 }
 
 resource "google_monitoring_metric_descriptor" "nvlink_traffic_rate" {
@@ -185,11 +160,6 @@ resource "google_monitoring_metric_descriptor" "nvlink_traffic_rate" {
   }
   labels {
     key = local.attributes.direction.key
-  }
-  launch_stage = "BETA"
-  metadata {
-    sample_period = "60s"
-    ingest_delay  = "30s"
   }
 }
 

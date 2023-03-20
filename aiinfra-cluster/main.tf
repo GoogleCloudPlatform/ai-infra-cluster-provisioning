@@ -150,8 +150,8 @@ module "aiinfra-mig" {
   ]
 }
 
-module "dashboard" {
-  source               = "./modules/dashboard"
+module "dashboard-metrics" {
+  source               = "./modules/dashboard-metrics"
 }
 
 /*
@@ -165,7 +165,7 @@ module "aiinfra-default-dashboard" {
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
   widgets         = [
-    for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
+    for widget_object in module.dashboard-metrics.widget_objects : jsonencode(widget_object)
   ]
-  depends_on      = [module.dashboard]
+  depends_on      = [module.dashboard-metrics]
 }
