@@ -2,8 +2,8 @@
 . ./usr/_env_var_util.sh
 
 # print directory containing data with which these tests will compare output
-_env_var_util::test::expected_dir () {
-    echo './test/scripts/_env_var_util_expected'
+_env_var_util::test::data_dir () {
+    echo './test/scripts/_env_var_util_data'
 }
 
 # Helper functions
@@ -222,7 +222,7 @@ test::_env_var_util::print_tfvars::prints_all_required_and_defaultable () {
     _env_var_util::test::set_required_env
     _env_var_util::setup
     EXPECT_SUCCEED diff \
-        "$(_env_var_util::test::expected_dir)/optionals_unset.tfvars" \
+        "$(_env_var_util::test::data_dir)/optionals_unset.tfvars" \
         <(_env_var_util::print_tfvars email uuid)
 }
 
@@ -232,6 +232,6 @@ test::_env_var_util::print_tfvars::prints_optionals_when_set () {
     _env_var_util::test::set_optional_env
     _env_var_util::setup
     EXPECT_SUCCEED diff \
-        "$(_env_var_util::test::expected_dir)/optionals_set.tfvars" \
+        "$(_env_var_util::test::data_dir)/optionals_set.tfvars" \
         <(_env_var_util::print_tfvars email uuid)
 }

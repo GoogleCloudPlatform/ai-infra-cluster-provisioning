@@ -1,0 +1,28 @@
+{
+  "planned_values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.aiinfra-compute",
+          "resources": [
+            {
+              "address": "module.aiinfra-compute.google_compute_instance_group_manager.mig[0]",
+              "values": {
+                "base_instance_name": "ci-vm",
+                "name": "ci-mig",
+                "zone": "us-central1-f"
+              }
+            },
+            {
+              "address": "module.aiinfra-compute.google_compute_instance_template.compute_vm_template[0]",
+              "values": {
+                "machine_type": "a2-highgpu-2g",
+                "region": "us-central1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
