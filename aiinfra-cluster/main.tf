@@ -150,8 +150,8 @@ module "aiinfra-mig" {
   ]
 }
 
-module "dashboard-metrics" {
-  source               = "./modules/dashboard-metrics"
+module "dashboard-metric-descriptor" {
+  source               = "./modules/dashboard-metric-descriptor"
 }
 
 /*
@@ -165,7 +165,7 @@ module "aiinfra-default-dashboard" {
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
   widgets         = [
-    for widget_object in module.dashboard-metrics.widget_objects : jsonencode(widget_object)
+    for widget_object in module.dashboard-metric-descriptor.widget_objects : jsonencode(widget_object)
   ]
-  depends_on      = [module.dashboard-metrics]
+  depends_on      = [module.dashboard-metric-descriptor]
 }
