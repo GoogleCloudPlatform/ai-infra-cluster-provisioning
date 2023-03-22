@@ -1,0 +1,9 @@
+PROJECT_ID=testing-project-id
+NAME_PREFIX=test-aiinfra-gke
+ZONE=us-central1-a
+ACCELERATOR_TYPE=nvidia-tesla-a100
+ORCHESTRATOR_TYPE=gke
+NETWORK_CONFIG=default_network
+GPU_COUNT=2
+GKE_NODE_POOL_COUNT=2
+GKE_NODE_COUNT_PER_NODE_POOL=2

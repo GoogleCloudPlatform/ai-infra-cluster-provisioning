@@ -65,6 +65,7 @@ variable "machine_type" {
 variable "instance_count" {
   description = "The number of VM instances."
   type        = number
+  default     = 0
 }
 
 variable "accelerator_type" {
@@ -75,6 +76,7 @@ variable "accelerator_type" {
 variable "gpu_per_vm" {
   description = "The number of GPUs per VM."
   type        = number
+  default     = 0
 }
 
 variable "instance_image" {
@@ -138,13 +140,13 @@ variable "nfs_filestore_list" {
 }
 
 variable "orchestrator_type" {
-  description = "The job orchestrator to be used, can be either ray (default) or slurm."
+  description = "The job orchestrator to be used, can be either ray (default), slurm or gke."
   type        = string
   default     = "none"
 
   validation {
-    condition     = contains(["ray", "slurm", "none"], var.orchestrator_type)
-    error_message = "Variable orchestrator_type must be either ray, slurm or none."
+    condition     = contains(["ray", "slurm", "gke", "none"], var.orchestrator_type)
+    error_message = "Variable orchestrator_type must be either ray, slurm, gke or none."
   }
 }
 
@@ -177,4 +179,28 @@ variable "local_dir_copy_list" {
     ])
     error_message = "All directory paths should be full path and exist on the machine. Destination path should be provided for all directory paths."
   }
+}
+
+variable "gke_node_pool_count" {
+  description = "The number of homogeneous node pools for GKE cluster."
+  type        = number
+  default     = 0
+}
+
+variable "gke_node_count_per_node_pool" {
+  description = "The desired node count per node pool for GKE cluster. Creation will fail if at least this number of Nodes cannot be created."
+  type        = number
+  default     = 0
+}
+
+variable "custom_node_pools" {
+  description               = "The list of custom nodepools for the GKE cluster."
+  type                      = list(object({
+    name                    = string
+    node_count              = number
+    machine_type            = string
+    guest_accelerator_count = number
+    guest_accelerator_type  = string
+  }))
+  default                   = []
 }
