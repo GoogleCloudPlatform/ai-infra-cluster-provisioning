@@ -71,7 +71,7 @@ locals {
   ] : []
 
   widgets = (var.orchestrator_type != "gke" && var.enable_ops_agent) ? [
-    for widget_object in module.dashboard.widget_objects : jsonencode(widget_object)
+    for widget_object in module.dashboard-metric-descriptor.widget_objects : jsonencode(widget_object)
   ] : []
 
   vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
@@ -167,8 +167,8 @@ module "aiinfra-compute" {
   node_pools = length(var.custom_node_pools) != 0 || length(local.basic_node_pools) != 0 ? coalescelist(var.custom_node_pools, local.basic_node_pools) : []
 }
 
-module "dashboard" {
-  source = "./modules/dashboard"
+module "dashboard-metric-descriptor" {
+  source               = "./modules/dashboard-metric-descriptor"
 }
 
 /*
@@ -176,10 +176,11 @@ module "dashboard" {
 */
 module "aiinfra-default-dashboard" {
   source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
-  count           = var.orchestrator_type != "gke" ? 1: 0
+  count           = var.enable_ops_agent ? 1 : 0
   project_id      = var.project_id
   deployment_name = local.depl_name
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
   widgets         = local.widgets
+  depends_on      = [module.dashboard-metric-descriptor]
 }
