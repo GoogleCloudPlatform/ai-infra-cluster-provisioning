@@ -157,22 +157,21 @@ Since the resource state is stored outside of the container, the GPU cluster lif
 ## Instructions
 
 1. gcloud auth application-default login.
-2. gcloud auth configure-docker us-docker.pkg.dev
-3. ***[`OPTIONAL - if project not set already`]*** gcloud config set account supercomputer-testing
-4. Create env.list file. The sample env.list can be found [here](#sample-config-file-that-the-user-provides). 
-5. ***[`SIMPLE CREATE`]*** 
+1. ***[`OPTIONAL - if project not set already`]*** gcloud config set account supercomputer-testing
+1. Create env.list file. The sample env.list can be found [here](#sample-config-file-that-the-user-provides). 
+1. ***[`SIMPLE CREATE`]*** 
    > docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
-6. ***[`SIMPLE DESTROY`]*** 
+1. ***[`SIMPLE DESTROY`]*** 
    > docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Destroy
-7. ***[`OPTIONAL - Pull docker image before hand`]*** 
+1. ***[`OPTIONAL - Pull docker image before hand`]*** 
    > docker pull us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest
-8. ***[`OPTIONAL - Mount local directory`]*** 
+1. ***[`OPTIONAL - Mount local directory`]*** 
    > docker run -v /usr/username/test:/usr/aiinfra/copy -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
-9.  ***[`OPTIONAL - Mount gcloud config for auth token`]*** 
+1.  ***[`OPTIONAL - Mount gcloud config for auth token`]*** 
     > `Linux` docker run -v ~/.config/gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
     
     > `Windows` docker run -v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
-10. ***[`OPTIONAL - GCS bucket not provided`]*** 
+1. ***[`OPTIONAL - GCS bucket not provided`]*** 
     > Need storage object owner access if you don't already have a storage bucket to reuse.
 
 
