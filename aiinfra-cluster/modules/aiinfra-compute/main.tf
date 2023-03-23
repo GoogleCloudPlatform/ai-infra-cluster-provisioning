@@ -102,7 +102,7 @@ resource "google_compute_instance_template" "compute_vm_template" {
   provider       = google-beta
   // TODO: fix this
   // count          = var.enable_gke ? 0 : 1
-  name_prefix    = "${local.resource_prefix}"
+  name           = "${local.resource_prefix}-ins-tmpl"
   machine_type   = var.machine_type
   region         = var.region
 
@@ -230,8 +230,8 @@ module "aiinfra-slurm" {
   zone                     = var.zone
   network_self_link        = var.network_self_link
   subnetwork_self_link     = var.subnetwork_self_link
-  instance_template        = google_compute_instance_template.compute_vm_template.self_link
-  depends_on = [google_compute_instance_template.compute_vm_template]
+  instance_template        = "https://www.googleapis.com/compute/beta/projects/${var.project_id}/global/instanceTemplates/${local.resource_prefix}-ins-tmpl"
+  depends_on               = [google_compute_instance_template.compute_vm_template]
 }
 
 module "aiinfra-gke" {
