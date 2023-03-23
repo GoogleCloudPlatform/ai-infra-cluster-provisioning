@@ -193,7 +193,9 @@ resource "google_compute_instance_template" "compute_vm_template" {
 
 resource "google_compute_instance_group_manager" "mig" {
   provider           = google-beta
-  count              = var.enable_gke ? 0 : 1
+  // Use Orchestrator_type flag to determine this.
+  count = 0
+  //count              = var.enable_gke ? 0 : 1
   name               = "${local.resource_prefix}-mig"
   base_instance_name = "${local.resource_prefix}-vm"
   project            = var.project_id
@@ -215,6 +217,19 @@ resource "google_compute_instance_group_manager" "mig" {
     create = "30m"
     update = "30m"
   }
+}
+
+module "aiinfra-slurm" {
+  source                   = "../slurm-cluster"
+  // Use Orchestrator_type flag to determine this.
+  count                    = 1
+  project_id               = var.project_id
+  deployment_name          = var.deployment_name
+  region                   = var.region
+  zone                     = var.zone
+  network_self_link        = var.network_self_link
+  subnetwork_self_link     = var.subnetwork_self_link
+  instance_template        = one(google_compute_instance_template.compute_vm_template[*].self_link)
 }
 
 module "aiinfra-gke" {
