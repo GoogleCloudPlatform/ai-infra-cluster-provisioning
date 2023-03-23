@@ -100,7 +100,8 @@ data "google_compute_image" "compute_image" {
 resource "google_compute_instance_template" "compute_vm_template" {
   project        = var.project_id
   provider       = google-beta
-  count          = var.enable_gke ? 0 : 1
+  // TODO: fix this
+  // count          = var.enable_gke ? 0 : 1
   name_prefix    = "${local.resource_prefix}"
   machine_type   = var.machine_type
   region         = var.region
@@ -229,7 +230,8 @@ module "aiinfra-slurm" {
   zone                     = var.zone
   network_self_link        = var.network_self_link
   subnetwork_self_link     = var.subnetwork_self_link
-  instance_template        = one(google_compute_instance_template.compute_vm_template[*].self_link)
+  instance_template        = google_compute_instance_template.compute_vm_template.self_link
+  depends_on = [google_compute_instance_template.compute_vm_template]
 }
 
 module "aiinfra-gke" {
