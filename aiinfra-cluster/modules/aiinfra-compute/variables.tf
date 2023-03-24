@@ -278,10 +278,14 @@ variable "network_interfaces" {
   }
 }
 
-variable "enable_gke" {
-  description = "Flag to enable GKE cluster creation instead of MIG."
-  type        = bool
-  default     = false
+variable "orchestrator_type" {
+  description = "The job orchestrator to be used, can be either ray (default), slurm or gke."
+  type        = string
+
+  validation {
+    condition     = contains(["ray", "slurm", "gke", "none"], var.orchestrator_type)
+    error_message = "Variable orchestrator_type must be either ray, slurm, gke or none."
+  }
 }
 
 variable "gke_version" {

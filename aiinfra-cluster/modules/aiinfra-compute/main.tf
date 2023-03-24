@@ -100,8 +100,7 @@ data "google_compute_image" "compute_image" {
 resource "google_compute_instance_template" "compute_vm_template" {
   project        = var.project_id
   provider       = google-beta
-  // TODO: fix this
-  // count          = var.enable_gke ? 0 : 1
+  count          = contains(["ray", "slurm", "none"], var.orchestrator_type) ? 1 : 0
   name           = "${local.resource_prefix}-ins-tmpl"
   machine_type   = var.machine_type
   region         = var.region
@@ -194,9 +193,7 @@ resource "google_compute_instance_template" "compute_vm_template" {
 
 resource "google_compute_instance_group_manager" "mig" {
   provider           = google-beta
-  // Use Orchestrator_type flag to determine this.
-  count = 0
-  //count              = var.enable_gke ? 0 : 1
+  count = contains(["ray", "none"], var.orchestrator_type) ? 1 : 0
   name               = "${local.resource_prefix}-mig"
   base_instance_name = "${local.resource_prefix}-vm"
   project            = var.project_id
@@ -222,8 +219,7 @@ resource "google_compute_instance_group_manager" "mig" {
 
 module "aiinfra-slurm" {
   source                   = "../slurm-cluster"
-  // Use Orchestrator_type flag to determine this.
-  count                    = 1
+  count                    = var.orchestrator_type == "slurm" ? 1 : 0
   project_id               = var.project_id
   deployment_name          = var.deployment_name
   region                   = var.region
@@ -236,7 +232,7 @@ module "aiinfra-slurm" {
 
 module "aiinfra-gke" {
   source                   = "../gke-cluster"
-  count                    = var.enable_gke ? 1 : 0
+  count                    = var.orchestrator_type == "gke" ? 1 : 0
   project                  = var.project_id
   region                   = var.region
   zone                     = var.zone

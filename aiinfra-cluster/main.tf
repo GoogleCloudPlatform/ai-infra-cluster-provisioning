@@ -169,7 +169,7 @@ module "aiinfra-compute" {
   depends_on = [
     module.aiinfra-network
   ]
-  enable_gke = var.orchestrator_type == "gke"
+  orchestrator_type = var.orchestrator_type
   gke_version = var.gke_version
   
   node_pools = length(var.custom_node_pool) != 0 || length(local.basic_node_pool) != 0 ? coalescelist(var.custom_node_pool, local.basic_node_pool) : []
