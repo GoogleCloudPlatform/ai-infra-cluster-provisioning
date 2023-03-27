@@ -4,6 +4,17 @@
 . ./test/aiinfra-cluster/terraform.sh
 . ./test/scripts/_env_var_util.sh
 
+initialize_terraform () {
+    local -r root_module_dir='/usr/primary'
+    local -r cache_dir="${root_module_dir}/.terraform"
+
+    [ -d "${cache_dir}/plugin-cache" ] || mkdir -p "${cache_dir}/plugin-cache"
+    [ -f "${cache_dir}/.terraform.lock.hcl" ] \
+        && cp {"${cache_dir}/","${root_module_dir}/"}".terraform.lock.hcl"
+    terraform -chdir="${root_module_dir}" init
+    cp {"${root_module_dir}/","${cache_dir}/"}".terraform.lock.hcl"
+}
+
 run_tests () {
     local -r COLOR_RST='\e[0m'
     local -r COLOR_BLD='\e[1m'
@@ -78,4 +89,4 @@ run_tests () {
     [ "${#tests_failed[@]}" -eq 0 ]
 }
 
-run_tests "${@}"
+initialize_terraform && run_tests "${@}"

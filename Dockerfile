@@ -6,18 +6,24 @@ RUN apt-get update && apt-get install git bash bc curl jq python3 software-prope
 # Install terraform
 ##########################################################################################
 ENV TERRAFORM_VERSION="1.3.7"
-RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && unzip terraform* && mv terraform /usr/local/bin/terraform \
-    && chmod +x /usr/local/bin/terraform && rm terraform* 
+ENV ROOT_MODULE_DIR="/usr/primary"
+ENV CACHE_DIR="${ROOT_MODULE_DIR}/.terraform"
+RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
+    && unzip terraform* \
+    && mv terraform /usr/local/bin/terraform \
+    && chmod +x /usr/local/bin/terraform \
+    && rm terraform* \
+    && mkdir -p "${CACHE_DIR}/plugin-cache" \
+    && echo "plugin_cache_dir = \"${CACHE_DIR}/plugin-cache\"" >"${HOME}/.terraformrc"
 
 ##########################################################################################
 # Clean up container, copy files in, and configure terraform
 ##########################################################################################
 RUN apt-get --quiet clean autoclean && apt-get --quiet autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/
 ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
-COPY aiinfra-cluster/ /usr/primary/
-RUN mkdir -p "${HOME}/.terraform.d/plugin-cache" \
-    && echo "plugin_cache_dir = \"${HOME}/.terraform.d/plugin-cache\"" >"${HOME}/.terraformrc" \
-    && terraform -chdir=/usr/primary init
+COPY aiinfra-cluster/ "${ROOT_MODULE_DIR}"
+ARG TF_INIT=true
+RUN if [ "${TF_INIT}" = true ]; then terraform -chdir=/usr/primary init; fi
 COPY scripts/ /usr/
 COPY examples/ /usr/examples/
 

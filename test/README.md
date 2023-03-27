@@ -11,7 +11,22 @@ command:
 ```bash
 tag='prov-test' # or whatever
 docker build --pull --target test --tag "${tag}" .
-docker run -it -v "${HOME}/.config/gcloud:/root/.config/gcloud:ro" "${tag}"
+docker run -it -v "${HOME}/.config/gcloud:/root/.config/gcloud:rw" "${tag}"
+```
+
+One unfortunate aspect of building inside a docker container is that it will have to download modules and plugins each time you change any terraform code. This can be circumvented by disabling docker-build-time `terraform init` and providing the docker run command with a host-machine directory in which the downloads may persist between runs.
+```bash
+mkdir ./.terraform
+tag='prov-test' # or whatever
+docker build --pull \
+  --build-arg TF_INIT=false \
+  --target test \
+  --tag "${tag}" \
+  .
+docker run -it \
+  -v "${HOME}/.config/gcloud:/root/.config/gcloud:rw" \
+  -v "${PWD}/.terraform:/usr/primary/.terraform:rw" \
+  ${tag}"
 ```
 
 # Structure
