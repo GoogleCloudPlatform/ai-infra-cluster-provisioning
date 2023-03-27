@@ -82,6 +82,16 @@ locals {
   gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-widget-data.gce_gke_gpu_utilization_widgets : []
   vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
+  default_instance_image = var.orchestrator_type == "slurm" ? {
+    family  = "schedmd-v5-slurm-22-05-6-hpc-centos-7"
+    project = "schedmd-slurm-public"
+    name    = ""
+  } : {
+    family  = "pytorch-1-12-gpu-debian-10"
+    project = "ml-images"
+    name    = ""
+  }
+
 }
 
 module "aiinfra-network" {
@@ -151,7 +161,7 @@ module "aiinfra-compute" {
     collocation               = "COLLOCATED"
     vm_count                  = var.instance_count
   }
-  instance_image      = local.instance_image
+  instance_image      = var.instance_image == null ? local.default_instance_image : local.instance_image
   on_host_maintenance = "TERMINATE"
   machine_type        = var.machine_type
   zone                = var.zone
