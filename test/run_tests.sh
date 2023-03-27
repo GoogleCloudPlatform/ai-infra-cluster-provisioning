@@ -1,20 +1,43 @@
 #!/bin/bash
 
+# source all files containing tests
 . ./test/aiinfra-cluster/installation_scripts/install_cloud_ops_agent.sh
 . ./test/aiinfra-cluster/terraform.sh
 . ./test/scripts/_env_var_util.sh
 
+# Call `terraform init` and set up cache
+#
+# Parameters:
+#   - `root_module_dir`: directory containing the root `main.tf`
+#   - `cache_dir`: directory containing terraform cache
+# Output: none
+# Exit status:
+#   - 0: success
+#   - 1: terraform initialized unsuccessfully or the lock file was unable to
+#   be cached
 initialize_terraform () {
-    local -r root_module_dir='/usr/primary'
-    local -r cache_dir="${root_module_dir}/.terraform"
+    local -r root_module_dir="${1}"
+    local -r cache_dir="${2}"
 
     [ -d "${cache_dir}/plugin-cache" ] || mkdir -p "${cache_dir}/plugin-cache"
     [ -f "${cache_dir}/.terraform.lock.hcl" ] \
         && cp {"${cache_dir}/","${root_module_dir}/"}".terraform.lock.hcl"
-    terraform -chdir="${root_module_dir}" init
-    cp {"${root_module_dir}/","${cache_dir}/"}".terraform.lock.hcl"
+    terraform -chdir="${root_module_dir}" init \
+        && cp {"${root_module_dir}/","${cache_dir}/"}".terraform.lock.hcl"
 }
 
+# Run all tests in sourced files
+#
+# Parameters:
+#   - `test_regex` (optional, default: 'test::.*'): run only tests matching
+#   this regex
+# Output:
+#   - output of tests
+#   - status of test running and whether it passed
+#   - results -- how many passed, failed, or were skipped
+# Exit status:
+#   - 0: all tests either passed or were skipped
+#   - 1: at least one test failed
 run_tests () {
     local -r COLOR_RST='\e[0m'
     local -r COLOR_BLD='\e[1m'
@@ -89,4 +112,7 @@ run_tests () {
     [ "${#tests_failed[@]}" -eq 0 ]
 }
 
-initialize_terraform && run_tests "${@}"
+root_module_dir='/usr/primary'
+cache_dir="${root_module_dir}/.terraform"
+initialize_terraform "${root_module_dir}" "${cache_dir}" \
+    && run_tests "${@}"

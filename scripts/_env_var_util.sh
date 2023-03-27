@@ -14,13 +14,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-_env_var_util::clean () {
-    local tmp
 
+# Clean up environment variables whether they are valid or not. Right now this
+# is just setting a few to lowercase to simplify string comparisons
+#
+# Parameters: none
+# Output: none
+# Exit status: 0
+_env_var_util::clean () {
     ACTION="${ACTION,,}"
     NETWORK_CONFIG="${NETWORK_CONFIG,,}"
 }
 
+# Assert that environment variables are valid. An error will be printed for
+# each invalid variable before returning.
+#
+# Parameters: none
+# Output: none
+# Exit status:
+#   - 0: all environment variables are valid
+#   - 1: at least one environment variable is invalid
 _env_var_util::validate () {
     local valid=true
 
@@ -62,6 +75,12 @@ _env_var_util::validate () {
     [ "${valid}" == true ]
 }
 
+# For convenience, several environment variables have default values. If they
+# are not set by the user (or set to null!), they are set here.
+#
+# Parameters: none
+# Output: none
+# Exit status: 0
 _env_var_util::set_defaults () {
     REGION=${REGION:-"${ZONE%-?}"}
     [ "${ORCHESTRATOR_TYPE}" != "gke" ] && INSTANCE_COUNT=${INSTANCE_COUNT:-"1"}
@@ -78,6 +97,17 @@ _env_var_util::set_defaults () {
     NETWORK_CONFIG=${NETWORK_CONFIG:-"default_network"}
 }
 
+# Retrieves the service account for the project which has the format -- 
+# `${project_num}-compute@developer.gserviceaccount.com` -- where `project_num`
+# is the `projectNumber` corresponding to the project denoted by `project_id`
+#
+# Parameters:
+#   - `project_id`: the name of the project in which the cluster will be
+#   provisioned.
+# Output: service account email address for the project
+# Exit status:
+#   - 0: printed successfully
+#   - 1: error when calling gcloud commands
 _env_var_util::get_project_email () {
     local -r project_id="${1}"
     local project_num
@@ -103,12 +133,31 @@ _env_var_util::get_project_email () {
     echo "${project_num}-compute@developer.gserviceaccount.com"
 }
 
+# Prepares and validates environment variables in order for them to be
+# converted to terraform variables in `_env_var_util::print_tfvars`.
+#
+# Parameters: none
+# Output: none
+# Exit status:
+#   - 0: success
+#   - 1: environment is invalid
 _env_var_util::setup () {
     _env_var_util::clean \
     && _env_var_util::validate \
     && _env_var_util::set_defaults
 }
 
+# Print environment variables as terraform variables.
+#
+# Parameters:
+#   - `project_email`: service account email address for project (typically
+#   populated using `_env_var_util::get_project_email`).
+#   - `uuid`: a unique identifier that will be prepended to the terraform
+#   variable `labels` as `aiinfra-cluster="${uuid}"`
+# Output: a tfvars file for the root module in `aiinfra-cluster`.
+# Exit status:
+#   - 0: success
+#   - 1: missing parameter
 _env_var_util::print_tfvars () {
     local -r project_email="${1}"
     local -r uuid="${2}"
