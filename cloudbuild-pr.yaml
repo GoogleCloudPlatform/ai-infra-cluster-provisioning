@@ -42,6 +42,6 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '--tag=test', '--target=test', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run', 'test' ]
+  args: [ 'run', '--network=cloudbuild', 'test' ]
 
 timeout: 900s

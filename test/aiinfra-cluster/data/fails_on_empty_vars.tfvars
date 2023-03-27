@@ -1,0 +1,12 @@
+project_id = ""
+name_prefix = ""
+region = ""
+zone = ""
+machine_type = ""
+instance_count = 0
+accelerator_type = ""
+gpu_per_vm = 0
+instance_image = {}
+labels = {}
+metadata = {}
+gcs_bucket_path = ""

@@ -150,6 +150,16 @@ _perform_terraform_action() {
         terraform --version
         terraform -chdir=/usr/primary init -input=false
         terraform -chdir=/usr/primary validate
+    elif [[ "${ACTION,,}" == "plan" ]]; then
+        terraform --version
+        if ! terraform -chdir=/usr/primary init -input=false; then
+            echo >&2 'terraform init failure'
+            exit 1
+        fi
+        if ! terraform -chdir=/usr/primary plan -no-color -input=false -out=/out/tfplan; then
+            echo >&2 'terraform plan failure'
+            exit 1
+        fi
     else
         echo "Action $ACTION is not supported..."
     fi
