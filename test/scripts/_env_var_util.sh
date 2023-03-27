@@ -33,8 +33,7 @@ _env_var_util::test::unset_env () {
         ENABLE_OPS_AGENT \
         ENABLE_NOTEBOOK \
         GKE_NODE_POOL_COUNT \
-        GKE_MIN_NODE_COUNT \
-        GKE_MAX_NODE_COUNT \
+        GKE_NODE_COUNT_PER_NODE_POOL \
         CUSTOM_NODE_POOL
 }
 
@@ -68,8 +67,7 @@ _env_var_util::test::set_optional_env () {
     ENABLE_OPS_AGENT='ops'
     ENABLE_NOTEBOOK='note'
     GKE_NODE_POOL_COUNT='node'
-    GKE_MIN_NODE_COUNT='min'
-    GKE_MAX_NODE_COUNT='max'
+    GKE_NODE_COUNT_PER_NODE_POOL=3
     CUSTOM_NODE_POOL='custom'
 }
 

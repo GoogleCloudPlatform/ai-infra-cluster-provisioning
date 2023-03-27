@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 # Format a prefix for errors printed by assertion functions so they all look the
 # same.
-
-
+#
 # Parameters:
 #   - `fn_name`: the name of the assertion function that is erroring
 #   - `params` (variadic): the parameters to the assertion function

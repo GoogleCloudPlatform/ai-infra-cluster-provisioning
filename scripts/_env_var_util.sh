@@ -214,8 +214,7 @@ EOF
     [ -n "${ENABLE_OPS_AGENT}" ] && echo "enable_ops_agent = \"${ENABLE_OPS_AGENT}\""
     [ -n "${ENABLE_NOTEBOOK}" ] && echo "enable_notebook = \"${ENABLE_NOTEBOOK}\""
     [ -n "${GKE_NODE_POOL_COUNT}" ] && echo "gke_node_pool_count = \"${GKE_NODE_POOL_COUNT}\""
-    [ -n "${GKE_MIN_NODE_COUNT}" ] && echo "gke_min_node_count = \"${GKE_MIN_NODE_COUNT}\""
-    [ -n "${GKE_MAX_NODE_COUNT}" ] && echo "gke_max_node_count = \"${GKE_MAX_NODE_COUNT}\""
+    [ -n "${GKE_NODE_COUNT_PER_NODE_POOL}" ] && echo "gke_node_count_per_node_pool = ${GKE_NODE_COUNT_PER_NODE_POOL}"
     [ -n "${CUSTOM_NODE_POOL}" ] && echo "custom_node_pool = \"${CUSTOM_NODE_POOL}\""
 
     return 0

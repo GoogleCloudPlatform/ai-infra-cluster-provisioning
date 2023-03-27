@@ -35,6 +35,5 @@ startup_command = "echo"
 enable_ops_agent = "ops"
 enable_notebook = "note"
 gke_node_pool_count = "node"
-gke_min_node_count = "min"
-gke_max_node_count = "max"
+gke_node_count_per_node_pool = 3
 custom_node_pool = "custom"
