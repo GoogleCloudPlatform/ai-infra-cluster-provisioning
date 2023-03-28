@@ -44,6 +44,16 @@ locals {
       description = "Direction of the link traffic, one of [tx, rx]"
     }
   }
+
+  dcgm_dashboard_data = jsondecode(tostring(data.http.nvidia_dcgm_dashboard.response_body))
+  nvml_dashboard_data = jsondecode(tostring(data.http.nvidia_nvml_dashboard.response_body))
+  
+  nvidia_dcgm_widgets = [
+    for tile in local.dcgm_dashboard_data.mosaicLayout.tiles : jsonencode(tile.widget)
+  ]
+  nvidia_nvml_widgets = [
+    for tile in local.nvml_dashboard_data.mosaicLayout.tiles : jsonencode(tile.widget)
+  ]
 }
 
 resource "google_monitoring_metric_descriptor" "sm_utilization" {
@@ -163,3 +173,18 @@ resource "google_monitoring_metric_descriptor" "nvlink_traffic_rate" {
   }
 }
 
+data "http" "nvidia_dcgm_dashboard" {
+  url = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/nvidia-dcgm.json"
+
+  request_headers = {
+    Accept = "application/json"
+  }
+}
+
+data "http" "nvidia_nvml_dashboard" {
+  url = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/nvidia-nvml.json"
+
+  request_headers = {
+    Accept = "application/json"
+  }
+}
