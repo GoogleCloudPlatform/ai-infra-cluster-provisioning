@@ -121,12 +121,20 @@ _env_var_util::set_defaults () {
     METADATA="${METADATA:-"{}"}"
     ACCELERATOR_TYPE=${ACCELERATOR_TYPE:-"nvidia-tesla-a100"}
     LABELS="${LABELS:-"{}"}"
-    [ -n "${IMAGE_NAME}" ] || {
-        IMAGE_FAMILY_NAME=${IMAGE_FAMILY_NAME:-"pytorch-1-12-gpu-debian-10"};
+    [ -z "${IMAGE_FAMILY_NAME}" ] && [ -z "${IMAGE_NAME}" ] && {
+        if [ "${ORCHESTRATOR_TYPE}" = "slurm" ]; then
+            IMAGE_FAMILY_NAME='schedmd-v5-slurm-22-05-6-hpc-centos-7'
+            IMAGE_PROJECT='schedmd-slurm-public'
+        else
+            IMAGE_FAMILY_NAME='pytorch-1-12-gpu-debian-10'
+        fi
     }
+    IMAGE_PROJECT=${IMAGE_PROJECT:-"ml-images"}
     DISK_SIZE_GB=${DISK_SIZE_GB:-"2000"}
     DISK_TYPE=${DISK_TYPE:-"pd-ssd"}
     NETWORK_CONFIG=${NETWORK_CONFIG:-"default_network"}
+
+    return 0
 }
 
 # Retrieves the service account for the project which has the format -- 
@@ -228,7 +236,7 @@ accelerator_type = "${ACCELERATOR_TYPE}"
 instance_image = {
   family = "${IMAGE_FAMILY_NAME}"
   name = "${IMAGE_NAME}"
-  project = "ml-images"
+  project = "${IMAGE_PROJECT}"
 }
 labels = { aiinfra-cluster="${uuid}", ${LABELS#*{}
 disk_size_gb = ${DISK_SIZE_GB}

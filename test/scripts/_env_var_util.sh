@@ -22,6 +22,7 @@ _env_var_util::test::unset_env () {
         ACCELERATOR_TYPE \
         IMAGE_FAMILY_NAME \
         IMAGE_NAME \
+        IMAGE_PROJECT \
         LABELS \
         DISK_SIZE_GB \
         DISK_TYPE \
@@ -51,7 +52,6 @@ _env_var_util::test::set_defaultable_env () {
     VM_TYPE='vm-type'
     METADATA='{key="val"}'
     ACCELERATOR_TYPE='accelerator-type'
-    IMAGE_NAME='image'
     LABELS='{another_key="another_val"}'
     DISK_SIZE_GB=3
     DISK_TYPE='disk-type'
@@ -180,9 +180,56 @@ test::_env_var_util::set_defaults::changes_unset_values () {
     EXPECT_STREQ "${LABELS}" '{}'
     EXPECT_STREQ "${IMAGE_FAMILY_NAME}" 'pytorch-1-12-gpu-debian-10'
     EXPECT_STR_EMPTY "${IMAGE_NAME}"
+    EXPECT_STREQ "${IMAGE_PROJECT}" 'ml-images'
     EXPECT_EQ "${DISK_SIZE_GB}" 2000
     EXPECT_STREQ "${DISK_TYPE}" 'pd-ssd'
     EXPECT_STREQ "${NETWORK_CONFIG}" 'default_network'
+}
+
+test::_env_var_util::set_defaults::does_not_change_set_values () {
+    _env_var_util::test::unset_env
+    _env_var_util::test::set_required_env
+    _env_var_util::test::set_defaultable_env
+    EXPECT_SUCCEED _env_var_util::set_defaults
+
+    EXPECT_STREQ "${REGION}" 'region'
+    EXPECT_EQ "${GPU_COUNT}" 3
+    EXPECT_STREQ "${VM_TYPE}" 'vm-type'
+    EXPECT_STREQ "${METADATA}" '{key="val"}'
+    EXPECT_STREQ "${ACCELERATOR_TYPE}" 'accelerator-type'
+    EXPECT_STREQ "${LABELS}" '{another_key="another_val"}'
+    EXPECT_EQ "${DISK_SIZE_GB}" 3
+    EXPECT_STREQ "${DISK_TYPE}" 'disk-type'
+    EXPECT_STREQ "${NETWORK_CONFIG}" 'network'
+
+    _env_var_util::test::unset_env
+    _env_var_util::test::set_required_env
+    IMAGE_FAMILY_NAME='family'
+    EXPECT_SUCCEED _env_var_util::set_defaults
+
+    EXPECT_STREQ "${IMAGE_FAMILY_NAME}" 'family'
+    EXPECT_STR_EMPTY "${IMAGE_NAME}"
+    EXPECT_STREQ "${IMAGE_PROJECT}" 'ml-images'
+
+    _env_var_util::test::unset_env
+    _env_var_util::test::set_required_env
+    IMAGE_NAME='name'
+    EXPECT_SUCCEED _env_var_util::set_defaults
+
+    EXPECT_STR_EMPTY "${IMAGE_FAMILY_NAME}"
+    EXPECT_STREQ "${IMAGE_NAME}" 'name'
+    EXPECT_STREQ "${IMAGE_PROJECT}" 'ml-images'
+}
+
+test::_env_var_util::set_defaults::sets_slurm_values () {
+    _env_var_util::test::unset_env
+    _env_var_util::test::set_required_env
+    ORCHESTRATOR_TYPE='slurm'
+    EXPECT_SUCCEED _env_var_util::set_defaults
+
+    EXPECT_STREQ "${IMAGE_FAMILY_NAME}" 'schedmd-v5-slurm-22-05-6-hpc-centos-7'
+    EXPECT_STR_EMPTY "${IMAGE_NAME}"
+    EXPECT_STREQ "${IMAGE_PROJECT}" 'schedmd-slurm-public'
 }
 
 test::_env_var_util::set_defaults::instance_count_defaults_when_not_gke () {
@@ -211,25 +258,6 @@ test::_env_var_util::set_defaults::instance_count_unchanged_when_gke () {
     INSTANCE_COUNT=3
     EXPECT_SUCCEED _env_var_util::set_defaults
     EXPECT_EQ "${INSTANCE_COUNT}" 3
-}
-
-test::_env_var_util::set_defaults::does_not_change_set_values () {
-    _env_var_util::test::unset_env
-    _env_var_util::test::set_required_env
-    _env_var_util::test::set_defaultable_env
-    EXPECT_SUCCEED _env_var_util::set_defaults
-
-    EXPECT_STREQ "${REGION}" 'region'
-    EXPECT_EQ "${GPU_COUNT}" 3
-    EXPECT_STREQ "${VM_TYPE}" 'vm-type'
-    EXPECT_STREQ "${METADATA}" '{key="val"}'
-    EXPECT_STREQ "${ACCELERATOR_TYPE}" 'accelerator-type'
-    EXPECT_STREQ "${LABELS}" '{another_key="another_val"}'
-    EXPECT_STR_EMPTY "${IMAGE_FAMILY_NAME}"
-    EXPECT_STREQ "${IMAGE_NAME}" 'image'
-    EXPECT_EQ "${DISK_SIZE_GB}" 3
-    EXPECT_STREQ "${DISK_TYPE}" 'disk-type'
-    EXPECT_STREQ "${NETWORK_CONFIG}" 'network'
 }
 
 # idk if it is okay to put service account email address in public repo
