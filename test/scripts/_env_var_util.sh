@@ -62,7 +62,7 @@ _env_var_util::test::set_optional_env () {
     INSTANCE_COUNT=3
     GCS_MOUNT_LIST='mount'
     NFS_FILESHARE_LIST='fileshare'
-    ORCHESTRATOR_TYPE='orchestrator'
+    ORCHESTRATOR_TYPE='none'
     STARTUP_COMMAND='echo'
     ENABLE_OPS_AGENT='ops'
     ENABLE_NOTEBOOK='note'
@@ -87,6 +87,31 @@ test::_env_var_util::clean::sets_network_config_to_lowercase () {
     EXPECT_STREQ "${NETWORK_CONFIG}" 'network'
 }
 
+test::_env_var_util::clean::sets_orchestrator_type_to_lowercase () {
+    _env_var_util::test::unset_env
+    ORCHESTRATOR_TYPE='ORCHESTRATOR'
+    _env_var_util::clean
+    EXPECT_STREQ "${ORCHESTRATOR_TYPE}" 'orchestrator'
+}
+
+test::_env_var_util::expect_contains::fails_on_empty_array () {
+    declare -ar arr=()
+    local -r element=""
+    EXPECT_FAIL _env_var_util::expect_contains arr element
+}
+
+test::_env_var_util::expect_contains::fails_on_element_missing () {
+    declare -ar arr=("apple" "banana")
+    local -r element="orange"
+    EXPECT_FAIL _env_var_util::expect_contains arr element
+}
+
+test::_env_var_util::expect_contains::succeeds_on_element_present () {
+    declare -ar arr=("apple" "banana")
+    local -r element="apple"
+    EXPECT_SUCCEED _env_var_util::expect_contains arr element
+}
+
 test::_env_var_util::validate::fails_when_required_is_not_set () {
     declare -ar required_vars=(ACTION PROJECT_ID NAME_PREFIX ZONE)
     for required_var in "${required_vars[@]}"; do
@@ -105,10 +130,24 @@ test::_env_var_util::validate::fails_when_image_and_family_are_both_set () {
     EXPECT_FAIL _env_var_util::validate
 }
 
+test::_env_var_util::validate::fails_when_action_is_set_wrong () {
+    _env_var_util::test::unset_env
+    _env_var_util::test::set_required_env
+    ACTION='wrong'
+    EXPECT_FAIL _env_var_util::validate
+}
+
 test::_env_var_util::validate::fails_when_network_config_is_set_wrong () {
     _env_var_util::test::unset_env
     _env_var_util::test::set_required_env
     NETWORK_CONFIG='wrong'
+    EXPECT_FAIL _env_var_util::validate
+}
+
+test::_env_var_util::validate::fails_when_orchestrator_type_is_set_wrong () {
+    _env_var_util::test::unset_env
+    _env_var_util::test::set_required_env
+    ORCHESTRATOR_TYPE='wrong'
     EXPECT_FAIL _env_var_util::validate
 }
 

@@ -29,9 +29,9 @@ get_error_prefix () {
         params_str="'${params[0]}'"
     fi
 
-    local i
-    for i in $(seq 1 $((${#params[@]} - 1))); do
-        params_str="${params_str}, '${params[$i]}'"
+    local param
+    for param in "${params[@]:1}"; do
+        params_str+=", '${param}'"
     done
 
     echo "--> ${fn_name}(${params_str}):"
