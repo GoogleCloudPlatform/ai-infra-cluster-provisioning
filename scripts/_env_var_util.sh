@@ -24,6 +24,44 @@
 _env_var_util::clean () {
     ACTION="${ACTION,,}"
     NETWORK_CONFIG="${NETWORK_CONFIG,,}"
+    ORCHESTRATOR_TYPE="${ORCHESTRATOR_TYPE,,}"
+}
+
+# Check if an array contains a value. Print an error message if it doesn't
+#
+# Parameters:
+#   - `_array_name`: name of the _array variable
+#   - `_value_name`: name of the _value variable
+# Output: none
+# Exit status:
+#   - 0: _array contains the _value
+#   - 1: _array does not contain the _value
+_env_var_util::expect_contains () {
+    local -r _array_name="${1}"
+    local -r _value_name="${2}"
+    local -nr _array="${_array_name}"
+    local -nr _value="${_value_name}"
+
+    [ "${#_array[@]}" -gt 0 ] || {
+        echo "Array '${_array_name}' contains zero elements"
+        return 1
+    } >&2
+
+    local _element
+    for _element in "${_array[@]}"; do
+        [ "${_element}" = "${_value}" ] && return 0;
+    done
+
+    local _array_pretty="'${_array[0]}'"
+    for _element in "${_array[@]:1}"; do
+        _array_pretty+=", '${_element}'"
+    done
+    {
+        echo "${_value_name}='${_value}'"
+        echo "  - Must be one of [${_array_pretty}]."
+    } >&2
+
+    return 1
 }
 
 # Assert that environment variables are valid. An error will be printed for
@@ -37,17 +75,12 @@ _env_var_util::clean () {
 _env_var_util::validate () {
     local valid=true
 
-    {
-        [ "${ACTION}" == 'create' ] \
-        || [ "${ACTION}" == 'destroy' ] \
-        || [ "${ACTION}" == 'plan' ] \
-        || [ "${ACTION}" == 'validate' ];
-    } || {
-        echo "ACTION='${ACTION}'"
-        echo "  - Must be one of ['create', 'destroy', 'plan', 'validate']."
+
+    declare -ar expected_actions=('create' 'destroy' 'plan' 'validate')
+    _env_var_util::expect_contains expected_actions ACTION || {
         echo "  - This can also be set as an argument to the entrypoint."
         echo "  - If running in docker, this goes after the image tag"
-        echo "    (docker run cluster-provision-image \${ACTION})."
+        echo "  (docker run cluster-provision-image \${ACTION})."
         valid=false
     } >&2
 
@@ -61,18 +94,17 @@ _env_var_util::validate () {
         valid=false
     } >&2
 
-    {
-        [ -z "${NETWORK_CONFIG}" ] \
-        || [ "${NETWORK_CONFIG}" == 'default_network' ] \
-        || [ "${NETWORK_CONFIG}" == 'new_network' ] \
-        || [ "${NETWORK_CONFIG}" == 'multi_nic_network' ];
-    } || {
-        echo "NETWORK_CONFIG='${NETWORK_CONFIG}'"
-        echo "  - Must be one of ['default_network', 'new_network', 'multi_nic_network']."
-        valid=false
-    } >&2
+    declare -ar expected_network_configs=('default_network' 'new_network' 'multi_nic_network')
+    [ -z "${NETWORK_CONFIG}" ] \
+        || _env_var_util::expect_contains expected_network_configs NETWORK_CONFIG \
+        || valid=false
 
-    [ "${valid}" == true ]
+    declare -ar expected_orchestrator_types=('ray', 'slurm', 'gke', 'none')
+    [ -z "${ORCHESTRATOR_TYPE}" ] \
+        || _env_var_util::expect_contains expected_orchestrator_types ORCHESTRATOR_TYPE \
+        || valid=false
+
+    [ "${valid}" = true ]
 }
 
 # For convenience, several environment variables have default values. If they
@@ -89,12 +121,20 @@ _env_var_util::set_defaults () {
     METADATA="${METADATA:-"{}"}"
     ACCELERATOR_TYPE=${ACCELERATOR_TYPE:-"nvidia-tesla-a100"}
     LABELS="${LABELS:-"{}"}"
-    [ -n "${IMAGE_NAME}" ] || {
-        IMAGE_FAMILY_NAME=${IMAGE_FAMILY_NAME:-"pytorch-1-12-gpu-debian-10"};
+    [ -z "${IMAGE_FAMILY_NAME}" ] && [ -z "${IMAGE_NAME}" ] && {
+        if [ "${ORCHESTRATOR_TYPE}" = "slurm" ]; then
+            IMAGE_FAMILY_NAME='schedmd-v5-slurm-22-05-6-hpc-centos-7'
+            IMAGE_PROJECT='schedmd-slurm-public'
+        else
+            IMAGE_FAMILY_NAME='pytorch-1-12-gpu-debian-10'
+        fi
     }
+    IMAGE_PROJECT=${IMAGE_PROJECT:-"ml-images"}
     DISK_SIZE_GB=${DISK_SIZE_GB:-"2000"}
     DISK_TYPE=${DISK_TYPE:-"pd-ssd"}
     NETWORK_CONFIG=${NETWORK_CONFIG:-"default_network"}
+
+    return 0
 }
 
 # Retrieves the service account for the project which has the format -- 
@@ -196,7 +236,7 @@ accelerator_type = "${ACCELERATOR_TYPE}"
 instance_image = {
   family = "${IMAGE_FAMILY_NAME}"
   name = "${IMAGE_NAME}"
-  project = "ml-images"
+  project = "${IMAGE_PROJECT}"
 }
 labels = { aiinfra-cluster="${uuid}", ${LABELS#*{}
 disk_size_gb = ${DISK_SIZE_GB}
@@ -214,8 +254,7 @@ EOF
     [ -n "${ENABLE_OPS_AGENT}" ] && echo "enable_ops_agent = \"${ENABLE_OPS_AGENT}\""
     [ -n "${ENABLE_NOTEBOOK}" ] && echo "enable_notebook = \"${ENABLE_NOTEBOOK}\""
     [ -n "${GKE_NODE_POOL_COUNT}" ] && echo "gke_node_pool_count = \"${GKE_NODE_POOL_COUNT}\""
-    [ -n "${GKE_MIN_NODE_COUNT}" ] && echo "gke_min_node_count = \"${GKE_MIN_NODE_COUNT}\""
-    [ -n "${GKE_MAX_NODE_COUNT}" ] && echo "gke_max_node_count = \"${GKE_MAX_NODE_COUNT}\""
+    [ -n "${GKE_NODE_COUNT_PER_NODE_POOL}" ] && echo "gke_node_count_per_node_pool = ${GKE_NODE_COUNT_PER_NODE_POOL}"
     [ -n "${CUSTOM_NODE_POOL}" ] && echo "custom_node_pool = \"${CUSTOM_NODE_POOL}\""
 
     return 0
