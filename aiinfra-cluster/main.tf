@@ -114,7 +114,7 @@ module "nfs_filestore" {
 }
 
 module "startup" {
-  source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
+  source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=58ff5ad44b1b80a62c447eca4d57e9bba9badf70"
   project_id = var.project_id
   runners = concat(local.dir_copy_setup
     , module.gcsfuse_mount[*].client_install_runner
