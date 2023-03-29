@@ -99,7 +99,7 @@ _env_var_util::validate () {
         || _env_var_util::expect_contains expected_network_configs NETWORK_CONFIG \
         || valid=false
 
-    declare -ar expected_orchestrator_types=('ray', 'slurm', 'gke', 'none')
+    declare -ar expected_orchestrator_types=('ray' 'slurm' 'gke' 'none')
     [ -z "${ORCHESTRATOR_TYPE}" ] \
         || _env_var_util::expect_contains expected_orchestrator_types ORCHESTRATOR_TYPE \
         || valid=false
