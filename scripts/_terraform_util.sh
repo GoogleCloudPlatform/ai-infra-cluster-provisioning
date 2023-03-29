@@ -156,7 +156,7 @@ _perform_terraform_action() {
             echo >&2 'terraform init failure'
             exit 1
         fi
-        if ! terraform -chdir=/usr/primary plan -no-color -input=false -out=/out/tfplan; then
+        if ! terraform -chdir=/usr/primary plan -no-color -input=false; then
             echo >&2 'terraform plan failure'
             exit 1
         fi
