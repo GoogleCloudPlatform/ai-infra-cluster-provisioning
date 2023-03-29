@@ -70,8 +70,8 @@ locals {
     }
   ] : []
 
-  mig_widgets = var.enable_ops_agent ? concat(module.dashboard-metric-descriptor.nvidia_dcgm_widgets, module.dashboard-metric-descriptor.nvidia_nvml_widgets) : []
-  gke_widgets = var.enable_ops_agent ? module.dashboard-metric-descriptor.gke_gpu_utilization_widgets : []
+  nvidia_widgets                  = var.enable_ops_agent ? concat(module.dashboard-metric-descriptor.nvidia_dcgm_widgets, module.dashboard-metric-descriptor.nvidia_nvml_widgets) : []
+  gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-metric-descriptor.gke_gpu_utilization_widgets : []
 
   vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
@@ -180,6 +180,6 @@ module "aiinfra-default-dashboard" {
   deployment_name = local.depl_name
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
-  widgets         = var.orchestrator_type != "gke" ? local.mig_widgets : local.gke_widgets
+  widgets         = var.orchestrator_type != "gke" ? concat(local.nvidia_widgets, local.gce_gke_gpu_utilization_widgets) : local.gce_gke_gpu_utilization_widgets
   depends_on      = [module.dashboard-metric-descriptor]
 }
