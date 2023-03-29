@@ -71,7 +71,7 @@ locals {
   ] : []
 
   nvidia_widgets                  = var.enable_ops_agent ? concat(module.dashboard-metric-descriptor.nvidia_dcgm_widgets, module.dashboard-metric-descriptor.nvidia_nvml_widgets) : []
-  gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-metric-descriptor.gke_gpu_utilization_widgets : []
+  gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-metric-descriptor.gce_gke_gpu_utilization_widgets : []
 
   vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 

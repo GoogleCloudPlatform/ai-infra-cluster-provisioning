@@ -24,7 +24,7 @@ output "nvidia_nvml_widgets" {
   value       = local.nvidia_nvml_widgets 
 }
 
-output "gke_gpu_utilization_widgets" {
+output "gce_gke_gpu_utilization_widgets" {
   description = "The GKE GPU utilization widgets."
-  value       = local.gke_gpu_utilization_widgets 
+  value       = local.gce_gke_gpu_utilization_widgets 
 }
