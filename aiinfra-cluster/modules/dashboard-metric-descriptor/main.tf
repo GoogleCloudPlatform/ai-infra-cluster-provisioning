@@ -45,14 +45,18 @@ locals {
     }
   }
 
-  dcgm_dashboard_data = jsondecode(tostring(data.http.nvidia_dcgm_dashboard.response_body))
-  nvml_dashboard_data = jsondecode(tostring(data.http.nvidia_nvml_dashboard.response_body))
+  dcgm_dashboard_data                = jsondecode(tostring(data.http.nvidia_dcgm_dashboard.response_body))
+  nvml_dashboard_data                = jsondecode(tostring(data.http.nvidia_nvml_dashboard.response_body))
+  gke_gpu_utilization_dashboard_data = jsondecode(tostring(data.http.gke_gpu_utilization_dashboard.response_body))
   
   nvidia_dcgm_widgets = [
     for tile in local.dcgm_dashboard_data.mosaicLayout.tiles : jsonencode(tile.widget)
   ]
   nvidia_nvml_widgets = [
     for tile in local.nvml_dashboard_data.mosaicLayout.tiles : jsonencode(tile.widget)
+  ]
+  gke_gpu_utilization_widgets = [
+    for tile in local.gke_gpu_utilization_dashboard_data.mosaicLayout.tiles : jsonencode(tile.widget)
   ]
 }
 
@@ -183,6 +187,14 @@ data "http" "nvidia_dcgm_dashboard" {
 
 data "http" "nvidia_nvml_dashboard" {
   url = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/nvidia-nvml.json"
+
+  request_headers = {
+    Accept = "application/json"
+  }
+}
+
+data "http" "gke_gpu_utilization_dashboard" {
+  url = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/gce-gke-gpu-utilization.json"
 
   request_headers = {
     Accept = "application/json"
