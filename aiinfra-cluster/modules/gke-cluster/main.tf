@@ -217,6 +217,9 @@ resource "google_container_node_pool" "gke-node-pools" {
     # go/gke-cluster-pattern#req1.1.5
     image_type = "COS_CONTAINERD"
 
+    disk_size_gb = var.disk_size_gb
+    disk_type    = var.disk_type
+
     # Enable features on shielded nodes for go/gke-cluster-pattern#req1.1.5.
     shielded_instance_config {
       enable_secure_boot          = true
