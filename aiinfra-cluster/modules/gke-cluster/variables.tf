@@ -53,10 +53,22 @@ variable "subnetwork_self_link" {
   default     = null
 }
 
-variable "ip_cidr_block_size_17" {
+variable "disk_size_gb" {
+  description = "Size of disk for instances."
+  type        = number
+  default     = 200
+}
+
+variable "disk_type" {
+  description = "Disk type for instances."
+  type        = string
+  default     = "pd-standard"
+}
+
+variable "ip_cidr_block_17" {
   type        = string
   description = "A /17 CIDR IP range reserved for Metastore infrastructure. GKE pods, services, master subnet ranges are derived from it. If specified, will ignore (master_ipv4/pod/service/subnet)_cidr_block."
-  default     = "10.12.0.0/17"
+  default     = null
 }
 
 variable "subnet_cidr_block" {

@@ -96,8 +96,8 @@ variable "disk_type" {
   default     = "pd-standard"
 
   validation {
-    condition     = contains(["pd-ssd", "local-ssd", "pd-standard"], var.disk_type)
-    error_message = "Variable disk_type must be one of pd-ssd, local-ssd, or pd-standard."
+    condition     = contains(["pd-ssd", "local-ssd", "pd-standard", "pd-balanced", "pd-extreme"], var.disk_type)
+    error_message = "Variable disk_type must be one of pd-ssd, local-ssd, pd-balanced, pd-extreme or pd-standard."
   }
 }
 
@@ -191,6 +191,12 @@ variable "gke_node_count_per_node_pool" {
   description = "The desired node count per node pool for GKE cluster. Creation will fail if at least this number of Nodes cannot be created."
   type        = number
   default     = 0
+}
+
+variable "gke_ip_cidr_block_17" {
+  type        = string
+  description = "A /17 CIDR IP range reserved for Metastore infrastructure. GKE pods, services, master subnet ranges are derived from it."
+  default     = null
 }
 
 variable "custom_node_pools" {

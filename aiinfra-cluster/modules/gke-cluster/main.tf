@@ -22,11 +22,12 @@ locals {
   #   - /21 enough for 2k nodes
   #   - /22 gke service range (enough for 1k services)
   #   - /28 master range
-  cidr_blocks          = var.ip_cidr_block_size_17 == "" ? [] : cidrsubnets(var.ip_cidr_block_size_17, 18 - 17, 21 - 17, 22 - 17, 28 - 17)
-  pod_cidr_block       = var.ip_cidr_block_size_17 == "" ? var.pod_cidr_block : local.cidr_blocks[0]
-  subnet_cidr_block    = var.ip_cidr_block_size_17 == "" ? var.subnet_cidr_block : local.cidr_blocks[1]
-  service_cidr_block   = var.ip_cidr_block_size_17 == "" ? var.service_cidr_block : local.cidr_blocks[2]
-  master_cidr_block    = var.ip_cidr_block_size_17 == "" ? var.master_ipv4_cidr_block : local.cidr_blocks[3]
+  ip_cidr_block   = var.ip_cidr_block_17 == null ? "10.${random_integer.cidr_octet.result}.0.0/17" : var.ip_cidr_block_17
+  cidr_blocks          = local.ip_cidr_block == "" ? [] : cidrsubnets(local.ip_cidr_block, 18 - 17, 21 - 17, 22 - 17, 28 - 17)
+  pod_cidr_block       = local.ip_cidr_block == "" ? var.pod_cidr_block : local.cidr_blocks[0]
+  subnet_cidr_block    = local.ip_cidr_block == "" ? var.subnet_cidr_block : local.cidr_blocks[1]
+  service_cidr_block   = local.ip_cidr_block == "" ? var.service_cidr_block : local.cidr_blocks[2]
+  master_cidr_block    = local.ip_cidr_block == "" ? var.master_ipv4_cidr_block : local.cidr_blocks[3]
 }
 
 # Definition of the private GKE cluster.
@@ -217,6 +218,9 @@ resource "google_container_node_pool" "gke-node-pools" {
     # go/gke-cluster-pattern#req1.1.5
     image_type = "COS_CONTAINERD"
 
+    disk_size_gb = var.disk_size_gb
+    disk_type    = var.disk_type
+
     # Enable features on shielded nodes for go/gke-cluster-pattern#req1.1.5.
     shielded_instance_config {
       enable_secure_boot          = true
@@ -275,4 +279,12 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
   project = var.project
   role    = "roles/monitoring.viewer"
   member  = "serviceAccount:${var.node_service_account}"
+}
+
+resource "random_integer" "cidr_octet" {
+  min     = 10
+  max     = 100
+  keepers = {
+      gke_cluster_name = var.name
+  }
 }
