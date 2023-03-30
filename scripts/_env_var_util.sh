@@ -257,7 +257,6 @@ EOF
     [ -n "${GKE_NODE_COUNT_PER_NODE_POOL}" ] && echo "gke_node_count_per_node_pool = ${GKE_NODE_COUNT_PER_NODE_POOL}"
     [ -n "${CUSTOM_NODE_POOL}" ] && echo "custom_node_pool = \"${CUSTOM_NODE_POOL}\""
     [ -n "${GKE_IP_CIDR_BLOCK_17}" ] && echo "gke_ip_cidr_block_17 = \"${GKE_IP_CIDR_BLOCK_17}\""
-    [ -n ""]
 
     return 0
 }

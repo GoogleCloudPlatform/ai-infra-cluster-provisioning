@@ -37,3 +37,4 @@ enable_notebook = "note"
 gke_node_pool_count = "node"
 gke_node_count_per_node_pool = 3
 custom_node_pool = "custom"
+gke_ip_cidr_block_17 = "10.18.0.0/17"
