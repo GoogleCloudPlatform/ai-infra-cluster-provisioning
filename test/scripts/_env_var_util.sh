@@ -70,7 +70,7 @@ _env_var_util::test::set_optional_env () {
     GKE_NODE_POOL_COUNT='node'
     GKE_NODE_COUNT_PER_NODE_POOL=3
     CUSTOM_NODE_POOL='custom'
-    GKE_IP_CIDR_BLOCK_17=`10.12.0.0/17`
+    GKE_IP_CIDR_BLOCK_17='10.18.0.0/17'
 }
 
 # Test functions
