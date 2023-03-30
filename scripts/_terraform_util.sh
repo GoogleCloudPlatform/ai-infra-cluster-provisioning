@@ -40,7 +40,7 @@ _terraform_setup() {
                 export IS_CLEANUP_NEEDED="yes"
             fi
         fi
-    else
+    elif [ "${ORCHESTRATOR_TYPE}" != "gke" ]; then
         echo "Terraform apply failed with error $apply_ret."
         migErr=$(gcloud compute instance-groups managed list-errors $NAME_PREFIX-mig --zone $ZONE)
         echo -e "${RED} $migErr ${NOP}"
