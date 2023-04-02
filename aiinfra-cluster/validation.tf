@@ -22,7 +22,4 @@ locals {
   validate_custom_node_pool = (length(var.custom_node_pools) > 0 && (var.gke_node_pool_count > 0 || var.gke_node_count_per_node_pool > 0)) ? tobool("Custom node pools are provided. Please do not use gke_node_pool_count and gke_node_count_per_node_pool variables.") : true
   validate_instance_count = (var.orchestrator_type == "gke" && var.instance_count > 0 ) ? tobool("Please do not use instance_count when orchestrator_type is GKE.") : true
   validate_basic_node_pool = (var.orchestrator_type == "gke" && ((var.gke_node_pool_count > 0 && var.gke_node_count_per_node_pool == 0) || (var.gke_node_pool_count == 0 && var.gke_node_count_per_node_pool > 0))) ? tobool("Please provide both gke_node_pool_count and gke_node_count_per_node_pool variables for GKE basic node pool.") : true
-
-  validate_gke_ip_cidr_block = (var.orchestrator_type != "gke" && var.gke_ip_cidr_block_17 != null) ? tobool("Orchestrator type is not GKE. Please remove gke_ip_cidr_block_17 variables.") : true
-  
 }

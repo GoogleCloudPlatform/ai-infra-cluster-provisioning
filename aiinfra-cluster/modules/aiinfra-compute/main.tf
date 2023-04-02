@@ -234,7 +234,6 @@ module "aiinfra-gke" {
   name                     = "${local.resource_prefix}-gke"
   disk_size_gb             = var.disk_size_gb
   disk_type                = var.disk_type
-  ip_cidr_block_17         = var.gke_ip_cidr_block_17
   network_self_link        = var.network_self_link
   subnetwork_self_link     = var.subnetwork_self_link
   node_service_account     = lookup(var.service_account, "email", null)

@@ -193,12 +193,6 @@ variable "gke_node_count_per_node_pool" {
   default     = 0
 }
 
-variable "gke_ip_cidr_block_17" {
-  type        = string
-  description = "A /17 CIDR IP range reserved for Metastore infrastructure. GKE pods, services, master subnet ranges are derived from it."
-  default     = null
-}
-
 variable "custom_node_pools" {
   description               = "The list of custom nodepools for the GKE cluster."
   type                      = list(object({
