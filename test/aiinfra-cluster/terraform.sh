@@ -59,13 +59,14 @@ test::aiinfra-cluster::fails_on_empty_vars () {
     #| jq 'if ."@level" == "error" then halt_error else empty end'
 }
 
-skip::test::aiinfra-cluster::dashboard::is_removed_when_disable_ops_agent () {
+test::aiinfra-cluster::dashboard::is_removed_when_disable_ops_agent () {
     tfplan=$(mktemp)
     EXPECT_SUCCEED aiinfra-cluster::test::plan \
         "$(aiinfra-cluster::test::data_dir)/disable_ops_agent_removes_dashboard.tfvars" \
         "${tfplan}"
     tfshow=$(mktemp)
-    aiinfra-cluster::test::show "${tfplan}" >"${tfshow}"
+    aiinfra-cluster::test::show "${tfplan}" | tee "${tfshow}"
+    return 1
     EXPECT_SUCCEED aiinfra-cluster::test::json_contains \
         "$(aiinfra-cluster::test::data_dir)/disable_ops_agent_has_compute.json" \
         "${tfshow}"

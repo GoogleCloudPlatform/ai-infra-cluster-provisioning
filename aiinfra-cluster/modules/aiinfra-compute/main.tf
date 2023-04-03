@@ -100,7 +100,7 @@ data "google_compute_image" "compute_image" {
 resource "google_compute_instance_template" "compute_vm_template" {
   project        = var.project_id
   provider       = google-beta
-  count          = contains(["ray", "slurm", "none"], var.orchestrator_type) ? 1 : 0
+  count          = contains(["ray", "none"], var.orchestrator_type) ? 1 : 0
   name           = "${local.resource_prefix}-ins-tmpl"
   machine_type   = var.machine_type
   region         = var.region
@@ -220,13 +220,17 @@ resource "google_compute_instance_group_manager" "mig" {
 module "aiinfra-slurm" {
   source                   = "../slurm-cluster"
   count                    = var.orchestrator_type == "slurm" ? 1 : 0
+
   project_id               = var.project_id
   deployment_name          = var.deployment_name
-  region                   = var.region
   zone                     = var.zone
-  network_self_link        = var.network_self_link
+  region                   = var.region
+
+  network_name             = var.network_name
   subnetwork_self_link     = var.subnetwork_self_link
-  instance_template        = "https://www.googleapis.com/compute/beta/projects/${var.project_id}/global/instanceTemplates/${local.resource_prefix}-ins-tmpl"
+  service_account          = var.service_account
+
+  #instance_template        = "https://www.googleapis.com/compute/beta/projects/${var.project_id}/global/instanceTemplates/${local.resource_prefix}-ins-tmpl"
   depends_on               = [google_compute_instance_template.compute_vm_template]
 }
 

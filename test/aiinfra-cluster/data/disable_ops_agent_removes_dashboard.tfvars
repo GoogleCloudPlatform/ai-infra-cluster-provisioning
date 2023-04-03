@@ -15,3 +15,4 @@ labels = { aiinfra-cluster = "123456" }
 metadata = {}
 gcs_bucket_path = "gs://aiinfra-terraform-gce-ai-infra/ci-deployment"
 enable_ops_agent = false
+network_config = "new_network"

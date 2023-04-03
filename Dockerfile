@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install git bash bc curl jq python3 software-prope
 ##########################################################################################
 # Install terraform
 ##########################################################################################
-ENV TERRAFORM_VERSION="1.3.9"
+ENV TERRAFORM_VERSION="1.4.2"
 ENV ROOT_MODULE_DIR="/usr/primary"
 ENV CACHE_DIR="${ROOT_MODULE_DIR}/.terraform"
 RUN wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
