@@ -7,5 +7,5 @@ STARTUP_COMMAND=echo \"Hello World\"
 INSTANCE_COUNT=1
 NETWORK_CONFIG=multi_nic_network
 GCS_MOUNT_LIST=aiinfra-mount-test-bucket:/usr/trainfiles,
-NFS_FILESHARE_LIST=/usr/nfsshare1:BASIC_SSD
+NFS_FILESTORE_LIST=/usr/nfsshare1:BASIC_SSD
 MINIMIZE_TERRAFORM_LOGGING=yes

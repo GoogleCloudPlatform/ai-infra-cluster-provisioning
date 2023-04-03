@@ -28,7 +28,7 @@ _env_var_util::test::unset_env () {
         DISK_TYPE \
         NETWORK_CONFIG \
         GCS_MOUNT_LIST \
-        NFS_FILESHARE_LIST \
+        NFS_FILESTORE_LIST \
         ORCHESTRATOR_TYPE \
         STARTUP_COMMAND \
         ENABLE_OPS_AGENT \
@@ -62,7 +62,7 @@ _env_var_util::test::set_defaultable_env () {
 _env_var_util::test::set_optional_env () {
     INSTANCE_COUNT=3
     GCS_MOUNT_LIST='mount'
-    NFS_FILESHARE_LIST='fileshare'
+    NFS_FILESTORE_LIST='filestore'
     ORCHESTRATOR_TYPE='none'
     STARTUP_COMMAND='echo'
     ENABLE_OPS_AGENT='ops'

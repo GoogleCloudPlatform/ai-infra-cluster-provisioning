@@ -248,7 +248,7 @@ EOF
 
     [ -n "${INSTANCE_COUNT}" ] && echo "instance_count = ${INSTANCE_COUNT}"
     [ -n "${GCS_MOUNT_LIST}" ] && echo "gcs_mount_list = \"${GCS_MOUNT_LIST}\""
-    [ -n "${NFS_FILESHARE_LIST}" ] && echo "nfs_fileshare_list = \"${NFS_FILESHARE_LIST}\""
+    [ -n "${NFS_FILESTORE_LIST}" ] && echo "nfs_filestore_list = \"${NFS_FILESTORE_LIST}\""
     [ -n "${ORCHESTRATOR_TYPE}" ] && echo "orchestrator_type = \"${ORCHESTRATOR_TYPE}\""
     [ -n "${STARTUP_COMMAND}" ] && echo "startup_command = \"${STARTUP_COMMAND}\""
     [ -n "${ENABLE_OPS_AGENT}" ] && echo "enable_ops_agent = \"${ENABLE_OPS_AGENT}\""
