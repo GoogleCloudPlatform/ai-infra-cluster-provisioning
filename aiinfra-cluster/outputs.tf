@@ -14,17 +14,7 @@
   * limitations under the License.
   */
 
-output "nvidia_dcgm_widgets" {
-  description = "The Nvidia DCGM widgets."
-  value       = local.nvidia_dcgm_widgets 
-}
-
-output "nvidia_nvml_widgets" {
-  description = "The Nvidia NVML widgets."
-  value       = local.nvidia_nvml_widgets 
-}
-
-output "gce_gke_gpu_utilization_widgets" {
-  description = "The GKE GPU utilization widgets."
-  value       = local.gce_gke_gpu_utilization_widgets 
+output "dashboard_instructions" {
+  description = "Instructions for accessing the GPU dashboard"
+  value = try(module.aiinfra-default-dashboard[0].instructions, "Dashboard not created")
 }
