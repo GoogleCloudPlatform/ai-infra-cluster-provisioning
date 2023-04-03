@@ -47,9 +47,9 @@ The optional parameters are:
     
     Example: `CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]`
 1. ***GCS_MOUNT_LIST***. This defines the list of GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
-1. ***NFS_FILESHARE_LIST***. This defines the list of NFS file shares to mount. The format is `</mount/path1>:<NFS fileshare type>,</mount/path2>:<NFS fileshare type>:<NFS fileshare size in GB>`. For example: NFS_FILESHARE_LIST=/usr/nfsshare1:BASIC_SSD
-    -  The `<NFS fileshare type>` cannot be empty. The supported values are `BASIC_HDD`,`BASIC_SSD`,`HIGH_SCALE_SSD` and `ENTERPRISE`.
-    -  The `<NFS fileshare size in GB>` can be empty and the default value is 2560 GB (2.5 TB).
+1. ***NFS_FILESTORE_LIST***. This defines the list of NFS file shares to mount. The format is `</mount/path1>:<NFS filestore type>,</mount/path2>:<NFS filestore type>:<NFS filestore size in GB>`. For example: NFS_FILESTORE_LIST=/usr/nfsshare1:BASIC_SSD
+    -  The `<NFS filestore type>` cannot be empty. The supported values are `BASIC_HDD`,`BASIC_SSD`,`HIGH_SCALE_SSD` and `ENTERPRISE`.
+    -  The `<NFS filestore size in GB>` can be empty and the default value is 2560 GB (2.5 TB).
 1. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
 1. ***MINIMIZE_TERRAFORM_LOGGING***. This controls the verbosity of terraform logs. When any value is set for this parameter, the terraform output is redirected to a local file and not printed on syserr. The log file is then uploaded to storage account. Any value can be set for this parameter, e.g.: yes, true.
 1. ***NETWORK_CONFIG***. This controls the VPC type to be used for the MIG. The supported values are default_network, new_network and multi_nic_network. The default value is default_network. The behavior is 
@@ -131,7 +131,7 @@ For multi-node training, we need to set up an orchestrator on all the VMs of the
 
 ### Shared Filesystem
 
-For sharing data across machines running AI workload, users can use a shared file system. Currently we are using NFS filestore or GCS bucket as shared file system across machines. Users can use the `GCS_MOUNT_LIST` parameter to provide a comma separated list of GCS buckets and their mount paths. Similarly they can use `NFS_FILESHARE_LIST` parameter to provide comma separated list of paths. For each filestore path, a new filestore will be created and mounted to the path specified on every VM in the cluster.
+For sharing data across machines running AI workload, users can use a shared file system. Currently we are using NFS filestore or GCS bucket as shared file system across machines. Users can use the `GCS_MOUNT_LIST` parameter to provide a comma separated list of GCS buckets and their mount paths. Similarly they can use `NFS_FILESTORE_LIST` parameter to provide comma separated list of paths. For each filestore path, a new filestore will be created and mounted to the path specified on every VM in the cluster.
 
 ### Connecting to the GPU cluster and running the training script
 
