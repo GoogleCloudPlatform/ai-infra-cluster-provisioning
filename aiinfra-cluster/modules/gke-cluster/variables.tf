@@ -65,35 +65,6 @@ variable "disk_type" {
   default     = "pd-standard"
 }
 
-variable "ip_cidr_block_17" {
-  type        = string
-  description = "A /17 CIDR IP range reserved for Metastore infrastructure. GKE pods, services, master subnet ranges are derived from it. If specified, will ignore (master_ipv4/pod/service/subnet)_cidr_block."
-  default     = null
-}
-
-variable "subnet_cidr_block" {
-  type        = string
-  description = "A CIDR IP block reserved for per cluster subnetwork."
-  default     = ""
-}
-
-variable "master_ipv4_cidr_block" {
-  type        = string
-  description = "The CIDR block for master node, e.g., 172.16.0.32/28."
-  default     = ""
-}
-
-variable "pod_cidr_block" {
-  type        = string
-  description = "A CIDR IP block reserved for GKE secondary range for pods."
-  default     = ""
-}
-
-variable "service_cidr_block" {
-  type        = string
-  description = "A CIDR IP block reserved for GKE secondary range for services."
-  default     = ""
-}
 
 # GKE Dataplane V2 support. This setting is immutable on clusters.
 # https://cloud.google.com/kubernetes-engine/docs/concepts/dataplane-v2

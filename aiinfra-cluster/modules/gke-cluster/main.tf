@@ -14,22 +14,6 @@
   * limitations under the License.
   */
 
-locals {
-  # This cuts a /17 ip_cidr_range into the following ranges:
-  # -/17
-  #  - /18 gke pod range (max 512 nodes with /27 per node)
-  #  - /18
-  #   - /21 enough for 2k nodes
-  #   - /22 gke service range (enough for 1k services)
-  #   - /28 master range
-  ip_cidr_block   = var.ip_cidr_block_17 == null ? "10.${random_integer.cidr_octet.result}.0.0/17" : var.ip_cidr_block_17
-  cidr_blocks          = local.ip_cidr_block == "" ? [] : cidrsubnets(local.ip_cidr_block, 18 - 17, 21 - 17, 22 - 17, 28 - 17)
-  pod_cidr_block       = local.ip_cidr_block == "" ? var.pod_cidr_block : local.cidr_blocks[0]
-  subnet_cidr_block    = local.ip_cidr_block == "" ? var.subnet_cidr_block : local.cidr_blocks[1]
-  service_cidr_block   = local.ip_cidr_block == "" ? var.service_cidr_block : local.cidr_blocks[2]
-  master_cidr_block    = local.ip_cidr_block == "" ? var.master_ipv4_cidr_block : local.cidr_blocks[3]
-}
-
 # Definition of the private GKE cluster.
 resource "google_container_cluster" "gke-cluster" {
   provider = google-beta
@@ -46,6 +30,7 @@ resource "google_container_cluster" "gke-cluster" {
   # documentation for the container_cluster resource.
   remove_default_node_pool = true
   initial_node_count = 1
+  min_master_version = "1.25.6-gke.1000"
 
   network    = var.network_self_link
   subnetwork = var.subnetwork_self_link
@@ -57,8 +42,6 @@ resource "google_container_cluster" "gke-cluster" {
   master_authorized_networks_config {
   }
 
-  private_ipv6_google_access = "PRIVATE_IPV6_GOOGLE_ACCESS_TO_GOOGLE"
-
   # Security Note: Basic Auth Disabled, no client certificate accepted.
   # The only way to manage the master is via OpenID tokens (aka gcloud).
   # (requirement H5; go/gke-cluster-pattern#req1.1.7)
@@ -66,12 +49,6 @@ resource "google_container_cluster" "gke-cluster" {
     client_certificate_config {
       issue_client_certificate = false
     }
-  }
-  # Requires a Pod Security Policy
-  #
-  # go/gke-cluster-pattern#req3.3.1 (part of)
-  pod_security_policy_config {
-    enabled = true
   }
 
   # Enable shielded nodes to meet go/gke-cluster-pattern#req1.1.5
@@ -93,21 +70,6 @@ resource "google_container_cluster" "gke-cluster" {
     # order to let the datapath_provider take effect.
     # https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/issues/656#issuecomment-720398658
     provider = "PROVIDER_UNSPECIFIED"
-  }
-
-  private_cluster_config {
-    enable_private_endpoint = true
-    enable_private_nodes    = true
-    master_ipv4_cidr_block  = local.master_cidr_block
-    master_global_access_config {
-      enabled = false
-    }
-  }
-
-  # Adding this block enables IP aliasing.
-  ip_allocation_policy {
-    cluster_ipv4_cidr_block  = local.pod_cidr_block == "" ? null : local.pod_cidr_block
-    services_ipv4_cidr_block = local.service_cidr_block == "" ? null : local.service_cidr_block
   }
 
   # This change will also enable the metadata server on nodes.
@@ -142,19 +104,6 @@ resource "google_container_cluster" "gke-cluster" {
   }
 
   addons_config {
-    # We optionally enable the Istio Add-on. Istio is required if there is
-    # any pod-to-pod communication. We keep it optional
-    # to simplify small deployments where there is no pod-to-pod communication
-    # (for now)
-    #
-    # go/gke-cluster-pattern#req5.2.1 for internal traffic, and satified
-    # only if var.enable_istio = "true".
-    istio_config {
-      # Awkward flag to enable istio_config.
-      disabled = false
-      auth     = "AUTH_MUTUAL_TLS"
-    }
-
     gce_persistent_disk_csi_driver_config {
       enabled = true
     }

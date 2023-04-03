@@ -35,7 +35,6 @@ The optional parameters are:
     -  __gke__: A private GKE cluster is created with private node pool following the recommendations from the GKE team.
 1. ***GKE_NODE_POOL_COUNT***: The number of homogeneous node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
 1. ***GKE_NODE_COUNT_PER_NODE_POOL***: The desired node count per node pool for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
-1. ***GKE_IP_CIDR_BLOCK_17***: A /17 CIDR IP range reserved for Metastore infrastructure. GKE pods, services, master subnet ranges are derived from it. Please make sure that the CIDR block is available otherwise the GKE cluster creation will fail. Only applicable when `ORCHESTRATOR_TYPE` is `gke`. Ex: 10.12.0.0/17
 1. ***CUSTOM_NODE_POOL***: The custom node pool description for GKE. The structure of the custom node pool is list of node pool objects. The node pool object is 
     ```
     name                    = string
