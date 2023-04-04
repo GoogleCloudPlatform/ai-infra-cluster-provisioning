@@ -218,20 +218,21 @@ resource "google_compute_instance_group_manager" "mig" {
 }
 
 module "aiinfra-slurm" {
-  source                   = "../slurm-cluster"
-  count                    = var.orchestrator_type == "slurm" ? 1 : 0
+  source = "../slurm-cluster"
+  count  = var.orchestrator_type == "slurm" ? 1 : 0
 
-  project_id               = var.project_id
-  deployment_name          = var.deployment_name
-  zone                     = var.zone
-  region                   = var.region
-
-  network_name             = var.network_name
-  subnetwork_self_link     = var.subnetwork_self_link
-  service_account          = var.service_account
+  project_id           = var.project_id
+  deployment_name      = var.deployment_name
+  zone                 = var.zone
+  region               = var.region
+  network_id           = var.network_id
+  network_self_link    = var.network_self_link
+  subnetwork_address   = var.subnetwork_address
+  subnetwork_self_link = var.subnetwork_self_link
+  service_account      = var.service_account
 
   #instance_template        = "https://www.googleapis.com/compute/beta/projects/${var.project_id}/global/instanceTemplates/${local.resource_prefix}-ins-tmpl"
-  depends_on               = [google_compute_instance_template.compute_vm_template]
+  #depends_on               = [google_compute_instance_template.compute_vm_template]
 }
 
 module "aiinfra-gke" {

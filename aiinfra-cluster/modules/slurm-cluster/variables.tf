@@ -35,13 +35,23 @@ variable "region" {
   type        = string
 }
 
-variable "network_name" {
-  description = "Name of the network in which the filestore and cluster will be created."
+variable "network_id" {
+  description = "ID of the network in which the filestore and cluster will be created."
+  type        = string
+}
+
+variable "network_self_link" {
+  description = "Self link of network to which the cluster will be attached"
+  type        = string
+}
+
+variable "subnetwork_address" {
+  description = "Address range of subnetwork to which the cluster will be attached"
   type        = string
 }
 
 variable "subnetwork_self_link" {
-  description = "The self link of the subnetwork to attach the VM."
+  description = "Self link of subnetwork to which the cluster will be attached"
   type        = string
 }
 
@@ -56,12 +66,6 @@ variable "subnetwork_self_link" {
 #  description = "Service tier of the filestore instance."
 #  type        = number
 #}
-
-variable "labels" {
-  description = "Labels to add to the filestore instance."
-  type        = map(string)
-  default     = {}
-}
 
 ## Node Group
 
