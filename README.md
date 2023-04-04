@@ -35,6 +35,7 @@ The optional parameters are:
     -  __gke__: A private GKE cluster is created with private node pool following the recommendations from the GKE team.
 1. ***GKE_NODE_POOL_COUNT***: The number of homogeneous node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
 1. ***GKE_NODE_COUNT_PER_NODE_POOL***: The desired node count per node pool for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
+1. ***GKE_VERSION***: The GKE version to use for creating the GKE cluster. Default value is the latest GKE version for the project in the region. Only applicable when `ORCHESTRATOR_TYPE` is `gke`. Ex: `GKE_VERSION=1.25.7-gke.1000`
 1. ***CUSTOM_NODE_POOL***: The custom node pool description for GKE. The structure of the custom node pool is list of node pool objects. The node pool object is 
     ```
     name                    = string

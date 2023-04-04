@@ -232,6 +232,7 @@ module "aiinfra-gke" {
   region                   = var.region
   zone                     = var.zone
   name                     = "${local.resource_prefix}-gke"
+  gke_version              = var.gke_version
   disk_size_gb             = var.disk_size_gb
   disk_type                = var.disk_type
   network_self_link        = var.network_self_link

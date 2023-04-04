@@ -35,7 +35,8 @@ _env_var_util::test::unset_env () {
         ENABLE_NOTEBOOK \
         GKE_NODE_POOL_COUNT \
         GKE_NODE_COUNT_PER_NODE_POOL \
-        CUSTOM_NODE_POOL
+        CUSTOM_NODE_POOL \
+        GKE_VERSION
 }
 
 _env_var_util::test::set_required_env () {
@@ -69,6 +70,7 @@ _env_var_util::test::set_optional_env () {
     GKE_NODE_POOL_COUNT='node'
     GKE_NODE_COUNT_PER_NODE_POOL=3
     CUSTOM_NODE_POOL='custom'
+    GKE_VERSION='1.25.7-gke.1000'
 }
 
 # Test functions

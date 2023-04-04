@@ -14,6 +14,16 @@
   * limitations under the License.
   */
 
+locals {
+  gke_master_version = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
+  
+}
+
+data "google_container_engine_versions" "gkeversion" {
+  location = var.region
+  project  = var.project
+}
+
 # Definition of the private GKE cluster.
 resource "google_container_cluster" "gke-cluster" {
   provider = google-beta
@@ -30,7 +40,7 @@ resource "google_container_cluster" "gke-cluster" {
   # documentation for the container_cluster resource.
   remove_default_node_pool = true
   initial_node_count = 1
-  min_master_version = "1.25.6-gke.1000"
+  min_master_version = local.gke_master_version
 
   network    = var.network_self_link
   subnetwork = var.subnetwork_self_link

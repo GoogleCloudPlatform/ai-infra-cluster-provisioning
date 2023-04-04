@@ -41,6 +41,12 @@ variable "name" {
   type    = string
 }
 
+variable "gke_version" {
+  description = "The GKE version to use to create the cluster."
+  default = null
+  type    = string
+}
+
 variable "network_self_link" {
   description = "The self link of the network to attach the VM."
   type        = string
