@@ -72,7 +72,7 @@ locals {
 
   nvidia_widgets                  = var.enable_ops_agent ? concat(module.dashboard-widget-data.nvidia_dcgm_widgets, module.dashboard-widget-data.nvidia_nvml_widgets) : []
   gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-widget-data.gce_gke_gpu_utilization_widgets : []
-
+  gke_version                     = var.gke_version
   vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
 }
@@ -163,6 +163,7 @@ module "aiinfra-compute" {
     module.aiinfra-network
   ]
   enable_gke = var.orchestrator_type == "gke"
+
   node_pools = length(var.custom_node_pools) != 0 || length(local.basic_node_pools) != 0 ? coalescelist(var.custom_node_pools, local.basic_node_pools) : []
 }
 

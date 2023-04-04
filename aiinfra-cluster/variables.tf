@@ -193,6 +193,12 @@ variable "gke_node_count_per_node_pool" {
   default     = 0
 }
 
+variable "gke_version" {
+  description = "The GKE version to use to create the cluster."
+  default = null
+  type    = string
+}
+
 variable "custom_node_pools" {
   description               = "The list of custom nodepools for the GKE cluster."
   type                      = list(object({

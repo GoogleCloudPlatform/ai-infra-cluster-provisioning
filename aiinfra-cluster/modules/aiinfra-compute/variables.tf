@@ -284,6 +284,12 @@ variable "enable_gke" {
   default     = false
 }
 
+variable "gke_version" {
+  description = "The GKE version to use to create the cluster."
+  default = null
+  type    = string
+}
+
 variable "node_pools" {
   description               = "The list of nodepools for the GKE cluster."
   type                      = list(object({
