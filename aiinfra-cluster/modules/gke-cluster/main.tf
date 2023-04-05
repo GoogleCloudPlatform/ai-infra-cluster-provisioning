@@ -30,7 +30,7 @@ resource "google_container_cluster" "gke-cluster" {
 
   project  = var.project
   name     = var.name
-  location = var.zone
+  location = var.region
   node_locations = var.node_locations
 
   # We need to explicitly manage the node pool to enable features such as
@@ -142,8 +142,8 @@ resource "google_container_node_pool" "gke-node-pools" {
 
   project            = var.project
   name               = each.value.name
-  cluster            = google_container_cluster.gke-cluster.name
-  location           = var.zone
+  cluster            = google_container_cluster.gke-cluster.id
+  node_locations     = [each.value.zone]
   node_count         = each.value.node_count
 
   upgrade_settings {
@@ -238,12 +238,4 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
   project = var.project
   role    = "roles/monitoring.viewer"
   member  = "serviceAccount:${var.node_service_account}"
-}
-
-resource "random_integer" "cidr_octet" {
-  min     = 10
-  max     = 100
-  keepers = {
-      gke_cluster_name = var.name
-  }
 }

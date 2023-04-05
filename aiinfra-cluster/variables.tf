@@ -199,10 +199,11 @@ variable "gke_version" {
   type    = string
 }
 
-variable "custom_node_pools" {
+variable "custom_node_pool" {
   description               = "The list of custom nodepools for the GKE cluster."
   type                      = list(object({
     name                    = string
+    zone                    = string
     node_count              = number
     machine_type            = string
     guest_accelerator_count = number
