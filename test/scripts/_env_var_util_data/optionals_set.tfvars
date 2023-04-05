@@ -36,5 +36,5 @@ enable_ops_agent = "ops"
 enable_notebook = "note"
 gke_node_pool_count = "node"
 gke_node_count_per_node_pool = 3
-custom_node_pool = "custom"
+custom_node_pool = custom
 gke_version = "1.25.7-gke.1000"
