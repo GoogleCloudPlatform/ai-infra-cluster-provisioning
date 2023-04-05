@@ -294,6 +294,7 @@ variable "node_pools" {
   description               = "The list of nodepools for the GKE cluster."
   type                      = list(object({
     name                    = string
+    zone                    = string
     node_count              = number
     machine_type            = string
     guest_accelerator_count = number

@@ -92,6 +92,7 @@ locals {
   default_node_pool         = [{
     name                    = "system-nodes"
     node_count              = var.instance_count
+    zone                    = var.zone
     machine_type            = var.machine_type
     guest_accelerator_count = var.guest_accelerator.count
     guest_accelerator_type  = var.guest_accelerator.type

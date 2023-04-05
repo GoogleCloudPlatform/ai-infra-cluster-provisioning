@@ -39,13 +39,14 @@ The optional parameters are:
 1. ***CUSTOM_NODE_POOL***: The custom node pool description for GKE. The structure of the custom node pool is list of node pool objects. The node pool object is 
     ```
     name                    = string
+    zone                    = string
     node_count              = number
     machine_type            = string
     guest_accelerator_count = number
     guest_accelerator_type  = string
     ```
     
-    Example: `CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]`
+    Example: `CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]`
 1. ***GCS_MOUNT_LIST***. This defines the list of GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
 1. ***NFS_FILESTORE_LIST***. This defines the list of NFS file shares to mount. The format is `</mount/path1>:<NFS filestore type>,</mount/path2>:<NFS filestore type>:<NFS filestore size in GB>`. For example: NFS_FILESTORE_LIST=/usr/nfsshare1:BASIC_SSD
     -  The `<NFS filestore type>` cannot be empty. The supported values are `BASIC_HDD`,`BASIC_SSD`,`HIGH_SCALE_SSD` and `ENTERPRISE`.
