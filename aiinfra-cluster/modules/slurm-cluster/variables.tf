@@ -73,11 +73,21 @@ variable "subnetwork_self_link" {
 #  description = "Maximum number of dynamic nodes allowed in this partition"
 #  type        = number
 #}
-#
-#variable "instance_template" {
-#  description = "Self link to the instance template to be used for creating compute and controller nodes."
-#  type        = string
-#}
+
+variable "instance_template_compute" {
+  description = "Self link to the instance template to be used for creating compute nodes."
+  type        = string
+}
+
+variable "instance_template_controller" {
+  description = "Self link to the instance template to be used for creating controller node."
+  type        = string
+}
+
+variable "instance_template_login" {
+  description = "Self link to the instance template to be used for creating login node."
+  type        = string
+}
 
 ## Controller
 

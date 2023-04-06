@@ -123,7 +123,7 @@ _env_var_util::set_defaults () {
     LABELS="${LABELS:-"{}"}"
     [ -z "${IMAGE_FAMILY_NAME}" ] && [ -z "${IMAGE_NAME}" ] && {
         if [ "${ORCHESTRATOR_TYPE}" = "slurm" ]; then
-            IMAGE_FAMILY_NAME='schedmd-v5-slurm-22-05-6-hpc-centos-7'
+            IMAGE_FAMILY_NAME='schedmd-v5-slurm-22-05-8-ubuntu-2004-lts'
             IMAGE_PROJECT='schedmd-slurm-public'
         else
             IMAGE_FAMILY_NAME='pytorch-1-12-gpu-debian-10'

@@ -230,7 +230,7 @@ test::_env_var_util::set_defaults::sets_slurm_values () {
     ORCHESTRATOR_TYPE='slurm'
     EXPECT_SUCCEED _env_var_util::set_defaults
 
-    EXPECT_STREQ "${IMAGE_FAMILY_NAME}" 'schedmd-v5-slurm-22-05-6-hpc-centos-7'
+    EXPECT_STREQ "${IMAGE_FAMILY_NAME}" 'schedmd-v5-slurm-22-05-8-ubuntu-2004-lts'
     EXPECT_STR_EMPTY "${IMAGE_NAME}"
     EXPECT_STREQ "${IMAGE_PROJECT}" 'schedmd-slurm-public'
 }
