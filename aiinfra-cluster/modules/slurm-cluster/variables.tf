@@ -69,10 +69,15 @@ variable "subnetwork_self_link" {
 
 ## Node Group
 
-#variable "node_count_dynamic_max" {
-#  description = "Maximum number of dynamic nodes allowed in this partition"
-#  type        = number
-#}
+variable "node_count_static" {
+  description = "Number of statically allocated nodes in compute partition"
+  type        = number
+}
+
+variable "node_count_dynamic_max" {
+  description = "Maximum number of dynamically allocated nodes allowed in compute partition"
+  type        = number
+}
 
 variable "instance_template_compute" {
   description = "Self link to the instance template to be used for creating compute nodes."

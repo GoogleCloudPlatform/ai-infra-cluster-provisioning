@@ -14,10 +14,6 @@
   * limitations under the License.
   */
 
-locals {
-  manual_firewall = false
-}
-
 module "homefs" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=develop"
 
@@ -38,8 +34,8 @@ module "compute_node_group" {
 
   project_id             = var.project_id
   labels                 = { ghpc_role = "compute" }
-  node_count_static      = 0
-  node_count_dynamic_max = 2
+  node_count_static      = var.node_count_static
+  node_count_dynamic_max = var.node_count_dynamic_max
   instance_template      = var.instance_template_compute
 }
 
@@ -53,7 +49,7 @@ module "compute_partition" {
   subnetwork_self_link = var.subnetwork_self_link
   network_storage      = flatten([module.homefs.network_storage])
   node_groups          = flatten([module.compute_node_group.node_groups])
-  enable_placement     = true
+  enable_placement     = false
 
   # TODO: pass labels
   # labels               = merge(var.labels, { ghpc_role = "schedmd-slurm-gcp-v5-partition",})
@@ -108,46 +104,3 @@ module "slurm_login" {
 
   disable_login_public_ips = false
 }
-
-resource "google_compute_firewall" "ingress_external_ssh" {
-  count = local.manual_firewall ? 1 : 0
-
-  name    = "ingress-external-ssh"
-  network = var.network_self_link
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22"]
-  }
-
-  direction     = "INGRESS"
-  priority      = 999
-  source_ranges = ["35.235.240.0/20"]
-  depends_on    = [module.slurm_login]
-}
-
-resource "google_compute_firewall" "ingress_internal" {
-  count = local.manual_firewall ? 1 : 0
-
-  name    = "ingress-internal"
-  network = var.network_self_link
-
-  allow {
-    protocol = "icmp"
-    ports    = null
-  }
-  allow {
-    protocol = "tcp"
-    ports    = ["0-65535"]
-  }
-  allow {
-    protocol = "udp"
-    ports    = ["0-65535"]
-  }
-
-  direction     = "INGRESS"
-  priority      = 999
-  source_ranges = [var.subnetwork_address]
-  depends_on    = [module.slurm_login]
-}
-

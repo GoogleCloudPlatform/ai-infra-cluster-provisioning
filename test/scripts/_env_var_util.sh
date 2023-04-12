@@ -37,7 +37,9 @@ _env_var_util::test::unset_env () {
         GKE_NODE_COUNT_PER_NODE_POOL \
         GKE_ENABLE_COMPACT_PLACEMENT \
         CUSTOM_NODE_POOL \
-        GKE_VERSION
+        GKE_VERSION \
+        SLURM_NODE_COUNT_STATIC \
+        SLURM_NODE_COUNT_DYNAMIC_MAX
 }
 
 _env_var_util::test::set_required_env () {
@@ -58,20 +60,6 @@ _env_var_util::test::set_defaultable_env () {
     DISK_SIZE_GB=3
     DISK_TYPE='disk-type'
     NETWORK_CONFIG='network'
-}
-
-_env_var_util::test::set_optional_env () {
-    INSTANCE_COUNT=3
-    GCS_MOUNT_LIST='mount'
-    NFS_FILESTORE_LIST='filestore'
-    ORCHESTRATOR_TYPE='none'
-    STARTUP_COMMAND='echo'
-    ENABLE_OPS_AGENT='ops'
-    ENABLE_NOTEBOOK='note'
-    GKE_NODE_POOL_COUNT='node'
-    GKE_NODE_COUNT_PER_NODE_POOL=3
-    CUSTOM_NODE_POOL='custom'
-    GKE_VERSION='1.25.7-gke.1000'
 }
 
 # Test functions
@@ -297,7 +285,19 @@ test::_env_var_util::print_tfvars::prints_all_required_and_defaultable () {
 test::_env_var_util::print_tfvars::prints_optionals_when_set () {
     _env_var_util::test::unset_env
     _env_var_util::test::set_required_env
-    _env_var_util::test::set_optional_env
+    INSTANCE_COUNT=3
+    GCS_MOUNT_LIST='mount'
+    NFS_FILESTORE_LIST='filestore'
+    ORCHESTRATOR_TYPE='none'
+    STARTUP_COMMAND='echo'
+    ENABLE_OPS_AGENT='ops'
+    ENABLE_NOTEBOOK='note'
+    GKE_NODE_POOL_COUNT=3
+    GKE_NODE_COUNT_PER_NODE_POOL=3
+    CUSTOM_NODE_POOL='custom'
+    GKE_VERSION='1.25.7-gke.1000'
+    SLURM_NODE_COUNT_STATIC=3
+    SLURM_NODE_COUNT_DYNAMIC_MAX=3
     _env_var_util::setup
     EXPECT_SUCCEED diff \
         "$(_env_var_util::test::data_dir)/optionals_set.tfvars" \

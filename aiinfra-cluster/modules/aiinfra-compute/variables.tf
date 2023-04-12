@@ -298,6 +298,16 @@ variable "orchestrator_type" {
   }
 }
 
+variable "slurm_node_count_static" {
+  description = "Number of statically allocated nodes in compute partition"
+  type        = number
+}
+
+variable "slurm_node_count_dynamic_max" {
+  description = "Maximum number of dynamically allocated nodes allowed in compute partition"
+  type        = number
+}
+
 variable "gke_version" {
   description = "The GKE version to use to create the cluster."
   default = null

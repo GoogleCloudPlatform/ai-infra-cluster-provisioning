@@ -241,7 +241,7 @@ resource "google_compute_instance_group_manager" "mig" {
   wait_for_instances = true
   version {
     name              = "default"
-    instance_template = one(google_compute_instance_template.templates["compute"].id)
+    instance_template = google_compute_instance_template.templates["compute"].id
   }
   target_size = var.instance_count
   depends_on = [var.network_self_link, var.network_storage]
@@ -269,6 +269,9 @@ module "aiinfra-slurm" {
   subnetwork_address   = var.subnetwork_address
   subnetwork_self_link = var.subnetwork_self_link
   service_account      = var.service_account
+
+  node_count_static      = var.slurm_node_count_static
+  node_count_dynamic_max = var.slurm_node_count_dynamic_max
 
   instance_template_compute    = "${local.vm_template_self_link_prefix}/${google_compute_instance_template.templates["compute"].name}"
   instance_template_controller = "${local.vm_template_self_link_prefix}/${google_compute_instance_template.templates["controller"].name}"
