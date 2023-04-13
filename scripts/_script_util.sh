@@ -39,20 +39,13 @@ _expand_files_to_copy() {
     # copy example training script based on the image type.
     if [[ ! -z "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"tf-"* ]] || [[ ! -z "$IMAGE_NAME" && "$IMAGE_NAME" == *"tf-"* ]]; then
         echo "DLVM image used is a TensorFlow image. Copying the TensorFlow example script."
-        export EXAMPLE_SCRIPT_SRC_PATH=/usr/examples/training_scripts/Tensorflow
+        FILELIST+=",/usr/examples/training_scripts/Tensorflow:/home/jupyter/aiinfra-sample"
     elif [[ ! -z "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"pytorch-"* ]] || [[ ! -z "$IMAGE_NAME" && "$IMAGE_NAME" == *"pytorch-"* ]]; then
         echo "DLVM image used is a Pytorch image. Copying the pytorch exmple script."
-        export EXAMPLE_SCRIPT_SRC_PATH=/usr/examples/training_scripts/PyTorch
+        FILELIST+=",/usr/examples/training_scripts/PyTorch:/home/jupyter/aiinfra-sample"
     else
-        echo -e "${RED}IMAGE_FAMILY_NAME=$IMAGE_FAMILY_NAME, IMAGE_NAME=$IMAGE_NAME. These images are neither Tensorflow nor Pytorch Image. ${NOC}"
-    fi
-
-    if [[ -z "$EXAMPLE_SCRIPT_SRC_PATH" ]]; then
-        echo "No example training script found for the image."
-    elif [[ ! -d "$EXAMPLE_SCRIPT_SRC_PATH" ]]; then
-        echo "Directory $EXAMPLE_SCRIPT_SRC_PATH not found to copy example training scripts."
-    else
-        FILELIST+=",$EXAMPLE_SCRIPT_SRC_PATH:/home/jupyter/aiinfra-sample"
+        echo "IMAGE_FAMILY_NAME=$IMAGE_FAMILY_NAME, IMAGE_NAME=$IMAGE_NAME. These images are neither Tensorflow nor Pytorch Image. Copying all example scripts."
+        FILELIST+=",/usr/examples/training_scripts/PyTorch:/home/jupyter/aiinfra-sample,/usr/examples/training_scripts/Tensorflow:/home/jupyter/aiinfra-sample"
     fi
 
     echo "local_dir_copy_list = \"$FILELIST\"" >> /usr/primary/tf.auto.tfvars

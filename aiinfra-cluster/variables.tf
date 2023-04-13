@@ -81,7 +81,11 @@ variable "gpu_per_vm" {
 
 variable "instance_image" {
   description = "The VM instance image."
-  type        = map
+  type = object({
+    name    = string,
+    family  = string,
+    project = string
+  })
 }
 
 variable "disk_size_gb" {

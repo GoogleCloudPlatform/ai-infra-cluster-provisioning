@@ -1,5 +1,7 @@
 PROJECT_ID=gce-ai-infra
 ZONE=us-central1-a
+VM_TYPE=n1-standard-1
+GPU_COUNT=0
 TERRAFORM_GCS_PATH=gs://aiinfra-terraform-gce-ai-infra/gcb-continuous
 STARTUP_COMMAND=echo \"Hello World\"
 METADATA={ key1 = "val", key2 = "val2"}
