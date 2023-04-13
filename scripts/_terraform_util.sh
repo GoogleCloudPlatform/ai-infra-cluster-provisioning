@@ -19,13 +19,17 @@
 #
 _terraform_setup() {
     apply_ret=0
+    parallel_degree=10
+    if [ "${ORCHESTRATOR_TYPE}" == "gke" ]; then
+      parallel_degree=30
+    fi
 
     # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
     if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
         echo "Redirecting 'terraform apply' output to $TERRAFORM_LOG_PATH."
-        terraform -chdir=/usr/primary apply -input=false -auto-approve > $TERRAFORM_LOG_PATH || apply_ret=$?
+        terraform -chdir=/usr/primary apply -input=false -auto-approve -parallelism=$parallel_degree > $TERRAFORM_LOG_PATH || apply_ret=$?
     else
-        terraform -chdir=/usr/primary apply -input=false -auto-approve || apply_ret=$?
+        terraform -chdir=/usr/primary apply -input=false -auto-approve -parallelism=$parallel_degree || apply_ret=$?
     fi
 
     if [ $apply_ret -eq 0 ]; then
