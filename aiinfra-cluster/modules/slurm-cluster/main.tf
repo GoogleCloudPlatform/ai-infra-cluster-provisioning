@@ -74,14 +74,6 @@ module "slurm_controller" {
 
   disable_controller_public_ips = false
 
-  #cloud_parameters = {
-  #  no_comma_params = false
-  #  resume_rate     = 0
-  #  resume_timeout  = 1200
-  #  suspend_rate    = 0
-  #  suspend_timeout = 450
-  #}
-
   # TODO: pass labels
   # labels                          = merge(var.labels, { ghpc_role = "schedmd-slurm-gcp-v5-controller",})
   # TODO: take list of GCS buckets and NFS filestore and provide it here.

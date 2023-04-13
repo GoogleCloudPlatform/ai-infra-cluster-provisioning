@@ -47,6 +47,7 @@ test::aiinfra-cluster::passes_on_default_vars () {
     EXPECT_SUCCEED aiinfra-cluster::test::plan \
         "$(aiinfra-cluster::test::data_dir)/passes_on_default_vars.tfvars" \
         "${tfplan}"
+    tfshow=$(mktemp)
     EXPECT_SUCCEED aiinfra-cluster::test::json_contains \
         "$(aiinfra-cluster::test::data_dir)/passes_on_default_vars.json" \
         <(aiinfra-cluster::test::show "${tfplan}")
@@ -65,8 +66,7 @@ test::aiinfra-cluster::dashboard::is_removed_when_disable_ops_agent () {
         "$(aiinfra-cluster::test::data_dir)/disable_ops_agent_removes_dashboard.tfvars" \
         "${tfplan}"
     tfshow=$(mktemp)
-    aiinfra-cluster::test::show "${tfplan}" | tee "${tfshow}"
-    return 1
+    aiinfra-cluster::test::show "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED aiinfra-cluster::test::json_contains \
         "$(aiinfra-cluster::test::data_dir)/disable_ops_agent_has_compute.json" \
         "${tfshow}"
