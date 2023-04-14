@@ -116,17 +116,6 @@ retry_with_backoff () {
 
 
 handle_debian() {
-    install_wget_with_retry() {
-        install_wget () {
-            apt-get --quiet update \
-            && apt-get --quiet install -y wget;
-        }
-
-        echo >&2 "Installing wget."
-        retry_with_backoff 10 32 install_wget \
-            || { echo >&2 'wget package install failed'; return 1; }
-    }
-
     is_legacy_monitoring_installed() {
         dpkg-query --show --showformat 'dpkg-query: ${Package} is installed\n' ${LEGACY_MONITORING_PACKAGE} |
             grep "${LEGACY_MONITORING_PACKAGE} is installed"
@@ -159,7 +148,9 @@ handle_debian() {
         local -r cuda_debfile_url="https://developer.download.nvidia.com/compute/cuda/repos/${distribution}/x86_64/${cuda_debfile_filename}"
 
         dcgm_package_install () {
-            wget --quiet "${cuda_debfile_url}" \
+            apt-get --quiet update \
+                && apt-get --quiet install -y wget \
+                && wget --quiet "${cuda_debfile_url}" \
                 && dpkg -i "${cuda_debfile_filename}" \
                 && apt-get --quiet update \
                 && apt-get --quiet install -y datacenter-gpu-manager \
@@ -206,10 +197,6 @@ EOF
 }
 
 handle_redhat() {
-    install_wget_with_retry() {
-        echo >&2 "install_wget_with_retry: not implemented for redhat"
-    }
-
     is_legacy_monitoring_installed() {
         rpm --query --queryformat 'package %{NAME} is installed\n' ${LEGACY_MONITORING_PACKAGE} |
             grep "${LEGACY_MONITORING_PACKAGE} is installed"
@@ -251,7 +238,6 @@ main() {
         fail "Legacy or Ops Agent is already installed."
     fi
 
-    install_wget_with_retry
     echo >&2 "Install Ops Agent"
     retry_with_backoff 10 32 install_opsagent \
         || { echo >&2 'Failed to install Ops Agent'; return 1; }
