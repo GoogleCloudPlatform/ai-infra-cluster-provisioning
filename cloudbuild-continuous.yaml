@@ -69,11 +69,33 @@ steps:
           '--network=cloudbuild',
           'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
           'Destroy' ]
+# Test for GKE
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'run',
+          '--env-file', 'test/continuous/gke-env.list',
+          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-gke',
+          '--network=cloudbuild',
+          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+          'Destroy' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'run',
+          '--env-file', 'test/continuous/gke-env.list',
+          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-gke',
+          '--network=cloudbuild',
+          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+          'Create' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'run',
+          '--env-file', 'test/continuous/gke-env.list',
+          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-gke',
+          '--network=cloudbuild',
+          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+          'Destroy' ]
 
 images:
 - 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image'
 
-timeout: 1800s
+timeout: 3600s
 
 substitutions:
   _VERSION: 'v0.4.2'

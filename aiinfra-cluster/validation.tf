@@ -24,4 +24,6 @@ locals {
   validate_basic_node_pool = (var.orchestrator_type == "gke" && (var.gke_node_pool_count == 0 && var.gke_node_count_per_node_pool > 0)) ? tobool("Please provide gke_node_pool_count for applying gke_node_count_per_node_pool for the GKE basic node pool.") : true
 
   validate_gke_version = (var.orchestrator_type != "gke" && var.gke_version != null) ? tobool("Orchestrator type is not GKE. Please remove gke_version variable .") : true
+
+  validate_image_for_ray = (var.orchestrator_type == "ray" && var.instance_image.project != "ml-images") ? tobool("Orchestrator type RAY is not supported for non-DLVM images. Please remove orchestrator_type variable or use an image from ml-images project.") : true
 }

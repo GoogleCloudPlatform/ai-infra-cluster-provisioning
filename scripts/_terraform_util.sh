@@ -19,13 +19,17 @@
 #
 _terraform_setup() {
     apply_ret=0
+    parallel_degree=""
+    if [ "${ORCHESTRATOR_TYPE}" == "gke" ]; then
+      parallel_degree="-parallelism=21"
+    fi
 
     # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
     if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
         echo "Redirecting 'terraform apply' output to $TERRAFORM_LOG_PATH."
-        terraform -chdir=/usr/primary apply -input=false -auto-approve > $TERRAFORM_LOG_PATH || apply_ret=$?
+        terraform -chdir=/usr/primary apply -input=false -auto-approve $parallel_degree > $TERRAFORM_LOG_PATH || apply_ret=$?
     else
-        terraform -chdir=/usr/primary apply -input=false -auto-approve || apply_ret=$?
+        terraform -chdir=/usr/primary apply -input=false -auto-approve $parallel_degree || apply_ret=$?
     fi
 
     if [ $apply_ret -eq 0 ]; then
@@ -54,6 +58,8 @@ _terraform_setup() {
 _Display_connection_info() {
     if [[ -n "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
         echo "Not checking for proxy_url information."
+    elif [[ "${IMAGE_PROJECT,,}" != "ml-images" ]]; then
+        echo "Jupyter notebook is not available in non-DLVM images."
     elif [[ -n "$ENABLE_NOTEBOOK" && "${ENABLE_NOTEBOOK,,}" == "false" ]]; then
         echo "Jupyter notebook is disabled."
     else

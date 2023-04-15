@@ -129,6 +129,11 @@ resource "google_container_cluster" "gke-cluster" {
 
   logging_service    = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
+
+  timeouts {
+    create = "120m"
+    update = "120m"
+  }
 }
 
 # We define explict node pools, so that it can be modified without
@@ -215,6 +220,10 @@ resource "google_container_node_pool" "gke-node-pools" {
       node_config[0].labels,
       node_config[0].taint,
     ]
+  }
+  timeouts {
+    create = "60m"
+    update = "60m"
   }
 }
 

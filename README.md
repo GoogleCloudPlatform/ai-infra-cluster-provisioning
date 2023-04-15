@@ -21,8 +21,9 @@ The optional parameters are:
 1. ***GPU_COUNT***. This defines the GPU count per VM. The default value is 2 if not set.
 1. ***VM_TYPE***. This defines the VM type. The default value is a2-highgpu-2g if not set.
 1. ***ACCELERATOR_TYPE***. This defines the Accelerator type. The default value is nvidia-tesla-a100 if not set.
-1. ***IMAGE_FAMILY_NAME***. This defines the image family name for the VM. The default value is pytorch-1-12-gpu-debian-10 if not set. We support images only from ml-images project.
-1. ***IMAGE_NAME***. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-12-cu113-v20221107-debian-10 if not set. We support images only from ml-images project.
+1. ***IMAGE_FAMILY_NAME***. This defines the image family name for the VM. The default value is pytorch-1-12-gpu-debian-10 if not set.
+1. ***IMAGE_NAME***. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-12-cu113-v20221107-debian-10 if not set.
+1. ***IMAGE_PROJECT***. This defines the image project name for the VM. The default value is ml-images project.
 1. ***DISK_SIZE_GB***. This defines the disk size in GB for the VMs. The default value is 2000 GB(2 TB) if not specified.
 1. ***DISK_TYPE***. This defines the disk type to use for VM creation. The default value is pd-ssd if not defined.
 1. ***TERRAFORM_GCS_PATH***. Google cloud storage bucket path to use for state management and copying scripts. If not provided then a default GCS bucket is created in the project. The name of the bucket is ‘aiinfra-terraform-<PROJECT_ID>’. For each deployment a separate folder is created under this GCS bucket in the name ‘<NAME_PREFIX-deployment>’. Ex: gs://test-bucket/deployment
