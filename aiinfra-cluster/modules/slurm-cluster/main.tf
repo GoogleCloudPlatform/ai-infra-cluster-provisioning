@@ -14,26 +14,11 @@
   * limitations under the License.
   */
 
-module "homefs" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=develop"
-
-  project_id      = var.project_id
-  deployment_name = var.deployment_name
-  zone            = var.zone
-  region          = var.region
-  network_id      = var.network_id
-  local_mount     = "/home"
-  labels          = { ghpc_role = "file-system" }
-
-  #size_gb              = var.filestore_size_gb
-  #filestore_tier       = var.filestore_tier
-}
-
 module "compute_node_group" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group//?ref=develop"
 
   project_id             = var.project_id
-  labels                 = { ghpc_role = "compute" }
+  labels                 = merge(var.labels, { ghpc_role = "compute" })
   node_count_static      = var.node_count_static
   node_count_dynamic_max = var.node_count_dynamic_max
   instance_template      = var.instance_template_compute
@@ -47,14 +32,9 @@ module "compute_partition" {
   region               = var.region
   partition_name       = "compute"
   subnetwork_self_link = var.subnetwork_self_link
-  network_storage      = flatten([module.homefs.network_storage])
+  network_storage      = flatten([var.network_storage])
   node_groups          = flatten([module.compute_node_group.node_groups])
   enable_placement     = false
-
-  # TODO: pass labels
-  # labels               = merge(var.labels, { ghpc_role = "schedmd-slurm-gcp-v5-partition",})
-  # TODO: take list of GCS buckets and NFS filestore and provide it here.
-  # network_storage      = flatten([module.datafs.network_storage, module.homefs.network_storage])
 }
 
 module "slurm_controller" {
@@ -67,17 +47,12 @@ module "slurm_controller" {
   zone                 = var.zone
   subnetwork_self_link = var.subnetwork_self_link
   network_self_link    = var.network_self_link
-  network_storage      = flatten([module.homefs.network_storage])
+  network_storage      = flatten([var.network_storage])
   service_account      = var.service_account
   instance_template    = var.instance_template_controller
-  labels               = { ghpc_role = "scheduler" }
+  labels               = merge(var.labels, { ghpc_role = "scheduler" })
 
   disable_controller_public_ips = false
-
-  # TODO: pass labels
-  # labels                          = merge(var.labels, { ghpc_role = "schedmd-slurm-gcp-v5-controller",})
-  # TODO: take list of GCS buckets and NFS filestore and provide it here.
-  # network_storage                 = flatten([module.datafs.network_storage, module.homefs.network_storage])
 }
 
 module "slurm_login" {
@@ -92,7 +67,7 @@ module "slurm_login" {
   zone                   = var.zone
   service_account        = var.service_account
   instance_template      = var.instance_template_login
-  labels                 = { ghpc_role = "scheduler" }
+  labels                 = merge(var.labels, { ghpc_role = "scheduler" })
 
   disable_login_public_ips = false
 }

@@ -47,7 +47,6 @@ test::aiinfra-cluster::passes_on_default_vars () {
     EXPECT_SUCCEED aiinfra-cluster::test::plan \
         "$(aiinfra-cluster::test::data_dir)/passes_on_default_vars.tfvars" \
         "${tfplan}"
-    tfshow=$(mktemp)
     EXPECT_SUCCEED aiinfra-cluster::test::json_contains \
         "$(aiinfra-cluster::test::data_dir)/passes_on_default_vars.json" \
         <(aiinfra-cluster::test::show "${tfplan}")

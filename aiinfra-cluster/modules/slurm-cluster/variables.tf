@@ -57,15 +57,18 @@ variable "subnetwork_self_link" {
 
 ## Filestore
 
-#variable "filestore_size_gb" {
-#  description = "Storage size of the filestore instance in GB."
-#  type        = number
-#}
-#
-#variable "filestore_tier" {
-#  description = "Service tier of the filestore instance."
-#  type        = number
-#}
+variable "network_storage" {
+  description = "Storage to mount on all instances"
+  type = list(string)
+  default = []
+}
+
+variable "labels" {
+  description = "Labels to add to the instances. List key, value pairs."
+  type        = map
+  default     = {}
+}
+
 
 ## Node Group
 

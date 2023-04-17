@@ -269,6 +269,7 @@ module "aiinfra-slurm" {
   subnetwork_address   = var.subnetwork_address
   subnetwork_self_link = var.subnetwork_self_link
   service_account      = var.service_account
+  network_storage      = var.network_storage_modules
 
   node_count_static      = var.slurm_node_count_static
   node_count_dynamic_max = var.slurm_node_count_dynamic_max

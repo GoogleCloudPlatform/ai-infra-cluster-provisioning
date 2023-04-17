@@ -308,6 +308,12 @@ variable "slurm_node_count_dynamic_max" {
   type        = number
 }
 
+variable "network_storage_modules" {
+  description = "Storage to mount on all instances"
+  type = list(string)
+  default = []
+}
+
 variable "gke_version" {
   description = "The GKE version to use to create the cluster."
   default = null

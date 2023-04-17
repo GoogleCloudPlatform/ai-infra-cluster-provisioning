@@ -184,6 +184,7 @@ module "aiinfra-compute" {
   orchestrator_type            = var.orchestrator_type
   slurm_node_count_static      = var.slurm_node_count_static
   slurm_node_count_dynamic_max = var.slurm_node_count_dynamic_max
+  network_storage              = flatten([module.nfs_filestore[*].network_storage])
   gke_version                  = var.gke_version
   
   node_pools = length(var.custom_node_pool) != 0 || length(local.basic_node_pool) != 0 ? coalescelist(var.custom_node_pool, local.basic_node_pool) : []
