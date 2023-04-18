@@ -1,11 +1,11 @@
 PROJECT_ID=gce-ai-infra
 ZONE=us-central1-a
-VM_TYPE=n1-standard-1
+VM_TYPE=a2-highgpu-2g
 GPU_COUNT=0
 TERRAFORM_GCS_PATH=gs://aiinfra-terraform-gce-ai-infra/gcb-continuous
 STARTUP_COMMAND=echo \"Hello World\"
 METADATA={ key1 = "val", key2 = "val2"}
-INSTANCE_COUNT=2
+INSTANCE_COUNT=1
 ORCHESTRATOR_TYPE=Ray
 SHOW_PROXY_URL=no
 NETWORK_CONFIG=multi_nic_network
