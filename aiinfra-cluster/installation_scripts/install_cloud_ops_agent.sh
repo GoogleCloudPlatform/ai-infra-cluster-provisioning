@@ -148,7 +148,9 @@ handle_debian() {
         local -r cuda_debfile_url="https://developer.download.nvidia.com/compute/cuda/repos/${distribution}/x86_64/${cuda_debfile_filename}"
 
         dcgm_package_install () {
-            wget --quiet "${cuda_debfile_url}" \
+            apt-get --quiet update \
+                && apt-get --quiet install -y wget \
+                && wget --quiet "${cuda_debfile_url}" \
                 && dpkg -i "${cuda_debfile_filename}" \
                 && apt-get --quiet update \
                 && apt-get --quiet install -y datacenter-gpu-manager \
@@ -219,7 +221,7 @@ handle_redhat() {
     }
 
     install_dcgm() {
-        fail "install_dcgm: not implemented for redhat"
+        echo >&2 "install_dcgm: not implemented for redhat"
     }
 }
 
@@ -244,4 +246,6 @@ main() {
     install_dcgm || { echo >&2 'Failed to install DCGM'; return 1; }
 }
 
-main
+if [ "${SOURCING}" != true ]; then
+    main
+fi

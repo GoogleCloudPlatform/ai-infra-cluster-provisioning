@@ -15,39 +15,39 @@
   */
 
 locals {
-  depl_name = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
+  depl_name         = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
 
-  default_metadata = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", })
-  metadata = var.enable_notebook ? merge(local.default_metadata, { proxy-mode="project_editors", }) : local.default_metadata
+  default_metadata  = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", })
+  metadata          = var.enable_notebook && var.instance_image.project == "ml-images" ? merge(local.default_metadata, { proxy-mode="project_editors", }) : local.default_metadata
 
-  gcs_mount_arr         = compact(split(",", trimspace(var.gcs_mount_list)))
-  nfs_filestore_arr     = compact(split(",", trimspace(var.nfs_filestore_list)))
-  
-  dir_copy_arr         = compact(split(",", trimspace(var.local_dir_copy_list)))
-  dir_copy_setup       = flatten([
+  gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
+  nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
+
+  dir_copy_arr = compact(split(",", trimspace(var.local_dir_copy_list)))
+  dir_copy_setup = flatten([
     for path in local.dir_copy_arr : [
       for file in fileset("${split(":", trimspace(path))[0]}", "**") : {
-        "destination"   = "${split(":", trimspace(path))[1]}/${basename("${file}")}"
-        "source"        = "${split(":", trimspace(path))[0]}/${basename("${file}")}"
-        "type"          = "data" 
+        "destination" = "${split(":", trimspace(path))[1]}/${basename("${file}")}"
+        "source"      = "${split(":", trimspace(path))[0]}/${basename("${file}")}"
+        "type"        = "data"
       }
     ]
   ])
-  
-  ray_setup             = var.orchestrator_type == "ray" ? [
+
+  ray_setup = var.orchestrator_type == "ray" && var.instance_image.project == "ml-images" ? [
     {
-      "type"            = "shell"
-      "destination"     = "/tmp/setup_ray.sh"
-      "source"          = "${path.module}/installation_scripts/setup_ray.sh"
-      "args"            = "1.12.1 26379 ${var.gpu_per_vm}"
+      "type"        = "shell"
+      "destination" = "/tmp/setup_ray.sh"
+      "source"      = "${path.module}/installation_scripts/setup_ray.sh"
+      "args"        = "1.12.1 26379 ${var.gpu_per_vm}"
     }
   ] : []
 
   startup_command_setup = var.startup_command != "" ? [
     {
-      "type"            = "shell"
-      "destination"     = "/tmp/initializestartup.sh"
-      "content"         = "${var.startup_command}"
+      "type"        = "shell"
+      "destination" = "/tmp/initializestartup.sh"
+      "content"     = "${var.startup_command}"
     }
   ] : []
 
@@ -58,8 +58,22 @@ locals {
       "source"      = "${path.module}/installation_scripts/install_cloud_ops_agent.sh"
     }
   ] : []
-  
-  vm_startup_setup      = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
+
+  basic_node_pool = (var.orchestrator_type == "gke" && var.gke_node_pool_count > 0) ? [
+    for idx in range(var.gke_node_pool_count) :
+    {
+      name                    = "${var.name_prefix}-nodepool-${idx}"
+      zone                    = var.zone
+      node_count              = var.gke_node_count_per_node_pool
+      machine_type            = var.machine_type
+      guest_accelerator_count = var.gpu_per_vm
+      guest_accelerator_type  = var.accelerator_type
+    }
+  ] : []
+
+  nvidia_widgets                  = var.enable_ops_agent ? concat(module.dashboard-widget-data.nvidia_dcgm_widgets, module.dashboard-widget-data.nvidia_nvml_widgets) : []
+  gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-widget-data.gce_gke_gpu_utilization_widgets : []
+  vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
 }
 
@@ -81,40 +95,40 @@ module "gcsfuse_mount" {
 }
 
 module "nfs_filestore" {
-  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44"
-  count           = length(local.nfs_filestore_arr)
-  project_id      = var.project_id
-  region          = var.region
-  zone            = var.zone
-  deployment_name = local.depl_name
-  network_name    = module.aiinfra-network.network_name
+  source               = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=c1f4a44"
+  count                = length(local.nfs_filestore_arr)
+  project_id           = var.project_id
+  region               = var.region
+  zone                 = var.zone
+  deployment_name      = local.depl_name
+  network_name         = module.aiinfra-network.network_name
   filestore_share_name = "nfsshare_${count.index}"
-  labels          = merge(var.labels, { ghpc_role = "aiinfra-filestore",})
-  local_mount     = split(":", trimspace(local.nfs_filestore_arr[count.index]))[0]
-  filestore_tier  = split(":", trimspace(local.nfs_filestore_arr[count.index]))[1]
-  size_gb         = length(split(":", trimspace(local.nfs_filestore_arr[count.index]))) > 2 ? split(":", trimspace(local.nfs_filestore_arr[count.index]))[2] : 2560
+  labels               = merge(var.labels, { ghpc_role = "aiinfra-filestore", })
+  local_mount          = split(":", trimspace(local.nfs_filestore_arr[count.index]))[0]
+  filestore_tier       = split(":", trimspace(local.nfs_filestore_arr[count.index]))[1]
+  size_gb              = length(split(":", trimspace(local.nfs_filestore_arr[count.index]))) > 2 ? split(":", trimspace(local.nfs_filestore_arr[count.index]))[2] : 2560
   depends_on = [
     module.aiinfra-network
   ]
 }
 
 module "startup" {
-  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=1b1cdb09347433ecdb65488989f70135e65e217b"
-  project_id      = var.project_id
+  source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=58ff5ad44b1b80a62c447eca4d57e9bba9badf70"
+  project_id = var.project_id
   runners = concat(local.dir_copy_setup
-  , module.gcsfuse_mount[*].client_install_runner
-  , module.gcsfuse_mount[*].mount_runner
-  , module.nfs_filestore[*].install_nfs_client_runner
-  , module.nfs_filestore[*].mount_runner
+    , module.gcsfuse_mount[*].client_install_runner
+    , module.gcsfuse_mount[*].mount_runner
+    , module.nfs_filestore[*].install_nfs_client_runner
+    , module.nfs_filestore[*].mount_runner
   , local.vm_startup_setup)
-  labels          = merge(var.labels, { ghpc_role = "scripts",})
+  labels          = merge(var.labels, { ghpc_role = "scripts", })
   deployment_name = local.depl_name
   gcs_bucket_path = var.gcs_bucket_path
   region          = var.region
 }
 
-module "aiinfra-mig" {
-  source               = "./modules/vm-instance-group"
+module "aiinfra-compute" {
+  source               = "./modules/aiinfra-compute"
   subnetwork_self_link = module.aiinfra-network.subnetwork_self_link
   service_account = {
     email  = var.service_account.email
@@ -136,22 +150,26 @@ module "aiinfra-mig" {
   zone                = var.zone
   region              = var.region
   startup_script      = module.startup.startup_script
-  metadata = local.metadata
-  labels      = merge(var.labels, { aiinfra_role = "compute",})
-  name_prefix = var.name_prefix
-  guest_accelerator = [{
+  metadata            = local.metadata
+  labels              = merge(var.labels, { aiinfra_role = "compute", })
+  name_prefix         = var.name_prefix
+  guest_accelerator = {
     count = var.gpu_per_vm
     type  = var.accelerator_type
-  }]
-  deployment_name = local.depl_name
+  }
+  deployment_name    = local.depl_name
   network_interfaces = module.aiinfra-network.network_interfaces
   depends_on = [
     module.aiinfra-network
   ]
+  enable_gke = var.orchestrator_type == "gke"
+  gke_version = var.gke_version
+  
+  node_pools = length(var.custom_node_pool) != 0 || length(local.basic_node_pool) != 0 ? coalescelist(var.custom_node_pool, local.basic_node_pool) : []
 }
 
-module "dashboard-metric-descriptor" {
-  source               = "./modules/dashboard-metric-descriptor"
+module "dashboard-widget-data" {
+  source               = "./modules/dashboard-widget-data"
 }
 
 /*
@@ -164,8 +182,6 @@ module "aiinfra-default-dashboard" {
   deployment_name = local.depl_name
   base_dashboard  = "Empty"
   title           = "AI Accelerator Experience Dashboard"
-  widgets         = [
-    for widget_object in module.dashboard-metric-descriptor.widget_objects : jsonencode(widget_object)
-  ]
-  depends_on      = [module.dashboard-metric-descriptor]
+  widgets         = var.orchestrator_type != "gke" ? concat(local.nvidia_widgets, local.gce_gke_gpu_utilization_widgets) : local.gce_gke_gpu_utilization_widgets
+  depends_on      = [module.dashboard-widget-data]
 }

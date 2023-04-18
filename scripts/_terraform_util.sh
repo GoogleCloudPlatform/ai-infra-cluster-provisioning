@@ -19,13 +19,17 @@
 #
 _terraform_setup() {
     apply_ret=0
+    parallel_degree=""
+    if [ "${ORCHESTRATOR_TYPE}" == "gke" ]; then
+      parallel_degree="-parallelism=21"
+    fi
 
     # change terraform verbosity based on MINIMIZE_TERRAFORM_LOGGING environment variable.
     if [[ -n "$MINIMIZE_TERRAFORM_LOGGING" ]]; then
         echo "Redirecting 'terraform apply' output to $TERRAFORM_LOG_PATH."
-        terraform -chdir=/usr/primary apply -input=false -auto-approve > $TERRAFORM_LOG_PATH || apply_ret=$?
+        terraform -chdir=/usr/primary apply -input=false -auto-approve $parallel_degree > $TERRAFORM_LOG_PATH || apply_ret=$?
     else
-        terraform -chdir=/usr/primary apply -input=false -auto-approve || apply_ret=$?
+        terraform -chdir=/usr/primary apply -input=false -auto-approve $parallel_degree || apply_ret=$?
     fi
 
     if [ $apply_ret -eq 0 ]; then
@@ -40,7 +44,7 @@ _terraform_setup() {
                 export IS_CLEANUP_NEEDED="yes"
             fi
         fi
-    else
+    elif [ "${ORCHESTRATOR_TYPE}" != "gke" ]; then
         echo "Terraform apply failed with error $apply_ret."
         migErr=$(gcloud compute instance-groups managed list-errors $NAME_PREFIX-mig --zone $ZONE)
         echo -e "${RED} $migErr ${NOP}"
@@ -54,6 +58,8 @@ _terraform_setup() {
 _Display_connection_info() {
     if [[ -n "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
         echo "Not checking for proxy_url information."
+    elif [[ "${IMAGE_PROJECT,,}" != "ml-images" ]]; then
+        echo "Jupyter notebook is not available in non-DLVM images."
     elif [[ -n "$ENABLE_NOTEBOOK" && "${ENABLE_NOTEBOOK,,}" == "false" ]]; then
         echo "Jupyter notebook is disabled."
     else
@@ -103,7 +109,7 @@ _terraform_cleanup() {
                 gsutil rm -r gs://$TF_BUCKET_NAME/$TF_STATE_PATH/ || del_state_ret=$?
             fi
          else
-            echo "Terraform destroy is alredy executed."
+            echo "Terraform destroy is already executed."
          fi
     fi
 }
@@ -150,6 +156,16 @@ _perform_terraform_action() {
         terraform --version
         terraform -chdir=/usr/primary init -input=false
         terraform -chdir=/usr/primary validate
+    elif [[ "${ACTION,,}" == "plan" ]]; then
+        terraform --version
+        if ! terraform -chdir=/usr/primary init -input=false; then
+            echo >&2 'terraform init failure'
+            exit 1
+        fi
+        if ! terraform -chdir=/usr/primary plan -no-color -input=false; then
+            echo >&2 'terraform plan failure'
+            exit 1
+        fi
     else
         echo "Action $ACTION is not supported..."
     fi

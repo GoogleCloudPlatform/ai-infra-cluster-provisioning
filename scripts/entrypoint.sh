@@ -24,6 +24,8 @@ source /usr/_debug_util.sh
 
 trap _terraform_cleanup EXIT SIGTERM SIGINT
 
+
+
 export GREEN='\e[1;32m'
 export RED='\e[0;31m'
 export NOC='\e[0m'
@@ -35,9 +37,25 @@ if [ ! -z "$1" ]; then
 fi
 
 _debug_hold
-_set_terraform_env_var
+_env_var_util::setup || {
+    echo >&2 "failed to set up environment"
+    exit 1;
+}
+
+echo 'tfvars:'
+echo '```terraform'
+_env_var_util::print_tfvars \
+    $(_env_var_util::get_project_email "${PROJECT_ID}") \
+    $(dbus-uuidgen | head -c6) \
+| tee /usr/primary/tf.auto.tfvars
+echo '```'
+
 _expand_files_to_copy
 
+gcloud config set project "${PROJECT_ID}" || {
+    echo >&2 "failed to set current project to '${PROJECT_ID}'"
+    exit 1;
+}
 _set_terraform_backend
 echo "====================================================================="
 action_err=0

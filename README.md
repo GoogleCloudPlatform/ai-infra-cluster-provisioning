@@ -18,37 +18,54 @@ Users have control to choose values for different fields for the resources. The 
 
 The optional parameters are:
 1. ***INSTANCE_COUNT***. This defines the VM instance count. The default value is 1 if not set.
-2. ***GPU_COUNT***. This defines the GPU count per VM. The default value is 2 if not set.
-3. ***VM_TYPE***. This defines the VM type. The default value is a2-highgpu-2g if not set.
-4. ***ACCELERATOR_TYPE***. This defines the Accelerator type. The default value is nvidia-tesla-a100 if not set.
-5. ***IMAGE_FAMILY_NAME***. This defines the image family name for the VM. The default value is pytorch-1-12-gpu-debian-10 if not set. We support images only from ml-images project.
-6. ***IMAGE_NAME***. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-12-cu113-v20221107-debian-10 if not set. We support images only from ml-images project.
-7. ***DISK_SIZE_GB***. This defines the disk size in GB for the VMs. The default value is 2000 GB(2 TB) if not specified.
-8. ***DISK_TYPE***. This defines the disk type to use for VM creation. The default value is pd-ssd if not defined.
-9. ***TERRAFORM_GCS_PATH***. Google cloud storage bucket path to use for state management and copying scripts. If not provided then a default GCS bucket is created in the project. The name of the bucket is ‘aiinfra-terraform-<PROJECT_ID>’. For each deployment a separate folder is created under this GCS bucket in the name ‘<NAME_PREFIX-deployment>’. Ex: gs://test-bucket/deployment
-10. ***VM_LOCALFILE_DEST_PATH***. This defines the destination directory path in the VM for file copy. If any local directory is mounted at "/usr/aiinfra/copy" in the docker container then all the files in that directory are copied to the VM_LOCALFILE_DEST_PATH in the VM. If not specified the default value is '/usr/aiinfra/copy'.
-11. ***METADATA***. This defines optional metadata to be set for the VM. Ex: { key1 = "val", key2 = "val2"}
-12. ***LABELS***. This defines key value pairs to set as labels when the VMs are created. Ex: { key1 = "val", key2 = "val2"} 
-13. ***STARTUP_COMMAND***. This defines the startup command to run when the VM starts up. Ex: python /usr/cp/train.py
-14. ***ORCHESTRATOR_TYPE***. This defines the Orchestrator type to be set up on the VMs. The current supported orchestrator type is: Ray.
-15. ***GCS_MOUNT_LIST***. This defines the list of GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
-16. ***NFS_FILESHARE_LIST***. This defines the list of NFS file shares to mount. The format is `</mount/path1>:<NFS fileshare type>,</mount/path2>:<NFS fileshare type>:<NFS fileshare size in GB>`. For example: NFS_FILESHARE_LIST=/usr/nfsshare1:BASIC_SSD
-    - The `<NFS fileshare type>` cannot be empty. The supported values are `BASIC_HDD`,`BASIC_SSD`,`HIGH_SCALE_SSD` and `ENTERPRISE`.
-    - The `<NFS fileshare size in GB>` can be empty and the default value is 2560 GB (2.5 TB).
-17. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
-18. ***MINIMIZE_TERRAFORM_LOGGING***. This controls the verbosity of terraform logs. When any value is set for this parameter, the terraform output is redirected to a local file and not printed on syserr. The log file is then uploaded to storage account. Any value can be set for this parameter, e.g.: yes, true.
-19. ***NETWORK_CONFIG***. This controls the VPC type to be used for the MIG. The supported values are default_network, new_network and multi_nic_network. The dault value is default_network. The behaviour is 
+1. ***GPU_COUNT***. This defines the GPU count per VM. The default value is 2 if not set.
+1. ***VM_TYPE***. This defines the VM type. The default value is a2-highgpu-2g if not set.
+1. ***ACCELERATOR_TYPE***. This defines the Accelerator type. The default value is nvidia-tesla-a100 if not set.
+1. ***IMAGE_FAMILY_NAME***. This defines the image family name for the VM. The default value is pytorch-1-12-gpu-debian-10 if not set.
+1. ***IMAGE_NAME***. This defines the image name for the VM. The default value is c2-deeplearning-pytorch-1-12-cu113-v20221107-debian-10 if not set.
+1. ***IMAGE_PROJECT***. This defines the image project name for the VM. The default value is ml-images project.
+1. ***DISK_SIZE_GB***. This defines the disk size in GB for the VMs. The default value is 2000 GB(2 TB) if not specified.
+1. ***DISK_TYPE***. This defines the disk type to use for VM creation. The default value is pd-ssd if not defined.
+1. ***TERRAFORM_GCS_PATH***. Google cloud storage bucket path to use for state management and copying scripts. If not provided then a default GCS bucket is created in the project. The name of the bucket is ‘aiinfra-terraform-<PROJECT_ID>’. For each deployment a separate folder is created under this GCS bucket in the name ‘<NAME_PREFIX-deployment>’. Ex: gs://test-bucket/deployment
+1. ***VM_LOCALFILE_DEST_PATH***. This defines the destination directory path in the VM for file copy. If any local directory is mounted at "/usr/aiinfra/copy" in the docker container then all the files in that directory are copied to the VM_LOCALFILE_DEST_PATH in the VM. If not specified the default value is '/usr/aiinfra/copy'.
+1. ***METADATA***. This defines optional metadata to be set for the VM. Ex: { key1 = "val", key2 = "val2"}
+1. ***LABELS***. This defines key value pairs to set as labels when the VMs are created. Ex: { key1 = "val", key2 = "val2"} 
+1. ***STARTUP_COMMAND***. This defines the startup command to run when the VM starts up. Ex: python /usr/cp/train.py
+1. ***ORCHESTRATOR_TYPE***. This defines the Orchestrator type to be set up on the VMs. The currently supported orchestrator types are 
+    -  __ray__: A Ray cluster is created using the MIG instances.
+    -  __gke__: A private GKE cluster is created with private node pool following the recommendations from the GKE team.
+1. ***GKE_NODE_POOL_COUNT***: The number of homogeneous node pools for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
+1. ***GKE_NODE_COUNT_PER_NODE_POOL***: The desired node count per node pool for GKE cluster. Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
+1. ***GKE_VERSION***: The GKE version to use for creating the GKE cluster. Default value is the latest GKE version for the project in the region. Only applicable when `ORCHESTRATOR_TYPE` is `gke`. Ex: `GKE_VERSION=1.25.7-gke.1000`
+1. ***CUSTOM_NODE_POOL***: The custom node pool description for GKE. The structure of the custom node pool is list of node pool objects. The node pool object is 
+    ```
+    name                    = string
+    zone                    = string
+    node_count              = number
+    machine_type            = string
+    guest_accelerator_count = number
+    guest_accelerator_type  = string
+    ```
+    
+    Example: `CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]`
+1. ***GCS_MOUNT_LIST***. This defines the list of GCS buckets to mount. The format is `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example: GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
+1. ***NFS_FILESTORE_LIST***. This defines the list of NFS file shares to mount. The format is `</mount/path1>:<NFS filestore type>,</mount/path2>:<NFS filestore type>:<NFS filestore size in GB>`. For example: NFS_FILESTORE_LIST=/usr/nfsshare1:BASIC_SSD
+    -  The `<NFS filestore type>` cannot be empty. The supported values are `BASIC_HDD`,`BASIC_SSD`,`HIGH_SCALE_SSD` and `ENTERPRISE`.
+    -  The `<NFS filestore size in GB>` can be empty and the default value is 2560 GB (2.5 TB).
+1. ***SHOW_PROXY_URL***. This controls if the Jupyter notebook proxy url is retrieved for the cluster or not. The default value is yes. If this is present and set to no, then connection information is not collected. The supported values are: yes, no.
+1. ***MINIMIZE_TERRAFORM_LOGGING***. This controls the verbosity of terraform logs. When any value is set for this parameter, the terraform output is redirected to a local file and not printed on syserr. The log file is then uploaded to storage account. Any value can be set for this parameter, e.g.: yes, true.
+1. ***NETWORK_CONFIG***. This controls the VPC type to be used for the MIG. The supported values are default_network, new_network and multi_nic_network. The default value is default_network. The behavior is 
     -  __default_network__: MIG uses the default VPC in the project.
     -  __new_network__: A new VPC is created for the MIG.
     -  __multi_nic_network__: New VPCs are created and used by all the VMs in the MIG. By default 5 new VPCs are created and 5 NICs are used for the MIG but that value is configurable.
-20. ***ENABLE_OPS_AGENT***. Can be one of:
+1. ***ENABLE_OPS_AGENT***. Can be one of:
     - `true` (default): Install Ops Agent with random-backoff retries
     - `false`: Do not install Ops Agent
-21. ***ENABLE_NOTEBOOK***. Can be one of:
+1. ***ENABLE_NOTEBOOK***. Can be one of:
     - `true` (default): Sets up jupyter notebook for the vm instances.
     - `false`: Do not set up jupyter notebook.
 
-The user needs to provide value for the above mandatory parameters. All other parameters are optional and default behaviour is described above. Users can also enable/disable various features using feature flags in the config, for example: ORCHESTRATOR_TYPE, SHOW_PROXY_URL, GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
+The user needs to provide value for the above mandatory parameters. All other parameters are optional and default behavior is described above. Users can also enable/disable various features using feature flags in the config, for example: ORCHESTRATOR_TYPE, SHOW_PROXY_URL, GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
 
 #### [Sample config file that the user provides](examples/env.list)
 
@@ -99,7 +116,7 @@ The cluster provisioning tool interacts with GCP to create cloud resources on be
 
 ### State management across sessions
 
-When terraform is executed to create the resources, it creates state files to keep track of the created resources. While changing or destroying resources, terraform uses these statefiles. If these state files are created within the container, then they will be lost when the container exits. That will result in leaking of the resources. Having the state files in the container forces cleanup resources before the container exits. This ties the cluster lifespan to that of the container. So to have better control over the resources we need to have the state files managed in cloud storage. That way multiple runs of the container can use the same state files to manage the resources. 
+When terraform is executed to create the resources, it creates state files to keep track of the created resources. While changing or destroying resources, terraform uses these state files. If these state files are created within the container, then they will be lost when the container exits. That will result in leaking of the resources. Having the state files in the container forces cleanup resources before the container exits. This ties the cluster lifespan to that of the container. So to have better control over the resources we need to have the state files managed in cloud storage. That way multiple runs of the container can use the same state files to manage the resources. 
 Using the provisioning tool the user can provide a GCS bucket path that the entrypoint.sh script uses for managing the terraform state and sets it as the backend for terraform. If the user does not provide a GCS bucket path then the provisioning tool creates a GCS bucket for managing terraform state, but for this the user needs to have permission to create a GCS bucket in the project they are using.
 
 ### Copying AI/ML training script to the GPU cluster
@@ -116,7 +133,7 @@ For multi-node training, we need to set up an orchestrator on all the VMs of the
 
 ### Shared Filesystem
 
-For sharing data across machines running AI workload, users can use a shared file system. Currently we are using NFS filestore or GCS bucket as shared file system across machines. Users can use the `GCS_MOUNT_LIST` parameter to provide a comma separated list of GCS buckets and their mount paths. Similarly they can use `NFS_FILESHARE_LIST` parameter to provide comma separated list of paths. For each filestore path, a new filestore will be created and mounted to the path specified on every VM in the cluster.
+For sharing data across machines running AI workload, users can use a shared file system. Currently we are using NFS filestore or GCS bucket as shared file system across machines. Users can use the `GCS_MOUNT_LIST` parameter to provide a comma separated list of GCS buckets and their mount paths. Similarly they can use `NFS_FILESTORE_LIST` parameter to provide comma separated list of paths. For each filestore path, a new filestore will be created and mounted to the path specified on every VM in the cluster.
 
 ### Connecting to the GPU cluster and running the training script
 
