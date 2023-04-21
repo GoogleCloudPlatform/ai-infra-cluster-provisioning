@@ -88,16 +88,6 @@ locals {
   }]
 
   network_interfaces = coalescelist(var.network_interfaces, local.default_network_interface)
-
-  default_node_pool         = [{
-    name                    = "system-nodes"
-    node_count              = var.instance_count
-    zone                    = var.zone
-    machine_type            = var.machine_type
-    guest_accelerator_count = var.guest_accelerator.count
-    guest_accelerator_type  = var.guest_accelerator.type
-  }]
-  gke_node_pools            = coalescelist(var.node_pools, local.default_node_pool)
 }
 
 data "google_compute_image" "compute_image" {
@@ -239,5 +229,5 @@ module "aiinfra-gke" {
   network_self_link        = var.network_self_link
   subnetwork_self_link     = var.subnetwork_self_link
   node_service_account     = lookup(var.service_account, "email", null)
-  node_pools               = local.gke_node_pools
+  node_pools               = var.node_pools
 }

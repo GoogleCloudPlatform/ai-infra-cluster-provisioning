@@ -255,6 +255,7 @@ EOF
     [ -n "${ENABLE_NOTEBOOK}" ] && echo "enable_notebook = \"${ENABLE_NOTEBOOK}\""
     [ -n "${GKE_NODE_POOL_COUNT}" ] && echo "gke_node_pool_count = \"${GKE_NODE_POOL_COUNT}\""
     [ -n "${GKE_NODE_COUNT_PER_NODE_POOL}" ] && echo "gke_node_count_per_node_pool = ${GKE_NODE_COUNT_PER_NODE_POOL}"
+    [ -n "${GKE_ENABLE_COMPACT_PLACEMENT}" ] && echo "gke_enable_compact_placement = ${GKE_ENABLE_COMPACT_PLACEMENT}"
     [ -n "${CUSTOM_NODE_POOL}" ] && echo "custom_node_pool = ${CUSTOM_NODE_POOL}"
     [ -n "${GKE_VERSION}" ] && echo "gke_version = \"${GKE_VERSION}\""
 
