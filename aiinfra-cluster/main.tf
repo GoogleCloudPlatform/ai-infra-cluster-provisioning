@@ -62,12 +62,13 @@ locals {
   basic_node_pool = (var.orchestrator_type == "gke" && var.gke_node_pool_count > 0) ? [
     for idx in range(var.gke_node_pool_count) :
     {
-      name                    = "${var.name_prefix}-nodepool-${idx}"
-      zone                    = var.zone
-      node_count              = var.gke_node_count_per_node_pool
-      machine_type            = var.machine_type
-      guest_accelerator_count = var.gpu_per_vm
-      guest_accelerator_type  = var.accelerator_type
+      name                     = "${var.name_prefix}-nodepool-${idx}"
+      zone                     = var.zone
+      node_count               = var.gke_node_count_per_node_pool
+      machine_type             = var.machine_type
+      guest_accelerator_count  = var.gpu_per_vm
+      guest_accelerator_type   = var.accelerator_type
+      enable_compact_placement = var.gke_enable_compact_placement
     }
   ] : []
 

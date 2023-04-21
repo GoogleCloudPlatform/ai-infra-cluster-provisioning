@@ -111,11 +111,12 @@ variable "scopes" {
 variable "node_pools" {
   description = "The list of nodepools for the GKE cluster."
   type = list(object({
-    name                    = string
-    zone                    = string
-    node_count              = number
-    machine_type            = string
-    guest_accelerator_count = number
-    guest_accelerator_type  = string
+    name                     = string
+    zone                     = string
+    node_count               = number
+    machine_type             = string
+    guest_accelerator_count  = number
+    guest_accelerator_type   = string
+    enable_compact_placement = bool
   }))
 }

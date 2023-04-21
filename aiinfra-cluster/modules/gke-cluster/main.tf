@@ -100,17 +100,7 @@ resource "google_container_cluster" "gke-cluster" {
 
   # regular release is required for all 1.24+ features.
   release_channel {
-    channel = "REGULAR"
-  }
-
-  # Allow planned maintenance during this time period.
-  maintenance_policy {
-    recurring_window {
-      start_time = "2023-01-01T09:00:00Z"
-      end_time = "2025-01-01T17:00:00Z"
-      # On the 1st Tuesday of every 6 months.
-      recurrence = "FREQ=MONTHLY;INTERVAL=6;BYDAY=1TU"
-    }
+    channel = "UNSPECIFIED"
   }
 
   addons_config {
@@ -157,9 +147,9 @@ resource "google_container_node_pool" "gke-node-pools" {
   }
 
   management {
-    auto_repair  = false
+    auto_repair  = true
     # auto_upgrade needs to be true for release cahnnel "Regular"
-    auto_upgrade = true
+    auto_upgrade = false
   }
 
   node_config {
@@ -215,6 +205,14 @@ resource "google_container_node_pool" "gke-node-pools" {
 
     oauth_scopes = var.scopes
   }
+
+  dynamic "placement_policy" {
+      for_each = each.value.enable_compact_placement ? [1] : []
+      content {
+        type = "COMPACT"
+      }
+    }
+
   lifecycle {
     ignore_changes = [
       node_config[0].labels,

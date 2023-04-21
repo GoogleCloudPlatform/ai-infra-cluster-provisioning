@@ -35,6 +35,7 @@ _env_var_util::test::unset_env () {
         ENABLE_NOTEBOOK \
         GKE_NODE_POOL_COUNT \
         GKE_NODE_COUNT_PER_NODE_POOL \
+        GKE_ENABLE_COMPACT_PLACEMENT \
         CUSTOM_NODE_POOL \
         GKE_VERSION
 }

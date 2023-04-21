@@ -197,6 +197,12 @@ variable "gke_node_count_per_node_pool" {
   default     = 0
 }
 
+variable "gke_enable_compact_placement" {
+  description = "The flag to enable compact placement for GKE node pools."
+  type        = bool
+  default     = true
+}
+
 variable "gke_version" {
   description = "The GKE version to use to create the cluster."
   default = null
@@ -204,14 +210,15 @@ variable "gke_version" {
 }
 
 variable "custom_node_pool" {
-  description               = "The list of custom nodepools for the GKE cluster."
-  type                      = list(object({
-    name                    = string
-    zone                    = string
-    node_count              = number
-    machine_type            = string
-    guest_accelerator_count = number
-    guest_accelerator_type  = string
+  description                = "The list of custom nodepools for the GKE cluster."
+  type                       = list(object({
+    name                     = string
+    zone                     = string
+    node_count               = number
+    machine_type             = string
+    guest_accelerator_count  = number
+    guest_accelerator_type   = string
+    enable_compact_placement = bool
   }))
   default                   = []
 }
