@@ -148,7 +148,7 @@ resource "google_container_node_pool" "gke-node-pools" {
 
   management {
     auto_repair  = true
-    # auto_upgrade needs to be true for release cahnnel "Regular"
+    # disabling auto_upgrade to stop automatic upgrade during customer workload execution.
     auto_upgrade = false
   }
 
