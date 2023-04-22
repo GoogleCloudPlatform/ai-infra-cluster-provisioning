@@ -155,7 +155,6 @@ module "aiinfra-compute" {
   project_id        = var.project_id
   disk_size_gb      = var.disk_size_gb
   disk_type         = var.disk_type
-  network_id        = module.aiinfra-network.network_id
   subnetwork_address = module.aiinfra-network.subnetwork_address
   network_self_link = module.aiinfra-network.network_self_link
   placement_policy = {

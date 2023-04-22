@@ -264,7 +264,6 @@ module "aiinfra-slurm" {
   deployment_name      = var.deployment_name
   zone                 = var.zone
   region               = var.region
-  network_id           = var.network_id
   network_self_link    = var.network_self_link
   subnetwork_address   = var.subnetwork_address
   subnetwork_self_link = var.subnetwork_self_link

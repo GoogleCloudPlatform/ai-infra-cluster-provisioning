@@ -35,11 +35,6 @@ variable "region" {
   type        = string
 }
 
-variable "network_id" {
-  description = "ID of the network in which the filestore and cluster will be created."
-  type        = string
-}
-
 variable "network_self_link" {
   description = "Self link of network to which the cluster will be attached"
   type        = string

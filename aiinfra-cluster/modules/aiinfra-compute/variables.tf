@@ -108,11 +108,6 @@ variable "service_account" {
   }
 }
 
-variable "network_id" {
-  description = "ID of the network in which the filestore and cluster will be created."
-  type        = string
-}
-
 variable "network_self_link" {
   description = "The self link of the network to attach the VM."
   type        = string
