@@ -265,7 +265,6 @@ module "aiinfra-slurm" {
   zone                 = var.zone
   region               = var.region
   network_self_link    = var.network_self_link
-  subnetwork_address   = var.subnetwork_address
   subnetwork_self_link = var.subnetwork_self_link
   service_account      = var.service_account
   network_storage      = var.network_storage_modules

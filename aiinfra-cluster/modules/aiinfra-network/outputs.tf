@@ -19,11 +19,6 @@ output "network_name" {
   value       = local.primary_network.network_name
 }
 
-output "subnetwork_address" {
-  description = "The ID of the primary network of all the VPCs created."
-  value       = local.primary_network.subnetwork_address
-}
-
 output "subnetwork_self_link" {
   description = "The subnetwork_self_link of the primary network of all the VPCs created."
   value       = local.primary_network.subnetwork_self_link

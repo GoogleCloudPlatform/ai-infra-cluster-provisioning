@@ -114,11 +114,6 @@ variable "network_self_link" {
   default     = "default"
 }
 
-variable "subnetwork_address" {
-  description = "Address range of subnetwork to which the cluster will be attached"
-  type        = string
-}
-
 variable "subnetwork_self_link" {
   description = "The self link of the subnetwork to attach the VM."
   type        = string
