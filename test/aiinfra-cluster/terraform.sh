@@ -36,6 +36,15 @@ aiinfra-cluster::test::json_contains () {
         "${input_file}"
 }
 
+aiinfra-cluster::test::json_omits () {
+    element_file="${1}"
+    input_file="${2}"
+    # reference for `contains(element)` function:
+    # https://stedolan.github.io/jq/manual/#Builtinoperatorsandfunctions
+    jq "contains($(cat ${element_file})) | if not then empty else halt_error end" \
+        "${input_file}"
+}
+
 # Test functions
 
 skip::test::aiinfra-cluster::fmt () {
@@ -69,7 +78,7 @@ test::aiinfra-cluster::dashboard::is_removed_when_disable_ops_agent () {
     EXPECT_SUCCEED aiinfra-cluster::test::json_contains \
         "$(aiinfra-cluster::test::data_dir)/disable_ops_agent_has_compute.json" \
         "${tfshow}"
-    EXPECT_FAIL aiinfra-cluster::test::json_contains \
+    EXPECT_SUCCEED aiinfra-cluster::test::json_omits \
         "$(aiinfra-cluster::test::data_dir)/disable_ops_agent_removes_dashboard.json" \
         "${tfshow}"
 }
