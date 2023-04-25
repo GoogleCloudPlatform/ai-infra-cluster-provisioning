@@ -75,7 +75,7 @@ The user needs to provide value for the above mandatory parameters. All other pa
 The cluster provisioning tool can be used in 3 different ways.
 1. [Docker image](#usage-via-docker-image) : The cluster provisioning tool public image can be used with `docker run` command to execute the tool in a docker container to create a GPU cluster.
 1. [Terraform module](#usage-via-terraform) : The cluster provisioning tool module can be used with `terraform` to create a GPU cluster.
-1. HPCToolkit module : The cluster provisioning tool module can be used with `HPCToolkit` to create a GPU cluster.
+1. [HPCToolkit module](#usage-via-hpctoolkit) : The cluster provisioning tool module can be used with `HPCToolkit` to create a GPU cluster.
 ## Usage via Docker image
 
 The user updates the config file and runs the docker image with the config file to create resources using the ‘docker run’ command. As part of the run command, users have to specify an action. The action can be Create, Destroy, Validate or Debug. The sample command looks like
@@ -237,7 +237,7 @@ GPU clusters.
 
 Below is a short introduction to [HPC toolkit](https://cloud.google.com/hpc-toolkit/docs/overview) and the resource materials for it.
 
-## HPC Toolkit
+### HPC Toolkit
 
 [HPC toolkit](https://cloud.google.com/hpc-toolkit/docs/overview) is an open-source software offered by Google Cloud which makes it
 easy for customers to deploy HPC environments on Google Cloud.
@@ -249,7 +249,7 @@ and intends to address the HPC deployment needs of a broad range of customers.
 
 The HPC Toolkit Repo is open-source and available [here](https://github.com/GoogleCloudPlatform/hpc-toolkit)
 
-## Resources
+### Resources
 
 1. [HPC Toolkit Repo](https://github.com/GoogleCloudPlatform/hpc-toolkit)
 2. [HPC Toolkit Quickstart](https://github.com/GoogleCloudPlatform/hpc-toolkit#quickstart)
@@ -259,9 +259,8 @@ The HPC Toolkit Repo is open-source and available [here](https://github.com/Goog
 6. [Installing Go](https://go.dev/doc/install)
 7. [HPC toolkit Troubleshooting](https://github.com/GoogleCloudPlatform/hpc-toolkit#troubleshooting)
 
-## HPC toolkit Blueprints in this repo
-
-### [aiinfra-GPU-cluster](../hpc-toolkit-blueprint/aiinfra-gpu-cluster.yaml)
+### HPC toolkit Blueprints in this repo
+#### [aiinfra-GPU-cluster](../hpc-toolkit-blueprint/aiinfra-gpu-cluster.yaml)
 
 
 ## Instructions
