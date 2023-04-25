@@ -24,7 +24,7 @@ locals {
 
   is_gvnic_supported = (var.instance_image.name != null && length(regexall("debian-11", var.instance_image.name)) > 0) || (var.instance_image.family != null && length(regexall("debian-11", var.instance_image.family)) > 0) || (var.instance_image.name != null && length(regexall("ubuntu", var.instance_image.name)) > 0) || (var.instance_image.family != null && length(regexall("ubuntu", var.instance_image.family)) > 0) || (var.instance_image.name != null && length(regexall("gvnic", var.instance_image.name)) > 0) || (var.instance_image.family != null && length(regexall("gvnic", var.instance_image.family)) > 0)
 
-  enable_gvnic  = var.bandwidth_tier != "not_enabled" && is_gvnic_supported
+  enable_gvnic  = var.bandwidth_tier != "not_enabled" && local.is_gvnic_supported
   enable_tier_1 = var.bandwidth_tier == "tier_1_enabled"
 
   # use Spot provisioning model (now GA) over older preemptible model
