@@ -25,5 +25,7 @@ locals {
 
   validate_gke_version = (var.orchestrator_type != "gke" && var.gke_version != null) ? tobool("Orchestrator type is not GKE. Please remove gke_version variable .") : true
 
-  validate_image_for_ray = (var.orchestrator_type == "ray" && var.instance_image.project != "ml-images") ? tobool("Orchestrator type RAY is not supported for non-DLVM images. Please remove orchestrator_type variable or use an image from ml-images project.") : true
+  validate_image_for_ray = (var.orchestrator_type == "ray" && var.instance_image.project != "ml-images" && var.instance_image.project != "deeplearning-platform-release") ? tobool("Orchestrator type RAY is not supported for non-DLVM images. Please remove orchestrator_type variable or use an image from ml-images or deeplearning-platform-release project.") : true
+
+  validate_image_for_enable_notebook = (var.enable_notebook && var.instance_image.project != "ml-images" && var.instance_image.project != "deeplearning-platform-release") ? tobool("Jupyter notebook is not supported for non-DLVM images. Please set enable_notebook variable to false or use an image from ml-images or deeplearning-platform-release project.") : true
 }
