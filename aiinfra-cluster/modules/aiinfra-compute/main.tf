@@ -22,14 +22,10 @@ locals {
 
   resource_prefix = var.name_prefix != null ? var.name_prefix : var.deployment_name
 
-  enable_gvnic  = var.bandwidth_tier != "not_enabled"
-  enable_tier_1 = var.bandwidth_tier == "tier_1_enabled"
+  is_gvnic_supported = (var.instance_image.name != null && length(regexall("debian-11", var.instance_image.name)) > 0) || (var.instance_image.family != null && length(regexall("debian-11", var.instance_image.family)) > 0) || (var.instance_image.name != null && length(regexall("ubuntu", var.instance_image.name)) > 0) || (var.instance_image.family != null && length(regexall("ubuntu", var.instance_image.family)) > 0) || (var.instance_image.name != null && length(regexall("gvnic", var.instance_image.name)) > 0) || (var.instance_image.family != null && length(regexall("gvnic", var.instance_image.family)) > 0)
 
-  is_debian_11_image = (var.instance_image.name != null && length(regexall("debian-11", var.instance_image.name)) > 0) || (var.instance_image.family != null && length(regexall("debian-11", var.instance_image.family)) > 0)
-  
-  // Terraform does not provide a way to validate multiple variables in variable validation block.
-  // Using this type of validation as per https://github.com/hashicorp/terraform/issues/25609#issuecomment-1057614400
-  validate_basic_node_pool = (!local.is_debian_11_image && (local.enable_gvnic || local.enable_tier_1)) ? tobool("GVNIC is only supported in debian 11 image.") : true
+  enable_gvnic  = var.bandwidth_tier != "not_enabled" && is_gvnic_supported
+  enable_tier_1 = var.bandwidth_tier == "tier_1_enabled"
 
   # use Spot provisioning model (now GA) over older preemptible model
   provisioning_model = var.spot ? "SPOT" : null
