@@ -1,4 +1,4 @@
-## Overview
+# Overview
 
 The Cluster provisioning tool aims to provide a solution for the external users to provision a GPU cluster quickly and efficiently and run their AI/ML workload in minutes. Similarly it aims to provide an automated way of providing GPU clusters for the internal AI/ML pipeline. 
 The cluster provisioning tool is a docker images which provision the cluster when run as a container. The docker image is self contained to create all the necessary resources for a GPU cluster. It has all the configs prepackaged and the tools installed. The configs packaged inside the image define the baseline GPU cluster. 
@@ -69,9 +69,14 @@ The optional parameters are:
 
 The user needs to provide value for the above mandatory parameters. All other parameters are optional and default behavior is described above. Users can also enable/disable various features using feature flags in the config, for example: ORCHESTRATOR_TYPE, SHOW_PROXY_URL, GCSFuse, Multi-NIC VM etc. The configuration file contains configs as key value pairs and provided to the ‘docker run’ command. These are set as environment variables within the docker container and then entrypoint.sh script uses these environment variables to configure terraform to create resources accordingly. 
 
-#### [Sample config file that the user provides](examples/env.list)
+#### [Sample config file that the user provides](examples/env_files/env.list)
 
-### Setting up Terraform to create resources
+# Usage
+The cluster provisioning tool can be used in 3 different ways.
+1. [Docker image](#usage-via-docker-image) : The cluster provisioning tool public image can be used with `docker run` command to execute the tool in a docker container to create a GPU cluster.
+1. [Terraform module](#usage-via-terraform) : The cluster provisioning tool module can be used with `terraform` to create a GPU cluster.
+1. HPCToolkit module : The cluster provisioning tool module can be used with `HPCToolkit` to create a GPU cluster.
+## Usage via Docker image
 
 The user updates the config file and runs the docker image with the config file to create resources using the ‘docker run’ command. As part of the run command, users have to specify an action. The action can be Create, Destroy, Validate or Debug. The sample command looks like
 ```
@@ -158,6 +163,106 @@ There are some default training scripts provided in the VMs under location `/hom
 ### Resource cleanup
 
 Since the resource state is stored outside of the container, the GPU cluster lifespan is decoupled from the container’s lifespan. Now the user can run the container and provide ‘Create’ as part of the ‘docker run’ command to create the resources. They can run the container again and provide ‘Destroy’ to destroy the container. The terraform state stored in the GCS bucket is cleared when the destroy operation is called.
+
+## Usage via Terraform
+The user can use the aiinfra-cluster module from the cluster provisioning tool [GitHub repository](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning). It can be done by simply providing the source like below.
+```tf
+module "aiinfra-cluster" {
+  source             = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//aiinfra-cluster//?ref=main"
+}
+```
+
+An example terraform config using the aiinfra-cluster module can be found [here](examples/terraform-config)
+
+### Installing terraform dependencies
+Please See
+[Cloud Docs on Installing Dependencies](https://cloud.google.com/hpc-toolkit/docs/setup/install-dependencies).
+
+### Supplying cloud credentials to Terraform
+
+Terraform can discover credentials for authenticating to Google Cloud Platform
+in several ways. We will summarize Terraform's documentation for using
+[gcloud](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/getting_started#configuring-the-provider) from your workstation and for automatically
+finding credentials in cloud environments.
+
+### Cloud credentials on your workstation
+
+You can generate cloud credentials associated with your Google Cloud account
+using the following command:
+
+```shell
+gcloud auth application-default login
+```
+
+You will be prompted to open your web browser and authenticate to Google Cloud
+and make your account accessible from the command-line. Once this command
+completes, Terraform will automatically use your "Application Default
+Credentials."
+
+If you receive failure messages containing "quota project" you should change the
+quota project associated with your Application Default Credentials with the
+following command and provide your current project ID as the argument:
+
+```shell
+gcloud auth application-default set-quota-project ${PROJECT-ID}
+```
+
+### Terraform Deployment
+
+When `terraform apply` fails, Terraform generally provides a useful error
+message. Here are some common reasons for the deployment to fail:
+
+* **GCP Access:** The credentials being used to call `terraform apply` do not
+  have access to the GCP project. This can be fixed by granting access in
+  `IAM & Admin`.
+* **Disabled APIs:** The GCP project must have the proper APIs enabled. See
+  [Enable GCP APIs](#enable-gcp-apis).
+* **Insufficient Quota:** The GCP project does not have enough quota to
+  provision the requested resources. See [GCP Quotas](#gcp-quotas).
+* **Required permission not found:**
+  * Example: `Required 'compute.projects.get' permission for 'projects/... forbidden`
+  * Credentials may not be set, or are not set correctly. Please follow
+    instructions at [Cloud credentials on your workstation](#cloud-credentials-on-your-workstation).
+  * Ensure proper permissions are set in the cloud console
+    [IAM section](https://console.cloud.google.com/iam-admin/iam).
+
+
+## Usage via HPCToolkit
+The cluster provisioning tool exposes the functionalities to provisioning a GPU
+cluster via Terraform modules. So the GPU cluster provisioning functionalities can 
+be directly integrated with HPC toolkit.
+
+This directory contains HPC toolkit blueprints that uses aiinfra-cluster module to create 
+GPU clusters.
+
+Below is a short introduction to [HPC toolkit](https://cloud.google.com/hpc-toolkit/docs/overview) and the resource materials for it.
+
+## HPC Toolkit
+
+[HPC toolkit](https://cloud.google.com/hpc-toolkit/docs/overview) is an open-source software offered by Google Cloud which makes it
+easy for customers to deploy HPC environments on Google Cloud.
+
+HPC Toolkit allows customers to deploy turnkey HPC environments (compute,
+networking, storage, etc.) following Google Cloud best-practices, in a repeatable
+manner. The HPC Toolkit is designed to be highly customizable and extensible,
+and intends to address the HPC deployment needs of a broad range of customers.
+
+The HPC Toolkit Repo is open-source and available [here](https://github.com/GoogleCloudPlatform/hpc-toolkit)
+
+## Resources
+
+1. [HPC Toolkit Repo](https://github.com/GoogleCloudPlatform/hpc-toolkit)
+2. [HPC Toolkit Quickstart](https://github.com/GoogleCloudPlatform/hpc-toolkit#quickstart)
+3. [HPC Toolkit dependencies](https://cloud.google.com/hpc-toolkit/docs/setup/install-dependencies)
+4. [Installing Terraform](https://developer.hashicorp.com/terraform/downloads)
+5. [Installing Packer](https://developer.hashicorp.com/packer/downloads)
+6. [Installing Go](https://go.dev/doc/install)
+7. [HPC toolkit Troubleshooting](https://github.com/GoogleCloudPlatform/hpc-toolkit#troubleshooting)
+
+## HPC toolkit Blueprints in this repo
+
+### [aiinfra-GPU-cluster](../hpc-toolkit-blueprint/aiinfra-gpu-cluster.yaml)
+
 
 ## Instructions
 
