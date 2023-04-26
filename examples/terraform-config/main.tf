@@ -46,7 +46,7 @@ locals {
 }
 
 module "aiinfra-cluster" {
-  source             = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//aiinfra-cluster//?ref=develop"
+  source             = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//aiinfra-cluster"
   region             = local.region
   instance_image     = local.instance_image
   gcs_mount_list     = local.gcs_mount_list

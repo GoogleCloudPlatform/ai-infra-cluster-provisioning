@@ -164,19 +164,39 @@ There are some default training scripts provided in the VMs under location `/hom
 
 Since the resource state is stored outside of the container, the GPU cluster lifespan is decoupled from the container’s lifespan. Now the user can run the container and provide ‘Create’ as part of the ‘docker run’ command to create the resources. They can run the container again and provide ‘Destroy’ to destroy the container. The terraform state stored in the GCS bucket is cleared when the destroy operation is called.
 
+### Instructions
+
+1. gcloud auth application-default login.
+1. ***[`OPTIONAL - if project not set already`]*** gcloud config set account supercomputer-testing
+1. Create env.list file. The sample env.list can be found [here](#sample-config-file-that-the-user-provides). 
+1. ***[`SIMPLE CREATE`]*** 
+   > docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
+1. ***[`SIMPLE DESTROY`]*** 
+   > docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Destroy
+1. ***[`OPTIONAL - Pull docker image before hand`]*** 
+   > docker pull us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest
+1. ***[`OPTIONAL - Mount local directory`]*** 
+   > docker run -v /usr/username/test:/usr/aiinfra/copy -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
+1.  ***[`OPTIONAL - Mount gcloud config for auth token`]*** 
+    > `Linux` docker run -v ~/.config/gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
+    
+    > `Windows` docker run -v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
+1. ***[`OPTIONAL - GCS bucket not provided`]*** 
+    > Need storage object owner access if you don't already have a storage bucket to reuse.
+
 ## Usage via Terraform
-The user can use the aiinfra-cluster module from the cluster provisioning tool [GitHub repository](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning). It can be done by simply providing the source like below.
+The user can use the [aiinfra-cluster module from the cluster provisioning tool GitHub repository](https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning/tree/main/aiinfra-cluster). It can be done by simply providing the source like below.
 ```tf
 module "aiinfra-cluster" {
-  source             = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//aiinfra-cluster//?ref=main"
+  source             = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//aiinfra-cluster"
 }
 ```
 
 An example terraform config using the aiinfra-cluster module can be found [here](examples/terraform-config)
 
 ### Installing terraform dependencies
-Please See
-[Cloud Docs on Installing Dependencies](https://cloud.google.com/hpc-toolkit/docs/setup/install-dependencies).
+1. [Install Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
+1. [Download Terraform version 1.3.7 or later](https://developer.hashicorp.com/terraform/downloads)
 
 ### Supplying cloud credentials to Terraform
 
@@ -185,7 +205,7 @@ in several ways. We will summarize Terraform's documentation for using
 [gcloud](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/getting_started#configuring-the-provider) from your workstation and for automatically
 finding credentials in cloud environments.
 
-### Cloud credentials on your workstation
+#### Cloud credentials on your workstation
 
 You can generate cloud credentials associated with your Google Cloud account
 using the following command:
@@ -207,7 +227,7 @@ following command and provide your current project ID as the argument:
 gcloud auth application-default set-quota-project ${PROJECT-ID}
 ```
 
-### Terraform Deployment
+### Terraform Deployment Troubleshooting
 
 When `terraform apply` fails, Terraform generally provides a useful error
 message. Here are some common reasons for the deployment to fail:
@@ -216,9 +236,9 @@ message. Here are some common reasons for the deployment to fail:
   have access to the GCP project. This can be fixed by granting access in
   `IAM & Admin`.
 * **Disabled APIs:** The GCP project must have the proper APIs enabled. See
-  [Enable GCP APIs](#enable-gcp-apis).
+  [Enable GCP APIs](https://cloud.google.com/hpc-toolkit/docs/setup/configure-environment#enable-apis).
 * **Insufficient Quota:** The GCP project does not have enough quota to
-  provision the requested resources. See [GCP Quotas](#gcp-quotas).
+  provision the requested resources. See [GCP Quotas](https://cloud.google.com/hpc-toolkit/docs/setup/hpc-blueprint#request-quota).
 * **Required permission not found:**
   * Example: `Required 'compute.projects.get' permission for 'projects/... forbidden`
   * Credentials may not be set, or are not set correctly. Please follow
@@ -260,28 +280,10 @@ The HPC Toolkit Repo is open-source and available [here](https://github.com/Goog
 7. [HPC toolkit Troubleshooting](https://github.com/GoogleCloudPlatform/hpc-toolkit#troubleshooting)
 
 ### HPC toolkit Blueprints in this repo
-#### [aiinfra-GPU-cluster](../hpc-toolkit-blueprint/aiinfra-gpu-cluster.yaml)
+#### [aiinfra-GPU-cluster](examples/hpc-toolkit-blueprint/aiinfra-gpu-cluster.yaml)
 
 
-## Instructions
 
-1. gcloud auth application-default login.
-1. ***[`OPTIONAL - if project not set already`]*** gcloud config set account supercomputer-testing
-1. Create env.list file. The sample env.list can be found [here](#sample-config-file-that-the-user-provides). 
-1. ***[`SIMPLE CREATE`]*** 
-   > docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
-1. ***[`SIMPLE DESTROY`]*** 
-   > docker run -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Destroy
-1. ***[`OPTIONAL - Pull docker image before hand`]*** 
-   > docker pull us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest
-1. ***[`OPTIONAL - Mount local directory`]*** 
-   > docker run -v /usr/username/test:/usr/aiinfra/copy -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
-1.  ***[`OPTIONAL - Mount gcloud config for auth token`]*** 
-    > `Linux` docker run -v ~/.config/gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
-    
-    > `Windows` docker run -v C:\Users%username%\AppData\Roaming\gcloud:/root/.config/gcloud -it --env-file env.list us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest Create
-1. ***[`OPTIONAL - GCS bucket not provided`]*** 
-    > Need storage object owner access if you don't already have a storage bucket to reuse.
 
 
 ## Billing Reports
