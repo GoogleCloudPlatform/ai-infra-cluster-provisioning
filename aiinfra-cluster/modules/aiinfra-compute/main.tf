@@ -229,6 +229,6 @@ module "aiinfra-gke" {
   disk_type                = var.disk_type
   network_self_link        = var.network_self_link
   subnetwork_self_link     = var.subnetwork_self_link
-  node_service_account     = lookup(var.service_account, "email", null)
+  node_service_account     = var.service_account.email
   node_pools               = var.node_pools
 }
