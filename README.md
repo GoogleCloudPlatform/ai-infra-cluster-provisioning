@@ -373,7 +373,8 @@ module "aiinfra-cluster" {
 ```
 
 An example terraform config using the aiinfra-cluster module can be found
-[here](examples/terraform-config)
+1. [MIG GPU cluster](examples/terraform-config/gpu-mig-cluster/)
+2. [GKE GPU cluster](examples/terraform-config/gpu-gke-cluster/)
 
 ### Installing terraform dependencies
 1. [Install Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
@@ -472,6 +473,7 @@ The HPC Toolkit Repo is open-source and available
 
 ### HPC toolkit Blueprints in this repo
 #### [aiinfra-GPU-cluster](examples/hpc-toolkit-blueprint/aiinfra-gpu-cluster.yaml)
+#### [aiinfra-GKE-cluster](examples/hpc-toolkit-blueprint/aiinfra-gke-cluster.yaml)
 
 
 ## Billing Reports

@@ -84,6 +84,8 @@ locals {
 
 }
 
+data "google_compute_default_service_account" "default" {}
+
 module "aiinfra-network" {
   source          = "./modules/aiinfra-network"
   project_id      = var.project_id
@@ -138,8 +140,8 @@ module "aiinfra-compute" {
   source               = "./modules/aiinfra-compute"
   subnetwork_self_link = module.aiinfra-network.subnetwork_self_link
   service_account = {
-    email  = var.service_account.email
-    scopes = ["cloud-platform"]
+    email  = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
+    scopes = var.service_account.scopes
   }
   instance_count    = var.instance_count
   project_id        = var.project_id

@@ -45,7 +45,6 @@ _env_var_util::setup || {
 echo 'tfvars:'
 echo '```terraform'
 _env_var_util::print_tfvars \
-    $(_env_var_util::get_project_email "${PROJECT_ID}") \
     $(dbus-uuidgen | head -c6) \
 | tee /usr/primary/tf.auto.tfvars
 echo '```'
