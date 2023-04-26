@@ -18,7 +18,7 @@ module "compute_node_group" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group//?ref=develop"
 
   project_id             = var.project_id
-  labels                 = merge(var.labels, { ghpc_role = "compute" })
+  labels                 = var.labels
   node_count_static      = var.node_count_static
   node_count_dynamic_max = var.node_count_dynamic_max
   instance_template      = var.instance_template_compute
@@ -50,7 +50,7 @@ module "slurm_controller" {
   network_storage      = flatten([var.network_storage])
   service_account      = var.service_account
   instance_template    = var.instance_template_controller
-  labels               = merge(var.labels, { ghpc_role = "scheduler" })
+  labels               = var.labels
 
   disable_controller_public_ips = false
 }
@@ -67,7 +67,5 @@ module "slurm_login" {
   zone                   = var.zone
   service_account        = var.service_account
   instance_template      = var.instance_template_login
-  labels                 = merge(var.labels, { ghpc_role = "scheduler" })
-
-  disable_login_public_ips = false
+  labels                 = var.labels
 }
