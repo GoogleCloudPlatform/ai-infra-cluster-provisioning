@@ -251,26 +251,13 @@ test::_env_var_util::set_defaults::instance_count_unchanged_when_gke () {
     EXPECT_EQ "${INSTANCE_COUNT}" 3
 }
 
-# idk if it is okay to put service account email address in public repo
-# so im not gonna. also i dont think this function really belongs in
-# this scope
-#test::_env_var_util::get_project_email::gets_project_email () {
-#    EXPECT_STREQ \
-#        "$(_env_var_util::get_project_email "gce-ai-infra")" \
-#        ''
-#}
-
-test::_env_var_util::print_tfvars::fails_if_email_not_given () {
-    EXPECT_FAIL _env_var_util::print_tfvars
-}
-
 test::_env_var_util::print_tfvars::fails_if_uuid_not_given () {
-    EXPECT_FAIL _env_var_util::print_tfvars email
+    EXPECT_FAIL _env_var_util::print_tfvars
 }
 
 test::_env_var_util::print_tfvars::succeeds_with_invalid_env () {
     _env_var_util::test::unset_env
-    EXPECT_SUCCEED _env_var_util::print_tfvars email uuid >/dev/null
+    EXPECT_SUCCEED _env_var_util::print_tfvars uuid >/dev/null
 }
 
 test::_env_var_util::print_tfvars::prints_all_required_and_defaultable () {
@@ -279,7 +266,7 @@ test::_env_var_util::print_tfvars::prints_all_required_and_defaultable () {
     _env_var_util::setup
     EXPECT_SUCCEED diff \
         "$(_env_var_util::test::data_dir)/optionals_unset.tfvars" \
-        <(_env_var_util::print_tfvars email uuid)
+        <(_env_var_util::print_tfvars uuid)
 }
 
 test::_env_var_util::print_tfvars::prints_optionals_when_set () {
@@ -301,5 +288,5 @@ test::_env_var_util::print_tfvars::prints_optionals_when_set () {
     _env_var_util::setup
     EXPECT_SUCCEED diff \
         "$(_env_var_util::test::data_dir)/optionals_set.tfvars" \
-        <(_env_var_util::print_tfvars email uuid)
+        <(_env_var_util::print_tfvars uuid)
 }

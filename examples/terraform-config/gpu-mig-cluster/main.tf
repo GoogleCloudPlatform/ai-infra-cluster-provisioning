@@ -19,11 +19,11 @@ locals {
   machine_type       = "a2-highgpu-1g"
   instance_count     = 1
   region             = "us-central1"
-  gcs_mount_list     = "spani-mount-test:/usr/trainfiles"
-  gcs_bucket_path    = "gs://aiinfra-terraform-soumyapani-testing/spani5-deployment"
-  deployment_name    = "sp-aiinfra-test-dpl"
+  gcs_mount_list     = "test-bucket:/usr/trainfiles"
+  gcs_bucket_path    = "gs://test-bucket/test-dir"
+  deployment_name    = "aiinfra-gpu-dpl"
   startup_command    = "echo \"Hello World\""
-  project_id         = "soumyapani-testing"
+  project_id         = "test-project"
   zone               = "us-central1-a"
   orchestrator_type  = "none"
   disk_size_gb       = 2000
@@ -41,7 +41,7 @@ locals {
   labels = {
     label1          = "marker1"
   }
-  name_prefix = "sp-aiinfra-test"
+  name_prefix = "aiinfra-gpu"
   gpu_per_vm  = 1
 }
 
@@ -54,7 +54,7 @@ module "aiinfra-cluster" {
   metadata           = local.metadata
   instance_count     = local.instance_count
   gpu_per_vm         = local.gpu_per_vm
-  labels             = merge(local.labels, { ghpc_role = "aiinfra-cluster",})
+  labels             = local.labels
   accelerator_type   = local.accelerator_type
   orchestrator_type  = local.orchestrator_type
   disk_size_gb       = local.disk_size_gb
