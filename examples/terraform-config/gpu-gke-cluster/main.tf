@@ -14,20 +14,20 @@
   * limitations under the License.
   */
 locals {
+  project_id   = "test-project-gke"
   region       = "us-central1"
   zone         = "us-central1-a"
-  machine_type = "n1-standard-1"
+  machine_type = "a2-highgpu-1g"
   disk_size_gb = 2000
-  project_id   = "test-project-gke"
-  name_prefix  = "aiinfra-gke-test"
-  gpu_per_vm   = 0
+  gpu_per_vm   = 1
+  name_prefix     = "aiinfra-gke-test"
+  deployment_name = "aiinfra-gke-test-dpl"  
   metadata = {
     meta1 = "val"
     meta2 = "val2"
   }
   network_config               = "default_network"
   disk_type                    = "pd-ssd"
-  gke_node_count_per_node_pool = 0
   gcs_bucket_path              = "gs://test-bucket/test-dir"
   labels = {
     ghpc_blueprint  = "aiinfra-gke"
@@ -42,8 +42,8 @@ locals {
     project = "deeplearning-platform-release"
   }
   orchestrator_type   = "gke"
-  gke_node_pool_count = 0
-  deployment_name     = "aiinfra-gke-test-dpl"
+  gke_node_count_per_node_pool = 2
+  gke_node_pool_count = 1
 }
 
 module "aiinfra-cluster" {
