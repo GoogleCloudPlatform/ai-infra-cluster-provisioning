@@ -45,11 +45,17 @@ variable "subnetwork_self_link" {
   type        = string
 }
 
-## Filestore
-
 variable "network_storage" {
   description = "Storage to mount on all instances"
-  type = list(string)
+  type = list(object({
+    server_ip             = string,
+    remote_mount          = string,
+    local_mount           = string,
+    fs_type               = string,
+    mount_options         = string,
+    client_install_runner = map(string)
+    mount_runner          = map(string)
+  }))
   default = []
 }
 
@@ -58,7 +64,6 @@ variable "labels" {
   type        = map
   default     = {}
 }
-
 
 ## Node Group
 

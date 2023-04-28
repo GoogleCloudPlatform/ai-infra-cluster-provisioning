@@ -298,9 +298,17 @@ variable "slurm_node_count_dynamic_max" {
   type        = number
 }
 
-variable "network_storage_modules" {
-  description = "Storage to mount on all instances"
-  type = list(string)
+variable "slurm_network_storage" {
+  description = "Storage to mount on all slurm instances"
+  type = list(object({
+    server_ip             = string,
+    remote_mount          = string,
+    local_mount           = string,
+    fs_type               = string,
+    mount_options         = string,
+    client_install_runner = map(string)
+    mount_runner          = map(string)
+  }))
   default = []
 }
 

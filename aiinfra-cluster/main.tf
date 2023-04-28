@@ -182,7 +182,7 @@ module "aiinfra-compute" {
   orchestrator_type            = var.orchestrator_type
   slurm_node_count_static      = var.slurm_node_count_static
   slurm_node_count_dynamic_max = var.slurm_node_count_dynamic_max
-  network_storage              = flatten([
+  slurm_network_storage = flatten([
     module.nfs_filestore[*].network_storage,
     module.gcsfuse_mount[*].network_storage,
   ])
