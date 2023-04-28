@@ -15,7 +15,7 @@
   */
 
 module "compute_node_group" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group//?ref=develop"
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group//?ref=v1.16.0"
 
   project_id             = var.project_id
   labels                 = var.labels
@@ -25,7 +25,7 @@ module "compute_node_group" {
 }
 
 module "compute_partition" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition//?ref=develop"
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition//?ref=v1.16.0"
 
   deployment_name      = var.deployment_name
   project_id           = var.project_id
@@ -38,7 +38,7 @@ module "compute_partition" {
 }
 
 module "slurm_controller" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller//?ref=develop"
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller//?ref=v1.16.0"
 
   deployment_name      = var.deployment_name
   partition            = flatten([module.compute_partition.partition])
@@ -56,7 +56,7 @@ module "slurm_controller" {
 }
 
 module "slurm_login" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-login//?ref=develop"
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-login//?ref=v1.16.0"
 
   project_id             = var.project_id
   deployment_name        = var.deployment_name
