@@ -20,6 +20,8 @@ locals {
   kubernetes_service_account_namespace = "default"
 }
 
+data "google_client_config" "current" {}
+
 data "google_container_engine_versions" "gkeversion" {
   location = var.region
   project  = var.project
@@ -246,12 +248,4 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
   project = var.project
   role    = "roles/monitoring.viewer"
   member  = "serviceAccount:${var.node_service_account}"
-}
-
-resource "google_service_account_iam_binding" "default-workload-identity" {
-  service_account_id = "projects/${var.project}/serviceAccounts/${var.node_service_account}"
-  role               = "roles/iam.workloadIdentityUser"
-  members = [
-    "serviceAccount:${var.project}.svc.id.goog[${local.kubernetes_service_account_namespace}/${local.kubernetes_service_account_name}]",
-  ]
 }
