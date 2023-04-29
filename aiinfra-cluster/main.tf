@@ -210,3 +210,15 @@ module "aiinfra-default-dashboard" {
   widgets         = var.orchestrator_type != "gke" ? concat(local.nvidia_widgets, local.gce_gke_gpu_utilization_widgets) : local.gce_gke_gpu_utilization_widgets
   depends_on      = [module.dashboard-widget-data]
 }
+
+module "aiinfra-k8s-setup" {
+  source                               = "./modules/kubernetes-ops"
+  project                              = var.project_id
+  enable_k8s_setup                     = var.orchestrator_type == "gke"
+  gke_cluster_endpoint                 = module.aiinfra-compute.gke_cluster_endpoint
+  gke_certificate_authority_data       = module.aiinfra-compute.gke_certificate_authority_data
+  gke_token                            = module.aiinfra-compute.gke_token
+  kubernetes_service_account_name      = "aiinfra-gke-sa"
+  kubernetes_service_account_namespace = "default"
+  node_service_account = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
+}
