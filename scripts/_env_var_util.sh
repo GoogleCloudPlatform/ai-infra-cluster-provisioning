@@ -203,6 +203,7 @@ EOF
     [ -n "${GKE_NODE_COUNT_PER_NODE_POOL}" ] && echo "gke_node_count_per_node_pool = ${GKE_NODE_COUNT_PER_NODE_POOL}"
     [ -n "${GKE_ENABLE_COMPACT_PLACEMENT}" ] && echo "gke_enable_compact_placement = ${GKE_ENABLE_COMPACT_PLACEMENT}"
     [ -n "${CUSTOM_NODE_POOL}" ] && echo "custom_node_pool = ${CUSTOM_NODE_POOL}"
+    [ -n "${KUBERNETES_SETUP_CONFIG}" ] && echo "kubernetes_setup_config = ${KUBERNETES_SETUP_CONFIG}"
     [ -n "${GKE_VERSION}" ] && echo "gke_version = \"${GKE_VERSION}\""
 
     return 0

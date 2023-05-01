@@ -37,6 +37,7 @@ _env_var_util::test::unset_env () {
         GKE_NODE_COUNT_PER_NODE_POOL \
         GKE_ENABLE_COMPACT_PLACEMENT \
         CUSTOM_NODE_POOL \
+        KUBERNETES_SETUP_CONFIG \
         GKE_VERSION
 }
 
@@ -71,6 +72,7 @@ _env_var_util::test::set_optional_env () {
     GKE_NODE_POOL_COUNT='node'
     GKE_NODE_COUNT_PER_NODE_POOL=3
     CUSTOM_NODE_POOL='custom'
+    KUBERNETES_SETUP_CONFIG='config'
     GKE_VERSION='1.25.7-gke.1000'
 }
 

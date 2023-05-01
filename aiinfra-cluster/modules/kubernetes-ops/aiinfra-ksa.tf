@@ -15,9 +15,9 @@
   */
 
 provider "kubernetes" {
-    host                   = var.gke_cluster_endpoint
-    cluster_ca_certificate = base64decode(var.gke_certificate_authority_data)
-    token                  = var.gke_token
+    host                   = var.gke_conn.gke_cluster_endpoint
+    cluster_ca_certificate = base64decode(var.gke_conn.gke_certificate_authority_data)
+    token                  = var.gke_conn.gke_token
 }
 
 resource "google_service_account_iam_binding" "default-workload-identity" {

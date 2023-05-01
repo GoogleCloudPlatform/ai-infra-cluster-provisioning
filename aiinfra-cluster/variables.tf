@@ -223,3 +223,14 @@ variable "custom_node_pool" {
   }))
   default                   = []
 }
+
+variable "kubernetes_setup_config" {
+  description = "The configuration to setup GKE cluster."
+  type                       = object({
+    enable_k8s_setup                     = bool
+    kubernetes_service_account_name      = string
+    kubernetes_service_account_namespace = string
+    node_service_account                 = string
+  })
+  default                   = null
+}

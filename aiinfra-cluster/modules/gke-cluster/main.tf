@@ -16,8 +16,6 @@
 
 locals {
   gke_master_version = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
-  kubernetes_service_account_name = "default"
-  kubernetes_service_account_namespace = "default"
 }
 
 data "google_client_config" "current" {}

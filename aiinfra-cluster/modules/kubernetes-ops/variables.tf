@@ -19,22 +19,18 @@ variable "project" {
   type        = string
 }
 
-variable "gke_cluster_endpoint" {
-  description = "Kubernetes cluster API endpoint."
-  type        = string
-  default     = ""
-}
-
-variable "gke_certificate_authority_data" {
-  description = "Kubernetes cluster cluster CA certificate."
-  type        = string
-  default     = ""
-}
-
-variable "gke_token" {
-  description = "Kubernetes cluster access token."
-  type        = string
-  default     = ""
+variable "gke_conn" {
+  description                = "The GKE cluster connection information."
+  type                       = object({
+    gke_cluster_endpoint           = string
+    gke_certificate_authority_data = string
+    gke_token                      = string
+  })
+  default                    = {
+    gke_cluster_endpoint           = ""
+    gke_certificate_authority_data = ""
+    gke_token                      = ""
+  }
 }
 
 variable "kubernetes_service_account_name" {

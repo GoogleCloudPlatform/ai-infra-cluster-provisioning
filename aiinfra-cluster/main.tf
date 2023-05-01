@@ -82,6 +82,13 @@ locals {
   gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-widget-data.gce_gke_gpu_utilization_widgets : []
   vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
+  kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
+    enable_k8s_setup                     = var.orchestrator_type == "gke"
+    kubernetes_service_account_name      = "aiinfra-gke-sa"
+    kubernetes_service_account_namespace = "default"
+    node_service_account                 = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
+  }
+
 }
 
 data "google_compute_default_service_account" "default" {}
@@ -196,13 +203,15 @@ module "aiinfra-default-dashboard" {
 }
 
 module "aiinfra-k8s-setup" {
-  source                               = "./modules/kubernetes-ops"
-  project                              = var.project_id
-  enable_k8s_setup                     = var.orchestrator_type == "gke"
-  gke_cluster_endpoint                 = module.aiinfra-compute.gke_cluster_endpoint
-  gke_certificate_authority_data       = module.aiinfra-compute.gke_certificate_authority_data
-  gke_token                            = module.aiinfra-compute.gke_token
-  kubernetes_service_account_name      = "aiinfra-gke-sa"
-  kubernetes_service_account_namespace = "default"
-  node_service_account = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
+  source              = "./modules/kubernetes-ops"
+  project             = var.project_id
+  gke_conn            = {
+    gke_cluster_endpoint           = module.aiinfra-compute.gke_cluster_endpoint
+    gke_certificate_authority_data = module.aiinfra-compute.gke_certificate_authority_data
+    gke_token                      = module.aiinfra-compute.gke_token
+  }
+  enable_k8s_setup                     = local.kubernetes_setup_config.enable_k8s_setup
+  kubernetes_service_account_name      = local.kubernetes_setup_config.kubernetes_service_account_name
+  kubernetes_service_account_namespace = local.kubernetes_setup_config.kubernetes_service_account_namespace
+  node_service_account = local.kubernetes_setup_config.node_service_account
 }
