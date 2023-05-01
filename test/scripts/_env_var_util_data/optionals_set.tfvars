@@ -28,4 +28,5 @@ slurm_node_count_dynamic_max = 3
 gke_node_pool_count = 3
 gke_node_count_per_node_pool = 3
 custom_node_pool = custom
+kubernetes_setup_config = config
 gke_version = "1.25.7-gke.1000"
