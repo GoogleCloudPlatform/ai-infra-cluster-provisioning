@@ -28,15 +28,15 @@ data "google_container_engine_versions" "gkeversion" {
 module "cluster" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/gke-cluster//?ref=develop"
 
-  project_id = var.project_id
-  deployment_name = var.deployment_name
-  region = var.region
-  network_id = var.network_id
-  subnetwork_self_link = var.subnetwork_self_link
-  min_master_version = var.gke_version
-  service_account = var.service_account
+  project_id                    = var.project_id
+  deployment_name               = var.deployment_name
+  region                        = var.region
+  network_id                    = var.network_id
+  subnetwork_self_link          = var.subnetwork_self_link
+  min_master_version            = var.gke_version
+  service_account               = var.service_account
   authenticator_security_groups = "gke-security-groups@google.com"
-  labels = merge(var.labels, { ghpc_role = "scheduler" })
+  labels                        = merge(var.labels, { ghpc_role = "scheduler" })
 
   timeouts {
     create = "120m"
@@ -51,16 +51,16 @@ module "node-pools" {
     for node_pool in var.node_pools : node_pool.name => node_pool
   }
 
-  project_id = var.project_id
-  cluster_id = module.cluster.id
+  project_id      = var.project_id
+  cluster_id      = module.cluster.id
   service_account = var.service_account
-  auto_upgrade = false
+  auto_upgrade    = false
 
-  zones = each.value.zones
-  name = each.value.name
-  machine_type = each.value.machine_type
-  total_min_nodes = each.value.node_count
-  total_max_nodes = each.value.node_count
+  zones             = each.value.zones
+  name              = each.value.name
+  machine_type      = each.value.machine_type
+  total_min_nodes   = each.value.node_count
+  total_max_nodes   = each.value.node_count
   compact_placement = each.value.enable_compact_placement
 
   timeouts {
