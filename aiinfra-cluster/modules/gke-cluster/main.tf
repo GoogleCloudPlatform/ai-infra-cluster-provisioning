@@ -25,6 +25,38 @@ data "google_container_engine_versions" "gkeversion" {
   project  = var.project
 }
 
+module "cluster" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/gke-cluster//?ref=develop"
+
+  project_id = var.project_id
+  deployment_name = var.deployment_name
+  region = var.region
+  network_id = var.network_id
+  subnetwork_self_link = var.subnetwork_self_link
+  min_master_version = var.gke_version
+  service_account = var.service_account
+  labels = merge(var.labels, { ghpc_role = "scheduler" })
+}
+
+module "node-pools" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/gke-node-pool//?ref=develop"
+
+  for_each = {
+    for node_pool in var.node_pools : node_pool.name => node_pool
+  }
+
+  project_id = var.project_id
+  cluster_id = module.cluster.id
+  service_account = var.service_account
+
+  zones = each.value.zones
+  name = each.value.name
+  machine_type = each.value.machine_type
+  total_min_nodes = each.value.node_count
+  total_max_nodes = each.value.node_count
+  compact_placement = each.value.enable_compact_placement
+}
+
 # Definition of the private GKE cluster.
 resource "google_container_cluster" "gke-cluster" {
   provider = google-beta
