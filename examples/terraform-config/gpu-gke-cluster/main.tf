@@ -14,53 +14,52 @@
   * limitations under the License.
   */
 locals {
-  project_id   = "test-project-gke"
-  region       = "us-central1"
-  zone         = "us-central1-a"
-  machine_type = "a2-highgpu-1g"
-  disk_size_gb = 2000
-  gpu_per_vm   = 1
-  name_prefix     = "aiinfra-gke-test"
-  deployment_name = "aiinfra-gke-test-dpl"  
+  project_id                   = "test-project-gke"
+  region                       = "us-central1"
+  zone                         = "us-central1-a"
+  machine_type                 = "a2-highgpu-1g"
+  accelerator_type             = "nvidia-tesla-a100"
+  gpu_per_vm                   = 1
+  name_prefix                  = "aiinfra-gke-test"
+  deployment_name              = "aiinfra-gke-test-dpl"  
   metadata = {
     meta1 = "val"
     meta2 = "val2"
   }
   network_config               = "default_network"
   disk_type                    = "pd-ssd"
+  disk_size_gb                 = 2000
   gcs_bucket_path              = "gs://test-bucket/test-dir"
   labels = {
     ghpc_blueprint  = "aiinfra-gke"
     ghpc_deployment = "aiinfra-gke-test-dpl"
     label1          = "marker1"
   }
+  orchestrator_type            = "gke"
   gke_enable_compact_placement = false
-  accelerator_type             = "nvidia-tesla-a100"
-  orchestrator_type   = "gke"
   gke_node_count_per_node_pool = 2
-  gke_node_pool_count = 1
+  gke_node_pool_count          = 1
 }
 
 module "aiinfra-cluster" {
   source                       = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//aiinfra-cluster"
-  gke_node_pool_count          = local.gke_node_pool_count
   name_prefix                  = local.name_prefix
   zone                         = local.zone
-  disk_type                    = local.disk_type
-  instance_image               = local.instance_image
-  accelerator_type             = local.accelerator_type
-  gcs_bucket_path              = local.gcs_bucket_path
-  machine_type                 = local.machine_type
-  orchestrator_type            = local.orchestrator_type
-  gke_enable_compact_placement = local.gke_enable_compact_placement
-  network_config               = local.network_config
-  labels                       = local.labels
-  disk_size_gb                 = local.disk_size_gb
   region                       = local.region
   project_id                   = local.project_id
   deployment_name              = local.deployment_name
+  gcs_bucket_path              = local.gcs_bucket_path
+  machine_type                 = local.machine_type
+  accelerator_type             = local.accelerator_type
   gpu_per_vm                   = local.gpu_per_vm
-  gke_node_count_per_node_pool = local.gke_node_count_per_node_pool
+  disk_type                    = local.disk_type
+  disk_size_gb                 = local.disk_size_gb
+  network_config               = local.network_config
+  labels                       = local.labels
   metadata                     = local.metadata
+  orchestrator_type            = local.orchestrator_type
+  gke_node_pool_count          = local.gke_node_pool_count
+  gke_enable_compact_placement = local.gke_enable_compact_placement
+  gke_node_count_per_node_pool = local.gke_node_count_per_node_pool
 }
 

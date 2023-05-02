@@ -32,54 +32,51 @@ locals {
     ghpc_deployment = "aiinfra-gke-test-dpl"
     label1          = "marker1"
   }
-  gke_enable_compact_placement = false
   orchestrator_type   = "gke"
   custom_node_pool = [
     {
-      "name"="sp-test-pool-1"
-      "zone"="us-central1-a"
-      "node_count"=2
-      "machine_type"="a2-highgpu-2g"
-      "guest_accelerator_count"=2
-      "guest_accelerator_type"="nvidia-tesla-a100"
+      name = "test-pool-1"
+      zone = "us-central1-a"
+      node_count = 1
+      machine_type = "n1-standard-1"
+      guest_accelerator_count = 0
+      guest_accelerator_type = "nvidia-tesla-a100"
+      enable_compact_placement = false
     },
     {
-      "name"="sp-test-pool-2"
-      "zone"="us-central1-c"
-      "node_count"=2
-      "machine_type"="a2-highgpu-2g"
-      "guest_accelerator_count"=2
-      "guest_accelerator_type"="nvidia-tesla-a100"
+      name = "test-pool-2"
+      zone = "us-central1-c"
+      node_count = 1
+      machine_type = "n1-standard-1"
+      guest_accelerator_count = 0
+      guest_accelerator_type = "nvidia-tesla-a100"
+      enable_compact_placement = false
     }
   ]
-  kubernetes_setup_config= {
-    "enable_k8s_setup"                     = true
-    "kubernetes_service_account_name"      = "test-sa"
-    "kubernetes_service_account_namespace" = "default"
-    "node_service_account"                 = "394538338993-compute@developer.gserviceaccount.com"
+  
+  kubernetes_setup_config = {
+    enable_k8s_setup                     = true
+    kubernetes_service_account_name      = "my-test-sa"
+    kubernetes_service_account_namespace = "default"
+    node_service_account                 = "xxxxxx-compute@developer.gserviceaccount.com"
   }
 }
 
 module "aiinfra-cluster" {
   source                       = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//aiinfra-cluster"
-  gke_node_pool_count          = local.gke_node_pool_count
   name_prefix                  = local.name_prefix
   zone                         = local.zone
   disk_type                    = local.disk_type
-  instance_image               = local.instance_image
-  accelerator_type             = local.accelerator_type
   gcs_bucket_path              = local.gcs_bucket_path
-  machine_type                 = local.machine_type
   orchestrator_type            = local.orchestrator_type
-  gke_enable_compact_placement = local.gke_enable_compact_placement
+  custom_node_pool             = local.custom_node_pool
+  kubernetes_setup_config      = local.kubernetes_setup_config
   network_config               = local.network_config
   labels                       = local.labels
   disk_size_gb                 = local.disk_size_gb
   region                       = local.region
   project_id                   = local.project_id
   deployment_name              = local.deployment_name
-  gpu_per_vm                   = local.gpu_per_vm
-  gke_node_count_per_node_pool = local.gke_node_count_per_node_pool
   metadata                     = local.metadata
 }
 
