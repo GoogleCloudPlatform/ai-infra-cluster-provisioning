@@ -89,11 +89,7 @@ variable "instance_image" {
     family  = string,
     project = string
   })
-  default = {
-    family  = "tf-latest-gpu-gvnic-debian-10"
-    name    = null
-    project = "deeplearning-platform-release"
-  }
+  default = null
 }
 
 variable "disk_size_gb" {

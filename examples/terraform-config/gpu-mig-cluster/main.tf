@@ -14,26 +14,26 @@
   * limitations under the License.
   */
 locals {
+  project_id         = "test-project"
+  name_prefix        = "aiinfra-gpu"
+  deployment_name    = "aiinfra-gpu-dpl"
+  region             = "us-central1"
+  zone               = "us-central1-a"
+  machine_type       = "a2-highgpu-1g"
+  accelerator_type   = "nvidia-tesla-a100"
+  instance_count     = 1
+  gpu_per_vm  = 1
   network_config     = "default_network"
   disk_type          = "pd-ssd"
-  machine_type       = "a2-highgpu-1g"
-  instance_count     = 1
-  region             = "us-central1"
-  gcs_mount_list     = "test-bucket:/usr/trainfiles"
-  gcs_bucket_path    = "gs://test-bucket/test-dir"
-  deployment_name    = "aiinfra-gpu-dpl"
-  startup_command    = "echo \"Hello World\""
-  project_id         = "test-project"
-  zone               = "us-central1-a"
-  orchestrator_type  = "none"
   disk_size_gb       = 2000
-  accelerator_type   = "nvidia-tesla-a100"
-  nfs_filestore_list = ""
   instance_image = {
     family  = "pytorch-1-10-gpu-debian-10"
     name    = ""
     project = "ml-images"
   }
+  gcs_bucket_path    = "gs://test-bucket/test-dir"
+  orchestrator_type  = "none"
+  startup_command    = "echo \"Hello World\""
   metadata = {
     meta1 = "val"
     meta2 = "val2"
@@ -41,8 +41,8 @@ locals {
   labels = {
     label1          = "marker1"
   }
-  name_prefix = "aiinfra-gpu"
-  gpu_per_vm  = 1
+  nfs_filestore_list = ""
+  gcs_mount_list     = "test-bucket:/usr/trainfiles"
 }
 
 module "aiinfra-cluster" {

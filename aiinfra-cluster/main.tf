@@ -94,8 +94,8 @@ locals {
     project = "schedmd-slurm-public"
     name    = ""
   } : {
-    family  = "pytorch-1-12-gpu-debian-10"
-    project = "ml-images"
+    family  = "pytorch-latest-gpu-debian-11-py310"
+    project = "deeplearning-platform-release"
     name    = ""
   }
 }
