@@ -18,3 +18,18 @@ output "dashboard_instructions" {
   description = "Instructions for accessing the GPU dashboard"
   value = try(module.aiinfra-default-dashboard[0].instructions, "Dashboard not created")
 }
+
+output "gke_cluster_name" {
+  description = "The name of the GKE cluster created."
+  value = var.orchestrator_type == "gke" ? module.aiinfra-compute.gke_cluster_name : "GKE cluster not available"
+}
+
+output "gke_cluster_connection" {
+  description = "The GKE cluster connection Information"
+  value = var.orchestrator_type == "gke" ? {
+    gke_cluster_endpoint           = module.aiinfra-compute.gke_cluster_endpoint
+    gke_certificate_authority_data = module.aiinfra-compute.gke_certificate_authority_data
+    gke_token                      = module.aiinfra-compute.gke_token
+  } : null
+  sensitive = true
+}
