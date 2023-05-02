@@ -63,6 +63,8 @@ locals {
       zone                     = var.zone
       node_count               = var.gke_node_count_per_node_pool
       machine_type             = var.machine_type
+      disk_size_gb             = 200
+      disk_type                = "pd-standard"
       guest_accelerator_count  = var.gpu_per_vm
       guest_accelerator_type   = var.accelerator_type
       enable_compact_placement = var.gke_enable_compact_placement
@@ -218,6 +220,7 @@ module "aiinfra-default-dashboard" {
 
 module "aiinfra-k8s-setup" {
   source              = "./modules/kubernetes-ops"
+  count               = 0
   project             = var.project_id
   gke_conn            = {
     gke_cluster_endpoint           = module.aiinfra-compute.gke_cluster_endpoint

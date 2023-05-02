@@ -15,21 +15,21 @@
   */
 
 output "gke_cluster_name" {
-  value       = resource.google_container_cluster.gke-cluster.name
+  value       = "FIXME" // resource.google_container_cluster.gke-cluster.name
   description = "Google Kubernetes cluster name"
 }
 
 output "gke_cluster_endpoint" {
-  value       = "https://${resource.google_container_cluster.gke-cluster.endpoint}"
+  value       = "FIXME" // "https://${resource.google_container_cluster.gke-cluster.endpoint}"
   description = "Kubernetes cluster API endpoint"
 }
 
 output "gke_certificate_authority_data" {
-  value       = resource.google_container_cluster.gke-cluster.master_auth.0.cluster_ca_certificate
+  value       = "FIXME" // resource.google_container_cluster.gke-cluster.master_auth.0.cluster_ca_certificate
   description = "Kubernetes cluster cluster CA certificate"
 }
 
 output "gke_token" {
-  value       = data.google_client_config.current.access_token
+  value       = "FIXME" // data.google_client_config.current.access_token
   description = "Kubernetes cluster access token"
 }
