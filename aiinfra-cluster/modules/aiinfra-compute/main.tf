@@ -89,6 +89,35 @@ locals {
   }]
 
   network_interfaces = coalescelist(var.network_interfaces, local.default_network_interface)
+
+  vm_template_self_link_prefix = "https://www.googleapis.com/compute/beta/projects/${var.project_id}/global/instanceTemplates"
+  vm_templates = merge(
+    contains(["ray", "slurm", "none"], var.orchestrator_type) ? {
+        compute = {
+          machine_type            = var.machine_type
+          disk_size_gb            = var.disk_size_gb
+          disk_type               = var.disk_type
+          guest_accelerators = [{
+            type  = var.guest_accelerator.type
+            count = var.guest_accelerator.count
+          }]
+        }
+    } : {},
+    contains(["slurm"], var.orchestrator_type) ? {
+        controller = {
+          machine_type            = "c2-standard-4"
+          disk_size_gb            = 50
+          disk_type               = "pd-ssd"
+          guest_accelerators = []
+        }
+        login = {
+          machine_type            = "n2-standard-2"
+          disk_size_gb            = 50
+          disk_type               = "pd-standard"
+          guest_accelerators = []
+        }
+    } : {},
+  )
 }
 
 data "google_compute_image" "compute_image" {
@@ -97,22 +126,24 @@ data "google_compute_image" "compute_image" {
   project = var.instance_image.project
 }
 
-resource "google_compute_instance_template" "compute_vm_template" {
-  project        = var.project_id
+resource "google_compute_instance_template" "templates" {
+  for_each = toset(keys(local.vm_templates))
   provider       = google-beta
-  count          = var.enable_gke ? 0 : 1
-  name_prefix    = "${local.resource_prefix}"
-  machine_type   = var.machine_type
-  region         = var.region
 
-  tags   = var.tags
-  labels = var.labels
+  project = var.project_id
+  region  = var.region
+  tags    = var.tags
+  labels  = var.labels
+
+  name           = "${local.resource_prefix}-${each.key}"
+  machine_type   = local.vm_templates[each.key].machine_type
+
 
   disk {
     boot           = true
     source_image   = data.google_compute_image.compute_image.self_link
-    disk_size_gb   = var.disk_size_gb
-    disk_type      = var.disk_type
+    disk_size_gb   = local.vm_templates[each.key].disk_size_gb
+    disk_type      = local.vm_templates[each.key].disk_type
     labels         = var.labels
     auto_delete = true
   }
@@ -162,9 +193,12 @@ resource "google_compute_instance_template" "compute_vm_template" {
     }
   }
 
-  guest_accelerator {
-    type  = var.guest_accelerator.type
-    count = var.guest_accelerator.count
+  dynamic "guest_accelerator" {
+    for_each = local.vm_templates[each.key].guest_accelerators
+    content {
+      type  = guest_accelerator.value.type
+      count = guest_accelerator.value.count
+    }
   }
 
   scheduling {
@@ -193,7 +227,7 @@ resource "google_compute_instance_template" "compute_vm_template" {
 
 resource "google_compute_instance_group_manager" "mig" {
   provider           = google-beta
-  count              = var.enable_gke ? 0 : 1
+  count = contains(["ray", "none"], var.orchestrator_type) ? 1 : 0
   name               = "${local.resource_prefix}-mig"
   base_instance_name = "${local.resource_prefix}-vm"
   project            = var.project_id
@@ -207,7 +241,7 @@ resource "google_compute_instance_group_manager" "mig" {
   wait_for_instances = true
   version {
     name              = "default"
-    instance_template = one(google_compute_instance_template.compute_vm_template[*].id)
+    instance_template = google_compute_instance_template.templates["compute"].id
   }
   target_size = var.instance_count
   depends_on = [var.network_self_link, var.network_storage]
@@ -217,9 +251,35 @@ resource "google_compute_instance_group_manager" "mig" {
   }
 }
 
+module "aiinfra-slurm" {
+  source     = "../slurm-cluster"
+  count      = var.orchestrator_type == "slurm" ? 1 : 0
+  depends_on = [
+    google_compute_instance_template.templates["compute"],
+    google_compute_instance_template.templates["controller"],
+    google_compute_instance_template.templates["login"],
+  ]
+
+  project_id           = var.project_id
+  deployment_name      = var.deployment_name
+  zone                 = var.zone
+  region               = var.region
+  network_self_link    = var.network_self_link
+  subnetwork_self_link = var.subnetwork_self_link
+  service_account      = var.service_account
+  network_storage      = var.slurm_network_storage
+
+  node_count_static      = var.slurm_node_count_static
+  node_count_dynamic_max = var.slurm_node_count_dynamic_max
+
+  instance_template_compute    = "${local.vm_template_self_link_prefix}/${google_compute_instance_template.templates["compute"].name}"
+  instance_template_controller = "${local.vm_template_self_link_prefix}/${google_compute_instance_template.templates["controller"].name}"
+  instance_template_login      = "${local.vm_template_self_link_prefix}/${google_compute_instance_template.templates["login"].name}"
+}
+
 module "aiinfra-gke" {
   source                   = "../gke-cluster"
-  count                    = var.enable_gke ? 1 : 0
+  count                    = var.orchestrator_type == "gke" ? 1 : 0
   project                  = var.project_id
   region                   = var.region
   zone                     = var.zone

@@ -75,9 +75,16 @@ The optional parameters are:
    up. Ex: python /usr/cp/train.py
 1. ***ORCHESTRATOR_TYPE***. This defines the Orchestrator type to be set up on the
    VMs. The currently supported orchestrator types are 
+    -  __none__ (default): No cluster orchestration. A Single MIG will be created.
     -  __ray__: A Ray cluster is created using the MIG instances.
     -  __gke__: A private GKE cluster is created with private node pool following the
        recommendations from the GKE team.
+    -  __slurm__: Login and controller nodes are created along with static compute
+       nodes for a Slurm cluster.
+1. ***SLURM_NODE_COUNT_STATIC***: The number of nodes statically allocated for Slurm
+   cluster.
+1. ***SLURM_NODE_COUNT_DYNAMIC_MAX***: The maximum number of nodes allowed to be
+   dynamically allocated for Slurm cluster.
 1. ***GKE_NODE_POOL_COUNT***: The number of homogeneous node pools for GKE cluster.
    Only applicable when `ORCHESTRATOR_TYPE` is `gke`.
 1. ***GKE_NODE_COUNT_PER_NODE_POOL***: The desired node count per node pool for GKE

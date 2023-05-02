@@ -123,7 +123,7 @@ _env_var_util::set_defaults () {
     LABELS="${LABELS:-"{}"}"
     [ -z "${IMAGE_FAMILY_NAME}" ] && [ -z "${IMAGE_NAME}" ] && {
         if [ "${ORCHESTRATOR_TYPE}" = "slurm" ]; then
-            IMAGE_FAMILY_NAME='schedmd-v5-slurm-22-05-6-hpc-centos-7'
+            IMAGE_FAMILY_NAME='schedmd-v5-slurm-22-05-8-ubuntu-2004-lts'
             IMAGE_PROJECT='schedmd-slurm-public'
         else
             IMAGE_FAMILY_NAME='pytorch-1-12-gpu-debian-10'
@@ -199,7 +199,9 @@ EOF
     [ -n "${STARTUP_COMMAND}" ] && echo "startup_command = \"${STARTUP_COMMAND}\""
     [ -n "${ENABLE_OPS_AGENT}" ] && echo "enable_ops_agent = \"${ENABLE_OPS_AGENT}\""
     [ -n "${ENABLE_NOTEBOOK}" ] && echo "enable_notebook = \"${ENABLE_NOTEBOOK}\""
-    [ -n "${GKE_NODE_POOL_COUNT}" ] && echo "gke_node_pool_count = \"${GKE_NODE_POOL_COUNT}\""
+    [ -n "${SLURM_NODE_COUNT_STATIC}" ] && echo "slurm_node_count_static = ${SLURM_NODE_COUNT_STATIC}"
+    [ -n "${SLURM_NODE_COUNT_DYNAMIC_MAX}" ] && echo "slurm_node_count_dynamic_max = ${SLURM_NODE_COUNT_DYNAMIC_MAX}"
+    [ -n "${GKE_NODE_POOL_COUNT}" ] && echo "gke_node_pool_count = ${GKE_NODE_POOL_COUNT}"
     [ -n "${GKE_NODE_COUNT_PER_NODE_POOL}" ] && echo "gke_node_count_per_node_pool = ${GKE_NODE_COUNT_PER_NODE_POOL}"
     [ -n "${GKE_ENABLE_COMPACT_PLACEMENT}" ] && echo "gke_enable_compact_placement = ${GKE_ENABLE_COMPACT_PLACEMENT}"
     [ -n "${CUSTOM_NODE_POOL}" ] && echo "custom_node_pool = ${CUSTOM_NODE_POOL}"

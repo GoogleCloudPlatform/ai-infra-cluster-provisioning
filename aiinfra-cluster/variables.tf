@@ -234,3 +234,15 @@ variable "kubernetes_setup_config" {
   })
   default                   = null
 }
+variable "slurm_node_count_static" {
+  description = "Number of statically allocated nodes in compute partition"
+  type        = number
+  default     = 0
+}
+
+variable "slurm_node_count_dynamic_max" {
+  description = "Maximum number of dynamically allocated nodes allowed in compute partition"
+  type        = number
+  default     = 0
+}
+

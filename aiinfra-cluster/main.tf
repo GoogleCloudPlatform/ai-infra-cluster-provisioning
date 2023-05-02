@@ -89,6 +89,15 @@ locals {
     node_service_account                 = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
   }
 
+  default_instance_image = var.orchestrator_type == "slurm" ? {
+    family  = "schedmd-v5-slurm-22-05-6-hpc-centos-7"
+    project = "schedmd-slurm-public"
+    name    = ""
+  } : {
+    family  = "pytorch-1-12-gpu-debian-10"
+    project = "ml-images"
+    name    = ""
+  }
 }
 
 data "google_compute_default_service_account" "default" {}
@@ -160,7 +169,7 @@ module "aiinfra-compute" {
     collocation               = "COLLOCATED"
     vm_count                  = var.instance_count
   }
-  instance_image      = local.instance_image
+  instance_image      = var.instance_image == null ? local.default_instance_image : local.instance_image
   on_host_maintenance = "TERMINATE"
   machine_type        = var.machine_type
   zone                = var.zone
@@ -178,8 +187,14 @@ module "aiinfra-compute" {
   depends_on = [
     module.aiinfra-network
   ]
-  enable_gke = var.orchestrator_type == "gke"
-  gke_version = var.gke_version
+  orchestrator_type            = var.orchestrator_type
+  slurm_node_count_static      = var.slurm_node_count_static
+  slurm_node_count_dynamic_max = var.slurm_node_count_dynamic_max
+  slurm_network_storage = flatten([
+    module.nfs_filestore[*].network_storage,
+    module.gcsfuse_mount[*].network_storage,
+  ])
+  gke_version                  = var.gke_version
   
   node_pools = length(var.custom_node_pool) != 0 || length(local.basic_node_pool) != 0 ? coalescelist(var.custom_node_pool, local.basic_node_pool) : []
 }
