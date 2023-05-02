@@ -14,7 +14,7 @@
               }
             },
             {
-              "address": "module.aiinfra-compute.google_compute_instance_template.compute_vm_template[0]",
+              "address": "module.aiinfra-compute.google_compute_instance_template.templates[\"compute\"]",
               "values": {
                 "machine_type": "a2-highgpu-2g",
                 "region": "us-central1"
@@ -23,7 +23,10 @@
           ]
         },
         {
-          "address": "module.aiinfra-default-dashboard"
+          "address": "module.aiinfra-default-dashboard[0]"
+        },
+        {
+          "address": "module.startup"
         }
       ]
     }

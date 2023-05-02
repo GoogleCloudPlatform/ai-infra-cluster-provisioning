@@ -37,12 +37,14 @@ _expand_files_to_copy() {
     fi
 
     # copy example training script based on the image type.
-    if [[ ! -z "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"tf-"* ]] || [[ ! -z "$IMAGE_NAME" && "$IMAGE_NAME" == *"tf-"* ]]; then
+    if [[ -n "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"tf-"* ]] || [[ -n "$IMAGE_NAME" && "$IMAGE_NAME" == *"tf-"* ]]; then
         echo "DLVM image used is a TensorFlow image. Copying the TensorFlow example script."
         FILELIST+=",/usr/examples/training_scripts/Tensorflow:/home/jupyter/aiinfra-sample"
-    elif [[ ! -z "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"pytorch-"* ]] || [[ ! -z "$IMAGE_NAME" && "$IMAGE_NAME" == *"pytorch-"* ]]; then
+    elif [[ -n "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"pytorch-"* ]] || [[ -n "$IMAGE_NAME" && "$IMAGE_NAME" == *"pytorch-"* ]]; then
         echo "DLVM image used is a Pytorch image. Copying the pytorch exmple script."
         FILELIST+=",/usr/examples/training_scripts/PyTorch:/home/jupyter/aiinfra-sample"
+    elif [[ -n "$IMAGE_FAMILY_NAME" && "$IMAGE_FAMILY_NAME" == *"slurm-"* ]]; then
+        echo "Slurm public image is used to create slurm cluster."
     else
         echo "IMAGE_FAMILY_NAME=$IMAGE_FAMILY_NAME, IMAGE_NAME=$IMAGE_NAME. These images are neither Tensorflow nor Pytorch Image. Copying all example scripts."
         FILELIST+=",/usr/examples/training_scripts/PyTorch:/home/jupyter/aiinfra-sample,/usr/examples/training_scripts/Tensorflow:/home/jupyter/aiinfra-sample"
