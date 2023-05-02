@@ -16,8 +16,9 @@
 
 locals {
   gke_master_version = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
-  
 }
+
+data "google_client_config" "current" {}
 
 data "google_container_engine_versions" "gkeversion" {
   location = var.region

@@ -32,7 +32,8 @@ variable "service_account" {
       "https://www.googleapis.com/auth/monitoring.write",
       "https://www.googleapis.com/auth/servicecontrol",
       "https://www.googleapis.com/auth/service.management.readonly",
-    "https://www.googleapis.com/auth/trace.append"]
+      "https://www.googleapis.com/auth/trace.append",
+      "cloud-platform"]
   }
 }
 
@@ -223,6 +224,17 @@ variable "custom_node_pool" {
   default                   = []
 }
 
+variable "kubernetes_setup_config" {
+  description = "The configuration to setup GKE cluster."
+  type                       = object({
+    enable_k8s_setup                     = bool
+    kubernetes_service_account_name      = string
+    kubernetes_service_account_namespace = string
+    node_service_account                 = string
+  })
+  default                   = null
+}
+
 variable "slurm_node_count_static" {
   description = "Number of statically allocated nodes in compute partition"
   type        = number
@@ -234,4 +246,3 @@ variable "slurm_node_count_dynamic_max" {
   type        = number
   default     = 0
 }
-

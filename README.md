@@ -96,7 +96,7 @@ The optional parameters are:
    when `ORCHESTRATOR_TYPE` is `gke`. Ex: `GKE_VERSION=1.25.7-gke.1000`
 1. ***CUSTOM_NODE_POOL***: The custom node pool description for GKE. The structure of
    the custom node pool is list of node pool objects. The node pool object is 
-    ```
+    ```tf
     name                     = string
     zone                     = string
     node_count               = number
@@ -107,7 +107,28 @@ The optional parameters are:
     ```
     
     Example:
-    `CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]`
+    `CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100","enable_compact_placement"=true},{"name"="sp-test-pool-2","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100","enable_compact_placement"=true}]`
+1. ***KUBERNETES_SETUP_CONFIG***: The configuration to perform various kubernetes setup
+   on the GKE cluster created by the tool. This includes KSA binding. The structure of 
+   the `KUBERNETES_SETUP_CONFIG` object is
+   ```tf
+    enable_k8s_setup                     = bool
+    kubernetes_service_account_name      = string
+    kubernetes_service_account_namespace = string
+    node_service_account                 = string
+   ```
+   * `enable_k8s_setup`: This is the flag to enable kubernetes setup. The default value is
+         true if the `ORCHESTRATOR_TYPE` is `gke`.
+   * `kubernetes_service_account_name`: The kubernetes service account (KSA) name. The
+         value is `aiinfra-gke-sa`.
+   * `kubernetes_service_account_namespace`: The kubernetes service account (KSA) namespace.
+         The default value is `default`.
+   * `node_service_account`: The google service account (GSA) name to bind to the KSA. The 
+         default value is project service account email.
+   
+   Example: 
+   `KUBERNETES_SETUP_CONFIG={"enable_k8s_setup"=true,"kubernetes_service_account_name"="test-sa","kubernetes_service_account_namespace"="default","node_service_account"="xxxxxx-compute@developer.gserviceaccount.com"}`
+
 1. ***GCS_MOUNT_LIST***. This defines the list of GCS buckets to mount. The format is
    `<bucket1>:</mount/path1>,<bucket2>:</mount/path2>`. For example:
    GCS_MOUNT_LIST=test-gcs-bucket-name:/usr/trainfiles
@@ -380,7 +401,8 @@ module "aiinfra-cluster" {
 ```
 
 An example terraform config using the aiinfra-cluster module can be found
-[here](examples/terraform-config)
+1. [MIG GPU cluster](examples/terraform-config/gpu-mig-cluster/)
+2. [GKE GPU cluster](examples/terraform-config/gpu-gke-cluster/)
 
 ### Installing terraform dependencies
 1. [Install Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
@@ -479,6 +501,7 @@ The HPC Toolkit Repo is open-source and available
 
 ### HPC toolkit Blueprints in this repo
 #### [aiinfra-GPU-cluster](examples/hpc-toolkit-blueprint/aiinfra-gpu-cluster.yaml)
+#### [aiinfra-GKE-cluster](examples/hpc-toolkit-blueprint/aiinfra-gke-cluster.yaml)
 
 
 ## Billing Reports

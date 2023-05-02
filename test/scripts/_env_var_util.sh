@@ -36,8 +36,9 @@ _env_var_util::test::unset_env () {
         GKE_NODE_POOL_COUNT \
         GKE_NODE_COUNT_PER_NODE_POOL \
         GKE_ENABLE_COMPACT_PLACEMENT \
-        CUSTOM_NODE_POOL \
         GKE_VERSION \
+        CUSTOM_NODE_POOL \
+        KUBERNETES_SETUP_CONFIG \
         SLURM_NODE_COUNT_STATIC \
         SLURM_NODE_COUNT_DYNAMIC_MAX
 }
@@ -251,26 +252,13 @@ test::_env_var_util::set_defaults::instance_count_unchanged_when_gke () {
     EXPECT_EQ "${INSTANCE_COUNT}" 3
 }
 
-# idk if it is okay to put service account email address in public repo
-# so im not gonna. also i dont think this function really belongs in
-# this scope
-#test::_env_var_util::get_project_email::gets_project_email () {
-#    EXPECT_STREQ \
-#        "$(_env_var_util::get_project_email "gce-ai-infra")" \
-#        ''
-#}
-
-test::_env_var_util::print_tfvars::fails_if_email_not_given () {
-    EXPECT_FAIL _env_var_util::print_tfvars
-}
-
 test::_env_var_util::print_tfvars::fails_if_uuid_not_given () {
-    EXPECT_FAIL _env_var_util::print_tfvars email
+    EXPECT_FAIL _env_var_util::print_tfvars
 }
 
 test::_env_var_util::print_tfvars::succeeds_with_invalid_env () {
     _env_var_util::test::unset_env
-    EXPECT_SUCCEED _env_var_util::print_tfvars email uuid >/dev/null
+    EXPECT_SUCCEED _env_var_util::print_tfvars uuid >/dev/null
 }
 
 test::_env_var_util::print_tfvars::prints_all_required_and_defaultable () {
@@ -279,7 +267,7 @@ test::_env_var_util::print_tfvars::prints_all_required_and_defaultable () {
     _env_var_util::setup
     EXPECT_SUCCEED diff \
         "$(_env_var_util::test::data_dir)/optionals_unset.tfvars" \
-        <(_env_var_util::print_tfvars email uuid)
+        <(_env_var_util::print_tfvars uuid)
 }
 
 test::_env_var_util::print_tfvars::prints_optionals_when_set () {
@@ -294,12 +282,13 @@ test::_env_var_util::print_tfvars::prints_optionals_when_set () {
     ENABLE_NOTEBOOK='note'
     GKE_NODE_POOL_COUNT=3
     GKE_NODE_COUNT_PER_NODE_POOL=3
-    CUSTOM_NODE_POOL='custom'
     GKE_VERSION='1.25.7-gke.1000'
+    CUSTOM_NODE_POOL='custom'
+    KUBERNETES_SETUP_CONFIG='config'
     SLURM_NODE_COUNT_STATIC=3
     SLURM_NODE_COUNT_DYNAMIC_MAX=3
     _env_var_util::setup
     EXPECT_SUCCEED diff \
         "$(_env_var_util::test::data_dir)/optionals_set.tfvars" \
-        <(_env_var_util::print_tfvars email uuid)
+        <(_env_var_util::print_tfvars uuid)
 }

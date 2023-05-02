@@ -82,6 +82,13 @@ locals {
   gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-widget-data.gce_gke_gpu_utilization_widgets : []
   vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
+  kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
+    enable_k8s_setup                     = var.orchestrator_type == "gke"
+    kubernetes_service_account_name      = "aiinfra-gke-sa"
+    kubernetes_service_account_namespace = "default"
+    node_service_account                 = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
+  }
+
   default_instance_image = var.orchestrator_type == "slurm" ? {
     family  = "schedmd-v5-slurm-22-05-6-hpc-centos-7"
     project = "schedmd-slurm-public"
@@ -91,8 +98,9 @@ locals {
     project = "ml-images"
     name    = ""
   }
-
 }
+
+data "google_compute_default_service_account" "default" {}
 
 module "aiinfra-network" {
   source          = "./modules/aiinfra-network"
@@ -148,8 +156,8 @@ module "aiinfra-compute" {
   source               = "./modules/aiinfra-compute"
   subnetwork_self_link = module.aiinfra-network.subnetwork_self_link
   service_account = {
-    email  = var.service_account.email
-    scopes = ["cloud-platform"]
+    email  = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
+    scopes = var.service_account.scopes
   }
   instance_count    = var.instance_count
   project_id        = var.project_id
@@ -207,4 +215,18 @@ module "aiinfra-default-dashboard" {
   title           = "AI Accelerator Experience Dashboard"
   widgets         = var.orchestrator_type != "gke" ? concat(local.nvidia_widgets, local.gce_gke_gpu_utilization_widgets) : local.gce_gke_gpu_utilization_widgets
   depends_on      = [module.dashboard-widget-data]
+}
+
+module "aiinfra-k8s-setup" {
+  source              = "./modules/kubernetes-ops"
+  project             = var.project_id
+  gke_conn            = {
+    gke_cluster_endpoint           = module.aiinfra-compute.gke_cluster_endpoint
+    gke_certificate_authority_data = module.aiinfra-compute.gke_certificate_authority_data
+    gke_token                      = module.aiinfra-compute.gke_token
+  }
+  enable_k8s_setup                     = local.kubernetes_setup_config.enable_k8s_setup
+  kubernetes_service_account_name      = local.kubernetes_setup_config.kubernetes_service_account_name
+  kubernetes_service_account_namespace = local.kubernetes_setup_config.kubernetes_service_account_namespace
+  node_service_account = local.kubernetes_setup_config.node_service_account
 }

@@ -14,23 +14,22 @@
 
 ---
 
-blueprint_name: aiinfra-gpu-cluster
+blueprint_name: aiinfra-gke-cluster
 
 vars:
-  project_id: test-project
-  name_prefix: aiinfra-gpu
+  project_id: test-project-gke
+  name_prefix: aiinfra-gke
   region: us-central1
   zone: us-central1-a
   machine_type: a2-highgpu-2g
-  instance_count: 2
   accelerator_type: nvidia-tesla-a100
   gpu_per_vm: 2
   # expected image deeplearning on linux -> Debian 10 based Deep Learning VM for PyTorch CPU/GPU with CUDA 11.3 M94 Deep Learning VM Image with PyTorch 1.11 and fast.ai preinstalled.
   # projects/ml-images/global/images/c1-deeplearning-tf-2-1-cu110-v20220806-debian-10
   instance_image:
     name: null
-    family: pytorch-1-10-gpu-debian-10
-    project: ml-images
+    family: tf-latest-gpu-gvnic-debian-10
+    project: deeplearning-platform-release
   disk_size_gb: 2000
   disk_type: pd-ssd
   labels:
@@ -39,11 +38,10 @@ vars:
     meta1: "val"
     meta2: "val2"
   gcs_bucket_path: "gs://test-bucket/test-dir"
-  network_config: multi_nic_network
-  gcs_mount_list: "test-bucket:/usr/trainfiles"
-  nfs_filestore_list: ""
-  orchestrator_type: "ray"
-  startup_command: "echo \"Hello World\""
+  network_config: default_network
+  orchestrator_type: "gke"
+  gke_node_pool_count: 2
+  gke_node_count_per_node_pool: 2
   
 deployment_groups:
 - group: primary

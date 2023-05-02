@@ -137,42 +137,6 @@ _env_var_util::set_defaults () {
     return 0
 }
 
-# Retrieves the service account for the project which has the format -- 
-# `${project_num}-compute@developer.gserviceaccount.com` -- where `project_num`
-# is the `projectNumber` corresponding to the project denoted by `project_id`
-#
-# Parameters:
-#   - `project_id`: the name of the project in which the cluster will be
-#   provisioned.
-# Output: service account email address for the project
-# Exit status:
-#   - 0: printed successfully
-#   - 1: error when calling gcloud commands
-_env_var_util::get_project_email () {
-    local -r project_id="${1}"
-    local project_num
-
-    get_project_num () {
-        gcloud projects describe "${project_id}" --format="value(projectNumber)"
-    }
-
-    # go for gold
-    project_num=$(get_project_num) || {
-        # kinda long setup if failed
-        echo 'unable to retrieve project number, reauthenticating...'
-        gcloud auth login --update-adc || {
-            echo 'gcloud authentication failed'
-            return 1;
-        }
-        project_num="$(get_project_num)" || {
-            echo 'failed to retrieve project information from gcloud'
-            return 1;
-        };
-    } >&2
-
-    echo "${project_num}-compute@developer.gserviceaccount.com"
-}
-
 # Prepares and validates environment variables in order for them to be
 # converted to terraform variables in `_env_var_util::print_tfvars`.
 #
@@ -190,8 +154,6 @@ _env_var_util::setup () {
 # Print environment variables as terraform variables.
 #
 # Parameters:
-#   - `project_email`: service account email address for project (typically
-#   populated using `_env_var_util::get_project_email`).
 #   - `uuid`: a unique identifier that will be prepended to the terraform
 #   variable `labels` as `aiinfra-cluster="${uuid}"`
 # Output: a tfvars file for the root module in `aiinfra-cluster`.
@@ -199,13 +161,8 @@ _env_var_util::setup () {
 #   - 0: success
 #   - 1: missing parameter
 _env_var_util::print_tfvars () {
-    local -r project_email="${1}"
-    local -r uuid="${2}"
+    local -r uuid="${1}"
 
-    [ -n "${project_email}" ] || {
-        echo >&2 "required parameter (1: project_email) empty"
-        return 1;
-    }
     [ -n "${uuid}" ] || {
         echo >&2 "required parameter (2: uuid) empty"
         return 1;
@@ -214,17 +171,6 @@ _env_var_util::print_tfvars () {
     # print required and defaultable values
     cat <<EOF
 project_id = "${PROJECT_ID}"
-service_account = {
-  email = "${project_email}"
-  scopes = [
-    "https://www.googleapis.com/auth/devstorage.read_write",
-    "https://www.googleapis.com/auth/logging.write",
-    "https://www.googleapis.com/auth/monitoring.write",
-    "https://www.googleapis.com/auth/servicecontrol",
-    "https://www.googleapis.com/auth/service.management.readonly",
-    "https://www.googleapis.com/auth/trace.append"
-  ]
-}
 name_prefix = "${NAME_PREFIX}"
 deployment_name = "${NAME_PREFIX}-dpl"
 zone = "${ZONE}"
@@ -259,6 +205,7 @@ EOF
     [ -n "${GKE_NODE_COUNT_PER_NODE_POOL}" ] && echo "gke_node_count_per_node_pool = ${GKE_NODE_COUNT_PER_NODE_POOL}"
     [ -n "${GKE_ENABLE_COMPACT_PLACEMENT}" ] && echo "gke_enable_compact_placement = ${GKE_ENABLE_COMPACT_PLACEMENT}"
     [ -n "${CUSTOM_NODE_POOL}" ] && echo "custom_node_pool = ${CUSTOM_NODE_POOL}"
+    [ -n "${KUBERNETES_SETUP_CONFIG}" ] && echo "kubernetes_setup_config = ${KUBERNETES_SETUP_CONFIG}"
     [ -n "${GKE_VERSION}" ] && echo "gke_version = \"${GKE_VERSION}\""
 
     return 0
