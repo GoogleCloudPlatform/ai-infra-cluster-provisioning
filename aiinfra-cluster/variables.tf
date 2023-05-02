@@ -61,6 +61,7 @@ variable "zone" {
 variable "machine_type" {
   description = "The VM type to use for compute."
   type        = string
+  default     = "n1-standard-1"
 }
 
 variable "instance_count" {
@@ -72,6 +73,7 @@ variable "instance_count" {
 variable "accelerator_type" {
   description = "The accelerator (GPU) type."
   type        = string
+  default     = "nvidia-tesla-a100"
 }
 
 variable "gpu_per_vm" {
@@ -87,6 +89,11 @@ variable "instance_image" {
     family  = string,
     project = string
   })
+  default = {
+    family  = "tf-latest-gpu-gvnic-debian-10"
+    name    = null
+    project = "deeplearning-platform-release"
+  }
 }
 
 variable "disk_size_gb" {

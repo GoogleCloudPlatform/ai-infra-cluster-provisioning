@@ -58,7 +58,7 @@ _terraform_setup() {
 _Display_connection_info() {
     if [[ -n "$SHOW_PROXY_URL" && "${SHOW_PROXY_URL,,}" == "no" ]]; then
         echo "Not checking for proxy_url information."
-    elif [[ "${IMAGE_PROJECT,,}" != "ml-images" ]]; then
+    elif [[ "${IMAGE_PROJECT,,}" != "ml-images" && "${IMAGE_PROJECT,,}" != "deeplearning-platform-release" ]]; then
         echo "Jupyter notebook is not available in non-DLVM images."
     elif [[ -n "$ENABLE_NOTEBOOK" && "${ENABLE_NOTEBOOK,,}" == "false" ]]; then
         echo "Jupyter notebook is disabled."

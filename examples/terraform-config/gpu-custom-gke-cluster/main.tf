@@ -17,9 +17,7 @@ locals {
   project_id   = "test-project-gke"
   region       = "us-central1"
   zone         = "us-central1-a"
-  machine_type = "a2-highgpu-1g"
   disk_size_gb = 2000
-  gpu_per_vm   = 1
   name_prefix     = "aiinfra-gke-test"
   deployment_name = "aiinfra-gke-test-dpl"  
   metadata = {
@@ -35,10 +33,31 @@ locals {
     label1          = "marker1"
   }
   gke_enable_compact_placement = false
-  accelerator_type             = "nvidia-tesla-a100"
   orchestrator_type   = "gke"
-  gke_node_count_per_node_pool = 2
-  gke_node_pool_count = 1
+  custom_node_pool = [
+    {
+      "name"="sp-test-pool-1"
+      "zone"="us-central1-a"
+      "node_count"=2
+      "machine_type"="a2-highgpu-2g"
+      "guest_accelerator_count"=2
+      "guest_accelerator_type"="nvidia-tesla-a100"
+    },
+    {
+      "name"="sp-test-pool-2"
+      "zone"="us-central1-c"
+      "node_count"=2
+      "machine_type"="a2-highgpu-2g"
+      "guest_accelerator_count"=2
+      "guest_accelerator_type"="nvidia-tesla-a100"
+    }
+  ]
+  kubernetes_setup_config= {
+    "enable_k8s_setup"                     = true
+    "kubernetes_service_account_name"      = "test-sa"
+    "kubernetes_service_account_namespace" = "default"
+    "node_service_account"                 = "394538338993-compute@developer.gserviceaccount.com"
+  }
 }
 
 module "aiinfra-cluster" {
