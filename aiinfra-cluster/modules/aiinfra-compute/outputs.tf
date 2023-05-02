@@ -15,21 +15,21 @@
   */
 
 output "gke_cluster_name" {
-  value       = var.enable_gke ? module.aiinfra-gke[0].gke_cluster_name : ""
+  value       = var.orchestrator_type == "gke" ? module.aiinfra-gke[0].gke_cluster_name : ""
   description = "Google Kubernetes cluster name"
 }
 
 output "gke_cluster_endpoint" {
-  value       = var.enable_gke ? module.aiinfra-gke[0].gke_cluster_endpoint : ""
+  value       = var.orchestrator_type == "gke" ? module.aiinfra-gke[0].gke_cluster_endpoint : ""
   description = "Kubernetes cluster API endpoint"
 }
 
 output "gke_certificate_authority_data" {
-  value       = var.enable_gke ? module.aiinfra-gke[0].gke_certificate_authority_data : ""
+  value       = var.orchestrator_type == "gke" ? module.aiinfra-gke[0].gke_certificate_authority_data : ""
   description = "Kubernetes cluster cluster CA certificate"
 }
 
 output "gke_token" {
-  value       = var.enable_gke ? module.aiinfra-gke[0].gke_token : ""
+  value       = var.orchestrator_type == "gke" ? module.aiinfra-gke[0].gke_token : ""
   description = "Kubernetes cluster access token"
 }

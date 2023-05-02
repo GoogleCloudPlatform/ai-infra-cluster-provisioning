@@ -36,9 +36,9 @@ _env_var_util::test::unset_env () {
         GKE_NODE_POOL_COUNT \
         GKE_NODE_COUNT_PER_NODE_POOL \
         GKE_ENABLE_COMPACT_PLACEMENT \
+        GKE_VERSION \
         CUSTOM_NODE_POOL \
         KUBERNETES_SETUP_CONFIG \
-        GKE_VERSION \
         SLURM_NODE_COUNT_STATIC \
         SLURM_NODE_COUNT_DYNAMIC_MAX
 }
@@ -282,9 +282,9 @@ test::_env_var_util::print_tfvars::prints_optionals_when_set () {
     ENABLE_NOTEBOOK='note'
     GKE_NODE_POOL_COUNT=3
     GKE_NODE_COUNT_PER_NODE_POOL=3
+    GKE_VERSION='1.25.7-gke.1000'
     CUSTOM_NODE_POOL='custom'
     KUBERNETES_SETUP_CONFIG='config'
-    GKE_VERSION='1.25.7-gke.1000'
     SLURM_NODE_COUNT_STATIC=3
     SLURM_NODE_COUNT_DYNAMIC_MAX=3
     _env_var_util::setup
