@@ -20,12 +20,6 @@ locals {
   gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
 
-  instance_image = var.instance_image == null ? null : {
-    project    = var.instance_image.project,
-    family  = var.instance_image.family == null ? "" : var.instance_image.family,
-    name = var.instance_image.name == null ? "" : var.instance_image.name
-  }
-
   dir_copy_arr = compact(split(",", trimspace(var.local_dir_copy_list)))
   dir_copy_setup = flatten([
     for path in local.dir_copy_arr : [
@@ -86,6 +80,12 @@ locals {
     node_service_account                 = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
   }
 
+  normalized_instance_image = var.instance_image == null ? null : {
+    project    = var.instance_image.project,
+    family  = var.instance_image.family == null ? "" : var.instance_image.family,
+    name = var.instance_image.name == null ? "" : var.instance_image.name
+  }
+
   default_instance_image = var.orchestrator_type == "slurm" ? {
     family  = "schedmd-v5-slurm-22-05-6-hpc-centos-7"
     project = "schedmd-slurm-public"
@@ -95,6 +95,7 @@ locals {
     project = "deeplearning-platform-release"
     name    = ""
   }
+  instance_image = var.instance_image == null ? local.default_instance_image : local.normalized_instance_image
 }
 
 data "google_compute_default_service_account" "default" {}
@@ -166,8 +167,8 @@ module "aiinfra-compute" {
     collocation               = "COLLOCATED"
     vm_count                  = var.instance_count
   }
-  enable_notebook     = var.enable_notebook
-  instance_image      = var.instance_image == null ? local.default_instance_image : local.instance_image
+  enable_notebook     = (local.instance_image.project != "ml-images" && local.instance_image.project != "deeplearning-platform-release") ? false : var.enable_notebook
+  instance_image      = local.instance_image
   on_host_maintenance = "TERMINATE"
   machine_type        = var.machine_type
   zone                = var.zone
