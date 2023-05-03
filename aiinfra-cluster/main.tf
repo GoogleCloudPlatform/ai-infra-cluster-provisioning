@@ -17,17 +17,8 @@
 locals {
   depl_name         = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
 
-  default_metadata  = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", })
-  metadata          = var.enable_notebook ? merge(local.default_metadata, { proxy-mode="project_editors", }) : local.default_metadata
-
   gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
-
-  instance_image = {
-    project    = var.instance_image.project,
-    family  = var.instance_image.family == null ? "" : var.instance_image.family,
-    name = var.instance_image.name == null ? "" : var.instance_image.name
-  }
 
   dir_copy_arr = compact(split(",", trimspace(var.local_dir_copy_list)))
   dir_copy_setup = flatten([
@@ -89,15 +80,22 @@ locals {
     node_service_account                 = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
   }
 
+  normalized_instance_image = var.instance_image == null ? null : {
+    project    = var.instance_image.project,
+    family  = var.instance_image.family == null ? "" : var.instance_image.family,
+    name = var.instance_image.name == null ? "" : var.instance_image.name
+  }
+
   default_instance_image = var.orchestrator_type == "slurm" ? {
     family  = "schedmd-v5-slurm-22-05-6-hpc-centos-7"
     project = "schedmd-slurm-public"
     name    = ""
   } : {
-    family  = "pytorch-1-12-gpu-debian-10"
-    project = "ml-images"
+    family  = "pytorch-latest-gpu-debian-11-py310"
+    project = "deeplearning-platform-release"
     name    = ""
   }
+  instance_image = var.instance_image == null ? local.default_instance_image : local.normalized_instance_image
 }
 
 data "google_compute_default_service_account" "default" {}
@@ -169,13 +167,14 @@ module "aiinfra-compute" {
     collocation               = "COLLOCATED"
     vm_count                  = var.instance_count
   }
-  instance_image      = var.instance_image == null ? local.default_instance_image : local.instance_image
+  enable_notebook     = (local.instance_image.project != "ml-images" && local.instance_image.project != "deeplearning-platform-release") ? false : var.enable_notebook
+  instance_image      = local.instance_image
   on_host_maintenance = "TERMINATE"
   machine_type        = var.machine_type
   zone                = var.zone
   region              = var.region
   startup_script      = module.startup.startup_script
-  metadata            = local.metadata
+  metadata            = var.metadata
   labels              = merge(var.labels, { aiinfra_role = "compute", })
   name_prefix         = var.name_prefix
   guest_accelerator = {

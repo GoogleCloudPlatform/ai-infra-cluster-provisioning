@@ -234,6 +234,12 @@ variable "enable_oslogin" {
   }
 }
 
+variable "enable_notebook" {
+  description = "The flag to enable jupyter notebook initialization."
+  type        = bool
+  default     = true
+}
+
 variable "network_interfaces" {
   type = list(object({
     network            = string,
