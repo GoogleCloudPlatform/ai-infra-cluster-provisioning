@@ -17,9 +17,6 @@
 locals {
   depl_name         = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
 
-  default_metadata  = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", })
-  metadata          = var.enable_notebook ? merge(local.default_metadata, { proxy-mode="project_editors", }) : local.default_metadata
-
   gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
 
@@ -169,6 +166,7 @@ module "aiinfra-compute" {
     collocation               = "COLLOCATED"
     vm_count                  = var.instance_count
   }
+  enable_notebook     = var.enable_notebook
   instance_image      = var.instance_image == null ? local.default_instance_image : local.instance_image
   on_host_maintenance = "TERMINATE"
   machine_type        = var.machine_type

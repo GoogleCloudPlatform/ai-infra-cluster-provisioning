@@ -15,6 +15,9 @@
 */
 
 locals {
+  default_metadata  = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", install-nvidia-driver = "True", })
+  enable_notebook   = var.enable_notebook ? { proxy-mode="project_editors", } : {}
+
   startup_script = var.startup_script != null ? (
   { startup-script = var.startup_script }) : {}
   network_storage = var.network_storage != null ? (
@@ -215,7 +218,7 @@ resource "google_compute_instance_template" "templates" {
     }
   }
 
-  metadata = merge(local.network_storage, local.startup_script, local.enable_oslogin, var.metadata)
+  metadata = merge(local.network_storage, local.startup_script, local.enable_oslogin, local.default_metadata, local.enable_notebook)
 
   lifecycle {
     create_before_destroy = true
