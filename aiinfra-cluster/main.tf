@@ -173,7 +173,7 @@ module "aiinfra-compute" {
   zone                = var.zone
   region              = var.region
   startup_script      = module.startup.startup_script
-  metadata            = local.metadata
+  metadata            = var.metadata
   labels              = merge(var.labels, { aiinfra_role = "compute", })
   name_prefix         = var.name_prefix
   guest_accelerator = {
