@@ -20,7 +20,7 @@ locals {
   gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
 
-  instance_image = {
+  instance_image = var.instance_image == null ? null : {
     project    = var.instance_image.project,
     family  = var.instance_image.family == null ? "" : var.instance_image.family,
     name = var.instance_image.name == null ? "" : var.instance_image.name
