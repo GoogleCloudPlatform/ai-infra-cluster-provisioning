@@ -217,7 +217,7 @@ module "aiinfra-default-dashboard" {
 }
 
 module "aiinfra-k8s-setup" {
-  source              = "./modules/kubernetes-ops"
+  source              = "./modules/kubernetes-operations"
   project             = var.project_id
   gke_conn            = {
     gke_cluster_endpoint           = module.aiinfra-compute.gke_cluster_endpoint

@@ -20,6 +20,14 @@ provider "kubernetes" {
     token                  = var.gke_conn.gke_token
 }
 
+provider "kubectl" {
+  host                   = var.gke_conn.gke_cluster_endpoint
+  cluster_ca_certificate = base64decode(var.gke_conn.gke_certificate_authority_data)
+  token                  = var.gke_conn.gke_token
+  load_config_file       = false
+}
+
+// Binding KSA to google service account.
 resource "google_service_account_iam_binding" "default-workload-identity" {
   count = var.enable_k8s_setup ? 1 : 0
   service_account_id = "projects/${var.project}/serviceAccounts/${var.node_service_account}"
@@ -29,6 +37,7 @@ resource "google_service_account_iam_binding" "default-workload-identity" {
   ]
 }
 
+// Creating and Annotating KSA with google service account
 resource "kubernetes_service_account" "gke-sa" {
   automount_service_account_token = false
   count = var.enable_k8s_setup ? 1 : 0
@@ -39,4 +48,13 @@ resource "kubernetes_service_account" "gke-sa" {
       "iam.gke.io/gcp-service-account" = var.node_service_account
     }
   }
+}
+
+// Installing NVIDIA GPU driver daemonset.
+data "http" "nvidia_driver_installer_manifest" {
+  url = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded.yaml"
+}
+
+resource "kubectl_manifest" "nvidia_driver_installer" {
+  yaml_body = data.http.nvidia_driver_installer_manifest.body
 }
