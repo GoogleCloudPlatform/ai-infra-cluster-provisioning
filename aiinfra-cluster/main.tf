@@ -196,6 +196,8 @@ module "aiinfra-compute" {
   gke_version                  = var.gke_version
   
   node_pools = length(var.custom_node_pool) != 0 || length(local.basic_node_pool) != 0 ? coalescelist(var.custom_node_pool, local.basic_node_pool) : []
+
+  container_image = var.container_image
 }
 
 module "dashboard-widget-data" {

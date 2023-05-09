@@ -207,6 +207,7 @@ EOF
     [ -n "${CUSTOM_NODE_POOL}" ] && echo "custom_node_pool = ${CUSTOM_NODE_POOL}"
     [ -n "${KUBERNETES_SETUP_CONFIG}" ] && echo "kubernetes_setup_config = ${KUBERNETES_SETUP_CONFIG}"
     [ -n "${GKE_VERSION}" ] && echo "gke_version = \"${GKE_VERSION}\""
+    [ -n "${CONTAINER_IMAGE}" ] && echo "container_image = \"${CONTAINER_IMAGE}\""
 
     return 0
 }

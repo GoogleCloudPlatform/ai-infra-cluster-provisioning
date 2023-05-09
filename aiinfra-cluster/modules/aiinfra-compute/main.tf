@@ -60,6 +60,9 @@ locals {
   }
   enable_oslogin = var.enable_oslogin == "INHERIT" ? {} : { enable-oslogin = lookup(local.oslogin_api_values, var.enable_oslogin, "") }
 
+  enable_cloudinit = var.instance_image.project == "cos-cloud" && var.container_image != null
+  cloudinit_metadata = local.enable_cloudinit ? { user-data = "${data.cloudinit_config.config.rendered}" } : {}
+
   machine_vals            = split("-", var.machine_type)
   machine_family          = local.machine_vals[0]
   machine_not_shared_core = length(local.machine_vals) > 2
@@ -127,6 +130,20 @@ data "google_compute_image" "compute_image" {
   name    = var.instance_image.name != "" ? var.instance_image.name : null
   family  = var.instance_image.family != "" ? var.instance_image.family : null
   project = var.instance_image.project
+}
+
+data "cloudinit_config" "config" {
+  gzip = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    content = templatefile("${path.module}/userdata.yaml", {
+      image = var.container_image != null ? var.container_image : ""
+      volume_flags = ""
+    })
+    filename = "userdata.yaml"
+  }
 }
 
 resource "google_compute_instance_template" "templates" {
@@ -218,7 +235,14 @@ resource "google_compute_instance_template" "templates" {
     }
   }
 
-  metadata = merge(local.network_storage, local.startup_script, local.enable_oslogin, local.default_metadata, local.enable_notebook)
+  metadata = merge(
+    local.network_storage,
+    local.startup_script,
+    local.enable_oslogin,
+    local.default_metadata,
+    local.enable_notebook,
+    local.cloudinit_metadata,
+  )
 
   lifecycle {
     create_before_destroy = true

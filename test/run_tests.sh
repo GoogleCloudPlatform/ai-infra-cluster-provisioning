@@ -22,7 +22,7 @@ initialize_terraform () {
     [ -d "${cache_dir}/plugin-cache" ] || mkdir -p "${cache_dir}/plugin-cache"
     [ -f "${cache_dir}/.terraform.lock.hcl" ] \
         && cp {"${cache_dir}/","${root_module_dir}/"}".terraform.lock.hcl"
-    terraform -chdir="${root_module_dir}" init \
+    terraform -chdir="${root_module_dir}" init -reconfigure \
         && cp {"${root_module_dir}/","${cache_dir}/"}".terraform.lock.hcl"
 }
 

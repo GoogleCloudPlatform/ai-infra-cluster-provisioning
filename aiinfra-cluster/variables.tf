@@ -249,3 +249,9 @@ variable "slurm_node_count_dynamic_max" {
   type        = number
   default     = 0
 }
+
+variable "container_image" {
+  description = "The container to start in a MIG with COS image"
+  type        = string
+  default     = null
+}

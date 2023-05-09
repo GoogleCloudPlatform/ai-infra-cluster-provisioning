@@ -337,3 +337,9 @@ variable "node_pools" {
   }))
   default                   = []
 }
+
+variable "container_image" {
+  description = "The container to start in a MIG with COS image"
+  type        = string
+  default     = null
+}

@@ -40,7 +40,8 @@ _env_var_util::test::unset_env () {
         CUSTOM_NODE_POOL \
         KUBERNETES_SETUP_CONFIG \
         SLURM_NODE_COUNT_STATIC \
-        SLURM_NODE_COUNT_DYNAMIC_MAX
+        SLURM_NODE_COUNT_DYNAMIC_MAX \
+        CONTAINER_IMAGE
 }
 
 _env_var_util::test::set_required_env () {
@@ -287,6 +288,7 @@ test::_env_var_util::print_tfvars::prints_optionals_when_set () {
     KUBERNETES_SETUP_CONFIG='config'
     SLURM_NODE_COUNT_STATIC=3
     SLURM_NODE_COUNT_DYNAMIC_MAX=3
+    CONTAINER_IMAGE='container'
     _env_var_util::setup
     EXPECT_SUCCEED diff \
         "$(_env_var_util::test::data_dir)/optionals_set.tfvars" \
