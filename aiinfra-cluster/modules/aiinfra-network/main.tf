@@ -26,31 +26,31 @@ locals {
 
 module "default_vpc" {
   count      = local.trimmed_net_config != "new_network" ? 1 : 0
-  source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
+  source     = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=v1.17.0"
   project_id = var.project_id
   region     = var.region
 }
 
 module "new_vpc" {
   count           = local.trimmed_net_config == "new_network" ? 1 : 0
-  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=c1f4a44d92e775baa8c48aab6ae28cf9aee932a1"
+  source          = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=v1.17.0"
   project_id      = var.project_id
   region          = var.region
-  deployment_name = var.deployment_name
+  deployment_name = var.resource_prefix
 }
 
 module "multinic_vpc" {
-  source                = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=866de32de9c3cf7ea8fa20f377d62aa80a07b8b3"
+  source                = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=v1.17.0"
   count                 = local.trimmed_net_config == "multi_nic_network" ? var.nic_count : 0
   network_address_range = "10.${count.index}.0.0/16"
   subnetworks = [{
     new_bits      = 8
-    subnet_name   = "${var.deployment_name}-primary-subnet-${count.index}"
+    subnet_name   = "${var.resource_prefix}-primary-subnet-${count.index}"
     subnet_region = var.region
   }]
-  ips_per_nat           = count.index == 0 ? 2 : 0
-  region                = var.region
-  deployment_name       = var.deployment_name
-  project_id            = var.project_id
-  network_name          = "${var.deployment_name}-net-${count.index}"
+  ips_per_nat     = count.index == 0 ? 2 : 0
+  region          = var.region
+  deployment_name = var.resource_prefix
+  project_id      = var.project_id
+  network_name    = "${var.resource_prefix}-net-${count.index}"
 }

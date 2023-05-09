@@ -24,7 +24,7 @@ variable "region" {
   type        = string
 }
 
-variable "deployment_name" {
+variable "resource_prefix" {
   description = "Name of the deployment, used to name the cluster"
   type        = string
 }

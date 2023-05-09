@@ -1,30 +1,10 @@
 #!/bin/bash
 
 # source all files containing tests
-. ./test/aiinfra-cluster/installation_scripts/install_cloud_ops_agent.sh
-. ./test/aiinfra-cluster/terraform.sh
-. ./test/scripts/_env_var_util.sh
-
-# Call `terraform init` and set up cache
-#
-# Parameters:
-#   - `root_module_dir`: directory containing the root `main.tf`
-#   - `cache_dir`: directory containing terraform cache
-# Output: none
-# Exit status:
-#   - 0: success
-#   - 1: terraform initialized unsuccessfully or the lock file was unable to
-#   be cached
-initialize_terraform () {
-    local -r root_module_dir="${1}"
-    local -r cache_dir="${2}"
-
-    [ -d "${cache_dir}/plugin-cache" ] || mkdir -p "${cache_dir}/plugin-cache"
-    [ -f "${cache_dir}/.terraform.lock.hcl" ] \
-        && cp {"${cache_dir}/","${root_module_dir}/"}".terraform.lock.hcl"
-    terraform -chdir="${root_module_dir}" init \
-        && cp {"${root_module_dir}/","${cache_dir}/"}".terraform.lock.hcl"
-}
+. ./test/terraform/modules/network/tests.sh
+#. ./test/aiinfra-cluster/installation_scripts/install_cloud_ops_agent.sh
+#. ./test/aiinfra-cluster/terraform.sh
+#. ./test/scripts/_env_var_util.sh
 
 # Run all tests in sourced files
 #
@@ -112,7 +92,4 @@ run_tests () {
     [ "${#tests_failed[@]}" -eq 0 ]
 }
 
-root_module_dir='/usr/primary'
-cache_dir="${root_module_dir}/.terraform"
-initialize_terraform "${root_module_dir}" "${cache_dir}" \
-    && run_tests "${@}"
+run_tests "${@}"
