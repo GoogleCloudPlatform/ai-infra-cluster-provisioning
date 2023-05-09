@@ -14,37 +14,11 @@
  * limitations under the License.
  */
 
-output "network_name" {
-  description = "The name of the primary network of all the VPCs created."
-  value       = local.primary_network.network_name
-}
-
-output "subnetwork_self_link" {
-  description = "The subnetwork_self_link of the primary network of all the VPCs created."
-  value       = local.primary_network.subnetwork_self_link
-}
-
-output "network_self_link" {
-  description = "The network_self_link of the primary network of all the VPCs created."
-  value       = local.primary_network.network_self_link
-}
-
-output "network_interfaces" {
-  description = "The network interface that includes all VPC subnets."
-  value = local.trimmed_net_config == "multi_nic_network" ? [for idx in range(var.nic_count) : {
-    access_config      = idx == 0 ? [local.empty_access_config] : []
-    alias_ip_range     = []
-    ipv6_access_config = []
-    network            = null
-    network_ip         = null
-    queue_count        = null
-    stack_type         = null
-    # Disabling GVNIC until we have the DLVM fix.
-    nic_type           = null
-    subnetwork         = module.multinic_vpc[idx].subnetwork_self_link
-    subnetwork_project = var.project_id
-    }
-  ] : []
-
-  depends_on = [module.multinic_vpc]
+output "subnetwork_self_links" {
+  description = "Primary subnet self-links of all the VPCs"
+  value = flatten([
+    data.google_compute_subnetwork.default_vpc_subnet[*].self_link,
+    module.single_new_vpc[*].subnetwork_self_link,
+    module.multiple_new_vpcs[*].subnetwork_self_link,
+  ])
 }

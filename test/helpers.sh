@@ -195,7 +195,7 @@ helpers::terraform_show () {
 helpers::plan_output () {
     local -r plan_json_file="${1:?}"
     local -r variable_name="${2:?}"
-    jq -r ".planned_values.outputs.${variable_name}.value" "${plan_json_file}"
+    jq -rc ".planned_values.outputs.${variable_name}.value" "${plan_json_file}"
 }
 
 helpers::json_contains () {

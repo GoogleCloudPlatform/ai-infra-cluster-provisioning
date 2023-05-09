@@ -1,0 +1,23 @@
+{
+  "planned_values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.multiple_new_vpcs[0]"
+        },
+        {
+          "address": "module.multiple_new_vpcs[1]"
+        },
+        {
+          "address": "module.multiple_new_vpcs[2]"
+        },
+        {
+          "address": "module.multiple_new_vpcs[3]"
+        },
+        {
+          "address": "module.multiple_new_vpcs[4]"
+        }
+      ]
+    }
+  }
+}

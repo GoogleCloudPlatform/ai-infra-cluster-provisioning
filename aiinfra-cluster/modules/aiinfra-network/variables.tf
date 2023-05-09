@@ -25,14 +25,8 @@ variable "region" {
 }
 
 variable "resource_prefix" {
-  description = "Name of the deployment, used to name the cluster"
+  description = "Arbitrary string with which all names of newly created resources will be prefixed"
   type        = string
-}
-
-variable "nic_count" {
-  description = "The NIC count"
-  type        = number
-  default     = 5
 }
 
 variable "network_config" {
@@ -41,7 +35,10 @@ variable "network_config" {
   default     = "default_network"
 
   validation {
-    condition     = contains(["default_network", "new_network", "multi_nic_network"], var.network_config)
-    error_message = "Variable network_config must be one of default_network, new_network, or multi_nic_network."
+    condition = contains(
+      ["default_network", "new_network", "multi_nic_network"],
+      var.network_config
+    )
+    error_message = "network_config must be one of ['default_network', 'new_network', 'multi_nic_network']."
   }
 }
