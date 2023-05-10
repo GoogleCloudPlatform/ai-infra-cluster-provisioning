@@ -1,6 +1,6 @@
 PROJECT_ID=gce-ai-infra
 ZONE=us-central1-a
-VM_TYPE=a2-highgpu-2g
+VM_TYPE=n1-standard-8
 GPU_COUNT=0
 TERRAFORM_GCS_PATH=gs://aiinfra-terraform-gce-ai-infra/gcb-continuous
 STARTUP_COMMAND=echo \"Hello World\"
