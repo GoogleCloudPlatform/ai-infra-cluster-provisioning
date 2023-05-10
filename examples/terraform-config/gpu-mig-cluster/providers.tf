@@ -14,22 +14,15 @@
   * limitations under the License.
   */
 
-
-terraform {
-  required_version = ">= 0.13"
-
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 3.83, < 5.0"
-    }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 3.83, < 5.0"
-    }
-    kubectl = {
-      source  = "alekc/kubectl"
-      version = ">= 2.0.0"
-    }
-  }
+provider "google" {
+  project = var.project_id
+  zone    = var.zone
+  region  = var.region
 }
+
+provider "google-beta" {
+  project = var.project_id
+  zone    = var.zone
+  region  = var.region
+}
+

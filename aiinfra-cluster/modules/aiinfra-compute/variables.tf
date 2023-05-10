@@ -164,7 +164,7 @@ variable "bandwidth_tier" {
   Note that TIER_1 only works with specific machine families & shapes and must be using an image that supports gVNIC. See [official docs](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration) for more details.
   EOT
   type        = string
-  default     = "not_enabled"
+  default     = "gvnic_enabled"
 
   validation {
     condition     = contains(["not_enabled", "gvnic_enabled", "tier_1_enabled"], var.bandwidth_tier)
@@ -234,6 +234,12 @@ variable "enable_oslogin" {
   }
 }
 
+variable "enable_notebook" {
+  description = "The flag to enable jupyter notebook initialization."
+  type        = bool
+  default     = true
+}
+
 variable "network_interfaces" {
   type = list(object({
     network            = string,
@@ -278,10 +284,38 @@ variable "network_interfaces" {
   }
 }
 
-variable "enable_gke" {
-  description = "Flag to enable GKE cluster creation instead of MIG."
-  type        = bool
-  default     = false
+variable "orchestrator_type" {
+  description = "The job orchestrator to be used, can be either ray (default), slurm or gke."
+  type        = string
+
+  validation {
+    condition     = contains(["ray", "slurm", "gke", "none"], var.orchestrator_type)
+    error_message = "Variable orchestrator_type must be either ray, slurm, gke or none."
+  }
+}
+
+variable "slurm_node_count_static" {
+  description = "Number of statically allocated nodes in compute partition"
+  type        = number
+}
+
+variable "slurm_node_count_dynamic_max" {
+  description = "Maximum number of dynamically allocated nodes allowed in compute partition"
+  type        = number
+}
+
+variable "slurm_network_storage" {
+  description = "Storage to mount on all slurm instances"
+  type = list(object({
+    server_ip             = string,
+    remote_mount          = string,
+    local_mount           = string,
+    fs_type               = string,
+    mount_options         = string,
+    client_install_runner = map(string)
+    mount_runner          = map(string)
+  }))
+  default = []
 }
 
 variable "gke_version" {
@@ -291,14 +325,15 @@ variable "gke_version" {
 }
 
 variable "node_pools" {
-  description               = "The list of nodepools for the GKE cluster."
-  type                      = list(object({
-    name                    = string
-    zone                    = string
-    node_count              = number
-    machine_type            = string
-    guest_accelerator_count = number
-    guest_accelerator_type  = string
+  description                = "The list of nodepools for the GKE cluster."
+  type                       = list(object({
+    name                     = string
+    zone                     = string
+    node_count               = number
+    machine_type             = string
+    guest_accelerator_count  = number
+    guest_accelerator_type   = string
+    enable_compact_placement = bool
   }))
   default                   = []
 }

@@ -25,5 +25,6 @@ locals {
 
   validate_gke_version = (var.orchestrator_type != "gke" && var.gke_version != null) ? tobool("Orchestrator type is not GKE. Please remove gke_version variable .") : true
 
-  validate_image_for_ray = (var.orchestrator_type == "ray" && var.instance_image.project != "ml-images") ? tobool("Orchestrator type RAY is not supported for non-DLVM images. Please remove orchestrator_type variable or use an image from ml-images project.") : true
+  validate_slurm_static = (var.orchestrator_type != "slurm" && var.slurm_node_count_static != 0) ? tobool("slurm_node_count_static must not be set when orchestrator_type is not slurm") : true
+  validate_slurm_dynamic_max = (var.orchestrator_type != "slurm" && var.slurm_node_count_dynamic_max != 0) ? tobool("slurm_node_count_dynamic_max must not be set when orchestrator_type is not slurm") : true
 }

@@ -3,7 +3,7 @@
     "root_module": {
       "child_modules": [
         {
-          "address": "module.aiinfra-default-dashboard"
+          "address": "module.aiinfra-default-dashboard[0]"
         }
       ]
     }

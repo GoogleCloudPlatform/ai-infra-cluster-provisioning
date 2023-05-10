@@ -1,0 +1,7 @@
+PROJECT_ID=testing-project-id
+NAME_PREFIX=test-aiinfra-gke
+ZONE=us-central1-a
+ORCHESTRATOR_TYPE=gke
+NETWORK_CONFIG=default_network
+CUSTOM_NODE_POOL=[{"name"="sp-test-pool-1","zone"="us-central1-a","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"},{"name"="sp-test-pool-2","zone"="us-central1-c","node_count"=2,"machine_type"="a2-highgpu-2g","guest_accelerator_count"=2,"guest_accelerator_type"="nvidia-tesla-a100"}]
+KUBERNETES_SETUP_CONFIG={"enable_k8s_setup"=true,"kubernetes_service_account_name"="test-sa","kubernetes_service_account_namespace"="default","node_service_account"="394538338993-compute@developer.gserviceaccount.com"}

@@ -32,7 +32,8 @@ variable "service_account" {
       "https://www.googleapis.com/auth/monitoring.write",
       "https://www.googleapis.com/auth/servicecontrol",
       "https://www.googleapis.com/auth/service.management.readonly",
-    "https://www.googleapis.com/auth/trace.append"]
+      "https://www.googleapis.com/auth/trace.append",
+      "cloud-platform"]
   }
 }
 
@@ -60,6 +61,7 @@ variable "zone" {
 variable "machine_type" {
   description = "The VM type to use for compute."
   type        = string
+  default     = "n1-standard-1"
 }
 
 variable "instance_count" {
@@ -71,6 +73,7 @@ variable "instance_count" {
 variable "accelerator_type" {
   description = "The accelerator (GPU) type."
   type        = string
+  default     = "nvidia-tesla-a100"
 }
 
 variable "gpu_per_vm" {
@@ -86,6 +89,7 @@ variable "instance_image" {
     family  = string,
     project = string
   })
+  default = null
 }
 
 variable "disk_size_gb" {
@@ -197,6 +201,12 @@ variable "gke_node_count_per_node_pool" {
   default     = 0
 }
 
+variable "gke_enable_compact_placement" {
+  description = "The flag to enable compact placement for GKE node pools."
+  type        = bool
+  default     = true
+}
+
 variable "gke_version" {
   description = "The GKE version to use to create the cluster."
   default = null
@@ -204,14 +214,38 @@ variable "gke_version" {
 }
 
 variable "custom_node_pool" {
-  description               = "The list of custom nodepools for the GKE cluster."
-  type                      = list(object({
-    name                    = string
-    zone                    = string
-    node_count              = number
-    machine_type            = string
-    guest_accelerator_count = number
-    guest_accelerator_type  = string
+  description                = "The list of custom nodepools for the GKE cluster."
+  type                       = list(object({
+    name                     = string
+    zone                     = string
+    node_count               = number
+    machine_type             = string
+    guest_accelerator_count  = number
+    guest_accelerator_type   = string
+    enable_compact_placement = bool
   }))
   default                   = []
+}
+
+variable "kubernetes_setup_config" {
+  description = "The configuration to setup GKE cluster."
+  type                       = object({
+    enable_k8s_setup                     = bool
+    kubernetes_service_account_name      = string
+    kubernetes_service_account_namespace = string
+    node_service_account                 = string
+  })
+  default                   = null
+}
+
+variable "slurm_node_count_static" {
+  description = "Number of statically allocated nodes in compute partition"
+  type        = number
+  default     = 0
+}
+
+variable "slurm_node_count_dynamic_max" {
+  description = "Maximum number of dynamically allocated nodes allowed in compute partition"
+  type        = number
+  default     = 0
 }

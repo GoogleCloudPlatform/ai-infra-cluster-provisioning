@@ -1,15 +1,4 @@
 project_id = "project"
-service_account = {
-  email = "email"
-  scopes = [
-    "https://www.googleapis.com/auth/devstorage.read_write",
-    "https://www.googleapis.com/auth/logging.write",
-    "https://www.googleapis.com/auth/monitoring.write",
-    "https://www.googleapis.com/auth/servicecontrol",
-    "https://www.googleapis.com/auth/service.management.readonly",
-    "https://www.googleapis.com/auth/trace.append"
-  ]
-}
 name_prefix = "test"
 deployment_name = "test-dpl"
 zone = "us-central1-a"
@@ -34,7 +23,10 @@ orchestrator_type = "none"
 startup_command = "echo"
 enable_ops_agent = "ops"
 enable_notebook = "note"
-gke_node_pool_count = "node"
+slurm_node_count_static = 3
+slurm_node_count_dynamic_max = 3
+gke_node_pool_count = 3
 gke_node_count_per_node_pool = 3
 custom_node_pool = custom
+kubernetes_setup_config = config
 gke_version = "1.25.7-gke.1000"

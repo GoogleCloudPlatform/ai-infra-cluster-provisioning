@@ -17,9 +17,6 @@
 locals {
   depl_name         = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
 
-  default_metadata  = merge(var.metadata, { VmDnsSetting = "ZonalPreferred", enable-oslogin = "TRUE", install-nvidia-driver = "True", })
-  metadata          = var.enable_notebook && var.instance_image.project == "ml-images" ? merge(local.default_metadata, { proxy-mode="project_editors", }) : local.default_metadata
-
   gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
 
@@ -34,7 +31,7 @@ locals {
     ]
   ])
 
-  ray_setup = var.orchestrator_type == "ray" && var.instance_image.project == "ml-images" ? [
+  ray_setup = var.orchestrator_type == "ray" ? [
     {
       "type"        = "shell"
       "destination" = "/tmp/setup_ray.sh"
@@ -62,12 +59,13 @@ locals {
   basic_node_pool = (var.orchestrator_type == "gke" && var.gke_node_pool_count > 0) ? [
     for idx in range(var.gke_node_pool_count) :
     {
-      name                    = "${var.name_prefix}-nodepool-${idx}"
-      zone                    = var.zone
-      node_count              = var.gke_node_count_per_node_pool
-      machine_type            = var.machine_type
-      guest_accelerator_count = var.gpu_per_vm
-      guest_accelerator_type  = var.accelerator_type
+      name                     = "${var.name_prefix}-nodepool-${idx}"
+      zone                     = var.zone
+      node_count               = var.gke_node_count_per_node_pool
+      machine_type             = var.machine_type
+      guest_accelerator_count  = var.gpu_per_vm
+      guest_accelerator_type   = var.accelerator_type
+      enable_compact_placement = var.gke_enable_compact_placement
     }
   ] : []
 
@@ -75,7 +73,32 @@ locals {
   gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-widget-data.gce_gke_gpu_utilization_widgets : []
   vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
+  kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
+    enable_k8s_setup                     = var.orchestrator_type == "gke"
+    kubernetes_service_account_name      = "aiinfra-gke-sa"
+    kubernetes_service_account_namespace = "default"
+    node_service_account                 = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
+  }
+
+  normalized_instance_image = var.instance_image == null ? null : {
+    project    = var.instance_image.project,
+    family  = var.instance_image.family == null ? "" : var.instance_image.family,
+    name = var.instance_image.name == null ? "" : var.instance_image.name
+  }
+
+  default_instance_image = var.orchestrator_type == "slurm" ? {
+    family  = "schedmd-v5-slurm-22-05-6-hpc-centos-7"
+    project = "schedmd-slurm-public"
+    name    = ""
+  } : {
+    family  = "pytorch-latest-gpu-debian-11-py310"
+    project = "deeplearning-platform-release"
+    name    = ""
+  }
+  instance_image = var.instance_image == null ? local.default_instance_image : local.normalized_instance_image
 }
+
+data "google_compute_default_service_account" "default" {}
 
 module "aiinfra-network" {
   source          = "./modules/aiinfra-network"
@@ -131,8 +154,8 @@ module "aiinfra-compute" {
   source               = "./modules/aiinfra-compute"
   subnetwork_self_link = module.aiinfra-network.subnetwork_self_link
   service_account = {
-    email  = var.service_account.email
-    scopes = ["cloud-platform"]
+    email  = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
+    scopes = var.service_account.scopes
   }
   instance_count    = var.instance_count
   project_id        = var.project_id
@@ -144,13 +167,14 @@ module "aiinfra-compute" {
     collocation               = "COLLOCATED"
     vm_count                  = var.instance_count
   }
-  instance_image      = var.instance_image
+  enable_notebook     = (local.instance_image.project != "ml-images" && local.instance_image.project != "deeplearning-platform-release") ? false : var.enable_notebook
+  instance_image      = local.instance_image
   on_host_maintenance = "TERMINATE"
   machine_type        = var.machine_type
   zone                = var.zone
   region              = var.region
   startup_script      = module.startup.startup_script
-  metadata            = local.metadata
+  metadata            = var.metadata
   labels              = merge(var.labels, { aiinfra_role = "compute", })
   name_prefix         = var.name_prefix
   guest_accelerator = {
@@ -162,8 +186,14 @@ module "aiinfra-compute" {
   depends_on = [
     module.aiinfra-network
   ]
-  enable_gke = var.orchestrator_type == "gke"
-  gke_version = var.gke_version
+  orchestrator_type            = var.orchestrator_type
+  slurm_node_count_static      = var.slurm_node_count_static
+  slurm_node_count_dynamic_max = var.slurm_node_count_dynamic_max
+  slurm_network_storage = flatten([
+    module.nfs_filestore[*].network_storage,
+    module.gcsfuse_mount[*].network_storage,
+  ])
+  gke_version                  = var.gke_version
   
   node_pools = length(var.custom_node_pool) != 0 || length(local.basic_node_pool) != 0 ? coalescelist(var.custom_node_pool, local.basic_node_pool) : []
 }
@@ -184,4 +214,21 @@ module "aiinfra-default-dashboard" {
   title           = "AI Accelerator Experience Dashboard"
   widgets         = var.orchestrator_type != "gke" ? concat(local.nvidia_widgets, local.gce_gke_gpu_utilization_widgets) : local.gce_gke_gpu_utilization_widgets
   depends_on      = [module.dashboard-widget-data]
+}
+
+module "aiinfra-k8s-setup" {
+  source                = "./modules/kubernetes-operations"
+  project_id            = var.project_id
+  cluster_id            = local.kubernetes_setup_config.enable_k8s_setup ? module.aiinfra-compute.gke_cluster_id : null
+  gke_cluster_exists    = local.kubernetes_setup_config.enable_k8s_setup
+  install_nvidia_driver = var.gpu_per_vm > 0
+  setup_kubernetes_service_account = (
+    local.kubernetes_setup_config.enable_k8s_setup ?
+    {
+      kubernetes_service_account_name = local.kubernetes_setup_config.kubernetes_service_account_name
+      kubernetes_service_account_namespace = local.kubernetes_setup_config.kubernetes_service_account_namespace
+      google_service_account_name = local.kubernetes_setup_config.node_service_account
+    }:
+    null
+  )
 }
