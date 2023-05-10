@@ -19,6 +19,11 @@ output "gke_cluster_name" {
   description = "Google Kubernetes cluster name"
 }
 
+output "gke_cluster_id" {
+  value       = var.orchestrator_type == "gke" ? module.aiinfra-gke[0].gke_cluster_id : ""
+  description = "Google Kubernetes cluster id"
+}
+
 output "gke_cluster_endpoint" {
   value       = var.orchestrator_type == "gke" ? module.aiinfra-gke[0].gke_cluster_endpoint : ""
   description = "Kubernetes cluster API endpoint"

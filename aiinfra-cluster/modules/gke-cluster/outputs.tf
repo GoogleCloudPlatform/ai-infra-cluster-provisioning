@@ -19,6 +19,11 @@ output "gke_cluster_name" {
   description = "Google Kubernetes cluster name"
 }
 
+output "gke_cluster_id" {
+  value       = resource.google_container_cluster.gke-cluster.id
+  description = "Google Kubernetes cluster id"
+}
+
 output "gke_cluster_endpoint" {
   value       = "https://${resource.google_container_cluster.gke-cluster.endpoint}"
   description = "Kubernetes cluster API endpoint"
