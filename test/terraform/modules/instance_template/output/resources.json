@@ -1,0 +1,66 @@
+{
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_instance_template.template",
+          "values": {
+            "advanced_machine_features": [
+              {
+                "threads_per_core": 1
+              }
+            ],
+            "disk": [
+              {
+                "auto_delete": true,
+                "boot": true,
+                "disk_size_gb": 50,
+                "disk_type": "pd-standard"
+              }
+            ],
+            "guest_accelerator": [
+              {
+                "count": 1,
+                "type": "nvidia-tesla-v100"
+              }
+            ],
+            "machine_type": "n1-standard-8",
+            "metadata": {
+              "enable-oslogin": "TRUE",
+              "foo": "bar",
+              "install-nvidia-driver": "True",
+              "startup-script": "echo hello world",
+              "VmDnsSetting": "ZonalPreferred"
+            },
+            "name": "ci-tpl",
+            "network_interface": [
+              {
+                "access_config": [
+                  {}
+                ],
+                "nic_type": "GVNIC",
+                "subnetwork": "https://www.googleapis.com/compute/v1/projects/gce-ai-infra/regions/us-central1/subnetworks/default"
+              }
+            ],
+            "project": "gce-ai-infra",
+            "region": "us-central1",
+            "scheduling": [
+              {
+                "automatic_restart": false,
+                "on_host_maintenance": "TERMINATE"
+              }
+            ],
+            "service_account": [
+              {
+                "email": "foo@bar.xyz",
+                "scopes": [
+                  "foobar"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

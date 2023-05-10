@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # source all files containing tests
+. ./test/terraform/modules/instance_template/tests.sh
 . ./test/terraform/modules/network/tests.sh
 #. ./test/aiinfra-cluster/installation_scripts/install_cloud_ops_agent.sh
 #. ./test/aiinfra-cluster/terraform.sh
