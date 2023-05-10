@@ -221,7 +221,7 @@ module "aiinfra-k8s-setup" {
   project_id            = var.project_id
   cluster_id            = local.kubernetes_setup_config.enable_k8s_setup ? module.aiinfra-compute.gke_cluster_id : null
   gke_cluster_exists    = local.kubernetes_setup_config.enable_k8s_setup
-  install_nvidia_driver = true
+  install_nvidia_driver = var.gpu_per_vm > 0
   setup_kubernetes_service_account = (
     local.kubernetes_setup_config.enable_k8s_setup ?
     {
