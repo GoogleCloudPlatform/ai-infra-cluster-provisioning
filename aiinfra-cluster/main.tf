@@ -217,15 +217,18 @@ module "aiinfra-default-dashboard" {
 }
 
 module "aiinfra-k8s-setup" {
-  source              = "./modules/kubernetes-operations"
-  project             = var.project_id
-  gke_conn            = {
-    gke_cluster_endpoint           = module.aiinfra-compute.gke_cluster_endpoint
-    gke_certificate_authority_data = module.aiinfra-compute.gke_certificate_authority_data
-    gke_token                      = module.aiinfra-compute.gke_token
-  }
-  enable_k8s_setup                     = local.kubernetes_setup_config.enable_k8s_setup
-  kubernetes_service_account_name      = local.kubernetes_setup_config.kubernetes_service_account_name
-  kubernetes_service_account_namespace = local.kubernetes_setup_config.kubernetes_service_account_namespace
-  node_service_account = local.kubernetes_setup_config.node_service_account
+  source                = "./modules/kubernetes-operations"
+  project_id            = var.project_id
+  cluster_id            = local.kubernetes_setup_config.enable_k8s_setup ? module.aiinfra-compute.gke_cluster_id : null
+  gke_cluster_exists    = local.kubernetes_setup_config.enable_k8s_setup
+  install_nvidia_driver = true
+  setup_kubernetes_service_account = (
+    local.kubernetes_setup_config.enable_k8s_setup ?
+    {
+      kubernetes_service_account_name = local.kubernetes_setup_config.kubernetes_service_account_name
+      kubernetes_service_account_namespace = local.kubernetes_setup_config.kubernetes_service_account_namespace
+      google_service_account_name = local.kubernetes_setup_config.node_service_account
+    }:
+    null
+  )
 }

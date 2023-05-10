@@ -14,38 +14,50 @@
   * limitations under the License.
   */
 
+locals {
+  split_cluster_id = var.gke_cluster_exists ? split("/", var.cluster_id) : null
+}
+
+data "google_container_cluster" "gke_cluster" {
+  count = var.gke_cluster_exists ? 1 : 0
+  name     = local.split_cluster_id[5]
+  location = local.split_cluster_id[3]
+}
+
+data "google_client_config" "default" {}
+
 provider "kubernetes" {
-    host                   = var.gke_conn.gke_cluster_endpoint
-    cluster_ca_certificate = base64decode(var.gke_conn.gke_certificate_authority_data)
-    token                  = var.gke_conn.gke_token
+  host                   = var.gke_cluster_exists ? "https://${data.google_container_cluster.gke_cluster[0].endpoint}" : ""
+  cluster_ca_certificate = var.gke_cluster_exists ? base64decode(data.google_container_cluster.gke_cluster[0].master_auth.0.cluster_ca_certificate) : ""
+  token                  = data.google_client_config.default.access_token
 }
 
 provider "kubectl" {
-  host                   = var.gke_conn.gke_cluster_endpoint
-  cluster_ca_certificate = base64decode(var.gke_conn.gke_certificate_authority_data)
-  token                  = var.gke_conn.gke_token
+  host                   = var.gke_cluster_exists ? "https://${data.google_container_cluster.gke_cluster[0].endpoint}" : ""
+  cluster_ca_certificate = var.gke_cluster_exists ? base64decode(data.google_container_cluster.gke_cluster[0].master_auth.0.cluster_ca_certificate) : ""
+  token                  = data.google_client_config.default.access_token
   load_config_file       = false
 }
 
 // Binding KSA to google service account.
 resource "google_service_account_iam_binding" "default-workload-identity" {
-  count = var.enable_k8s_setup ? 1 : 0
-  service_account_id = "projects/${var.project}/serviceAccounts/${var.node_service_account}"
+  count = var.setup_kubernetes_service_account != null && var.gke_cluster_exists ? 1 : 0
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.setup_kubernetes_service_account.google_service_account_name}"
   role               = "roles/iam.workloadIdentityUser"
   members = [
-    "serviceAccount:${var.project}.svc.id.goog[${var.kubernetes_service_account_namespace}/${var.kubernetes_service_account_name}]",
+    "serviceAccount:${var.project_id}.svc.id.goog[${var.setup_kubernetes_service_account.kubernetes_service_account_namespace}/${var.setup_kubernetes_service_account.kubernetes_service_account_name}]",
   ]
 }
 
 // Creating and Annotating KSA with google service account
 resource "kubernetes_service_account" "gke-sa" {
   automount_service_account_token = false
-  count = var.enable_k8s_setup ? 1 : 0
+  count = var.setup_kubernetes_service_account != null && var.gke_cluster_exists ? 1 : 0
   metadata {
-    name      = var.kubernetes_service_account_name
-    namespace = var.kubernetes_service_account_namespace
+    name      = var.setup_kubernetes_service_account.kubernetes_service_account_name
+    namespace = var.setup_kubernetes_service_account.kubernetes_service_account_namespace
     annotations = {
-      "iam.gke.io/gcp-service-account" = var.node_service_account
+      "iam.gke.io/gcp-service-account" = var.setup_kubernetes_service_account.google_service_account_name
     }
   }
 }
@@ -57,5 +69,6 @@ data "http" "nvidia_driver_installer_manifest" {
 }
 
 resource "kubectl_manifest" "nvidia_driver_installer" {
-  yaml_body = data.http.nvidia_driver_installer_manifest.body
+  count = var.install_nvidia_driver && var.gke_cluster_exists ? 1 : 0
+  yaml_body = data.http.nvidia_driver_installer_manifest.response_body
 }

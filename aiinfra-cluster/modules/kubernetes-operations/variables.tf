@@ -14,45 +14,41 @@
  * limitations under the License.
 */
 
-variable "project" {
+variable "project_id" {
   description = "Name of the project to use for instantiating clusters."
   type        = string
 }
 
-variable "gke_conn" {
-  description                = "The GKE cluster connection information."
-  type                       = object({
-    gke_cluster_endpoint           = string
-    gke_certificate_authority_data = string
-    gke_token                      = string
+variable "cluster_id" {
+  description = "An identifier for the resource with format projects/<project_id>/locations/<region>/clusters/<name>."
+  type = string
+}
+
+variable "gke_cluster_exists" {
+  description = "If set to false then the kubernetes providers will not be configured."
+  type = bool
+  default = true
+}
+
+variable "install_nvidia_driver" {
+  description = "If true will create a DaemonSet to install nvidia drivers."
+  type = bool
+  default = false
+}
+
+variable "setup_kubernetes_service_account" {
+  description = <<-EOT
+    If set, will configure a kubernetes service account and link it to a Google service account.
+
+    Subfields:
+    kubernetes_service_account_name: The Kubernetes Service Account name.
+    kubernetes_service_account_namespace: The Kubernetes Service Account namespace.
+    google_service_account_name: The Google Service Account name. Use empty string for default compute service account.
+    EOT
+  type = object({
+    kubernetes_service_account_name = string
+    kubernetes_service_account_namespace = string
+    google_service_account_name = string
   })
-  default                    = {
-    gke_cluster_endpoint           = ""
-    gke_certificate_authority_data = ""
-    gke_token                      = ""
-  }
-}
-
-variable "kubernetes_service_account_name" {
-  description = "The Kubernetes Service Account name."
-  type        = string
-  default     = "aiinfra-gke-sa"
-}
-
-variable "kubernetes_service_account_namespace" {
-  description = "The Kubernetes Service Account namespace."
-  type        = string
-  default     = "default"
-}
-
-variable "node_service_account" {
-  description = "The Google Service Account name."
-  type        = string
-  default     = ""
-}
-
-variable "enable_k8s_setup" {
-  description = "Flag to represent if kubernetes setup is needed."
-  type        = bool
-  default     = false
+  default = null
 }

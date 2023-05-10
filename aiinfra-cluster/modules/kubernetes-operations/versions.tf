@@ -14,14 +14,21 @@
   * limitations under the License.
   */
 
-
 terraform {
   required_version = ">= 0.13"
 
   required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.10"
+    }
     kubectl = {
       source  = "gavinbunney/kubectl"
       version = ">= 1.7.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.3"
     }
   }
 }
