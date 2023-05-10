@@ -1,7 +1,7 @@
 . ./test/helpers.sh
 
 network::src_dir () {
-    echo "${PWD}/aiinfra-cluster/modules/aiinfra-network"
+    echo "${PWD}/terraform/modules/network"
 }
 
 network::input_dir () {
