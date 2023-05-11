@@ -15,41 +15,77 @@
   */
 
 locals {
-  dcgm_dashboard_data                    = jsondecode(tostring(data.http.nvidia_dcgm_dashboard.response_body))
-  nvml_dashboard_data                    = jsondecode(tostring(data.http.nvidia_nvml_dashboard.response_body))
-  gce_gke_gpu_utilization_dashboard_data = jsondecode(tostring(data.http.gce_gke_gpu_utilization_dashboard.response_body))
+  gce_gke_gpu_utilization_data = try(
+    jsondecode(tostring(data.http.gce-gke-gpu-utilization[0].response_body)),
+    null,
+  )
+  nvidia_dcgm_data = try(
+    jsondecode(tostring(data.http.nvidia-dcgm[0].response_body)),
+    null,
+  )
+  nvidia_nvml_data = try(
+    jsondecode(tostring(data.http.nvidia-nvml[0].response_body)),
+    null,
+  )
 
-  nvidia_dcgm_widgets = [
-    for tile in local.dcgm_dashboard_data.mosaicLayout.tiles : jsonencode(tile.widget)
-  ]
-  nvidia_nvml_widgets = [
-    for tile in local.nvml_dashboard_data.mosaicLayout.tiles : jsonencode(tile.widget)
-  ]
-  gce_gke_gpu_utilization_widgets = [
-    for tile in local.gce_gke_gpu_utilization_dashboard_data.mosaicLayout.tiles : jsonencode(tile.widget)
-  ]
+  widgets = concat(
+    try(
+      [
+        for tile in local.gce_gke_gpu_utilization_data.mosaicLayout.tiles
+        : jsonencode(tile.widget)
+      ],
+      [],
+    ),
+    try(
+      [
+        for tile in local.nvidia_dcgm_data.mosaicLayout.tiles
+        : jsonencode(tile.widget)
+      ],
+      [],
+    ),
+    try(
+      [
+        for tile in local.nvidia_nvml_data.mosaicLayout.tiles
+        : jsonencode(tile.widget)
+      ],
+      [],
+    ),
+  )
 }
 
-data "http" "nvidia_dcgm_dashboard" {
-  url = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/nvidia-dcgm.json"
+data "http" "gce-gke-gpu-utilization" {
+  url   = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/gce-gke-gpu-utilization.json"
+  count = var.enable_gce_gke_gpu_utilization_widgets ? 1 : 0
 
   request_headers = {
     Accept = "application/json"
   }
 }
 
-data "http" "nvidia_nvml_dashboard" {
-  url = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/nvidia-nvml.json"
+data "http" "nvidia-dcgm" {
+  url   = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/nvidia-dcgm.json"
+  count = var.enable_nvidia_dcgm_widgets ? 1 : 0
 
   request_headers = {
     Accept = "application/json"
   }
 }
 
-data "http" "gce_gke_gpu_utilization_dashboard" {
-  url = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/gce-gke-gpu-utilization.json"
+data "http" "nvidia-nvml" {
+  url   = "https://cloud-monitoring-dashboards.googleusercontent.com/samples/nvidia-gpu/nvidia-nvml.json"
+  count = var.enable_nvidia_nvml_widgets ? 1 : 0
 
   request_headers = {
     Accept = "application/json"
   }
+}
+
+module "dashboard" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/monitoring/dashboard/?ref=v1.17.0"
+
+  base_dashboard  = "Empty"
+  deployment_name = var.resource_prefix
+  project_id      = var.project_id
+  title           = "AI Accelerator Experience Dashboard"
+  widgets         = local.widgets
 }

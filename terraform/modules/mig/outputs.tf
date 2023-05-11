@@ -16,5 +16,5 @@
 
 output "instructions" {
   description = "Instructions for accessing the dashboard"
-  value       = module.dashboard.instructions
+  value       = try(module.dashboard[0].instructions, "Dashboard not created")
 }

@@ -18,6 +18,7 @@ variable "project_id" {
   description = "GCP Project ID to which the cluster will be deployed."
   type        = string
 }
+
 variable "resource_prefix" {
   description = <<-EOT
     Arbitrary string with which all names of newly created resources will be

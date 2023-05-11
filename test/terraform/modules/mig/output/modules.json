@@ -6,6 +6,9 @@
           "address": "module.compute_instance_template"
         },
         {
+          "address": "module.dashboard"
+        },
+        {
           "address": "module.startup"
         }
       ],
