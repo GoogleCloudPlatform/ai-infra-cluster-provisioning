@@ -4,15 +4,15 @@ guest_accelerator = {
   type = "nvidia-tesla-v100"
   count = 1
 }
-extra_metadata = {
-  foo = "bar"
-}
 machine_image = {
   project = "ubuntu-os-cloud"
   family = "ubuntu-2204-lts"
   name = null
 }
 machine_type = "n1-standard-8"
+metadata = {
+  foo = "bar"
+}
 project_id = "gce-ai-infra"
 region = "us-central1"
 resource_prefix = "ci"
