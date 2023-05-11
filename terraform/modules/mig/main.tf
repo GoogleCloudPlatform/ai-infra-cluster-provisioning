@@ -14,12 +14,38 @@
  * limitations under the License.
 */
 
-module "compute_image_template" {
+locals {
+  region = join("-", slice(split("-", var.zone), 0, 2))
+}
+
+module "network" {
+  source = "../network"
+
+  network_config = var.network_config
+  project_id = var.project_id
+  region = local.region
+  resource_prefix = var.resource_prefix
+}
+
+module "compute_instance_template" {
   source = "../instance_template"
 
-  instance_image = local.instance_image
-  machine_type = var.machine_type
   disk_size_gb = var.disk_size_gb
+  disk_type = var.disk_type
+  guest_accelerator = var.guest_accelerator
+  machine_image = var.machine_image
+  machine_type = var.machine_type
+  metadata = null
+  project_id = var.project_id
+  region = local.region
+  resource_prefix = var.resource_prefix
+  service_account = var.service_account
+  startup_script = var.startup_script
+  subnetwork_self_links = module.network.subnetwork_self_links
+
+  depends_on = [
+    module.network,
+  ]
 }
 
 resource "google_compute_instance_group_manager" "mig" {
