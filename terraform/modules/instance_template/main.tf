@@ -16,9 +16,9 @@
 
 locals {
   machine_image = {
-    project = var.machine_image.project
     family  = var.machine_image.family != "" ? var.machine_image.family : null
     name    = var.machine_image.name != "" ? var.machine_image.name : null
+    project = var.machine_image.project
   }
 
   _image_or_family = coalesce(
@@ -44,7 +44,7 @@ locals {
     var.startup_script != null ? {
       startup-script = var.startup_script
     } : {},
-    var.extra_metadata != null ? var.extra_metadata : {},
+    var.metadata != null ? var.metadata : {},
   )
 
   service_account = var.service_account != null ? var.service_account : {
