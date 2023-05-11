@@ -1,4 +1,4 @@
-network_config = "default"
 project_id = "gce-ai-infra"
-region = "us-central1"
 resource_prefix = "ci"
+target_size = 1
+zone = "us-central1-a"

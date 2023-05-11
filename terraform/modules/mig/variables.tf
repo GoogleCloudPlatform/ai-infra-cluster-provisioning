@@ -15,317 +15,316 @@
 */
 
 variable "project_id" {
-  description = "Project in which the HPC deployment will be created"
+  description = "GCP Project ID to which the cluster will be deployed."
+  type        = string
+}
+variable "resource_prefix" {
+  description = <<-EOT
+    Arbitrary string with which all names of newly created resources will be
+    prefixed.
+    EOT
   type        = string
 }
 
-variable "region" {
-  description = "Region in which the HPC deployment will be created"
-  type        = string
-}
+variable "target_size" {
+  description = <<-EOT
+    The number of running instances for this managed instance group.
 
-variable "instance_count" {
-  description = "Number of instances"
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#target_size)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--size)
+    EOT
   type        = number
-  default     = 1
 }
 
-variable "instance_image" {
-  description = "Instance Image"
+variable "zone" {
+  description = <<-EOT
+    The zone that instances in this group should be created in.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone)
+    EOT
+  type        = string
+}
+
+variable "disk_size_gb" {
+  description = <<-EOT
+    The size of the image in gigabytes for the boot disk of each instance.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#disk_size_gb
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--boot-disk-size)"
+    EOT
+  type        = number
+  default     = 128
+}
+
+variable "disk_type" {
+  description = <<-EOT
+    The GCE disk type for the boot disk of each instance.
+
+    Possible values:
+    - `"pd-ssd"`
+    - `"local-ssd"`
+    - `"pd-balanced"`
+    - `"pd-standard"`
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#disk_type)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--boot-disk-type)"
+    EOT
+  type        = string
+  default     = "pd-standard"
+}
+
+variable "filestore_new" {
+  description = <<-EOT
+    Configurations to mount newly created network storage. Each object describes
+    NFS file-servers to be hosted in Filestore.
+
+    Related docs:
+    - [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/filestore#inputs)
+
+    ### `filestore_new.filestore_tier`
+
+    The service tier of the instance.
+
+    Possible values:
+    - `"BASIC_HDD"`
+    - `"BASIC_SSD"`
+    - `"HIGH_SCALE_SSD"`
+    - `"ENTERPRISE"`
+
+    Related docs:
+    - [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/filestore#input_filestore_tier)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/filestore/instances/create#--tier)
+
+    ### `filestore_new.local_mount`
+
+    Mountpoint for this filestore instance.
+
+    Related docs:
+    - [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/filestore#input_local_mount)
+
+    ### `filestore_new.size_gb`
+
+    Storage size of the filestore instance in GB.
+
+    Related docs:
+    - [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/filestore#input_local_mount)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/filestore/instances/create#--file-share)
+    EOT
+  type = list(object({
+    filestore_tier = string
+    local_mount    = string
+    size_gb        = number
+  }))
+  default = []
+}
+
+variable "gcsfuse_existing" {
+  description = <<-EOT
+    Configurations to mount existing network storage. Each object describes
+    Cloud Storage Buckets to be mounted with Cloud Storage FUSE.
+
+    Related docs:
+    - [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/pre-existing-network-storage#inputs)
+
+    ### `gcsfuse_existing.local_mount`
+
+    The mount point where the contents of the device may be accessed after mounting.
+
+    Related docs:
+    - [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/pre-existing-network-storage#input_local_mount)
+
+    ### `gcsfuse_existing.remote_mount`
+
+    Bucket name without “gs://”.
+
+    Related docs:
+    - [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/pre-existing-network-storage#input_remote_mount)
+    EOT
+  type = list(object({
+    local_mount  = string
+    remote_mount = string
+  }))
+  default = []
+}
+
+variable "guest_accelerator" {
+  description = <<-EOT
+    List of the type and count of accelerator cards attached to each instance.
+    This must be `null` when `machine_type` is of an
+    [accelerator-optimized machine family](https://cloud.google.com/compute/docs/accelerator-optimized-machines)
+    such as A2 or G2.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#guest_accelerator)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--accelerator)
+
+    ### `guest_accelerator.count`
+
+    The number of the guest accelerator cards exposed to each instance.
+
+    ### `guest_accelerator.type`
+
+    The accelerator type resource to expose to each instance.
+
+    Possible values:
+    - `"nvidia-tesla-k80"`
+    - `"nvidia-tesla-p100"`
+    - `"nvidia-tesla-p4"`
+    - `"nvidia-tesla-t4"`
+    - `"nvidia-tesla-v100"`
+
+    Related docs:
+    - [possible values](https://cloud.google.com/compute/docs/gpus#nvidia_gpus_for_compute_workloads)
+    EOT
   type = object({
-    name    = string,
-    family  = string,
+    count = number
+    type  = string
+  })
+  default = null
+}
+
+variable "machine_image" {
+  description = <<-EOT
+    The image with which this disk will initialize.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#source_image)
+
+    ### `machine_image.family`
+
+    The family of images from which the latest non-deprecated image will be selected. Conflicts with `machine_image.name`.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-family)
+
+    ### `machine_image.name`
+
+    The name of a specific image. Conflicts with `machin_image.family`.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image)
+
+    ### `machine_image.project`
+
+    The project_id to which this image belongs.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#project)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-project)
+    EOT
+  type = object({
+    family  = string
+    name    = string
     project = string
   })
-
   default = {
-    family  = "pytorch-latest-gpu-debian-11-py310"
     project = "deeplearning-platform-release"
+    family  = "pytorch-latest-gpu-debian-11-py310"
     name    = null
   }
 
   validation {
     condition = (
-      var.instance_image != null
-      && var.instance_image.project != null
-      && length(var.instance_image.project) != 0
-      && (
-        (
-          var.instance_image.name != null
-          && length(var.instance_image.name) != 0
-        )
-        || (
-          var.instance_image.family != null
-          && length(var.instance_image.family) != 0
-        )
-      )
-      && !(
-        var.instance_image.name != null
-        && length(var.instance_image.name) != 0
-        && var.instance_image.family != null
-        && length(var.instance_image.family) != 0
-      )
+      var.machine_image != null
+      // project is non-empty
+      && alltrue([
+        for empty in [null, ""]
+        : var.machine_image.project != empty
+      ])
+      // at least one is non-empty
+      && anytrue([
+        for value in [var.machine_image.name, var.machine_image.family]
+        : alltrue([for empty in [null, ""] : value != empty])
+      ])
+      // at least one is empty
+      && anytrue([
+        for value in [var.machine_image.name, var.machine_image.family]
+        : anytrue([for empty in [null, ""] : value == empty])
+      ])
     )
     error_message = "project must be non-empty exactly one of family or name must be non-empty"
   }
 }
 
-variable "disk_size_gb" {
-  description = "Size of disk for instances."
-  type        = number
-  default     = 200
-}
-
-variable "disk_type" {
-  description = "Disk type for instances."
-  type        = string
-  default     = "pd-standard"
-}
-
-variable "name_prefix" {
-  description = "Name Prefix"
-  type        = string
-  default     = null
-}
-
-variable "disable_public_ips" {
-  description = "If set to true, instances will not have public IPs"
-  type        = bool
-  default     = false
-}
-
 variable "machine_type" {
-  description = "Machine type to use for the instance creation"
+  description = <<-EOT
+    The name of a Google Compute Engine machine type.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type)
+    EOT
   type        = string
-  default     = "c2-standard-60"
+  default     = "a2-highgpu-2g"
 }
 
-variable "network_storage" {
-  description = "An array of network attached storage mounts to be configured."
-  type = list(object({
-    server_ip     = string,
-    remote_mount  = string,
-    local_mount   = string,
-    fs_type       = string,
-    mount_options = string
-  }))
-  default = []
-}
+variable "network_config" {
+  description = <<-EOT
+    The network configuration to specify the type of VPC to be used.
 
-variable "deployment_name" {
-  description = "Name of the deployment, used to name the cluster"
-  type        = string
-}
-
-variable "labels" {
-  description = "Labels to add to the instances. List key, value pairs."
-  type        = any
-}
-
-variable "network_self_link" {
-  description = "The self link of the network to attach the VM."
+    Possible values:
+    - `"default"`
+    - `"new_multi_nic"`
+    - `"new_single_nic"`
+    EOT
   type        = string
   default     = "default"
+
+  validation {
+    condition = contains(
+      ["default", "new_multi_nic", "new_single_nic"],
+      var.network_config
+    )
+    error_message = "network_config must be one of ['default', 'new_multi_nic', 'new_single_nic']."
+  }
 }
 
-variable "subnetwork_self_link" {
-  description = "The self link of the subnetwork to attach the VM."
-  type        = string
-  default     = null
-}
+variable "service_account" {
+  description = <<-EOT
+    Service account to attach to the instance.
 
-variable "zone" {
-  description = "Compute Platform zone"
-  type        = string
-}
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#service_account)
 
-variable "metadata" {
-  description = "Metadata, provided as a map"
-  type        = map(string)
-  default     = {}
+    ### `service_account.email`
+
+    The service account e-mail address. If not given, the default Google
+    Compute Engine service account is used.
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#email)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--service-account)
+
+    ### `service_account.scopes`
+
+    A list of service scopes. Both OAuth2 URLs and gcloud short names are
+    supported. To allow full access to all Cloud APIs, use the
+    `"cloud-platform"` scope. See a complete list of scopes
+    [here](https://cloud.google.com/sdk/gcloud/reference/alpha/compute/instances/set-scopes#--scopes)
+
+    Related docs:
+    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#scopes)
+    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--scopes)
+    EOT
+  type = object({
+    email  = string,
+    scopes = set(string)
+  })
+  default = null
 }
 
 variable "startup_script" {
-  description = "Startup script used on the instance"
-  type        = string
-  default     = null
-}
-
-variable "guest_accelerator" {
-  description = "The type and count of accelerator card attached to the instance."
-  type = object({
-    type  = string,
-    count = number
-  })
-  default = null
-}
-
-variable "on_host_maintenance" {
-  description = "Describes maintenance behavior for the instance. If left blank this will default to `MIGRATE` except for when `placement_policy`, spot provisioning, or GPUs require it to be `TERMINATE`"
-  type        = string
-  default     = null
-  validation {
-    condition     = var.on_host_maintenance == null ? true : contains(["MIGRATE", "TERMINATE"], var.on_host_maintenance)
-    error_message = "When set, the on_host_maintenance must be set to MIGRATE or TERMINATE."
-  }
-}
-
-variable "placement_policy" {
-  description = "Control where your VM instances are physically located relative to each other within a zone."
-  type = object({
-    vm_count                  = number,
-    availability_domain_count = number,
-    collocation               = string,
-  })
-  default = null
-}
-
-variable "tags" {
-  description = "Network tags, provided as a list"
-  type        = list(string)
-  default     = []
-}
-
-variable "threads_per_core" {
   description = <<-EOT
-  Sets the number of threads per physical core. By setting threads_per_core
-  to 2, Simultaneous Multithreading (SMT) is enabled extending the total number
-  of virtual cores. For example, a machine of type c2-standard-60 will have 60
-  virtual cores with threads_per_core equal to 2. With threads_per_core equal
-  to 1 (SMT turned off), only the 30 physical cores will be available on the VM.
-
-  The default value of \"0\" will turn off SMT for supported machine types, and
-  will fall back to GCE defaults for unsupported machine types (t2d, shared-core 
-  instances, or instances with less than 2 vCPU). 
-
-  Disabling SMT can be more performant in many HPC workloads, therefore it is
-  disabled by default where compatible.
-
-  null = SMT configuration will use the GCE defaults for the machine type
-  0 = SMT will be disabled where compatible (default)
-  1 = SMT will always be disabled (will fail on incompatible machine types)
-  2 = SMT will always be enabled (will fail on incompatible machine types)
-  EOT
-  type        = number
-  default     = 0
-
-  validation {
-    condition     = var.threads_per_core == null || try(var.threads_per_core >= 0, false) && try(var.threads_per_core <= 2, false)
-    error_message = "Allowed values for threads_per_core are \"null\", \"0\", \"1\", \"2\"."
-  }
-
-}
-
-variable "enable_oslogin" {
-  description = "Enable or Disable OS Login with \"ENABLE\" or \"DISABLE\". Set to \"INHERIT\" to inherit project OS Login setting."
+    Script to run at boot on each instance. This is here for convenience and
+    will just be appended to `metadata` under the key `"startup-script"`.
+    EOT
   type        = string
-  default     = "ENABLE"
-  validation {
-    condition     = var.enable_oslogin == null ? false : contains(["ENABLE", "DISABLE", "INHERIT"], var.enable_oslogin)
-    error_message = "Allowed string values for var.enable_oslogin are \"ENABLE\", \"DISABLE\", or \"INHERIT\"."
-  }
-}
-
-variable "enable_notebook" {
-  description = "The flag to enable jupyter notebook initialization."
-  type        = bool
-  default     = true
-}
-
-variable "network_interfaces" {
-  type = list(object({
-    network            = string,
-    subnetwork         = string,
-    subnetwork_project = string,
-    network_ip         = string,
-    nic_type           = string,
-    stack_type         = string,
-    queue_count        = number,
-    access_config = list(object({
-      nat_ip                 = string,
-      public_ptr_domain_name = string,
-      network_tier           = string
-    })),
-    ipv6_access_config = list(object({
-      public_ptr_domain_name = string,
-      network_tier           = string
-    })),
-    alias_ip_range = list(object({
-      ip_cidr_range         = string,
-      subnetwork_range_name = string
-    }))
-  }))
-  default = []
-  validation {
-    condition = alltrue([
-      for ni in var.network_interfaces : (ni.network == null) != (ni.subnetwork == null)
-    ])
-    error_message = "All additional network interfaces must define either \"network\" or \"subnetwork\", but not both."
-  }
-  validation {
-    condition = alltrue([
-      for ni in var.network_interfaces : ni.nic_type == "GVNIC" || ni.nic_type == "VIRTIO_NET" || ni.nic_type == null
-    ])
-    error_message = "In the variable network_interfaces, field \"nic_type\" must be either \"GVNIC\", \"VIRTIO_NET\" or null."
-  }
-  validation {
-    condition = alltrue([
-      for ni in var.network_interfaces : ni.stack_type == "IPV4_ONLY" || ni.stack_type == "IPV4_IPV6" || ni.stack_type == null
-    ])
-    error_message = "In the variable network_interfaces, field \"stack_type\" must be either \"IPV4_ONLY\", \"IPV4_IPV6\" or null."
-  }
-}
-
-variable "orchestrator_type" {
-  description = "The job orchestrator to be used, can be either ray (default), slurm or gke."
-  type        = string
-
-  validation {
-    condition     = contains(["ray", "slurm", "gke", "none"], var.orchestrator_type)
-    error_message = "Variable orchestrator_type must be either ray, slurm, gke or none."
-  }
-}
-
-variable "slurm_node_count_static" {
-  description = "Number of statically allocated nodes in compute partition"
-  type        = number
-}
-
-variable "slurm_node_count_dynamic_max" {
-  description = "Maximum number of dynamically allocated nodes allowed in compute partition"
-  type        = number
-}
-
-variable "slurm_network_storage" {
-  description = "Storage to mount on all slurm instances"
-  type = list(object({
-    server_ip             = string,
-    remote_mount          = string,
-    local_mount           = string,
-    fs_type               = string,
-    mount_options         = string,
-    client_install_runner = map(string)
-    mount_runner          = map(string)
-  }))
-  default = []
-}
-
-variable "gke_version" {
-  description = "The GKE version to use to create the cluster."
-  default = null
-  type    = string
-}
-
-variable "node_pools" {
-  description                = "The list of nodepools for the GKE cluster."
-  type                       = list(object({
-    name                     = string
-    zone                     = string
-    node_count               = number
-    machine_type             = string
-    guest_accelerator_count  = number
-    guest_accelerator_type   = string
-    enable_compact_placement = bool
-  }))
-  default                   = []
+  default     = null
 }

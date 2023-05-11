@@ -21,26 +21,26 @@ locals {
 module "network" {
   source = "../network"
 
-  network_config = var.network_config
-  project_id = var.project_id
-  region = local.region
+  network_config  = var.network_config
+  project_id      = var.project_id
+  region          = local.region
   resource_prefix = var.resource_prefix
 }
 
 module "compute_instance_template" {
   source = "../instance_template"
 
-  disk_size_gb = var.disk_size_gb
-  disk_type = var.disk_type
-  guest_accelerator = var.guest_accelerator
-  machine_image = var.machine_image
-  machine_type = var.machine_type
-  metadata = null
-  project_id = var.project_id
-  region = local.region
-  resource_prefix = var.resource_prefix
-  service_account = var.service_account
-  startup_script = var.startup_script
+  disk_size_gb          = var.disk_size_gb
+  disk_type             = var.disk_type
+  guest_accelerator     = var.guest_accelerator
+  machine_image         = var.machine_image
+  machine_type          = var.machine_type
+  metadata              = null
+  project_id            = var.project_id
+  region                = local.region
+  resource_prefix       = var.resource_prefix
+  service_account       = var.service_account
+  startup_script        = var.startup_script
   subnetwork_self_links = module.network.subnetwork_self_links
 
   depends_on = [
@@ -49,24 +49,31 @@ module "compute_instance_template" {
 }
 
 resource "google_compute_instance_group_manager" "mig" {
-  provider           = google-beta
-  name               = "${local.resource_prefix}-mig"
-  base_instance_name = "${local.resource_prefix}-vm"
+  provider = google-beta
+
+  base_instance_name = "${var.resource_prefix}-vm"
+  name               = "${var.resource_prefix}-mig"
   project            = var.project_id
+  target_size        = var.target_size
+  wait_for_instances = true
+  zone               = var.zone
+
   update_policy {
     minimal_action        = "RESTART"
     max_unavailable_fixed = 1
     type                  = "OPPORTUNISTIC"
     replacement_method    = "RECREATE" # Instance name will be preserved
   }
-  zone               = var.zone
-  wait_for_instances = true
+
   version {
     name              = "default"
-    instance_template = google_compute_instance_template.templates.id
+    instance_template = module.compute_instance_template.resource_id
   }
-  target_size = var.instance_count
-  depends_on = [var.network_self_link, var.network_storage]
+
+  depends_on = [
+    module.compute_instance_template,
+  ]
+
   timeouts {
     create = "30m"
     update = "30m"

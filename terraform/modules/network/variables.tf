@@ -24,7 +24,6 @@ variable "network_config" {
     - `"new_single_nic"`
     EOT
   type        = string
-  default     = "default"
 
   validation {
     condition = contains(
