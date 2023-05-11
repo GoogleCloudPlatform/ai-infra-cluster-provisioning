@@ -15,7 +15,7 @@
 */
 
 data "google_compute_subnetwork" "default_vpc_subnet" {
-  count = var.network_config == "default_network" ? 1 : 0
+  count = var.network_config == "default" ? 1 : 0
 
   name    = "default"
   project = var.project_id
@@ -24,7 +24,7 @@ data "google_compute_subnetwork" "default_vpc_subnet" {
 
 module "single_new_vpc" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=v1.17.0"
-  count  = var.network_config == "new_network" ? 1 : 0
+  count  = var.network_config == "new_single_nic" ? 1 : 0
 
   project_id      = var.project_id
   region          = var.region
@@ -33,7 +33,7 @@ module "single_new_vpc" {
 
 module "multiple_new_vpcs" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=v1.17.0"
-  count  = var.network_config == "multi_nic_network" ? 5 : 0
+  count  = var.network_config == "new_multi_nic" ? 5 : 0
 
   network_address_range = "10.${count.index}.0.0/16"
   subnetworks = [{
