@@ -1,3 +1,4 @@
 /*.list
-**/.terraform
-**/.terraform.lock.hcl
+**/.terraform*
+**/terraform.tf*
+**/tfplan

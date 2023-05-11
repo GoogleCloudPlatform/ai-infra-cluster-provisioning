@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # source all files containing tests
+. ./test/terraform/modules/dashboard/tests.sh
 . ./test/terraform/modules/instance_template/tests.sh
 . ./test/terraform/modules/mig/tests.sh
 . ./test/terraform/modules/network/tests.sh
