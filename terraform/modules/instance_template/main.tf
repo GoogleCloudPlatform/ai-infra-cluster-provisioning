@@ -31,14 +31,20 @@ locals {
   ]) ? "GVNIC" : "VIRTIO_NET"
 
   // do something similar to above
-  _enable_notebook = false
+  _machine_image_is_dlvm = contains(
+    [
+      "deeplearning-platform-release",
+      "ml-images",
+    ],
+    local.machine_image.project
+  )
   metadata = merge(
     {
       VmDnsSetting          = "ZonalPreferred"
       install-nvidia-driver = "True"
       enable-oslogin        = "TRUE"
     },
-    local._enable_notebook ? {
+    local._machine_image_is_dlvm ? {
       proxy-mode = "project_editors"
     } : {},
     var.startup_script != null ? {
