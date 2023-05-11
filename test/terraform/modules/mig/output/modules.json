@@ -4,6 +4,9 @@
       "child_modules": [
         {
           "address": "module.compute_instance_template"
+        },
+        {
+          "address": "module.startup"
         }
       ],
       "resources": [

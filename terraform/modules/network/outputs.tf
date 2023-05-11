@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
+output "network_id" {
+  description = "ID of the network"
+  value = one(toset(flatten([
+    module.default_vpc[*].network_id,
+    module.single_new_vpc[*].network_id,
+    module.multiple_new_vpcs[*].network_id,
+  ])))
+}
+
 output "subnetwork_self_links" {
   description = "Primary subnet self-links of all the VPCs"
   value = flatten([
-    data.google_compute_subnetwork.default_vpc_subnet[*].self_link,
+    module.default_vpc[*].subnetwork_self_link,
     module.single_new_vpc[*].subnetwork_self_link,
     module.multiple_new_vpcs[*].subnetwork_self_link,
   ])
