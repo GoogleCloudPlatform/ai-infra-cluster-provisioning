@@ -27,8 +27,8 @@ test::terraform::mig::simple_create_modules () {
         "$(mig::input_dir)/simple.tfvars" \
         "${tfplan}"
     tfshow=$(mktemp)
-    helpers::terraform_show "$(mig::src_dir)" "${tfplan}" | jq . >tmp.json #>"${tfshow}"
-    #EXPECT_SUCCEED helpers::json_contains \
-    #    "$(mig::output_dir)/modules.json" \
-    #    "${tfshow}"
+    helpers::terraform_show "$(mig::src_dir)" "${tfplan}" >"${tfshow}"
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(mig::output_dir)/modules.json" \
+        "${tfshow}"
 }

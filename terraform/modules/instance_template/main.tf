@@ -21,6 +21,7 @@ locals {
     project = var.machine_image.project
   }
 
+
   _image_or_family = coalesce(
     local.machine_image.family,
     local.machine_image.name,
@@ -30,7 +31,7 @@ locals {
     length(regexall(pattern, local._image_or_family)) > 0
   ]) ? "GVNIC" : "VIRTIO_NET"
 
-  // do something similar to above
+
   _machine_image_is_dlvm = contains(
     [
       "deeplearning-platform-release",
@@ -52,6 +53,7 @@ locals {
     } : {},
     var.metadata != null ? var.metadata : {},
   )
+
 
   service_account = var.service_account != null ? var.service_account : {
     email  = data.google_compute_default_service_account.account.email

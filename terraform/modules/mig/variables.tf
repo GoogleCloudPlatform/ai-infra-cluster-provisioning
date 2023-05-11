@@ -188,6 +188,33 @@ variable "guest_accelerator" {
   default = null
 }
 
+variable "enable_ops_agent" {
+  description = <<-EOT
+    Install
+    [Google Cloud Ops Agent](https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent).
+    EOT
+  type        = bool
+  default     = true
+
+  validation {
+    condition     = var.enable_ops_agent != null
+    error_message = "must not be null"
+  }
+}
+
+variable "enable_ray" {
+  description = <<-EOT
+    Install [Ray](https://docs.ray.io/en/latest/cluster/getting-started.html).
+    EOT
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = var.enable_ray != null
+    error_message = "must not be null"
+  }
+}
+
 variable "machine_image" {
   description = <<-EOT
     The image with which this disk will initialize.
@@ -322,9 +349,15 @@ variable "service_account" {
 
 variable "startup_script" {
   description = <<-EOT
-    Script to run at boot on each instance. This is here for convenience and
-    will just be appended to `metadata` under the key `"startup-script"`.
+    Shell script -- the actual script (not the filename). Defaults to null.
+    Shell script filename. Defaults to null.
     EOT
+  type        = string
+  default     = null
+}
+
+variable "startup_script_file" {
+  description = "Shell script filename."
   type        = string
   default     = null
 }

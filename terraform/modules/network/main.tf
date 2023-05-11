@@ -14,12 +14,12 @@
  * limitations under the License.
 */
 
-data "google_compute_subnetwork" "default_vpc_subnet" {
-  count = var.network_config == "default" ? 1 : 0
+module "default_vpc" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=v1.17.0"
+  count  = var.network_config == "default" ? 1 : 0
 
-  name    = "default"
-  project = var.project_id
-  region  = var.region
+  project_id = var.project_id
+  region     = var.region
 }
 
 module "single_new_vpc" {
