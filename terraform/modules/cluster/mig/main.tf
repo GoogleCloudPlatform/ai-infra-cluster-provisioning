@@ -21,12 +21,12 @@ locals {
     var.enable_ops_agent ? [{
       type        = "shell"
       destination = "/tmp/enable_cloud_ops_agent.sh"
-      source      = "${path.module}/../../../install_scripts/install_cloud_ops_agent.sh"
+      source      = "${path.module}/../../../../install_scripts/install_cloud_ops_agent.sh"
     }] : [],
     var.enable_ray ? [{
       type        = "shell"
       destination = "/tmp/enable_ray.sh"
-      source      = "${path.module}/../../../install_scripts/setup_ray.sh"
+      source      = "${path.module}/../../../../install_scripts/setup_ray.sh"
       args        = "1.12.1 26379 ${try(var.guest_accelerator.count, 0)}"
     }] : [],
     var.startup_script != null && var.startup_script != "" ? [{
@@ -44,7 +44,7 @@ locals {
 }
 
 module "dashboard" {
-  source = "../dashboard"
+  source = "../../common/dashboard"
   count  = var.enable_ops_agent ? 1 : 0
 
   enable_gce_gke_gpu_utilization_widgets = true
@@ -55,7 +55,7 @@ module "dashboard" {
 }
 
 module "network" {
-  source = "../network"
+  source = "../../common/network"
 
   network_config  = var.network_config
   project_id      = var.project_id
@@ -106,7 +106,7 @@ module "startup" {
 }
 
 module "compute_instance_template" {
-  source = "../instance_template"
+  source = "../../common/instance_template"
 
   disk_size_gb          = var.disk_size_gb
   disk_type             = var.disk_type

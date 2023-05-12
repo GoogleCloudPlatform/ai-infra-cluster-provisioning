@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # source all files containing tests
-. ./test/terraform/modules/dashboard/tests.sh
-. ./test/terraform/modules/instance_template/tests.sh
-. ./test/terraform/modules/mig/tests.sh
-. ./test/terraform/modules/network/tests.sh
+. ./test/terraform/modules/common/dashboard/tests.sh
+. ./test/terraform/modules/common/instance_template/tests.sh
+. ./test/terraform/modules/cluster/mig/tests.sh
+. ./test/terraform/modules/common/network/tests.sh
 #. ./test/aiinfra-cluster/installation_scripts/install_cloud_ops_agent.sh
 #. ./test/aiinfra-cluster/terraform.sh
 #. ./test/scripts/_env_var_util.sh
