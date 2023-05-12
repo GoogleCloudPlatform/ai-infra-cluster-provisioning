@@ -42,6 +42,8 @@ variable "zone" {
   type        = string
 }
 
+
+
 variable "disk_size_gb" {
   description = <<-EOT
     The size of the image in gigabytes for the boot disk of each instance.

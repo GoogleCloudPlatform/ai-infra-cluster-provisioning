@@ -14,6 +14,12 @@
   * limitations under the License.
   */
 
+output "enable_gce_gke_gpu_utilization_widgets" { value = var.enable_gce_gke_gpu_utilization_widgets }
+output "enable_nvidia_dcgm_widgets" { value = var.enable_nvidia_dcgm_widgets }
+output "enable_nvidia_nvml_widgets" { value = var.enable_nvidia_nvml_widgets }
+output "project_id" { value = var.project_id }
+output "resource_prefix" { value = var.resource_prefix }
+
 output "instructions" {
   description = "Instructions for accessing the dashboard"
   value       = module.dashboard.instructions

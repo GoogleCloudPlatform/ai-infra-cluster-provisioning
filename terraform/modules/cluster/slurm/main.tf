@@ -14,49 +14,262 @@
   * limitations under the License.
   */
 
-module "compute_node_group" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group//?ref=v1.16.0"
+locals {
+  compute_partitions = { for partition in var.compute_partitions : partition.name => {
+    disk_size_gb = coalesce(try(partition.disk_size_gb, null), 128)
+    disk_type = coalesce(try(partition.disk_type, null), "pd-standard")
+    guest_accelerators = flatten([
+      coalesce(try(partition.guest_accelerator, null), [])
+    ])
+    machine_type = coalesce(try(partition.machine_type, null), "a2-highgpu-2g")
+    node_count_static = partition.node_count_static
+    startup_runners = concat(
+      alltrue([for e in [null, ""] : partition.startup_script != e]) ? [{
+        type        = "shell"
+        destination = "/tmp/startup_script.sh"
+        content     = partition.startup_script
+      }] : [],
+      alltrue([for e in [null, ""] : partition.startup_script_file != e]) ? [{
+        type        = "shell"
+        destination = "/tmp/startup_script_file.sh"
+        source      = partition.startup_script_file
+      }] : [],
+    )
+  } }
 
-  project_id             = var.project_id
-  labels                 = var.labels
-  node_count_static      = var.node_count_static
-  node_count_dynamic_max = var.node_count_dynamic_max
-  instance_template      = var.instance_template_compute
+  controller_var = {
+    disk_size_gb = coalesce(try(var.controller_var.disk_size_gb, null), 50)
+    disk_type = coalesce(try(var.controller_var.disk_type, null), "pd-ssd")
+    guest_accelerators = flatten([
+      coalesce(try(var.controller_var.guest_accelerator, null), [])
+    ])
+    machine_type = coalesce(try(var.controller_var.machine_type, null), "c2-standard-4")
+    startup_runners = concat(
+      alltrue([for e in [null, ""] : controller_var.startup_script != e]) ? [{
+        type        = "shell"
+        destination = "/tmp/startup_script.sh"
+        content     = controller_var.startup_script
+      }] : [],
+      alltrue([for e in [null, ""] : controller_var.startup_script_file != e]) ? [{
+        type        = "shell"
+        destination = "/tmp/startup_script_file.sh"
+        source      = controller_var.startup_script_file
+      }] : [],
+    )
+  }
+
+  login_var = {
+    disk_size_gb = coalesce(try(var.login_var.disk_size_gb, null), 50)
+    disk_type = coalesce(try(var.login_var.disk_type, null), "pd-standard")
+    guest_accelerators = flatten([
+      coalesce(try(var.login_var.guest_accelerator, null), [])
+    ])
+    machine_type = coalesce(try(var.login_var.machine_type, null), "n2-standard-2")
+    startup_runners = concat(
+      alltrue([for e in [null, ""] : login_var.startup_script != e]) ? [{
+        type        = "shell"
+        destination = "/tmp/startup_script.sh"
+        content     = login_var.startup_script
+      }] : [],
+      alltrue([for e in [null, ""] : login_var.startup_script_file != e]) ? [{
+        type        = "shell"
+        destination = "/tmp/startup_script_file.sh"
+        source      = login_var.startup_script_file
+      }] : [],
+    )
+  }
+
+  _instance_template_prefix = "https://www.googleapis.com/compute/beta/projects/${var.project_id}/global/instanceTemplates"
+  compute_instance_templates = {
+    for partition in var.compute_partitions
+    : partition.name
+    => "${local._instance_template_prefix}/${google_compute_instance_template.compute_instance_template[partition.name].name}"
+  }
+  controller_instance_template = "${local._instance_template_prefix}/${google_compute_instance_template.controller_instance_template.name}"
+  login_instance_template      = "${local._instance_template_prefix}/${google_compute_instance_template.login_instance_template.name}"
+
 }
 
-module "compute_partition" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition//?ref=v1.16.0"
+module "network" {
+  source = "../../common/network"
 
-  deployment_name      = var.deployment_name
+  network_config  = var.network_config
+  project_id      = var.project_id
+  region          = local.region
+  resource_prefix = var.resource_prefix
+}
+
+module "gcsfuse" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/pre-existing-network-storage//?ref=v1.17.0"
+  count  = length(var.gcsfuse_existing)
+
+  fs_type       = "gcsfuse"
+  local_mount   = var.gcsfuse_existing[count.index].local_mount
+  mount_options = "defaults,_netdev,implicit_dirs,allow_other"
+  remote_mount  = var.gcsfuse_existing[count.index].remote_mount
+}
+
+module "filestore" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=v1.17.0"
+  count  = length(var.filestore_new)
+
+  deployment_name      = var.resource_prefix
+  filestore_share_name = "nfsshare_${count.index}"
+  filestore_tier       = var.filestore_new[count.index].filestore_tier
+  local_mount          = var.filestore_new[count.index].local_mount
+  network_id           = module.network.network_id
   project_id           = var.project_id
-  region               = var.region
-  partition_name       = "compute"
-  subnetwork_self_link = var.subnetwork_self_link
-  network_storage      = flatten([var.network_storage])
-  node_groups          = flatten([module.compute_node_group.node_groups])
-  enable_placement     = false
+  region               = local.region
+  size_gb              = var.filestore_new[count.index].size_gb
+  zone                 = var.zone
+  labels               = { ghpc_role = "file-system" }
 }
 
-module "slurm_controller" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller//?ref=v1.16.0"
+module "compute_startups" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=v1.17.0"
+  for_each = toset(var.compute_partitions[*].partition_name)
 
-  deployment_name      = var.deployment_name
+  deployment_name = var.resource_prefix
+  labels          = { ghpc_role = "scripts" }
+  project_id      = var.project_id
+  region          = local.region
+  runners = concat(
+    module.gcsfuse[*].client_install_runner,
+    module.gcsfuse[*].mount_runner,
+    module.filestore[*].install_nfs_client_runner,
+    module.filestore[*].mount_runner,
+    local.compute_partitions[each.key].startup_runners,
+  )
+}
+
+module "controller_startup" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=v1.17.0"
+
+  deployment_name = var.resource_prefix
+  labels          = { ghpc_role = "scripts" }
+  project_id      = var.project_id
+  region          = local.region
+  runners = concat(
+    module.gcsfuse[*].client_install_runner,
+    module.gcsfuse[*].mount_runner,
+    module.filestore[*].install_nfs_client_runner,
+    module.filestore[*].mount_runner,
+    local.controller_var.startup_runners,
+  )
+}
+
+module "login_startup" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=v1.17.0"
+
+  deployment_name = var.resource_prefix
+  labels          = { ghpc_role = "scripts" }
+  project_id      = var.project_id
+  region          = local.region
+  runners = concat(
+    module.gcsfuse[*].client_install_runner,
+    module.gcsfuse[*].mount_runner,
+    module.filestore[*].install_nfs_client_runner,
+    module.filestore[*].mount_runner,
+    local.login_var.startup_runners,
+  )
+}
+
+module "compute_instance_templates" {
+  source = "../../common/instance_template"
+  for_each = toset(var.compute_partitions[*].partition_name)
+
+  disk_size_gb          = var.compute_partitions[each.key].disk_size_gb
+  disk_type             = var.compute_partitions[each.key].disk_type
+  guest_accelerator     = var.compute_partitions[each.key].guest_accelerator
+  machine_image         = var.compute_partitions[each.key].machine_image
+  machine_type          = var.compute_partitions[each.key].machine_type
+  metadata              = null
+  project_id            = var.project_id
+  region                = local.region
+  resource_prefix       = var.resource_prefix
+  service_account       = var.service_account
+  startup_script        = module.compute_startups[each.key].startup_script
+  subnetwork_self_links = module.network.subnetwork_self_links
+}
+
+module "controller_instance_template" {
+  source = "../../common/instance_template"
+
+  disk_size_gb          = local.controller_var.disk_size_gb
+  disk_type             = local.controller_var.disk_type
+  guest_accelerator     = local.controller_var.guest_accelerator
+  machine_image         = local.machine_image
+  machine_type          = local.controller_var.machine_type
+  metadata              = null
+  project_id            = var.project_id
+  region                = local.region
+  resource_prefix       = var.resource_prefix
+  service_account       = var.service_account
+  startup_script        = module.controller_startup.startup_script
+  subnetwork_self_links = module.network.subnetwork_self_links
+}
+
+module "login_instance_template" {
+  source = "../../common/instance_template"
+
+  disk_size_gb          = local.login_var.disk_size_gb
+  disk_type             = local.login_var.disk_type
+  guest_accelerator     = local.login_var.guest_accelerator
+  machine_image         = local.machine_image
+  machine_type          = local.login_var.machine_type
+  metadata              = null
+  project_id            = var.project_id
+  region                = local.region
+  resource_prefix       = var.resource_prefix
+  service_account       = var.service_account
+  startup_script        = module.login_startup.startup_script
+  subnetwork_self_links = module.network.subnetwork_self_links
+}
+
+module "compute_node_groups" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group//?ref=v1.17.0"
+  for_each = toset(var.compute_partitions[*].partition_name)
+
+  instance_template      = var.compute_instance_templates[each.key]
+  labels                 = { ghpc_role = "compute" }
+  node_count_static      = local.compute_partitions[each.key].node_count_static
+  node_count_dynamic_max = 0
+  project_id             = var.project_id
+}
+
+module "compute_partitions" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition//?ref=v1.17.0"
+  for_each = toset(var.compute_partitions[*].partition_name)
+
+  enable_placement     = false
+  deployment_name      = var.resource_prefix
+  network_storage      = [] // flatten([var.network_storage])
+  node_groups          = flatten([module.compute_node_groups[each.key].node_groups])
+  partition_name       = local.compute_partitions[each.key].partition_name
+  project_id           = var.project_id
+  region               = local.compute_partitions[each.key].region
+  subnetwork_self_link = module.network.subnetwork_self_links[0]
+  zone                 = local.compute_partitions[each.key].zone
+}
+
+module "controller" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller//?ref=v1.17.0"
+
+  deployment_name      = var.resource_prefix
+  disable_controller_public_ips = false
+  instance_template    = var.controller_instance_template
+  labels               = { ghpc_role = "scheduler" }
+  network_storage      = [] // flatten([var.network_storage])
   partition            = flatten([module.compute_partition.partition])
   project_id           = var.project_id
-  region               = var.region
-  zone                 = var.zone
-  subnetwork_self_link = var.subnetwork_self_link
-  network_self_link    = var.network_self_link
-  network_storage      = flatten([var.network_storage])
+  region               = local.controller_var.region
   service_account      = var.service_account
-  instance_template    = var.instance_template_controller
-  labels               = var.labels
-
-  disable_controller_public_ips = false
+  subnetwork_self_link = module.network.subnetwork_self_links[0]
+  zone                 = local.controller_var.zone
 }
 
-module "slurm_login" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-login//?ref=v1.16.0"
+module "login" {
+  source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-login//?ref=v1.17.0"
 
   project_id             = var.project_id
   deployment_name        = var.deployment_name
@@ -67,5 +280,5 @@ module "slurm_login" {
   zone                   = var.zone
   service_account        = var.service_account
   instance_template      = var.instance_template_login
-  labels                 = var.labels
+  labels               = { ghpc_role = "scheduler" }
 }

@@ -38,4 +38,3 @@ variable "resource_prefix" {
   description = "Arbitrary string with which all names of newly created resources will be prefixed."
   type        = string
 }
-
