@@ -37,14 +37,14 @@ variable "node_locations" {
 
 variable "name" {
   description = "Name of the cluster, unique within the project."
-  default = "main"
-  type    = string
+  default     = "main"
+  type        = string
 }
 
 variable "gke_version" {
   description = "The GKE version to use to create the cluster."
-  default = null
-  type    = string
+  default     = null
+  type        = string
 }
 
 variable "network_self_link" {

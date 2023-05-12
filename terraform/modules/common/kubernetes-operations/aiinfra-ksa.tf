@@ -19,7 +19,7 @@ locals {
 }
 
 data "google_container_cluster" "gke_cluster" {
-  count = var.gke_cluster_exists ? 1 : 0
+  count    = var.gke_cluster_exists ? 1 : 0
   name     = local.split_cluster_id[5]
   location = local.split_cluster_id[3]
 }
@@ -41,7 +41,7 @@ provider "kubectl" {
 
 // Binding KSA to google service account.
 resource "google_service_account_iam_binding" "default-workload-identity" {
-  count = var.setup_kubernetes_service_account != null && var.gke_cluster_exists ? 1 : 0
+  count              = var.setup_kubernetes_service_account != null && var.gke_cluster_exists ? 1 : 0
   service_account_id = "projects/${var.project_id}/serviceAccounts/${var.setup_kubernetes_service_account.google_service_account_name}"
   role               = "roles/iam.workloadIdentityUser"
   members = [
@@ -52,7 +52,7 @@ resource "google_service_account_iam_binding" "default-workload-identity" {
 // Creating and Annotating KSA with google service account
 resource "kubernetes_service_account" "gke-sa" {
   automount_service_account_token = false
-  count = var.setup_kubernetes_service_account != null && var.gke_cluster_exists ? 1 : 0
+  count                           = var.setup_kubernetes_service_account != null && var.gke_cluster_exists ? 1 : 0
   metadata {
     name      = var.setup_kubernetes_service_account.kubernetes_service_account_name
     namespace = var.setup_kubernetes_service_account.kubernetes_service_account_namespace
@@ -69,6 +69,6 @@ data "http" "nvidia_driver_installer_manifest" {
 }
 
 resource "kubectl_manifest" "nvidia_driver_installer" {
-  count = var.install_nvidia_driver && var.gke_cluster_exists ? 1 : 0
+  count     = var.install_nvidia_driver && var.gke_cluster_exists ? 1 : 0
   yaml_body = data.http.nvidia_driver_installer_manifest.response_body
 }

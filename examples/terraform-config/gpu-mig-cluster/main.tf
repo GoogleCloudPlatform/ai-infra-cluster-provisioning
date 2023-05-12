@@ -14,32 +14,32 @@
   * limitations under the License.
   */
 locals {
-  project_id         = "test-project"
-  name_prefix        = "aiinfra-gpu"
-  deployment_name    = "aiinfra-gpu-dpl"
-  region             = "us-central1"
-  zone               = "us-central1-a"
-  machine_type       = "a2-highgpu-1g"
-  accelerator_type   = "nvidia-tesla-a100"
-  instance_count     = 1
-  gpu_per_vm  = 1
-  network_config     = "default_network"
-  disk_type          = "pd-ssd"
-  disk_size_gb       = 2000
+  project_id       = "test-project"
+  name_prefix      = "aiinfra-gpu"
+  deployment_name  = "aiinfra-gpu-dpl"
+  region           = "us-central1"
+  zone             = "us-central1-a"
+  machine_type     = "a2-highgpu-1g"
+  accelerator_type = "nvidia-tesla-a100"
+  instance_count   = 1
+  gpu_per_vm       = 1
+  network_config   = "default_network"
+  disk_type        = "pd-ssd"
+  disk_size_gb     = 2000
   instance_image = {
     family  = "pytorch-1-10-gpu-debian-10"
     name    = ""
     project = "ml-images"
   }
-  gcs_bucket_path    = "gs://test-bucket/test-dir"
-  orchestrator_type  = "none"
-  startup_command    = "echo \"Hello World\""
+  gcs_bucket_path   = "gs://test-bucket/test-dir"
+  orchestrator_type = "none"
+  startup_command   = "echo \"Hello World\""
   metadata = {
     meta1 = "val"
     meta2 = "val2"
   }
   labels = {
-    label1          = "marker1"
+    label1 = "marker1"
   }
   nfs_filestore_list = ""
   gcs_mount_list     = "test-bucket:/usr/trainfiles"

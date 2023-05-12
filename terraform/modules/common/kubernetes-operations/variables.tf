@@ -21,19 +21,19 @@ variable "project_id" {
 
 variable "cluster_id" {
   description = "An identifier for the resource with format projects/<project_id>/locations/<region>/clusters/<name>."
-  type = string
+  type        = string
 }
 
 variable "gke_cluster_exists" {
   description = "If set to false then the kubernetes providers will not be configured."
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "install_nvidia_driver" {
   description = "If true will create a DaemonSet to install nvidia drivers."
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 variable "setup_kubernetes_service_account" {
@@ -46,9 +46,9 @@ variable "setup_kubernetes_service_account" {
     google_service_account_name: The Google Service Account name. Use empty string for default compute service account.
     EOT
   type = object({
-    kubernetes_service_account_name = string
+    kubernetes_service_account_name      = string
     kubernetes_service_account_namespace = string
-    google_service_account_name = string
+    google_service_account_name          = string
   })
   default = null
 }

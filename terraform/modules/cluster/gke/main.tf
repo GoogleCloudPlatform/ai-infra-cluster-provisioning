@@ -29,9 +29,9 @@ data "google_container_engine_versions" "gkeversion" {
 resource "google_container_cluster" "gke-cluster" {
   provider = google-beta
 
-  project  = var.project
-  name     = var.name
-  location = var.region
+  project        = var.project
+  name           = var.name
+  location       = var.region
   node_locations = var.node_locations
 
   # We need to explicitly manage the node pool to enable features such as
@@ -40,8 +40,8 @@ resource "google_container_cluster" "gke-cluster" {
   # immediately delete it. This is a best-practice suggested in the Terraform
   # documentation for the container_cluster resource.
   remove_default_node_pool = true
-  initial_node_count = 1
-  min_master_version = local.gke_master_version
+  initial_node_count       = 1
+  min_master_version       = local.gke_master_version
 
   network    = var.network_self_link
   subnetwork = var.subnetwork_self_link
@@ -136,11 +136,11 @@ resource "google_container_node_pool" "gke-node-pools" {
     for node_pool in var.node_pools : node_pool.name => node_pool
   }
 
-  project            = var.project
-  name               = each.value.name
-  cluster            = google_container_cluster.gke-cluster.id
-  node_locations     = [each.value.zone]
-  node_count         = each.value.node_count
+  project        = var.project
+  name           = each.value.name
+  cluster        = google_container_cluster.gke-cluster.id
+  node_locations = [each.value.zone]
+  node_count     = each.value.node_count
 
   upgrade_settings {
     max_surge       = 0
@@ -148,7 +148,7 @@ resource "google_container_node_pool" "gke-node-pools" {
   }
 
   management {
-    auto_repair  = true
+    auto_repair = true
     # disabling auto_upgrade to stop automatic upgrade during customer workload execution.
     auto_upgrade = false
   }
@@ -208,11 +208,11 @@ resource "google_container_node_pool" "gke-node-pools" {
   }
 
   dynamic "placement_policy" {
-      for_each = each.value.enable_compact_placement ? [1] : []
-      content {
-        type = "COMPACT"
-      }
+    for_each = each.value.enable_compact_placement ? [1] : []
+    content {
+      type = "COMPACT"
     }
+  }
 
   lifecycle {
     ignore_changes = [

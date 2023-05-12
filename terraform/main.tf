@@ -15,7 +15,7 @@
   */
 
 locals {
-  depl_name         = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
+  depl_name = var.deployment_name != null ? var.deployment_name : "${var.name_prefix}-depl"
 
   gcs_mount_arr     = compact(split(",", trimspace(var.gcs_mount_list)))
   nfs_filestore_arr = compact(split(",", trimspace(var.nfs_filestore_list)))
@@ -71,7 +71,7 @@ locals {
 
   nvidia_widgets                  = var.enable_ops_agent ? concat(module.dashboard-widget-data.nvidia_dcgm_widgets, module.dashboard-widget-data.nvidia_nvml_widgets) : []
   gce_gke_gpu_utilization_widgets = var.enable_ops_agent ? module.dashboard-widget-data.gce_gke_gpu_utilization_widgets : []
-  vm_startup_setup = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
+  vm_startup_setup                = concat(local.ray_setup, local.install_ops_agent, local.startup_command_setup)
 
   kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
     enable_k8s_setup                     = var.orchestrator_type == "gke"
@@ -81,16 +81,16 @@ locals {
   }
 
   normalized_instance_image = var.instance_image == null ? null : {
-    project    = var.instance_image.project,
+    project = var.instance_image.project,
     family  = var.instance_image.family == null ? "" : var.instance_image.family,
-    name = var.instance_image.name == null ? "" : var.instance_image.name
+    name    = var.instance_image.name == null ? "" : var.instance_image.name
   }
 
   default_instance_image = var.orchestrator_type == "slurm" ? {
     family  = "schedmd-v5-slurm-22-05-6-hpc-centos-7"
     project = "schedmd-slurm-public"
     name    = ""
-  } : {
+    } : {
     family  = "pytorch-latest-gpu-debian-11-py310"
     project = "deeplearning-platform-release"
     name    = ""
@@ -151,7 +151,7 @@ module "startup" {
 }
 
 module "aiinfra-compute" {
-  source               = "./modules/aiinfra-compute"
+  source = "./modules/aiinfra-compute"
   service_account = {
     email  = var.service_account.email == null ? data.google_compute_default_service_account.default.email : var.service_account.email
     scopes = var.service_account.scopes
@@ -163,11 +163,11 @@ module "aiinfra-compute" {
   }
   enable_notebook     = (local.instance_image.project != "ml-images" && local.instance_image.project != "deeplearning-platform-release") ? false : var.enable_notebook
   on_host_maintenance = "TERMINATE"
-  node_pools = length(var.custom_node_pool) != 0 || length(local.basic_node_pool) != 0 ? coalescelist(var.custom_node_pool, local.basic_node_pool) : []
+  node_pools          = length(var.custom_node_pool) != 0 || length(local.basic_node_pool) != 0 ? coalescelist(var.custom_node_pool, local.basic_node_pool) : []
 }
 
 module "dashboard-widget-data" {
-  source               = "./modules/dashboard-widget-data"
+  source = "./modules/dashboard-widget-data"
 }
 
 /*
@@ -185,7 +185,7 @@ module "aiinfra-default-dashboard" {
 }
 
 module "aiinfra-k8s-setup" {
-  source                = "./modules/kubernetes-operations"
+  source                = "./modules/common/kubernetes-operations"
   project_id            = var.project_id
   cluster_id            = local.kubernetes_setup_config.enable_k8s_setup ? module.aiinfra-compute.gke_cluster_id : null
   gke_cluster_exists    = local.kubernetes_setup_config.enable_k8s_setup
@@ -193,10 +193,10 @@ module "aiinfra-k8s-setup" {
   setup_kubernetes_service_account = (
     local.kubernetes_setup_config.enable_k8s_setup ?
     {
-      kubernetes_service_account_name = local.kubernetes_setup_config.kubernetes_service_account_name
+      kubernetes_service_account_name      = local.kubernetes_setup_config.kubernetes_service_account_name
       kubernetes_service_account_namespace = local.kubernetes_setup_config.kubernetes_service_account_namespace
-      google_service_account_name = local.kubernetes_setup_config.node_service_account
-    }:
+      google_service_account_name          = local.kubernetes_setup_config.node_service_account
+    } :
     null
   )
 }
