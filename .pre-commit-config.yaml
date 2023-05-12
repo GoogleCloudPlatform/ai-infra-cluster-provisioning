@@ -6,13 +6,13 @@ repos:
           always_run: true
     - repo: local
       hooks:
-      - id: terraform-readme
-        name: terraform-readme
-        entry: tools/terraform-doc.sh
-        language: script
-        types: [terraform]
-        exclude: (\.terraform|test\/.*$|examples\/.*$)
-        pass_filenames: true
-        require_serial: true
-        always_run: true
-        verbose: true
+        - id: terraform-readme
+          name: terraform-readme
+          entry: tools/terraform-doc.sh
+          language: script
+          types: [terraform]
+          exclude: (\.terraform|test\/.*$|examples\/.*$)
+          pass_filenames: true
+          require_serial: true
+          always_run: true
+          verbose: true
