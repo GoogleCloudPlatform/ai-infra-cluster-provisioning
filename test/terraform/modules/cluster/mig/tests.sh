@@ -1,15 +1,15 @@
 . ./test/helpers.sh
 
 mig::src_dir () {
-    echo "${PWD}/terraform/modules/mig"
+    echo "${PWD}/terraform/modules/cluster/mig"
 }
 
 mig::input_dir () {
-    echo "${PWD}/test/terraform/modules/mig/input"
+    echo "${PWD}/test/terraform/modules/cluster/mig/input"
 }
 
 mig::output_dir () {
-    echo "${PWD}/test/terraform/modules/mig/output"
+    echo "${PWD}/test/terraform/modules/cluster/mig/output"
 }
 
 test::terraform::mig () {

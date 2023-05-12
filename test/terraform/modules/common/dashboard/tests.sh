@@ -1,15 +1,15 @@
 . ./test/helpers.sh
 
 dashboard::src_dir () {
-    echo "${PWD}/terraform/modules/dashboard"
+    echo "${PWD}/terraform/modules/common/dashboard"
 }
 
 dashboard::input_dir () {
-    echo "${PWD}/test/terraform/modules/dashboard/input"
+    echo "${PWD}/test/terraform/modules/common/dashboard/input"
 }
 
 dashboard::output_dir () {
-    echo "${PWD}/test/terraform/modules/dashboard/output"
+    echo "${PWD}/test/terraform/modules/common/dashboard/output"
 }
 
 test::terraform::dashboard () {
