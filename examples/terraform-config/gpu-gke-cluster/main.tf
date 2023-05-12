@@ -14,22 +14,22 @@
   * limitations under the License.
   */
 locals {
-  project_id                   = "test-project-gke"
-  region                       = "us-central1"
-  zone                         = "us-central1-a"
-  machine_type                 = "a2-highgpu-1g"
-  accelerator_type             = "nvidia-tesla-a100"
-  gpu_per_vm                   = 1
-  name_prefix                  = "aiinfra-gke-test"
-  deployment_name              = "aiinfra-gke-test-dpl"  
+  project_id       = "test-project-gke"
+  region           = "us-central1"
+  zone             = "us-central1-a"
+  machine_type     = "a2-highgpu-1g"
+  accelerator_type = "nvidia-tesla-a100"
+  gpu_per_vm       = 1
+  name_prefix      = "aiinfra-gke-test"
+  deployment_name  = "aiinfra-gke-test-dpl"
   metadata = {
     meta1 = "val"
     meta2 = "val2"
   }
-  network_config               = "default_network"
-  disk_type                    = "pd-ssd"
-  disk_size_gb                 = 2000
-  gcs_bucket_path              = "gs://test-bucket/test-dir"
+  network_config  = "default_network"
+  disk_type       = "pd-ssd"
+  disk_size_gb    = 2000
+  gcs_bucket_path = "gs://test-bucket/test-dir"
   labels = {
     ghpc_blueprint  = "aiinfra-gke"
     ghpc_deployment = "aiinfra-gke-test-dpl"

@@ -33,7 +33,7 @@ variable "service_account" {
       "https://www.googleapis.com/auth/servicecontrol",
       "https://www.googleapis.com/auth/service.management.readonly",
       "https://www.googleapis.com/auth/trace.append",
-      "cloud-platform"]
+    "cloud-platform"]
   }
 }
 
@@ -111,12 +111,12 @@ variable "disk_type" {
 
 variable "labels" {
   description = "Lables for the GPU cluster resources."
-  type        = map
+  type        = map(any)
 }
 
 variable "metadata" {
   description = "Metadata for the VM instance."
-  type        = map
+  type        = map(any)
 }
 
 variable "gcs_bucket_path" {
@@ -209,13 +209,13 @@ variable "gke_enable_compact_placement" {
 
 variable "gke_version" {
   description = "The GKE version to use to create the cluster."
-  default = null
-  type    = string
+  default     = null
+  type        = string
 }
 
 variable "custom_node_pool" {
-  description                = "The list of custom nodepools for the GKE cluster."
-  type                       = list(object({
+  description = "The list of custom nodepools for the GKE cluster."
+  type = list(object({
     name                     = string
     zone                     = string
     node_count               = number
@@ -224,18 +224,18 @@ variable "custom_node_pool" {
     guest_accelerator_type   = string
     enable_compact_placement = bool
   }))
-  default                   = []
+  default = []
 }
 
 variable "kubernetes_setup_config" {
   description = "The configuration to setup GKE cluster."
-  type                       = object({
+  type = object({
     enable_k8s_setup                     = bool
     kubernetes_service_account_name      = string
     kubernetes_service_account_namespace = string
     node_service_account                 = string
   })
-  default                   = null
+  default = null
 }
 
 variable "slurm_node_count_static" {
