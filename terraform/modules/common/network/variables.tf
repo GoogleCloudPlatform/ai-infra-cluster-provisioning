@@ -18,10 +18,7 @@ variable "network_config" {
   description = <<-EOT
     The network configuration to specify the type of VPC to be used.
 
-    Possible values:
-    - `"default"`
-    - `"new_multi_nic"`
-    - `"new_single_nic"`
+    Possible values: `["default", "new_multi_nic", "new_single_nic"]`
     EOT
   type        = string
 
@@ -38,8 +35,7 @@ variable "project_id" {
   description = <<-EOT
     The ID of the project in which the resource belongs.
 
-    Related docs:
-    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#project)
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#project).
     EOT
   type        = string
 }
@@ -48,17 +44,12 @@ variable "region" {
   description = <<-EOT
     The region in which the subnetwork(s) has been / will be created.
 
-    Related docs:
-    - [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#region)
-    - [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/networks/subnets/create#--region)
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#region), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/networks/subnets/create#--region).
     EOT
   type        = string
 }
 
 variable "resource_prefix" {
-  description = <<-EOT
-    Arbitrary string with which all names of newly created resources will be
-    prefixed.
-    EOT
+  description = "Arbitrary string with which all names of newly created resources will be prefixed."
   type        = string
 }

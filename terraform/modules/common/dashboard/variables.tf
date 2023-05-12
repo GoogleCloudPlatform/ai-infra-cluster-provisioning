@@ -35,10 +35,7 @@ variable "project_id" {
 }
 
 variable "resource_prefix" {
-  description = <<-EOT
-    Arbitrary string with which all names of newly created resources will be
-    prefixed.
-    EOT
+  description = "Arbitrary string with which all names of newly created resources will be prefixed."
   type        = string
 }
 
