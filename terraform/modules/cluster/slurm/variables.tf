@@ -61,7 +61,7 @@ variable "network_storage" {
 
 variable "labels" {
   description = "Labels to add to the instances. List key, value pairs."
-  type        = map
+  type        = map(any)
   default     = {}
 }
 

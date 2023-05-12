@@ -16,12 +16,12 @@
 
 output "dashboard_instructions" {
   description = "Instructions for accessing the GPU dashboard"
-  value = try(module.aiinfra-default-dashboard[0].instructions, "Dashboard not created")
+  value       = try(module.aiinfra-default-dashboard[0].instructions, "Dashboard not created")
 }
 
 output "gke_cluster_name" {
   description = "The name of the GKE cluster created."
-  value = var.orchestrator_type == "gke" ? module.aiinfra-compute.gke_cluster_name : "GKE cluster not available"
+  value       = var.orchestrator_type == "gke" ? module.aiinfra-compute.gke_cluster_name : "GKE cluster not available"
 }
 
 output "gke_cluster_connection" {

@@ -24,7 +24,7 @@ ENV PATH $PATH:/usr/local/gcloud/google-cloud-sdk/bin
 COPY aiinfra-cluster/ "${ROOT_MODULE_DIR}"
 ARG TF_INIT=true
 RUN if [ "${TF_INIT}" = true ]; then terraform -chdir=/usr/primary init; fi
-COPY scripts/ /usr/
+COPY setup-scripts/ /usr/
 COPY examples/ /usr/examples/
 
 
