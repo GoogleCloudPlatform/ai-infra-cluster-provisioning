@@ -26,6 +26,7 @@ No providers.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_compute_instance_templates"></a> [compute\_instance\_templates](#module\_compute\_instance\_templates) | ../../common/instance_template | n/a |
+| <a name="module_compute_partitions"></a> [compute\_partitions](#module\_compute\_partitions) | github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition// | v1.17.0 |
 | <a name="module_compute_startups"></a> [compute\_startups](#module\_compute\_startups) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/ | v1.17.0 |
 | <a name="module_controller"></a> [controller](#module\_controller) | github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller// | v1.17.0 |
 | <a name="module_controller_instance_template"></a> [controller\_instance\_template](#module\_controller\_instance\_template) | ../../common/instance_template | n/a |
@@ -37,7 +38,6 @@ No providers.
 | <a name="module_login_startup"></a> [login\_startup](#module\_login\_startup) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/ | v1.17.0 |
 | <a name="module_network"></a> [network](#module\_network) | ../../common/network | n/a |
 | <a name="module_node_groups"></a> [node\_groups](#module\_node\_groups) | github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group// | v1.17.0 |
-| <a name="module_partitions"></a> [partitions](#module\_partitions) | github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition// | v1.17.0 |
 
 ## Resources
 

@@ -27,9 +27,8 @@ test::terraform::slurm::simple_create_modules () {
         "$(slurm::input_dir)/simple.tfvars" \
         "${tfplan}"
     tfshow=$(mktemp)
-    helpers::terraform_show "$(slurm::src_dir)" "${tfplan}" | jq . >./tmp.json
-    #helpers::terraform_show "$(slurm::src_dir)" "${tfplan}" >"${tfshow}"
-    #EXPECT_SUCCEED helpers::json_contains \
-    #    "$(slurm::output_dir)/modules.json" \
-    #    "${tfshow}"
+    helpers::terraform_show "$(slurm::src_dir)" "${tfplan}" >"${tfshow}"
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(slurm::output_dir)/modules.json" \
+        "${tfshow}"
 }

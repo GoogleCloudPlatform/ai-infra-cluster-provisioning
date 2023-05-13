@@ -282,7 +282,7 @@ module "node_groups" {
   service_account        = module.compute_instance_templates[each.key].service_account
 }
 
-module "partitions" {
+module "compute_partitions" {
   source   = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition//?ref=v1.17.0"
   for_each = toset(local.partition_names)
 
@@ -306,7 +306,7 @@ module "controller" {
   instance_template    = local.controller_instance_template
   labels               = { ghpc_role = "scheduler" }
   network_storage      = [] // flatten([var.network_storage])
-  partition            = [for k in local.partition_names : module.partitions[k].partition]
+  partition            = [for k in local.partition_names : module.compute_partitions[k].partition]
   project_id           = var.project_id
   region               = local.controller_var.region
   service_account      = module.controller_instance_template.service_account
