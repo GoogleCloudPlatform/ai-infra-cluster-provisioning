@@ -32,3 +32,16 @@ test::terraform::slurm::simple_create_modules () {
         "$(slurm::output_dir)/modules.json" \
         "${tfshow}"
 }
+
+test::terraform::slurm::multiple_partitions () {
+    tfplan=$(mktemp)
+    EXPECT_SUCCEED helpers::terraform_plan \
+        "$(slurm::src_dir)" \
+        "$(slurm::input_dir)/multiple_partitions.tfvars" \
+        "${tfplan}"
+    tfshow=$(mktemp)
+    helpers::terraform_show "$(slurm::src_dir)" "${tfplan}" >"${tfshow}"
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(slurm::output_dir)/multiple_partitions.json" \
+        "${tfshow}"
+}
