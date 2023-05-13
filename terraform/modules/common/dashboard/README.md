@@ -51,5 +51,10 @@ No requirements.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_enable_gce_gke_gpu_utilization_widgets"></a> [enable\_gce\_gke\_gpu\_utilization\_widgets](#output\_enable\_gce\_gke\_gpu\_utilization\_widgets) | n/a |
+| <a name="output_enable_nvidia_dcgm_widgets"></a> [enable\_nvidia\_dcgm\_widgets](#output\_enable\_nvidia\_dcgm\_widgets) | n/a |
+| <a name="output_enable_nvidia_nvml_widgets"></a> [enable\_nvidia\_nvml\_widgets](#output\_enable\_nvidia\_nvml\_widgets) | n/a |
 | <a name="output_instructions"></a> [instructions](#output\_instructions) | Instructions for accessing the dashboard |
+| <a name="output_project_id"></a> [project\_id](#output\_project\_id) | n/a |
+| <a name="output_resource_prefix"></a> [resource\_prefix](#output\_resource\_prefix) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -50,6 +50,10 @@ No resources.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_network_config"></a> [network\_config](#output\_network\_config) | n/a |
 | <a name="output_network_id"></a> [network\_id](#output\_network\_id) | ID of the network |
+| <a name="output_project_id"></a> [project\_id](#output\_project\_id) | n/a |
+| <a name="output_region"></a> [region](#output\_region) | n/a |
+| <a name="output_resource_prefix"></a> [resource\_prefix](#output\_resource\_prefix) | n/a |
 | <a name="output_subnetwork_self_links"></a> [subnetwork\_self\_links](#output\_subnetwork\_self\_links) | Primary subnet self-links of all the VPCs |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

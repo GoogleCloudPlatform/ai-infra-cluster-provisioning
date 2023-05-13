@@ -116,7 +116,7 @@ variable "machine_image" {
 
 variable "machine_type" {
   description = <<-EOT
-    The name of a Google Compute Engine machine type.
+    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource).
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
     EOT
