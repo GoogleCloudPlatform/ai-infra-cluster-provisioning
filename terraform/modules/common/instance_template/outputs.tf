@@ -17,15 +17,16 @@
 output "disk_size_gb" { value = var.disk_size_gb }
 output "disk_type" { value = var.disk_type }
 output "guest_accelerator" { value = var.guest_accelerator }
-output "machine_image" { value = var.machine_image }
 output "machine_type" { value = var.machine_type }
-output "metadata" { value = var.metadata }
 output "project_id" { value = var.project_id }
 output "region" { value = var.region }
 output "resource_prefix" { value = var.resource_prefix }
-output "service_account" { value = var.service_account }
 output "startup_script" { value = var.startup_script }
 output "subnetwork_self_links" { value = var.subnetwork_self_links }
+
+output "machine_image" { value = local.machine_image }
+output "metadata" { value = local.metadata }
+output "service_account" { value = local.service_account }
 
 output "resource_id" {
   description = "`id` output of the google_compute_instance_template resource created."
