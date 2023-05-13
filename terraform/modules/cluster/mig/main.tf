@@ -149,19 +149,3 @@ resource "google_compute_instance_group_manager" "mig" {
     update = "30m"
   }
 }
-
-//module "aiinfra-gke" {
-//  source                   = "../gke-cluster"
-//  count                    = var.orchestrator_type == "gke" ? 1 : 0
-//  project                  = var.project_id
-//  region                   = var.region
-//  zone                     = var.zone
-//  name                     = "${local.resource_prefix}-gke"
-//  gke_version              = var.gke_version
-//  disk_size_gb             = var.disk_size_gb
-//  disk_type                = var.disk_type
-//  network_self_link        = var.network_self_link
-//  subnetwork_self_link     = var.subnetwork_self_link
-//  node_service_account     = var.service_account.email
-//  node_pools               = var.node_pools
-//}
