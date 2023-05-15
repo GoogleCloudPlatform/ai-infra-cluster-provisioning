@@ -45,11 +45,16 @@ No requirements.
 | <a name="input_enable_nvidia_dcgm_widgets"></a> [enable\_nvidia\_dcgm\_widgets](#input\_enable\_nvidia\_dcgm\_widgets) | Add Nvidia DCGM widgets to the dashboard. | `bool` | n/a | yes |
 | <a name="input_enable_nvidia_nvml_widgets"></a> [enable\_nvidia\_nvml\_widgets](#input\_enable\_nvidia\_nvml\_widgets) | Add Nvidia NVML widgets to the dashboard. | `bool` | n/a | yes |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | GCP Project ID to which the cluster will be deployed. | `string` | n/a | yes |
-| <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | Arbitrary string with which all names of newly created resources will be<br>prefixed. | `string` | n/a | yes |
+| <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | Arbitrary string with which all names of newly created resources will be prefixed. | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| <a name="output_enable_gce_gke_gpu_utilization_widgets"></a> [enable\_gce\_gke\_gpu\_utilization\_widgets](#output\_enable\_gce\_gke\_gpu\_utilization\_widgets) | n/a |
+| <a name="output_enable_nvidia_dcgm_widgets"></a> [enable\_nvidia\_dcgm\_widgets](#output\_enable\_nvidia\_dcgm\_widgets) | n/a |
+| <a name="output_enable_nvidia_nvml_widgets"></a> [enable\_nvidia\_nvml\_widgets](#output\_enable\_nvidia\_nvml\_widgets) | n/a |
 | <a name="output_instructions"></a> [instructions](#output\_instructions) | Instructions for accessing the dashboard |
+| <a name="output_project_id"></a> [project\_id](#output\_project\_id) | n/a |
+| <a name="output_resource_prefix"></a> [resource\_prefix](#output\_resource\_prefix) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -21,12 +21,12 @@ locals {
     var.enable_ops_agent ? [{
       type        = "shell"
       destination = "/tmp/enable_cloud_ops_agent.sh"
-      source      = "${path.module}/../../../../install_scripts/install_cloud_ops_agent.sh"
+      source      = "${path.module}/../../../../scripts/install_cloud_ops_agent.sh"
     }] : [],
     var.enable_ray ? [{
       type        = "shell"
       destination = "/tmp/enable_ray.sh"
-      source      = "${path.module}/../../../../install_scripts/setup_ray.sh"
+      source      = "${path.module}/../../../../scripts/setup_ray.sh"
       args        = "1.12.1 26379 ${try(var.guest_accelerator.count, 0)}"
     }] : [],
     var.startup_script != null && var.startup_script != "" ? [{
@@ -141,7 +141,7 @@ resource "google_compute_instance_group_manager" "mig" {
 
   version {
     name              = "default"
-    instance_template = module.compute_instance_template.resource_id
+    instance_template = module.compute_instance_template.id
   }
 
   timeouts {
@@ -149,59 +149,3 @@ resource "google_compute_instance_group_manager" "mig" {
     update = "30m"
   }
 }
-
-//module "aiinfra-slurm" {
-//  source     = "../slurm-cluster"
-//  count      = var.orchestrator_type == "slurm" ? 1 : 0
-//  depends_on = [
-//    google_compute_instance_template.templates["compute"],
-//    google_compute_instance_template.templates["controller"],
-//    google_compute_instance_template.templates["login"],
-//  ]
-//
-//  project_id           = var.project_id
-//  deployment_name      = var.deployment_name
-//  zone                 = var.zone
-//  region               = var.region
-//  network_self_link    = var.network_self_link
-//  subnetwork_self_link = var.subnetwork_self_link
-//  service_account      = var.service_account
-//  network_storage      = var.slurm_network_storage
-//
-//  node_count_static      = var.slurm_node_count_static
-//  node_count_dynamic_max = var.slurm_node_count_dynamic_max
-//
-//  instance_template_compute    = "${local.vm_template_self_link_prefix}/${google_compute_instance_template.templates["compute"].name}"
-//  instance_template_controller = "${local.vm_template_self_link_prefix}/${google_compute_instance_template.templates["controller"].name}"
-//  instance_template_login      = "${local.vm_template_self_link_prefix}/${google_compute_instance_template.templates["login"].name}"
-//}
-//
-//module "aiinfra-gke" {
-//  source                   = "../gke-cluster"
-//  count                    = var.orchestrator_type == "gke" ? 1 : 0
-//  project                  = var.project_id
-//  region                   = var.region
-//  zone                     = var.zone
-//  name                     = "${local.resource_prefix}-gke"
-//  gke_version              = var.gke_version
-//  disk_size_gb             = var.disk_size_gb
-//  disk_type                = var.disk_type
-//  network_self_link        = var.network_self_link
-//  subnetwork_self_link     = var.subnetwork_self_link
-//  node_service_account     = var.service_account.email
-//  node_pools               = var.node_pools
-//}
-//
-//vm_template_self_link_prefix = "https://www.googleapis.com/compute/beta/projects/${var.project_id}/global/instanceTemplates"
-//controller = {
-//  machine_type            = "c2-standard-4"
-//  disk_size_gb            = 50
-//  disk_type               = "pd-ssd"
-//  guest_accelerators = []
-//}
-//login = {
-//  machine_type            = "n2-standard-2"
-//  disk_size_gb            = 50
-//  disk_type               = "pd-standard"
-//  guest_accelerators = []
-//}

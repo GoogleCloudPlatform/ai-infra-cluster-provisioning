@@ -41,15 +41,19 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_network_config"></a> [network\_config](#input\_network\_config) | The network configuration to specify the type of VPC to be used.<br><br>Possible values:<br>- `"default"`<br>- `"new_multi_nic"`<br>- `"new_single_nic"` | `string` | n/a | yes |
-| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The ID of the project in which the resource belongs.<br><br>Related docs:<br>- [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#project) | `string` | n/a | yes |
-| <a name="input_region"></a> [region](#input\_region) | The region in which the subnetwork(s) has been / will be created.<br><br>Related docs:<br>- [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#region)<br>- [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/networks/subnets/create#--region) | `string` | n/a | yes |
-| <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | Arbitrary string with which all names of newly created resources will be<br>prefixed. | `string` | n/a | yes |
+| <a name="input_network_config"></a> [network\_config](#input\_network\_config) | The network configuration to specify the type of VPC to be used.<br><br>Possible values: `["default", "new_multi_nic", "new_single_nic"]` | `string` | n/a | yes |
+| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The ID of the project in which the resource belongs.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#project). | `string` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | The region in which the subnetwork(s) has been / will be created.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#region), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/networks/subnets/create#--region). | `string` | n/a | yes |
+| <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | Arbitrary string with which all names of newly created resources will be prefixed. | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| <a name="output_network_config"></a> [network\_config](#output\_network\_config) | n/a |
 | <a name="output_network_id"></a> [network\_id](#output\_network\_id) | ID of the network |
+| <a name="output_project_id"></a> [project\_id](#output\_project\_id) | n/a |
+| <a name="output_region"></a> [region](#output\_region) | n/a |
+| <a name="output_resource_prefix"></a> [resource\_prefix](#output\_resource\_prefix) | n/a |
 | <a name="output_subnetwork_self_links"></a> [subnetwork\_self\_links](#output\_subnetwork\_self\_links) | Primary subnet self-links of all the VPCs |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

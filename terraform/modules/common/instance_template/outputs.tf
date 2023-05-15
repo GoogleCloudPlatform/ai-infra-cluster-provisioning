@@ -14,7 +14,31 @@
  * limitations under the License.
 */
 
-output "resource_id" {
+output "disk_size_gb" { value = var.disk_size_gb }
+output "disk_type" { value = var.disk_type }
+output "guest_accelerator" { value = var.guest_accelerator }
+output "machine_type" { value = var.machine_type }
+output "project_id" { value = var.project_id }
+output "region" { value = var.region }
+output "resource_prefix" { value = var.resource_prefix }
+output "startup_script" { value = var.startup_script }
+output "subnetwork_self_links" { value = var.subnetwork_self_links }
+
+output "machine_image" { value = local.machine_image }
+output "metadata" { value = local.metadata }
+output "service_account" { value = local.service_account }
+
+output "id" {
   description = "`id` output of the google_compute_instance_template resource created."
   value       = resource.google_compute_instance_template.template.id
+}
+
+output "name" {
+  description = "`name` output of the google_compute_instance_template resource created."
+  value       = resource.google_compute_instance_template.template.name
+}
+
+output "self_link" {
+  description = "`self_link` output of the google_compute_instance_template resource created"
+  value       = resource.google_compute_instance_template.template.self_link
 }

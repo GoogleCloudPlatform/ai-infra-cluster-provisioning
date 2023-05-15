@@ -14,6 +14,24 @@
   * limitations under the License.
   */
 
+output "project_id" { value = var.project_id }
+output "resource_prefix" { value = var.resource_prefix }
+output "target_size" { value = var.target_size }
+output "zone" { value = var.zone }
+output "disk_size_gb" { value = var.disk_size_gb }
+output "disk_type" { value = var.disk_type }
+output "filestore_new" { value = var.filestore_new }
+output "gcsfuse_existing" { value = var.gcsfuse_existing }
+output "guest_accelerator" { value = var.guest_accelerator }
+output "enable_ops_agent" { value = var.enable_ops_agent }
+output "enable_ray" { value = var.enable_ray }
+output "machine_image" { value = var.machine_image }
+output "machine_type" { value = var.machine_type }
+output "network_config" { value = var.network_config }
+output "service_account" { value = var.service_account }
+output "startup_script" { value = var.startup_script }
+output "startup_script_file" { value = var.startup_script_file }
+
 output "instructions" {
   description = "Instructions for accessing the dashboard"
   value       = try(module.dashboard[0].instructions, "Dashboard not created")
