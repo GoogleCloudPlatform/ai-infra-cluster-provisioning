@@ -52,7 +52,6 @@ locals {
   zeroeth_partition_name   = var.compute_partitions[0].partition_name
   zeroeth_partition_zone   = local.compute_partitions[local.zeroeth_partition_name].zone
   zeroeth_partition_region = join("-", slice(split("-", local.zeroeth_partition_zone), 0, 2))
-
   controller_var = {
     disk_size_gb = coalesce(try(var.controller_var.disk_size_gb, null), 50)
     disk_type    = coalesce(try(var.controller_var.disk_type, null), "pd-ssd")
@@ -87,7 +86,6 @@ locals {
     )
     zone = coalesce(try(var.controller_var.zone, null), local.zeroeth_partition_zone)
   }
-
   login_var = {
     disk_size_gb = coalesce(try(var.login_var.disk_size_gb, null), 50)
     disk_type    = coalesce(try(var.login_var.disk_type, null), "pd-standard")
@@ -124,7 +122,6 @@ locals {
   }
 
   _instance_template_prefix = "https://www.googleapis.com/compute/beta/projects/${var.project_id}/global/instanceTemplates"
-
   compute_instance_templates = {
     for name in local.partition_names
     : name
@@ -132,7 +129,6 @@ locals {
   }
   controller_instance_template = "${local._instance_template_prefix}/${module.controller_instance_template.name}"
   login_instance_template      = "${local._instance_template_prefix}/${module.login_instance_template.name}"
-
 }
 
 module "network" {

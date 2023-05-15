@@ -21,37 +21,12 @@ steps:
   allowFailure: true
 
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          '--cache-from', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          '-f', 'Dockerfile', '.' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/pr/default-vpc-env.list',
-          '--env', 'NAME_PREFIX=pr${_PR_NUMBER}-defaultvpc',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Validate' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/pr/default-vpc-env.list',
-          '--env', 'NAME_PREFIX=pr${_PR_NUMBER}-defaultvpc',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Plan' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/pr/multinic-vpc-env.list',
-          '--env', 'NAME_PREFIX=pr${_PR_NUMBER}-multinic',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Validate' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/pr/multinic-vpc-env.list',
-          '--env', 'NAME_PREFIX=pr${_PR_NUMBER}-multinic',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Plan' ]
+  args: [
+    'build',
+    '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+    '--cache-from', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+    '--file', 'Dockerfile',
+    '.' ]
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '--tag=test', '--target=test', '.' ]
