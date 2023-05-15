@@ -28,12 +28,17 @@ output "machine_image" { value = local.machine_image }
 output "metadata" { value = local.metadata }
 output "service_account" { value = local.service_account }
 
-output "resource_id" {
+output "id" {
   description = "`id` output of the google_compute_instance_template resource created."
   value       = resource.google_compute_instance_template.template.id
 }
 
-output "resource_name" {
+output "name" {
   description = "`name` output of the google_compute_instance_template resource created."
   value       = resource.google_compute_instance_template.template.name
+}
+
+output "self_link" {
+  description = "`self_link` output of the google_compute_instance_template resource created"
+  value       = resource.google_compute_instance_template.template.self_link
 }

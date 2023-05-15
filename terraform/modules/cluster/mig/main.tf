@@ -141,7 +141,7 @@ resource "google_compute_instance_group_manager" "mig" {
 
   version {
     name              = "default"
-    instance_template = module.compute_instance_template.resource_id
+    instance_template = module.compute_instance_template.id
   }
 
   timeouts {

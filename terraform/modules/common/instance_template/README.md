@@ -60,14 +60,15 @@ No modules.
 | <a name="output_disk_size_gb"></a> [disk\_size\_gb](#output\_disk\_size\_gb) | n/a |
 | <a name="output_disk_type"></a> [disk\_type](#output\_disk\_type) | n/a |
 | <a name="output_guest_accelerator"></a> [guest\_accelerator](#output\_guest\_accelerator) | n/a |
+| <a name="output_id"></a> [id](#output\_id) | `id` output of the google\_compute\_instance\_template resource created. |
 | <a name="output_machine_image"></a> [machine\_image](#output\_machine\_image) | n/a |
 | <a name="output_machine_type"></a> [machine\_type](#output\_machine\_type) | n/a |
 | <a name="output_metadata"></a> [metadata](#output\_metadata) | n/a |
+| <a name="output_name"></a> [name](#output\_name) | `name` output of the google\_compute\_instance\_template resource created. |
 | <a name="output_project_id"></a> [project\_id](#output\_project\_id) | n/a |
 | <a name="output_region"></a> [region](#output\_region) | n/a |
-| <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id) | `id` output of the google\_compute\_instance\_template resource created. |
-| <a name="output_resource_name"></a> [resource\_name](#output\_resource\_name) | `name` output of the google\_compute\_instance\_template resource created. |
 | <a name="output_resource_prefix"></a> [resource\_prefix](#output\_resource\_prefix) | n/a |
+| <a name="output_self_link"></a> [self\_link](#output\_self\_link) | `self_link` output of the google\_compute\_instance\_template resource created |
 | <a name="output_service_account"></a> [service\_account](#output\_service\_account) | n/a |
 | <a name="output_startup_script"></a> [startup\_script](#output\_startup\_script) | n/a |
 | <a name="output_subnetwork_self_links"></a> [subnetwork\_self\_links](#output\_subnetwork\_self\_links) | n/a |

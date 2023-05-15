@@ -26,6 +26,7 @@ No providers.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_compute_instance_templates"></a> [compute\_instance\_templates](#module\_compute\_instance\_templates) | ../../common/instance_template | n/a |
+| <a name="module_compute_node_groups"></a> [compute\_node\_groups](#module\_compute\_node\_groups) | github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group// | v1.17.0 |
 | <a name="module_compute_partitions"></a> [compute\_partitions](#module\_compute\_partitions) | github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-partition// | v1.17.0 |
 | <a name="module_compute_startups"></a> [compute\_startups](#module\_compute\_startups) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/ | v1.17.0 |
 | <a name="module_controller"></a> [controller](#module\_controller) | github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller// | v1.17.0 |
@@ -37,7 +38,6 @@ No providers.
 | <a name="module_login_instance_template"></a> [login\_instance\_template](#module\_login\_instance\_template) | ../../common/instance_template | n/a |
 | <a name="module_login_startup"></a> [login\_startup](#module\_login\_startup) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/ | v1.17.0 |
 | <a name="module_network"></a> [network](#module\_network) | ../../common/network | n/a |
-| <a name="module_node_groups"></a> [node\_groups](#module\_node\_groups) | github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group// | v1.17.0 |
 
 ## Resources
 
@@ -59,5 +59,15 @@ No resources.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_compute_partitions"></a> [compute\_partitions](#output\_compute\_partitions) | n/a |
+| <a name="output_controller_var"></a> [controller\_var](#output\_controller\_var) | n/a |
+| <a name="output_filestore_new"></a> [filestore\_new](#output\_filestore\_new) | n/a |
+| <a name="output_gcsfuse_existing"></a> [gcsfuse\_existing](#output\_gcsfuse\_existing) | n/a |
+| <a name="output_login_var"></a> [login\_var](#output\_login\_var) | n/a |
+| <a name="output_network_config"></a> [network\_config](#output\_network\_config) | n/a |
+| <a name="output_project_id"></a> [project\_id](#output\_project\_id) | n/a |
+| <a name="output_resource_prefix"></a> [resource\_prefix](#output\_resource\_prefix) | n/a |
+| <a name="output_service_account"></a> [service\_account](#output\_service\_account) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

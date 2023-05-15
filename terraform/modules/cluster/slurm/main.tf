@@ -22,6 +22,7 @@ locals {
     => {
       node_count_static = partition.node_count_static
       guest_accelerator = partition.guest_accelerator
+      partition_name    = partition.partition_name
       zone              = partition.zone
 
       disk_size_gb = coalesce(try(partition.disk_size_gb, null), 128)
@@ -127,10 +128,10 @@ locals {
   compute_instance_templates = {
     for name in local.partition_names
     : name
-    => "${local._instance_template_prefix}/${module.compute_instance_templates[name].resource_name}"
+    => "${local._instance_template_prefix}/${module.compute_instance_templates[name].name}"
   }
-  controller_instance_template = "${local._instance_template_prefix}/${module.controller_instance_template.resource_name}"
-  login_instance_template      = "${local._instance_template_prefix}/${module.login_instance_template.resource_name}"
+  controller_instance_template = "${local._instance_template_prefix}/${module.controller_instance_template.name}"
+  login_instance_template      = "${local._instance_template_prefix}/${module.login_instance_template.name}"
 
 }
 
@@ -167,6 +168,10 @@ module "filestore" {
   size_gb              = var.filestore_new[count.index].size_gb
   zone                 = local.zeroeth_partition_zone
   labels               = { ghpc_role = "file-system" }
+
+  depends_on = [
+    module.network,
+  ]
 }
 
 module "compute_startups" {
@@ -184,6 +189,11 @@ module "compute_startups" {
     module.filestore[*].mount_runner,
     local.compute_partitions[each.key].startup_runners,
   )
+
+  depends_on = [
+    module.gcsfuse,
+    module.filestore,
+  ]
 }
 
 module "controller_startup" {
@@ -200,6 +210,11 @@ module "controller_startup" {
     module.filestore[*].mount_runner,
     local.controller_var.startup_runners,
   )
+
+  depends_on = [
+    module.gcsfuse,
+    module.filestore,
+  ]
 }
 
 module "login_startup" {
@@ -216,6 +231,11 @@ module "login_startup" {
     module.filestore[*].mount_runner,
     local.login_var.startup_runners,
   )
+
+  depends_on = [
+    module.gcsfuse,
+    module.filestore,
+  ]
 }
 
 module "compute_instance_templates" {
@@ -230,10 +250,14 @@ module "compute_instance_templates" {
   metadata              = null
   project_id            = var.project_id
   region                = local.compute_partitions[each.key].region
-  resource_prefix       = var.resource_prefix
+  resource_prefix       = "${var.resource_prefix}-${each.key}"
   service_account       = var.service_account
   startup_script        = module.compute_startups[each.key].startup_script
   subnetwork_self_links = module.network.subnetwork_self_links
+
+  depends_on = [
+    module.network,
+  ]
 }
 
 module "controller_instance_template" {
@@ -247,10 +271,14 @@ module "controller_instance_template" {
   metadata              = null
   project_id            = var.project_id
   region                = local.controller_var.region
-  resource_prefix       = var.resource_prefix
+  resource_prefix       = "${var.resource_prefix}-controller"
   service_account       = var.service_account
   startup_script        = module.controller_startup.startup_script
   subnetwork_self_links = module.network.subnetwork_self_links
+
+  depends_on = [
+    module.network,
+  ]
 }
 
 module "login_instance_template" {
@@ -264,13 +292,17 @@ module "login_instance_template" {
   metadata              = null
   project_id            = var.project_id
   region                = local.login_var.region
-  resource_prefix       = var.resource_prefix
+  resource_prefix       = "${var.resource_prefix}-login"
   service_account       = var.service_account
-  startup_script        = module.login_startup.startup_script
+  startup_script        = null
   subnetwork_self_links = module.network.subnetwork_self_links
+
+  depends_on = [
+    module.network,
+  ]
 }
 
-module "node_groups" {
+module "compute_node_groups" {
   source   = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/compute/schedmd-slurm-gcp-v5-node-group//?ref=v1.17.0"
   for_each = toset(local.partition_names)
 
@@ -280,6 +312,10 @@ module "node_groups" {
   node_count_dynamic_max = 0
   project_id             = var.project_id
   service_account        = module.compute_instance_templates[each.key].service_account
+
+  depends_on = [
+    module.compute_instance_templates,
+  ]
 }
 
 module "compute_partitions" {
@@ -290,28 +326,42 @@ module "compute_partitions" {
   deployment_name      = var.resource_prefix
   is_default           = each.key == local.partition_names[0]
   network_storage      = [] // flatten([var.network_storage])
-  node_groups          = [module.node_groups[each.key].node_groups]
+  node_groups          = [module.compute_node_groups[each.key].node_groups]
   partition_name       = each.key
   project_id           = var.project_id
   region               = local.compute_partitions[each.key].region
+  startup_script       = module.compute_startups[each.key].startup_script
   subnetwork_self_link = module.network.subnetwork_self_links[0]
   subnetwork_project   = var.project_id
   zone                 = local.compute_partitions[each.key].zone
+
+  depends_on = [
+    module.compute_instance_templates,
+    module.compute_startups,
+    module.network,
+    module.compute_node_groups,
+  ]
 }
 
 module "controller" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller//?ref=v1.17.0"
 
-  deployment_name      = var.resource_prefix
-  instance_template    = local.controller_instance_template
-  labels               = { ghpc_role = "scheduler" }
-  network_storage      = [] // flatten([var.network_storage])
-  partition            = [for k in local.partition_names : module.compute_partitions[k].partition]
-  project_id           = var.project_id
-  region               = local.controller_var.region
-  service_account      = module.controller_instance_template.service_account
-  subnetwork_self_link = module.network.subnetwork_self_links[0]
-  //zone = local.controller_var.zone
+  deployment_name           = var.resource_prefix
+  instance_template         = local.controller_instance_template
+  labels                    = { ghpc_role = "scheduler" }
+  network_storage           = [] // flatten([var.network_storage])
+  partition                 = [for k in local.partition_names : module.compute_partitions[k].partition]
+  project_id                = var.project_id
+  region                    = local.controller_var.region
+  service_account           = module.controller_instance_template.service_account
+  controller_startup_script = module.controller_startup.startup_script
+  subnetwork_self_link      = module.network.subnetwork_self_links[0]
+
+  depends_on = [
+    module.controller_instance_template,
+    module.controller_startup,
+    module.network,
+  ]
 }
 
 module "login" {
@@ -324,6 +374,12 @@ module "login" {
   project_id             = var.project_id
   region                 = local.login_var.region
   service_account        = module.login_instance_template.service_account
+  startup_script         = module.login_startup.startup_script
   subnetwork_self_link   = module.network.subnetwork_self_links[0]
-  //zone = var.zone
+
+  depends_on = [
+    module.login_instance_template,
+    module.login_startup,
+    module.network,
+  ]
 }
