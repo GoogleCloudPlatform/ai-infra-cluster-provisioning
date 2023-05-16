@@ -18,3 +18,8 @@ output "instructions" {
   description = "Instructions for accessing the dashboard"
   value       = try(module.dashboard[0].instructions, "Dashboard not created")
 }
+
+output "id" {
+  description = "`id` output of the google_compute_instance_template resource created."
+  value       = resource.google_compute_instance_template.template.id
+}

@@ -86,14 +86,14 @@ module "filestore" {
   region               = local.region
   size_gb              = var.filestore_new[count.index].size_gb
   zone                 = var.zone
-  labels               = { ghpc_role = "file-system" }
+  labels               = merge(var.labels, { ghpc_role = "file-system" })
 }
 
 module "startup" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=v1.17.0"
 
   deployment_name = var.resource_prefix
-  labels          = { ghpc_role = "scripts" }
+  labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
   region          = local.region
   runners = concat(
@@ -120,6 +120,8 @@ module "compute_instance_template" {
   service_account       = var.service_account
   startup_script        = module.startup.startup_script
   subnetwork_self_links = module.network.subnetwork_self_links
+  network_self_links    = module.network.network_self_links
+  labels                = merge(var.labels, { ghpc_role = "compute" })
 }
 
 resource "google_compute_instance_group_manager" "mig" {
