@@ -20,6 +20,19 @@ test::terraform::slurm::fmt () {
     EXPECT_SUCCEED terraform -chdir="$(slurm::src_dir)" fmt -check -recursive
 }
 
+test::terraform::slurm::defaults () {
+    tfplan=$(mktemp)
+    EXPECT_SUCCEED helpers::terraform_plan \
+        "$(slurm::src_dir)" \
+        "$(slurm::input_dir)/simple.tfvars" \
+        "${tfplan}"
+    tfshow=$(mktemp)
+    helpers::terraform_show "$(slurm::src_dir)" "${tfplan}" >"${tfshow}"
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(slurm::output_dir)/defaults.json" \
+        "${tfshow}"
+}
+
 test::terraform::slurm::simple_create_modules () {
     tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \

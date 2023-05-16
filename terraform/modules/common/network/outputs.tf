@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-output "network_config" { value = var.network_config }
-output "project_id" { value = var.project_id }
-output "region" { value = var.region }
-output "resource_prefix" { value = var.resource_prefix }
-
 output "network_id" {
   description = "ID of the network"
   value = one(toset(flatten([

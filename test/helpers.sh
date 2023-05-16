@@ -174,17 +174,36 @@ EXPECT_FILE_REGULAR () {
     return 0
 }
 
+# Call `terraform plan` and save tfplan to a file
+#
+# Parameters:
+#   - `src_dir`: path to the module directory
+#   - `var_file`: path to input tfvars file
+#   - `out_file`: path to output tfplan file
+# Output: terraform plan error messages in json format (if any)
+# Exit status:
+#   - 0: terraform plan produced zero errors (may have info or warn)
+#   - 1: terraform plan produced one or more errors
 helpers::terraform_plan () {
     local -r src_dir="${1:?}"
     local -r var_file="${2:?}"
     local -r out_file="${3:?}"
     ! jq -e 'select(."@level" == "error")' >&2 \
         <(terraform -chdir="${src_dir}" plan \
-            -no-color -json -parallelism=$(nproc) -lock=false \
+            -no-color -json -lock=false \
             -var-file="${var_file}" -out="${out_file}" \
         && echo '{"@level":"info","@message":"success"}')
 }
 
+# Call `terraform show` on a tfplan file
+#
+# Parameters:
+#   - `src_dir`: path to the module directory
+#   - `plan_file`: path to the tfplan file
+# Output: terraform show output in json format
+# Exit status:
+#   - 0: `terraform show` exited successfully
+#   - 1: `terraform show` exited unsuccessfully
 helpers::terraform_show () {
     local -r src_dir="${1:?}"
     local -r plan_file="${2:?}"
@@ -192,12 +211,30 @@ helpers::terraform_show () {
         -no-color -json "${plan_file}"
 }
 
+# Retrieve an output value from a tfplan file
+#
+# Parameters:
+#   - `plan_json_file`: path to the file which is the output of `terraform show`
+#   - `variable_name`: output variable name to retrieve
+# Output: the value from the tfplan file
+# Exit status:
+#   - 0: the variable was found in the tfplan file
+#   - 1: the variable was not found in the tfplan file
 helpers::plan_output () {
     local -r plan_json_file="${1:?}"
     local -r variable_name="${2:?}"
     jq -rc ".planned_values.outputs.${variable_name}.value" "${plan_json_file}"
 }
 
+# Check if a json object contains another json object
+#
+# Parameters:
+#   - `element_file`: file with a json object
+#   - `input_file`: file with a json object which might be in `element_file`
+# Output: if not found, `element_file`, else none
+# Exit status:
+#   - 0: `input_file` is contained within `element_file`
+#   - 1: `input_file` is not contained within `element_file`
 helpers::json_contains () {
     element_file="${1:?}"
     input_file="${2:?}"
@@ -207,6 +244,15 @@ helpers::json_contains () {
         "${input_file}"
 }
 
+# Check if a json object does not contain another json object
+#
+# Parameters:
+#   - `element_file`: file with a json object
+#   - `input_file`: file with a json object which might be in `element_file`
+# Output: if found, `element_file`, else none
+# Exit status:
+#   - 0: `input_file` is not contained within `element_file`
+#   - 1: `input_file` is contained within `element_file`
 helpers::json_omits () {
     element_file="${1:?}"
     input_file="${2:?}"
