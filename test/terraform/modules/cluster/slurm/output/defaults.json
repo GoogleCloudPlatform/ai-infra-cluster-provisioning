@@ -1,0 +1,56 @@
+{
+  "planned_values": {
+    "outputs": {
+      "compute_partitions": {
+        "value": [
+          {
+            "disk_size_gb": 128,
+            "disk_type": "pd-standard",
+            "guest_accelerator": null,
+            "machine_image": {
+              "project": "schedmd-slurm-public",
+              "family": "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts",
+              "name": null
+            },
+            "machine_type": "a2-highgpu-2g",
+            "node_count_static": 1,
+            "partition_name": "compute",
+            "region": "us-central1",
+            "startup_runners": [],
+            "zone": "us-central1-a"
+          }
+        ]
+      },
+      "controller_var": {
+        "value": {
+          "disk_size_gb": 50,
+          "disk_type": "pd-ssd",
+          "machine_image": {
+            "project": "schedmd-slurm-public",
+            "family": "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts",
+            "name": null
+          },
+          "machine_type": "c2-standard-4",
+          "region": "us-central1",
+          "startup_runners": [],
+          "zone": "us-central1-a"
+        }
+      },
+      "login_var": {
+        "value": {
+          "disk_size_gb": 50,
+          "disk_type": "pd-standard",
+          "machine_image": {
+            "project": "schedmd-slurm-public",
+            "family": "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts",
+            "name": null
+          },
+          "machine_type": "n2-standard-2",
+          "region": "us-central1",
+          "startup_runners": [],
+          "zone": "us-central1-a"
+        }
+      }
+    }
+  }
+}

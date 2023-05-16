@@ -30,6 +30,9 @@ variable "compute_partitions" {
 
     Related docs: [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/community/modules/scheduler/schedmd-slurm-gcp-v5-controller#input_partition), [slurm-gcp](https://github.com/SchedMD/slurm-gcp/blob/master/terraform/slurm_cluster/modules/slurm_controller_instance/README_TF.md#input_partitions), [schedmd](https://slurm.schedmd.com/slurm.conf.html#SECTION_PARTITION-CONFIGURATION).
 
+    ------------------------
+    Required Fields
+
     ------------
     `compute_partitions[*].node_count_static`
 
@@ -48,6 +51,10 @@ variable "compute_partitions" {
     Zone in which the partition’s nodes should be located.
 
     Related docs: [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/community/modules/compute/schedmd-slurm-gcp-v5-partition#input_zone).
+
+
+    ------------------------
+    Optional Fields (set to `null` to get default values)
 
     ------------
     `compute_partitions[*].disk_size_gb`
@@ -141,10 +148,49 @@ variable "compute_partitions" {
       count = number
       type  = string
     })
+    machine_image = object({
+      project = string
+      family  = string
+      name    = string
+    })
     machine_type        = string
     startup_script      = string
     startup_script_file = string
   }))
+
+  validation {
+    condition     = var.compute_partitions != null
+    error_message = "compute_partitions must not be null"
+  }
+
+  validation {
+    condition     = length(var.compute_partitions) > 0
+    error_message = "compute_partitions must contain at least one element"
+  }
+
+  validation {
+    condition = alltrue([
+      for p in var.compute_partitions
+      : p.node_count_static != null
+    ])
+    error_message = "compute_partitions[*].node_count_static must not be null"
+  }
+
+  validation {
+    condition = alltrue([
+      for p in var.compute_partitions
+      : p.partition_name != null
+    ])
+    error_message = "compute_partitions[*].partition_name must not be null"
+  }
+
+  validation {
+    condition = alltrue([
+      for p in var.compute_partitions
+      : p.zone != null
+    ])
+    error_message = "compute_partitions[*].zone must not be null"
+  }
 }
 
 variable "controller_var" {
@@ -221,8 +267,13 @@ variable "controller_var" {
     EOT
 
   type = object({
-    disk_size_gb        = number
-    disk_type           = string
+    disk_size_gb = number
+    disk_type    = string
+    machine_image = object({
+      project = string
+      family  = string
+      name    = string
+    })
     machine_type        = string
     startup_script      = string
     startup_script_file = string
@@ -369,8 +420,13 @@ variable "login_var" {
     EOT
 
   type = object({
-    disk_size_gb        = number
-    disk_type           = string
+    disk_size_gb = number
+    disk_type    = string
+    machine_image = object({
+      project = string
+      family  = string
+      name    = string
+    })
     machine_type        = string
     startup_script      = string
     startup_script_file = string

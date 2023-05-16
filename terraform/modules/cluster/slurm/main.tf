@@ -21,12 +21,12 @@ locals {
     : partition.partition_name
     => {
       node_count_static = partition.node_count_static
-      guest_accelerator = partition.guest_accelerator
       partition_name    = partition.partition_name
       zone              = partition.zone
 
-      disk_size_gb = coalesce(try(partition.disk_size_gb, null), 128)
-      disk_type    = coalesce(try(partition.disk_type, null), "pd-standard")
+      disk_size_gb      = coalesce(try(partition.disk_size_gb, null), 128)
+      disk_type         = coalesce(try(partition.disk_type, null), "pd-standard")
+      guest_accelerator = partition.guest_accelerator
       machine_image = coalesce(try(partition.machine_image, null), {
         project = "schedmd-slurm-public"
         family  = "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts"
@@ -308,10 +308,6 @@ module "compute_node_groups" {
   node_count_dynamic_max = 0
   project_id             = var.project_id
   service_account        = module.compute_instance_templates[each.key].service_account
-
-  depends_on = [
-    module.compute_instance_templates,
-  ]
 }
 
 module "compute_partitions" {
@@ -332,10 +328,7 @@ module "compute_partitions" {
   zone                 = local.compute_partitions[each.key].zone
 
   depends_on = [
-    module.compute_instance_templates,
-    module.compute_startups,
     module.network,
-    module.compute_node_groups,
   ]
 }
 
@@ -354,8 +347,6 @@ module "controller" {
   subnetwork_self_link      = module.network.subnetwork_self_links[0]
 
   depends_on = [
-    module.controller_instance_template,
-    module.controller_startup,
     module.network,
   ]
 }
@@ -374,8 +365,6 @@ module "login" {
   subnetwork_self_link   = module.network.subnetwork_self_links[0]
 
   depends_on = [
-    module.login_instance_template,
-    module.login_startup,
     module.network,
   ]
 }

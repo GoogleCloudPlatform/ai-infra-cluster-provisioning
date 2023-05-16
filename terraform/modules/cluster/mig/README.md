@@ -70,22 +70,5 @@ limitations under the License.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_disk_size_gb"></a> [disk\_size\_gb](#output\_disk\_size\_gb) | n/a |
-| <a name="output_disk_type"></a> [disk\_type](#output\_disk\_type) | n/a |
-| <a name="output_enable_ops_agent"></a> [enable\_ops\_agent](#output\_enable\_ops\_agent) | n/a |
-| <a name="output_enable_ray"></a> [enable\_ray](#output\_enable\_ray) | n/a |
-| <a name="output_filestore_new"></a> [filestore\_new](#output\_filestore\_new) | n/a |
-| <a name="output_gcsfuse_existing"></a> [gcsfuse\_existing](#output\_gcsfuse\_existing) | n/a |
-| <a name="output_guest_accelerator"></a> [guest\_accelerator](#output\_guest\_accelerator) | n/a |
 | <a name="output_instructions"></a> [instructions](#output\_instructions) | Instructions for accessing the dashboard |
-| <a name="output_machine_image"></a> [machine\_image](#output\_machine\_image) | n/a |
-| <a name="output_machine_type"></a> [machine\_type](#output\_machine\_type) | n/a |
-| <a name="output_network_config"></a> [network\_config](#output\_network\_config) | n/a |
-| <a name="output_project_id"></a> [project\_id](#output\_project\_id) | n/a |
-| <a name="output_resource_prefix"></a> [resource\_prefix](#output\_resource\_prefix) | n/a |
-| <a name="output_service_account"></a> [service\_account](#output\_service\_account) | n/a |
-| <a name="output_startup_script"></a> [startup\_script](#output\_startup\_script) | n/a |
-| <a name="output_startup_script_file"></a> [startup\_script\_file](#output\_startup\_script\_file) | n/a |
-| <a name="output_target_size"></a> [target\_size](#output\_target\_size) | n/a |
-| <a name="output_zone"></a> [zone](#output\_zone) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

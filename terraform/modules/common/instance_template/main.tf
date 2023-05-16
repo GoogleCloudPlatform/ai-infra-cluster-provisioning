@@ -59,6 +59,8 @@ locals {
     email  = data.google_compute_default_service_account.account.email
     scopes = ["cloud-platform"]
   }
+
+  name = "${var.resource_prefix}-tpl"
 }
 
 data "google_compute_default_service_account" "account" {
@@ -77,7 +79,7 @@ resource "google_compute_instance_template" "template" {
   project = var.project_id
   region  = var.region
 
-  name         = "${var.resource_prefix}-tpl"
+  name         = local.name
   machine_type = var.machine_type
   metadata     = local.metadata
 
