@@ -17,22 +17,20 @@
 . ./scripts/entrypoint_helpers.sh
 
 main () {
-    local arg_action
-    local arg_cluster
-    local arg_var_file
+    local arg_action arg_cluster arg_var_file
     {
-        entrypoint::parse_args "${@}" \
-        && entrypoint::default_args \
-        && entrypoint::validate_args
+        entrypoint_helpers::parse_args "${@}" \
+        && entrypoint_helpers::default_args \
+        && entrypoint_helpers::validate_args
     } \
-    || { echo; entrypoint::get_usage; return 1; } >&2
+    || { echo; entrypoint_helpers::get_usage; return 1; } >&2
 
     case "${arg_action}" in
         'create')
-            entrypoint::create "${arg_cluster}" "${arg_var_file}"
+            entrypoint_helpers::create "${arg_cluster}" "${arg_var_file}"
             ;;
         'destroy')
-            entrypoint::destroy "${arg_cluster}" "${arg_var_file}"
+            entrypoint_helpers::destroy "${arg_cluster}" "${arg_var_file}"
             ;;
     esac
 }

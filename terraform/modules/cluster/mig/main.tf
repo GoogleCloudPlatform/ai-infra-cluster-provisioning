@@ -20,13 +20,13 @@ locals {
   startup_runners = concat(
     var.enable_ops_agent ? [{
       type        = "shell"
-      destination = "/tmp/enable_cloud_ops_agent.sh"
-      source      = "${path.module}/../../../../scripts/install_cloud_ops_agent.sh"
+      destination = "/tmp/enable_ops_agent.sh"
+      source      = "${path.module}/../../../../scripts/enable_ops_agent.sh"
     }] : [],
     var.enable_ray ? [{
       type        = "shell"
       destination = "/tmp/enable_ray.sh"
-      source      = "${path.module}/../../../../scripts/setup_ray.sh"
+      source      = "${path.module}/../../../../scripts/enable_ray.sh"
       args        = "1.12.1 26379 ${try(var.guest_accelerator.count, 0)}"
     }] : [],
     var.startup_script != null && var.startup_script != "" ? [{

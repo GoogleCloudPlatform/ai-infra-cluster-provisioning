@@ -17,7 +17,7 @@
 # Parameters: none
 # Output: usage help message
 # Exit status: 0
-entrypoint::get_usage () {
+entrypoint_helpers::get_usage () {
     cat <<EOT
 Usage: ./scripts/entrypoint.sh [options] action cluster [var_file]
 
@@ -45,13 +45,13 @@ EOT
 #   - 1: unable to read at least one arg/flag/opt
 #
 # Note: will actually exit 0 (not return) when given a `help` flag
-entrypoint::parse_args () {
+entrypoint_helpers::parse_args () {
     local parameter_index=1
     while [ "${#}" -gt 0 ]; do
         if grep -q '^-' <(echo "${1}"); then
             case "${1}" in
                 -h|--help)
-                    echo "$(entrypoint::get_usage)"
+                    echo "$(entrypoint_helpers::get_usage)"
                     exit 0
                     ;;
                 *)
@@ -84,7 +84,7 @@ entrypoint::parse_args () {
     return 0
 }
 
-entrypoint::default_args () {
+entrypoint_helpers::default_args () {
     arg_var_file="${arg_var_file:-./terraform.tfvars}"
 }
 
@@ -97,7 +97,7 @@ entrypoint::default_args () {
 # Exit status:
 #   - 0: _array contains the _value
 #   - 1: _array does not contain the _value
-entrypoint::expect_contains () {
+entrypoint_helpers::expect_contains () {
     local -r _array_name="${1}"
     local -r _value_name="${2}"
     local -nr _array="${_array_name}"
@@ -133,17 +133,18 @@ entrypoint::expect_contains () {
 # Exit status:
 #   - 0: all args/flags/opts are valid
 #   - 1: at least one arg/flag/opt is invalid
-entrypoint::validate_args () {
+entrypoint_helpers::validate_args () {
     local valid=true
 
     declare -ar expected_actions=('create' 'destroy')
-    entrypoint::expect_contains expected_actions arg_action || valid=false
+    entrypoint_helpers::expect_contains expected_actions arg_action || valid=false
 
     declare -ar expected_clusters=('gke' 'mig' 'slurm')
-    entrypoint::expect_contains expected_clusters arg_cluster || valid=false
+    entrypoint_helpers::expect_contains expected_clusters arg_cluster || valid=false
 
     [ -f "${arg_var_file}" ] || {
-        echo "var_file '${arg_var_file}' must be regular file"
+        echo "var_file='${arg_var_file}'"
+        echo "  - Must be regular file"
         valid=false
     } >&2
 
@@ -156,7 +157,7 @@ entrypoint::validate_args () {
 #   - `cluster`: type of cluster
 # Output: path to the terraform module
 # Exit status: 0
-entrypoint::module_path () {
+entrypoint_helpers::module_path () {
     local -r cluster="${1:?}"
     echo "./terraform/modules/cluster/${cluster}"
 }
@@ -170,10 +171,10 @@ entrypoint::module_path () {
 # Exit status:
 #   - 0: all terraform calls were successful
 #   - 1: at least one terraform call failed
-entrypoint::create () {
+entrypoint_helpers::create () {
     local -r cluster="${1:?}"
     local -r var_file="${2:?}"
-    local -r module_path="$(entrypoint::module_path "${cluster}")"
+    local -r module_path="$(entrypoint_helpers::module_path "${cluster}")"
 
     echo "running terraform init"
     terraform -chdir="${module_path}" init || {
@@ -202,7 +203,7 @@ entrypoint::create () {
         "${tfplan}" \
     || {
         echo "terraform apply failure"
-        entrypoint::destroy "${cluster}" "${var_file}"
+        entrypoint_helpers::destroy "${cluster}" "${var_file}"
 
         rm -f "${tfplan}"
         return 1
@@ -221,10 +222,10 @@ entrypoint::create () {
 # Exit status:
 #   - 0: all terraform calls were successful
 #   - 1: at least one terraform call failed
-entrypoint::destroy () {
+entrypoint_helpers::destroy () {
     local -r cluster="${1:?}"
     local -r var_file="${2:?}"
-    local -r module_path="$(entrypoint::module_path "${cluster}")"
+    local -r module_path="$(entrypoint_helpers::module_path "${cluster}")"
 
     echo "running terraform destroy"
     terraform -chdir="${module_path}" \
