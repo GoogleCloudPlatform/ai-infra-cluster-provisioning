@@ -51,5 +51,6 @@ No resources.
 | Name | Description |
 |------|-------------|
 | <a name="output_network_id"></a> [network\_id](#output\_network\_id) | ID of the network |
+| <a name="output_network_self_links"></a> [network\_self\_links](#output\_network\_self\_links) | Primary subnet self-links of all the VPCs |
 | <a name="output_subnetwork_self_links"></a> [subnetwork\_self\_links](#output\_subnetwork\_self\_links) | Primary subnet self-links of all the VPCs |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
