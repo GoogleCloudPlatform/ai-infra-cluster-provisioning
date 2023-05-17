@@ -20,6 +20,8 @@ COPY test ./test
 ENTRYPOINT ["./test/run_tests.sh"]
 
 FROM base as deploy
-COPY scripts ./scripts
 COPY terraform ./terraform
+RUN for cluster in mig slurm; do \
+    terraform -chdir="./terraform/modules/cluster/${cluster}" init; done
+COPY scripts ./scripts
 ENTRYPOINT ["./scripts/entrypoint.sh"]
