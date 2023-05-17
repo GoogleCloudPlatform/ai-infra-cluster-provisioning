@@ -4,6 +4,7 @@ guest_accelerator = {
   type  = "nvidia-tesla-v100"
   count = 1
 }
+labels = {}
 machine_image = {
   project = "ubuntu-os-cloud"
   family  = "ubuntu-2204-lts"
@@ -20,7 +21,6 @@ service_account = {
   email  = "foo@bar.xyz"
   scopes = ["foobar"]
 }
-startup_script = "echo hello world"
-subnetwork_self_links = [
-  "https://www.googleapis.com/compute/v1/projects/gce-ai-infra/regions/us-central1/subnetworks/default",
-]
+startup_script        = "echo hello world"
+subnetwork_self_links = ["subnetwork_self_link"]
+network_self_links    = ["network_self_link"]

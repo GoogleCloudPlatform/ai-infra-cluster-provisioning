@@ -163,7 +163,7 @@ module "filestore" {
   region               = local.zeroeth_partition_region
   size_gb              = var.filestore_new[count.index].size_gb
   zone                 = local.zeroeth_partition_zone
-  labels               = { ghpc_role = "file-system" }
+  labels               = merge(var.labels, { ghpc_role = "file-system" })
 
   depends_on = [
     module.network,
@@ -175,7 +175,7 @@ module "compute_startups" {
   for_each = toset(local.partition_names)
 
   deployment_name = var.resource_prefix
-  labels          = { ghpc_role = "scripts" }
+  labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
   region          = local.compute_partitions[each.key].region
   runners = concat(
@@ -196,7 +196,7 @@ module "controller_startup" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=v1.17.0"
 
   deployment_name = var.resource_prefix
-  labels          = { ghpc_role = "scripts" }
+  labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
   region          = local.controller_var.region
   runners = concat(
@@ -217,7 +217,7 @@ module "login_startup" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=v1.17.0"
 
   deployment_name = var.resource_prefix
-  labels          = { ghpc_role = "scripts" }
+  labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
   region          = local.login_var.region
   runners = concat(
@@ -241,6 +241,7 @@ module "compute_instance_templates" {
   disk_size_gb          = local.compute_partitions[each.key].disk_size_gb
   disk_type             = local.compute_partitions[each.key].disk_type
   guest_accelerator     = local.compute_partitions[each.key].guest_accelerator
+  labels                = var.labels
   machine_image         = local.compute_partitions[each.key].machine_image
   machine_type          = local.compute_partitions[each.key].machine_type
   metadata              = null
@@ -263,6 +264,7 @@ module "controller_instance_template" {
   disk_size_gb          = local.controller_var.disk_size_gb
   disk_type             = local.controller_var.disk_type
   guest_accelerator     = null
+  labels                = var.labels
   machine_image         = local.controller_var.machine_image
   machine_type          = local.controller_var.machine_type
   metadata              = null
@@ -285,6 +287,7 @@ module "login_instance_template" {
   disk_size_gb          = local.login_var.disk_size_gb
   disk_type             = local.login_var.disk_type
   guest_accelerator     = null
+  labels                = var.labels
   machine_image         = local.login_var.machine_image
   machine_type          = local.login_var.machine_type
   metadata              = null
@@ -306,12 +309,11 @@ module "compute_node_groups" {
   for_each = toset(local.partition_names)
 
   instance_template      = local.compute_instance_templates[each.key]
-  labels                 = { ghpc_role = "compute" }
+  labels                 = merge(var.labels, { ghpc_role = "compute" })
   node_count_static      = local.compute_partitions[each.key].node_count_static
   node_count_dynamic_max = 0
   project_id             = var.project_id
-  // is it local.compute_instance_templates
-  service_account = module.compute_instance_templates[each.key].service_account
+  service_account        = module.compute_instance_templates[each.key].service_account
 }
 
 module "compute_partitions" {
@@ -341,7 +343,7 @@ module "controller" {
 
   deployment_name           = var.resource_prefix
   instance_template         = local.controller_instance_template
-  labels                    = { ghpc_role = "scheduler" }
+  labels                    = merge(var.labels, { ghpc_role = "scheduler" })
   network_storage           = [] // flatten([var.network_storage])
   partition                 = [for k in local.partition_names : module.compute_partitions[k].partition]
   project_id                = var.project_id
@@ -361,7 +363,7 @@ module "login" {
   controller_instance_id = module.controller.controller_instance_id
   deployment_name        = var.resource_prefix
   instance_template      = local.login_instance_template
-  labels                 = { ghpc_role = "scheduler" }
+  labels                 = merge(var.labels, { ghpc_role = "scheduler" })
   project_id             = var.project_id
   region                 = local.login_var.region
   service_account        = module.login_instance_template.service_account

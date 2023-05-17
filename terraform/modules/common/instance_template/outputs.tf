@@ -28,3 +28,5 @@ output "self_link" {
   description = "`self_link` output of the google_compute_instance_template resource created"
   value       = resource.google_compute_instance_template.template.self_link
 }
+
+output "service_account" { value = local.service_account }
