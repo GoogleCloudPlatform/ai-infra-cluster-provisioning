@@ -44,7 +44,7 @@ test::entrypoint_helpers::parse_args::succeeds_on_help () {
 test::entrypoint_helpers::default_args::defaults_var_file () {
     local arg_var_file
     EXPECT_SUCCEED entrypoint_helpers::default_args
-    EXPECT_STREQ "${arg_var_file}" './terraform.tfvars'
+    EXPECT_STREQ "${arg_var_file}" "${PWD}/input/terraform.tfvars"
 }
 
 test::entrypoint_helpers::validate_args::fails_on_invalid_action () {

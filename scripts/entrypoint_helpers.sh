@@ -32,7 +32,7 @@ Parameters:
                 - gke: Google Kubernetes Engine -- terraform/modules/cluster/gke
                 - mig: Managed Instange Group -- terraform/modules/cluster/mig
                 - slurm: Slurm Workload Manager -- terraform/modules/cluster/slurm
-    var_file    Terraform variables file. Defaults to ./terraform.tfvars
+    var_file    Terraform variables file. Defaults to ./input/terraform.tfvars
 EOT
 }
 
@@ -85,7 +85,7 @@ entrypoint_helpers::parse_args () {
 }
 
 entrypoint_helpers::default_args () {
-    arg_var_file="${arg_var_file:-./terraform.tfvars}"
+    arg_var_file="${arg_var_file:-${PWD}/input/terraform.tfvars}"
 }
 
 # Check if an array contains a value. Print an error message if it doesn't
