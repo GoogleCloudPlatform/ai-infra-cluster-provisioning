@@ -250,6 +250,7 @@ module "compute_instance_templates" {
   service_account       = var.service_account
   startup_script        = module.compute_startups[each.key].startup_script
   subnetwork_self_links = module.network.subnetwork_self_links
+  network_self_links    = module.network.network_self_links
 
   depends_on = [
     module.network,
@@ -271,6 +272,7 @@ module "controller_instance_template" {
   service_account       = var.service_account
   startup_script        = module.controller_startup.startup_script
   subnetwork_self_links = module.network.subnetwork_self_links
+  network_self_links    = module.network.network_self_links
 
   depends_on = [
     module.network,
@@ -292,6 +294,7 @@ module "login_instance_template" {
   service_account       = var.service_account
   startup_script        = null
   subnetwork_self_links = module.network.subnetwork_self_links
+  network_self_links    = module.network.network_self_links
 
   depends_on = [
     module.network,
@@ -307,7 +310,8 @@ module "compute_node_groups" {
   node_count_static      = local.compute_partitions[each.key].node_count_static
   node_count_dynamic_max = 0
   project_id             = var.project_id
-  service_account        = module.compute_instance_templates[each.key].service_account
+  // is it local.compute_instance_templates
+  service_account = module.compute_instance_templates[each.key].service_account
 }
 
 module "compute_partitions" {
@@ -317,7 +321,7 @@ module "compute_partitions" {
   enable_placement     = false
   deployment_name      = var.resource_prefix
   is_default           = each.key == local.partition_names[0]
-  network_storage      = [] // flatten([var.network_storage])
+  network_storage      = [] // TODO: flatten([var.network_storage])
   node_groups          = [module.compute_node_groups[each.key].node_groups]
   partition_name       = each.key
   project_id           = var.project_id

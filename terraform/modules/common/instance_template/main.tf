@@ -76,9 +76,9 @@ data "google_compute_image" "image" {
 resource "google_compute_instance_template" "template" {
   provider = google-beta
 
-  project = var.project_id
-  region  = var.region
-
+  project      = var.project_id
+  region       = var.region
+  labels       = var.labels
   name         = local.name
   machine_type = var.machine_type
   metadata     = local.metadata
@@ -106,19 +106,32 @@ resource "google_compute_instance_template" "template" {
   dynamic "network_interface" {
     for_each = toset(range(length(var.subnetwork_self_links)))
     content {
-      subnetwork = var.subnetwork_self_links[network_interface.value]
-      nic_type   = local.nic_type
+      network            = var.network_self_links[network_interface.value]
+      subnetwork         = var.subnetwork_self_links[network_interface.value]
+      subnetwork_project = var.project_id
+      nic_type           = local.nic_type
 
       dynamic "access_config" {
-        for_each = network_interface.value == 0 ? [{}] : []
-        content {}
+        for_each = network_interface.value == 0 ? [1] : []
+        content {
+          nat_ip                 = null
+          public_ptr_domain_name = null
+          network_tier           = null
+        }
       }
     }
+  }
+
+  // This needs to be set to TIER_1 for maximum VM egress bandwidth.
+  network_performance_config {
+    total_egress_bandwidth_tier = "DEFAULT"
   }
 
   scheduling {
     on_host_maintenance = "TERMINATE"
     automatic_restart   = false
+    preemptible         = false
+    provisioning_model  = null
   }
 
   service_account {

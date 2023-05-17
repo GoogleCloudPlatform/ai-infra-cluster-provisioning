@@ -306,3 +306,9 @@ variable "startup_script_file" {
   type        = string
   default     = null
 }
+
+variable "labels" {
+  description = "The resource labels (a map of key/value pairs) to be applied to the GPU cluster."
+  type        = map(string)
+  default     = {}
+}

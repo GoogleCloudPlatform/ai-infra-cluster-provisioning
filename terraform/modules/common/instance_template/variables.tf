@@ -132,6 +132,15 @@ variable "metadata" {
   type        = map(string)
 }
 
+variable "labels" {
+  description = <<-EOT
+    A set of key/value label pairs to assign to instances created from this template.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#labels), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--labels).
+    EOT
+  type        = map(string)
+}
+
 variable "project_id" {
   description = <<-EOT
     The ID of the project in which the resource belongs.
@@ -189,11 +198,21 @@ variable "startup_script" {
 }
 
 variable "subnetwork_self_links" {
-  description = "Primary subnet self-links for all the VPCs."
+  description = "The subnet self-links for all the VPCs."
   type        = list(string)
 
   validation {
     condition     = length(var.subnetwork_self_links) != 0
     error_message = "Must have one or more subnetwork self-link"
+  }
+}
+
+variable "network_self_links" {
+  description = "The network self-links for all the VPCs."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.network_self_links) != 0
+    error_message = "Must have one or more network self-link"
   }
 }

@@ -14,10 +14,6 @@
  * limitations under the License.
 */
 
-output "machine_image" { value = local.machine_image }
-output "metadata" { value = local.metadata }
-output "service_account" { value = local.service_account }
-
 output "id" {
   description = "`id` output of the google_compute_instance_template resource created."
   value       = resource.google_compute_instance_template.template.id

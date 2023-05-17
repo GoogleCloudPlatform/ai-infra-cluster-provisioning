@@ -23,6 +23,15 @@ output "network_id" {
   ])))
 }
 
+output "network_self_links" {
+  description = "Primary subnet self-links of all the VPCs"
+  value = flatten([
+    module.default_vpc[*].network_self_link,
+    module.single_new_vpc[*].network_self_link,
+    module.multiple_new_vpcs[*].network_self_link,
+  ])
+}
+
 output "subnetwork_self_links" {
   description = "Primary subnet self-links of all the VPCs"
   value = flatten([
