@@ -14,109 +14,152 @@
  * limitations under the License.
 */
 
-variable "project" {
-  description = "Name of the project to use for instantiating clusters."
+variable "project_id" {
+  description = "GCP Project ID to which the cluster will be deployed."
   type        = string
 }
 
-variable "region" {
-  description = "GCP region where to create resources."
+variable "resource_prefix" {
+  description = "Arbitrary string with which all names of newly created resources will be prefixed."
   type        = string
-}
-
-variable "zone" {
-  description = "GCP zone where to create resources. Only use if multi_zonal is false."
-  type        = string
-}
-
-variable "node_locations" {
-  description = "Zones for a regional cluster, leave blank to auto select."
-  type        = list(string)
-  default     = null
 }
 
 variable "name" {
-  description = "Name of the cluster, unique within the project."
+  description = <<-EOT
+    The name of the cluster, unique within the project and location.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--name).
+    EOT
   default     = "main"
   type        = string
 }
 
+variable "region" {
+  description = "The region in which the cluster master will be created. The cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well."
+  type        = string
+}
+
+variable "node_locations" {
+  description = <<-EOT
+    The list of zones in which the cluster's nodes are located.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#node_locations), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--node-locations).
+    EOT
+  type        = list(string)
+  default     = null
+}
+
 variable "gke_version" {
-  description = "The GKE version to use to create the cluster."
+  description = <<-EOT
+    The GKE version to be used as the minimum version of the master. The default value for that is latest master version.
+    More details can be found [here](https://cloud.google.com/kubernetes-engine/versioning#specifying_cluster_version)
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--name).
+    EOT
   default     = null
   type        = string
 }
 
-variable "network_self_link" {
-  description = "The self link of the network to attach the VM."
+variable "network_config" {
+  description = <<-EOT
+    The network configuration to specify the type of VPC to be used.
+
+    Possible values: `["default", "new_multi_nic", "new_single_nic"]`
+    EOT
   type        = string
   default     = "default"
-}
 
-variable "subnetwork_self_link" {
-  description = "The self link of the subnetwork to attach the VM."
-  type        = string
-  default     = null
+  validation {
+    condition = contains(
+      ["default", "new_multi_nic", "new_single_nic"],
+      var.network_config
+    )
+    error_message = "network_config must be one of ['default', 'new_multi_nic', 'new_single_nic']."
+  }
 }
 
 variable "disk_size_gb" {
-  description = "Size of disk for instances."
+  description = <<-EOT
+    Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB. Defaults to 200GB.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#disk_size_gb), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--disk-size).
+    EOT
   type        = number
   default     = 200
 }
 
 variable "disk_type" {
-  description = "Disk type for instances."
+  description = <<-EOT
+    Type of the disk attached to each node. The default disk type is 'pd-standard'
+
+    Possible values: `["pd-ssd", "local-ssd", "pd-balanced", "pd-standard"]`
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#disk_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--disk-type).
+    EOT
   type        = string
   default     = "pd-standard"
 }
 
-
-# GKE Dataplane V2 support. This setting is immutable on clusters.
-# https://cloud.google.com/kubernetes-engine/docs/concepts/dataplane-v2
-variable "enable_dataplane_v2" {
-  description = "Dataplane v2 provides better security, scalability, consistency and operations."
-  default     = false
-  type        = bool
-}
-
-# Security Note: do not use the default GCE service account. create a dedicated
-# service account with least privileges.
-#
-# For example, see the gke-cluster Service Account in the following projects:
-# http://google3/configs/cloud/gong/org_hierarchy/google.com/products/alphabetcloud/reference/project.abcloud-ref-prod/iam_policy.yaml
-# http://google3/configs/cloud/gong/org_hierarchy/google.com/products/alphabetcloud/reference/project.abcloud-ref-gcr/iam_policy.yaml
 variable "node_service_account" {
-  description = "Email address of the service account to use for running nodes."
+  description = <<-EOT
+    The service account to be used by the Node VMs. If not specified, the "default" service account is used.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#nested_node_config), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--service-account).
+    EOT
   type        = string
+  default     = null
 }
 
-# List of Oauth scopes to attach to node isntnaces in your GKE cluster.
-variable "scopes" {
-  type = list(string)
-  default = [
-    # H4: we rely on CloudIAM for implementing least-priviledge on GCP, so
-    # providing the SA a cloud-platform scope is safe, and simplified
-    # debugging of access control issues.
-    #
-    # Additional scopes can be provided for access to non-GCP services.
-    "https://www.googleapis.com/auth/cloud-platform",
+variable "enable_gke_dashboard" {
+  description = <<-EOT
+    Flag to enable GPU usage dashboards for the GKE cluster.
+    EOT
+  type        = bool
+  default     = true
 
-    # The Gin scope can be removed if the none of the applications sends
-    # logs to Gin.
-    "https://www.googleapis.com/auth/dataaccessauditlogging",
-  ]
+  validation {
+    condition     = var.enable_gke_dashboard != null
+    error_message = "must not be null"
+  }
 }
 
 variable "node_pools" {
-  description = "The list of nodepools for the GKE cluster."
+  description = <<-EOT
+    The list of node pools for the GKE cluster.
+    ```
+    zone: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
+    node_count: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
+    machine_type: The name of a Google Compute Engine machine type. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
+    guest_accelerator_type: The accelerator type resource to expose to this instance. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#nested_guest_accelerator)
+    guest_accelerator_count: The number of the guest accelerator cards exposed to this instance. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#nested_guest_accelerator)
+    enable_compact_placement: Specifies a custom placement policy for the nodes. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#placement_policy)
+    ```
+    EOT
   type = list(object({
-    name                     = string
     zone                     = string
     node_count               = number
     machine_type             = string
-    guest_accelerator_count  = number
     guest_accelerator_type   = string
+    guest_accelerator_count  = number
     enable_compact_placement = bool
   }))
+}
+
+variable "kubernetes_setup_config" {
+  description = <<-EOT
+    The configuration for setting up Kubernetes after GKE cluster is created.
+    ```
+    enable_kubernetes_setup: Flag to enable kubernetes setup. Default value is `true`.
+    kubernetes_service_account_name: The KSA (kubernetes service account) name to be used for Pods. Default value is `aiinfra-gke-sa`.
+    kubernetes_service_account_namespace: The KSA (kubernetes service account) namespace to be used for Pods. Default value is `default`.
+    ```
+
+    Related Docs: [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+    EOT
+  type = object({
+    enable_kubernetes_setup              = bool
+    kubernetes_service_account_name      = string
+    kubernetes_service_account_namespace = string
+  })
+  default = null
 }

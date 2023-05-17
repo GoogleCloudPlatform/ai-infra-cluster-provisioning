@@ -15,22 +15,55 @@
   */
 
 locals {
-  gke_master_version = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
+  gke_master_version   = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
+  node_service_account = var.node_service_account == null ? data.google_compute_default_service_account.default.email : var.node_service_account
+  oauth_scopes = [
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/dataaccessauditlogging",
+  ]
+
+  kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
+    enable_kubernetes_setup              = true
+    kubernetes_service_account_name      = "aiinfra-gke-sa"
+    kubernetes_service_account_namespace = "default"
+  }
 }
+
+data "google_compute_default_service_account" "default" {}
 
 data "google_client_config" "current" {}
 
 data "google_container_engine_versions" "gkeversion" {
   location = var.region
-  project  = var.project
+  project  = var.project_id
+}
+
+module "network" {
+  source = "../../common/network"
+
+  network_config  = var.network_config
+  project_id      = var.project_id
+  region          = var.region
+  resource_prefix = var.resource_prefix
+}
+
+module "dashboard" {
+  source = "../../common/dashboard"
+  count  = var.enable_gke_dashboard ? 1 : 0
+
+  enable_gce_gke_gpu_utilization_widgets = true
+  enable_nvidia_dcgm_widgets             = true
+  enable_nvidia_nvml_widgets             = true
+  project_id                             = var.project_id
+  resource_prefix                        = var.resource_prefix
 }
 
 # Definition of the private GKE cluster.
 resource "google_container_cluster" "gke-cluster" {
   provider = google-beta
 
-  project        = var.project
-  name           = var.name
+  project        = var.project_id
+  name           = "${var.resource_prefix}-gke"
   location       = var.region
   node_locations = var.node_locations
 
@@ -43,19 +76,12 @@ resource "google_container_cluster" "gke-cluster" {
   initial_node_count       = 1
   min_master_version       = local.gke_master_version
 
-  network    = var.network_self_link
-  subnetwork = var.subnetwork_self_link
+  network    = module.network.network_self_links[0]
+  subnetwork = module.network.subnetwork_self_links[0]
 
-  # Enable the master authorized networks only when VPCSC is enabled.
-  # Note: the existence of the "master_authorized_networks_config" block enables
-  # the master authorized networks even if it's empty. Here the block is dynamic
-  # that it only exists when VPCSC is enabled.
   master_authorized_networks_config {
   }
 
-  # Security Note: Basic Auth Disabled, no client certificate accepted.
-  # The only way to manage the master is via OpenID tokens (aka gcloud).
-  # (requirement H5; go/gke-cluster-pattern#req1.1.7)
   master_auth {
     client_certificate_config {
       issue_client_certificate = false
@@ -86,7 +112,7 @@ resource "google_container_cluster" "gke-cluster" {
   # This change will also enable the metadata server on nodes.
   # go/gke-cluster-pattern#req4.1.1#req1.1.5 (parts of, vTPM is another section)
   workload_identity_config {
-    workload_pool = "${var.project}.svc.id.goog"
+    workload_pool = "${var.project_id}.svc.id.goog"
   }
 
   authenticator_groups_config {
@@ -95,11 +121,8 @@ resource "google_container_cluster" "gke-cluster" {
     security_group = "gke-security-groups@google.com"
   }
 
-  # GKE Dataplane V2 support
-  # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#datapath_provider
-  datapath_provider = var.enable_dataplane_v2 ? "ADVANCED_DATAPATH" : "DATAPATH_PROVIDER_UNSPECIFIED"
+  datapath_provider = "DATAPATH_PROVIDER_UNSPECIFIED"
 
-  # regular release is required for all 1.24+ features.
   release_channel {
     channel = "UNSPECIFIED"
   }
@@ -127,17 +150,17 @@ resource "google_container_cluster" "gke-cluster" {
   }
 }
 
-# We define explict node pools, so that it can be modified without
+# We define explicit node pools, so that it can be modified without
 # having to destroy the entire cluster.
 resource "google_container_node_pool" "gke-node-pools" {
   provider = google-beta
 
   for_each = {
-    for node_pool in var.node_pools : node_pool.name => node_pool
+    for idx, node_pool in var.node_pools : idx => node_pool
   }
 
-  project        = var.project
-  name           = each.value.name
+  project        = var.project_id
+  name           = "${var.resource_prefix}-nodepool-${each.key}"
   cluster        = google_container_cluster.gke-cluster.id
   node_locations = [each.value.zone]
   node_count     = each.value.node_count
@@ -154,29 +177,12 @@ resource "google_container_node_pool" "gke-node-pools" {
   }
 
   node_config {
-    # Requirement H4: custom service account.
-    # go/gke-cluster-pattern#req1.1.6
-    service_account = var.node_service_account
+    service_account = local.node_service_account
+    machine_type    = each.value.machine_type
+    image_type      = "COS_CONTAINERD"
+    disk_size_gb    = var.disk_size_gb
+    disk_type       = var.disk_type
 
-    machine_type = each.value.machine_type
-
-    # Forcing the use of the Container-optimized image, as it is the only
-    # image with the proper logging deamon installed.
-    #
-    # cos images use Shielded VMs since v1.13.6-gke.0.
-    # https://cloud.google.com/kubernetes-engine/docs/how-to/node-images
-    #
-    # We use COS_CONTAINERD to be compatible with (optional) gVisor.
-    # https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods
-    #
-    # go/gke-cluster-pattern#req3.1.1
-    # go/gke-cluster-pattern#req1.1.5
-    image_type = "COS_CONTAINERD"
-
-    disk_size_gb = var.disk_size_gb
-    disk_type    = var.disk_type
-
-    # Enable features on shielded nodes for go/gke-cluster-pattern#req1.1.5.
     shielded_instance_config {
       enable_secure_boot          = true
       enable_integrity_monitoring = true
@@ -204,7 +210,7 @@ resource "google_container_node_pool" "gke-node-pools" {
       "disable-legacy-endpoints" = "true"
     }
 
-    oauth_scopes = var.scopes
+    oauth_scopes = local.oauth_scopes
   }
 
   dynamic "placement_policy" {
@@ -231,19 +237,40 @@ resource "google_container_node_pool" "gke-node-pools" {
 # on Cloud Monitoring console, some project level roles are needed for the
 # node_service_account
 resource "google_project_iam_member" "node_service_account_logWriter" {
-  project = var.project
+  project = var.project_id
   role    = "roles/logging.logWriter"
   member  = "serviceAccount:${var.node_service_account}"
 }
 
 resource "google_project_iam_member" "node_service_account_metricWriter" {
-  project = var.project
+  project = var.project_id
   role    = "roles/monitoring.metricWriter"
   member  = "serviceAccount:${var.node_service_account}"
 }
 
 resource "google_project_iam_member" "node_service_account_monitoringViewer" {
-  project = var.project
+  project = var.project_id
   role    = "roles/monitoring.viewer"
   member  = "serviceAccount:${var.node_service_account}"
+}
+
+module "kubernetes-operations" {
+  source             = "../../common/kubernetes-operations"
+  project_id         = var.project_id
+  cluster_id         = resource.google_container_cluster.gke-cluster.id
+  gke_cluster_exists = local.kubernetes_setup_config.enable_kubernetes_setup
+
+  install_nvidia_driver = anytrue([
+    for np in var.node_pools : np.guest_accelerator_count > 0
+  ])
+
+  setup_kubernetes_service_account = (
+    local.kubernetes_setup_config.enable_kubernetes_setup ?
+    {
+      kubernetes_service_account_name      = local.kubernetes_setup_config.kubernetes_service_account_name
+      kubernetes_service_account_namespace = local.kubernetes_setup_config.kubernetes_service_account_namespace
+      google_service_account_name          = local.node_service_account
+    } :
+    null
+  )
 }
