@@ -346,6 +346,16 @@ variable "gcsfuse_existing" {
   default = []
 }
 
+variable "labels" {
+  description = <<-EOT
+    The resource labels (a map of key/value pairs) to be applied to the GPU cluster.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#labels), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--labels).
+    EOT
+  type        = map(string)
+  default     = {}
+}
+
 variable "login_var" {
   description = <<-EOT
     Login node configuration.

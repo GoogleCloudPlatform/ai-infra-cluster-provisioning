@@ -179,6 +179,16 @@ variable "enable_ray" {
   }
 }
 
+variable "labels" {
+  description = <<-EOT
+    The resource labels (a map of key/value pairs) to be applied to the GPU cluster.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#labels), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--labels).
+    EOT
+  type        = map(string)
+  default     = {}
+}
+
 variable "machine_image" {
   description = <<-EOT
     The image with which this disk will initialize.
@@ -305,10 +315,4 @@ variable "startup_script_file" {
   description = "Shell script filename."
   type        = string
   default     = null
-}
-
-variable "labels" {
-  description = "The resource labels (a map of key/value pairs) to be applied to the GPU cluster."
-  type        = map(string)
-  default     = {}
 }

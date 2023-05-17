@@ -38,8 +38,9 @@
                 "access_config": [
                   {}
                 ],
+                "network": "network_self_link",
                 "nic_type": "GVNIC",
-                "subnetwork": "https://www.googleapis.com/compute/v1/projects/gce-ai-infra/regions/us-central1/subnetworks/default"
+                "subnetwork": "subnetwork_self_link"
               }
             ],
             "project": "gce-ai-infra",

@@ -62,4 +62,5 @@ No modules.
 | <a name="output_id"></a> [id](#output\_id) | `id` output of the google\_compute\_instance\_template resource created. |
 | <a name="output_name"></a> [name](#output\_name) | `name` output of the google\_compute\_instance\_template resource created. |
 | <a name="output_self_link"></a> [self\_link](#output\_self\_link) | `self_link` output of the google\_compute\_instance\_template resource created |
+| <a name="output_service_account"></a> [service\_account](#output\_service\_account) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
