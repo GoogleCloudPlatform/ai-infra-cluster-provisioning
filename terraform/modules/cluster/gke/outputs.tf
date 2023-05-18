@@ -14,27 +14,12 @@
   * limitations under the License.
   */
 
-output "gke_cluster_name" {
+output "name" {
   value       = resource.google_container_cluster.gke-cluster.name
   description = "Google Kubernetes cluster name"
 }
 
-output "gke_cluster_id" {
+output "id" {
   value       = resource.google_container_cluster.gke-cluster.id
   description = "Google Kubernetes cluster id"
-}
-
-output "gke_cluster_endpoint" {
-  value       = "https://${resource.google_container_cluster.gke-cluster.endpoint}"
-  description = "Kubernetes cluster API endpoint"
-}
-
-output "gke_certificate_authority_data" {
-  value       = resource.google_container_cluster.gke-cluster.master_auth.0.cluster_ca_certificate
-  description = "Kubernetes cluster cluster CA certificate"
-}
-
-output "gke_token" {
-  value       = data.google_client_config.current.access_token
-  description = "Kubernetes cluster access token"
 }
