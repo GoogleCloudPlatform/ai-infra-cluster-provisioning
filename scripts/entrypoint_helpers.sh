@@ -51,6 +51,10 @@ entrypoint_helpers::parse_args () {
     while [ "${#}" -gt 0 ]; do
         if grep -q '^-' <(echo "${1}"); then
             case "${1}" in
+                -b|--backend-bucket)
+                    opt_backend_bucket="${2}"
+                    shift
+                    ;;
                 -h|--help)
                     echo "$(entrypoint_helpers::get_usage)"
                     exit 0
@@ -64,15 +68,12 @@ entrypoint_helpers::parse_args () {
             case "${parameter_index}" in
                 1)
                     arg_action="${1}"
-                    shift
                     ;;
                 2)
                     arg_cluster="${1}"
-                    shift
                     ;;
                 3)
                     arg_var_file="${1}"
-                    shift
                     ;;
                 *)
                     echo >&2 "too many parameters starting at '${1}'"
@@ -81,6 +82,7 @@ entrypoint_helpers::parse_args () {
             esac
             ((++parameter_index))
         fi
+        shift
     done
     return 0
 }
