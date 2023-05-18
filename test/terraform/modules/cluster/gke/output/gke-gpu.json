@@ -1,0 +1,66 @@
+{
+    "planned_values": {
+      "root_module": {
+        "child_modules": [
+          {
+            "address": "module.kubernetes-operations"
+          },
+          {
+            "address": "module.dashboard"
+          },
+          {
+            "address": "module.kubernetes-operations"
+          }
+        ],
+        "resources": [
+          {
+            "address": "google_container_cluster.gke-cluster",
+            "values": {
+                "name":"ci-gke",
+                "network":"https://www.googleapis.com/compute/v1/projects/gce-ai-infra/global/networks/default",
+                "project":"gce-ai-infra",
+                "release_channel":[
+                   {
+                      "channel":"UNSPECIFIED"
+                   }
+                ],
+                "location":"us-central1"
+            }
+          },
+          {
+            "address":"google_container_node_pool.gke-node-pools[\"0\"]",
+            "values": {
+                "name":"ci-nodepool-0",
+                "node_count":1,
+                "node_locations":[
+                   "us-central1-a"
+                ],
+                "project":"gce-ai-infra",
+                "node_config":[
+                    {
+                        "disk_size_gb":200,
+                        "disk_type":"pd-standard",
+                        "guest_accelerator":[
+                           {
+                              "count":1,
+                              "gpu_partition_size":null,
+                              "gpu_sharing_config":null,
+                              "type":"nvidia-tesla-a100"
+                           }
+                        ],
+                        "gvnic":[
+                           {
+                              "enabled":true
+                           }
+                        ],
+                        "image_type":"COS_CONTAINERD",
+                        "machine_type":"a2-highgpu-1g"
+                    }
+                ]
+            }
+          }
+        ]
+      }
+    }
+  }
+  
