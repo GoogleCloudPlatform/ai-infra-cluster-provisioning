@@ -32,7 +32,8 @@ Parameters:
                 - gke: Google Kubernetes Engine -- terraform/modules/cluster/gke
                 - mig: Managed Instange Group -- terraform/modules/cluster/mig
                 - slurm: Slurm Workload Manager -- terraform/modules/cluster/slurm
-    var_file    Terraform variables file. Defaults to ./input/terraform.tfvars
+    var_file    Terraform variables file. Defaults to:
+                '${PWD}/input/terraform.tfvars'
 EOT
 }
 
