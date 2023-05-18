@@ -190,10 +190,10 @@ resource "google_container_node_pool" "gke-node-pools" {
     }
 
     dynamic "guest_accelerator" {
-      for_each = each.value.guest_accelerator_count > 0 ? [1] : []
+      for_each = each.value.guest_accelerator != null ? [1] : []
       content {
-        count = each.value.guest_accelerator_count
-        type  = each.value.guest_accelerator_type
+        count = each.value.guest_accelerator.count
+        type  = each.value.guest_accelerator.type
       }
     }
 
@@ -262,7 +262,7 @@ module "kubernetes-operations" {
   gke_cluster_exists = local.kubernetes_setup_config.enable_kubernetes_setup
 
   install_nvidia_driver = anytrue([
-    for np in var.node_pools : np.guest_accelerator_count > 0
+    for np in var.node_pools : np.guest_accelerator != null
   ])
 
   setup_kubernetes_service_account = (

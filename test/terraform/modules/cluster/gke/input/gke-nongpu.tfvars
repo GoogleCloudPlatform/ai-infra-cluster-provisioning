@@ -5,7 +5,6 @@ node_pools = [{
   zone                     = "us-central1-a"
   node_count               = 1
   machine_type             = "n1-standard-1"
-  guest_accelerator_type   = ""
-  guest_accelerator_count  = 0
+  guest_accelerator        = null
   enable_compact_placement = false
 }]
