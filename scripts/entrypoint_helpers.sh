@@ -84,10 +84,6 @@ entrypoint_helpers::parse_args () {
     return 0
 }
 
-entrypoint_helpers::default_args () {
-    arg_var_file="${arg_var_file:-${PWD}/input/terraform.tfvars}"
-}
-
 # Check if an array contains a value. Print an error message if it doesn't
 #
 # Parameters:

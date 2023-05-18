@@ -17,10 +17,10 @@
 . ./scripts/entrypoint_helpers.sh
 
 main () {
-    local arg_action arg_cluster arg_var_file
+    local arg_action arg_cluster
+    local arg_var_file="${PWD}/input/terraform.tfvars"
     {
         entrypoint_helpers::parse_args "${@}" \
-        && entrypoint_helpers::default_args \
         && entrypoint_helpers::validate_args
     } \
     || { echo; entrypoint_helpers::get_usage; return 1; } >&2
