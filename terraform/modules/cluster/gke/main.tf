@@ -16,7 +16,7 @@
 
 locals {
   gke_master_version   = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
-  node_service_account = var.node_service_account == null ? data.google_compute_default_service_account.default.email : var.node_service_account
+  node_service_account = var.node_service_account == null ? data.google_compute_default_service_account.account.email : var.node_service_account
   oauth_scopes = [
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/dataaccessauditlogging",
@@ -29,7 +29,9 @@ locals {
   }
 }
 
-data "google_compute_default_service_account" "default" {}
+data "google_compute_default_service_account" "account" {
+  project = var.project_id
+}
 
 data "google_client_config" "current" {}
 
@@ -62,10 +64,9 @@ module "dashboard" {
 resource "google_container_cluster" "gke-cluster" {
   provider = google-beta
 
-  project        = var.project_id
-  name           = "${var.resource_prefix}-gke"
-  location       = var.region
-  node_locations = var.node_locations
+  project  = var.project_id
+  name     = "${var.resource_prefix}-gke"
+  location = var.region
 
   # We need to explicitly manage the node pool to enable features such as
   # auto-upgrade and auto-scaling, but we can't create a cluster with no node
@@ -239,19 +240,19 @@ resource "google_container_node_pool" "gke-node-pools" {
 resource "google_project_iam_member" "node_service_account_logWriter" {
   project = var.project_id
   role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${var.node_service_account}"
+  member  = "serviceAccount:${local.node_service_account}"
 }
 
 resource "google_project_iam_member" "node_service_account_metricWriter" {
   project = var.project_id
   role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${var.node_service_account}"
+  member  = "serviceAccount:${local.node_service_account}"
 }
 
 resource "google_project_iam_member" "node_service_account_monitoringViewer" {
   project = var.project_id
   role    = "roles/monitoring.viewer"
-  member  = "serviceAccount:${var.node_service_account}"
+  member  = "serviceAccount:${local.node_service_account}"
 }
 
 module "kubernetes-operations" {

@@ -24,29 +24,9 @@ variable "resource_prefix" {
   type        = string
 }
 
-variable "name" {
-  description = <<-EOT
-    The name of the cluster, unique within the project and location.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--name).
-    EOT
-  default     = "main"
-  type        = string
-}
-
 variable "region" {
   description = "The region in which the cluster master will be created. The cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well."
   type        = string
-}
-
-variable "node_locations" {
-  description = <<-EOT
-    The list of zones in which the cluster's nodes are located.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#node_locations), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--node-locations).
-    EOT
-  type        = list(string)
-  default     = null
 }
 
 variable "gke_version" {
@@ -56,8 +36,8 @@ variable "gke_version" {
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--name).
     EOT
-  default     = null
   type        = string
+  default     = null
 }
 
 variable "network_config" {
