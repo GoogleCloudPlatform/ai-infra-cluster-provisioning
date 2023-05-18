@@ -26,7 +26,7 @@ fail() {
 # starting with `b^0==1` and ending with `b^(n-1)==y`,
 # this function chooses base `b==y^(1/(n-1))` in order to
 # output `n` values increasing exponentially from `1` to `y`
-gen_exponential () {
+enable_ops_agent::gen_exponential () {
     local -r n="${1}"
     local -r y="${2}"
 
@@ -66,7 +66,7 @@ gen_exponential () {
 # describes. Slight modification with the calculation of `base` that makes the
 # `rand_between` upper bound output random numbers with maximums exponentially
 # increasing to `max_backoff` over `retry_count` intervals.
-gen_backoff_times () {
+enable_ops_agent::gen_backoff_times () {
     local -r retry_count="${1}"
     local -r max_backoff="${2}"
 
@@ -78,14 +78,14 @@ gen_backoff_times () {
         if [ "${retry_count}" -eq 1 ]; then
             echo "${max_backoff}"
         else
-            gen_exponential "${retry_count}" "${max_backoff}"
+            enable_ops_agent::gen_exponential "${retry_count}" "${max_backoff}"
         fi;
     } | awk -v s="${RANDOM}" 'BEGIN {srand(s)} {printf("%.1f\n", rand()*$0)}'
 }
 
 # attempt a command at most `attempt_count` times with backoff times generated
 # with `gen_backoff_times` above.
-retry_with_backoff () {
+enable_ops_agent::retry_with_backoff () {
     local -r attempt_count="${1}"
     local -r max_backoff="${2}"
     local -r command_to_attempt="${@:3}"
@@ -109,14 +109,14 @@ retry_with_backoff () {
             echo >&2 "${command_to_attempt[@]}: success"
             return 0
         fi
-    done < <(gen_backoff_times "$((attempt_count - 1))" "${max_backoff}")
+    done < <(enable_ops_agent::gen_backoff_times "$((attempt_count - 1))" "${max_backoff}")
 
     echo >&2 "${command_to_attempt[@]}: max attempts (${attempt_count}) exceeded"
     return 1
 }
 
 
-handle_debian() {
+enable_ops_agent::handle_debian() {
     is_legacy_monitoring_installed() {
         dpkg-query --show --showformat 'dpkg-query: ${Package} is installed\n' ${LEGACY_MONITORING_PACKAGE} |
             grep "${LEGACY_MONITORING_PACKAGE} is installed"
@@ -159,7 +159,7 @@ handle_debian() {
         }
 
         echo >&2 "Installing DCGM package for distribution: '${distribution}'"
-        retry_with_backoff 10 32 dcgm_package_install \
+        enable_ops_agent::retry_with_backoff 10 32 dcgm_package_install \
             || { echo >&2 'DCGM package install failed'; return 1; }
 
         # setup
@@ -197,7 +197,7 @@ EOF
     }
 }
 
-handle_redhat() {
+enable_ops_agent::handle_redhat() {
     is_legacy_monitoring_installed() {
         rpm --query --queryformat 'package %{NAME} is installed\n' ${LEGACY_MONITORING_PACKAGE} |
             grep "${LEGACY_MONITORING_PACKAGE} is installed"
@@ -226,11 +226,11 @@ handle_redhat() {
     }
 }
 
-main() {
+enable_ops_agent::main() {
     if [ -f /etc/centos-release ] || [ -f /etc/redhat-release ] || [ -f /etc/oracle-release ] || [ -f /etc/system-release ]; then
-        handle_redhat
+        enable_ops_agent::handle_redhat
     elif [ -f /etc/debian_version ] || grep -qi ubuntu /etc/lsb-release || grep -qi ubuntu /etc/os-release; then
-        handle_debian
+        enable_ops_agent::handle_debian
     else
         fail "Unsupported platform."
     fi
@@ -240,7 +240,7 @@ main() {
     fi
 
     echo >&2 "Install Ops Agent"
-    retry_with_backoff 10 32 install_opsagent \
+    enable_ops_agent::retry_with_backoff 10 32 install_opsagent \
         || { echo >&2 'Failed to install Ops Agent'; return 1; }
 
     echo >&2 "Install DCGM"
@@ -248,5 +248,5 @@ main() {
 }
 
 if [ "${SOURCING}" != true ]; then
-    main
+    enable_ops_agent::main
 fi

@@ -12,14 +12,15 @@ RUN curl -s https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
     && unzip -uq ./terraform.zip \
     && rm -f ./terraform.zip \
     && mv ./terraform /root/.local/bin/terraform
+COPY terraform ./terraform
 
 FROM base as test
 COPY scripts ./scripts
-COPY terraform ./terraform
 COPY test ./test
 ENTRYPOINT ["./test/run_tests.sh"]
 
 FROM base as deploy
+RUN for cluster in gke mig slurm; do \
+    terraform -chdir="./terraform/modules/cluster/${cluster}" init; done
 COPY scripts ./scripts
-COPY terraform ./terraform
 ENTRYPOINT ["./scripts/entrypoint.sh"]
