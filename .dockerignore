@@ -1,2 +1,4 @@
 .git
 **/.terraform
+**/terraform.tf*
+**/tfplan

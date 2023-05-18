@@ -180,7 +180,7 @@ EXPECT_FILE_REGULAR () {
 #   - `src_dir`: path to the module directory
 #   - `var_file`: path to input tfvars file
 #   - `out_file`: path to output tfplan file
-# Output: terraform plan error messages in json format (if any)
+# Output: none
 # Exit status:
 #   - 0: terraform plan produced zero errors (may have info or warn)
 #   - 1: terraform plan produced one or more errors
