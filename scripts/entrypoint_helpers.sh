@@ -202,8 +202,6 @@ entrypoint_helpers::create () {
         "${tfplan}" \
     || {
         echo "terraform apply failure"
-        entrypoint_helpers::destroy "${cluster}" "${var_file}"
-
         rm -f "${tfplan}"
         return 1
     } >&2
@@ -236,4 +234,33 @@ entrypoint_helpers::destroy () {
     } >&2
 
     return 0
+}
+
+entrypoint_helpers::create_backend_gcs_bucket () {
+    local -r module_path="$(entrypoint_helpers::module_path "${cluster}")"
+    export TF_BUCKET_NAME=aiinfra-terraform-$PROJECT_ID
+    list_tf_bucket_ret=0
+    list_tf_bucket_out=`gcloud storage buckets list gs://$TF_BUCKET_NAME` || list_tf_bucket_ret=$?
+    if [ $list_tf_bucket_ret -eq 0 ]; then
+        echo "GCS bucket for terraform state $TF_BUCKET_NAME exists."
+        echo "$list_tf_bucket_out"
+    else
+        echo "GCS bucket for terraform state $TF_BUCKET_NAME does not exist. Creating..."
+        create_tf_bucket_out=`gcloud storage buckets create gs://$TF_BUCKET_NAME --project=$PROJECT_ID --default-storage-class=REGIONAL --location=$REGION --uniform-bucket-level-access`
+        create_tf_bucket_ret=$?
+        echo "$create_tf_bucket_out"
+        if [ $create_tf_bucket_ret -eq 0 ]; then
+            echo "Created bucket $TF_BUCKET_NAME successfully."
+        else
+            echo "Failed to create bucket $TF_BUCKET_NAME with error $create_tf_bucket_ret."
+            exit $create_tf_bucket_ret
+        fi
+    fi
+
+    echo "terraform {" > /usr/primary/backend.tf
+    echo "  backend \"gcs\" {" >> /usr/primary/backend.tf
+    echo "    bucket = \"$TF_BUCKET_NAME\"" >> /usr/primary/backend.tf
+    echo "    prefix = \"$NAME_PREFIX-deployment\"" >> /usr/primary/backend.tf
+    echo "  }" >> /usr/primary/backend.tf
+    echo "}" >> /usr/primary/backend.tf
 }
