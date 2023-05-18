@@ -20,7 +20,7 @@ COPY test ./test
 ENTRYPOINT ["./test/run_tests.sh"]
 
 FROM base as deploy
-RUN for cluster in mig slurm; do \
+RUN for cluster in gke mig slurm; do \
     terraform -chdir="./terraform/modules/cluster/${cluster}" init; done
 COPY scripts ./scripts
 ENTRYPOINT ["./scripts/entrypoint.sh"]
