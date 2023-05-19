@@ -19,7 +19,7 @@
 main () {
     local arg_action arg_cluster
     local arg_var_file="${PWD}/input/terraform.tfvars"
-    local opt_backend_bucket='gs://aiinfra'
+    local opt_backend_bucket=''
     {
         entrypoint_helpers::parse_args "${@}" \
         && entrypoint_helpers::validate_args
