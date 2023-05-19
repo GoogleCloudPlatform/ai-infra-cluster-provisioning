@@ -69,3 +69,18 @@ test::entrypoint_helpers::module_path::gets_path_to_cluster () {
         "$(entrypoint_helpers::module_path mig)" \
         './terraform/modules/cluster/mig'
 }
+
+test::entrypoint_helpers::read_tfvars::valid_param () {
+    parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+    local var_file="${parent_path}/../terraform/modules/cluster/mig/input/simple.tfvars"
+    EXPECT_STREQ \
+        "$(entrypoint_helpers::read_tfvars project_id)" \
+        'gce-ai-infra'
+}
+
+test::entrypoint_helpers::read_tfvars::invalid_param () {
+    parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+    local var_file="${parent_path}/../terraform/modules/cluster/mig/input/simple.tfvars"
+    EXPECT_STR_EMPTY \
+        "$(entrypoint_helpers::read_tfvars startup_script_gcs_bucket_path)"
+}
