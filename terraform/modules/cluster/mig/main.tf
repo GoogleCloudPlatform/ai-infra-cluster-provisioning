@@ -96,6 +96,7 @@ module "startup" {
   labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
   region          = local.region
+  gcs_bucket_path = var.startup_script_gcs_bucket_path
   runners = concat(
     module.gcsfuse[*].client_install_runner,
     module.gcsfuse[*].mount_runner,
