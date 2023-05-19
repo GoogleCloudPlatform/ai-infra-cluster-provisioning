@@ -1,7 +1,7 @@
 FROM gcr.io/google.com/cloudsdktool/cloud-sdk as base
 WORKDIR /root/aiinfra
 RUN apt-get update \
-    && apt-get --quiet install -y git bash curl jq zip \
+    && apt-get --quiet install -y bash bc curl git jq zip \
     && apt-get --quiet clean autoclean \
     && apt-get --quiet autoremove --yes \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/ \
