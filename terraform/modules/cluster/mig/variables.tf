@@ -310,7 +310,19 @@ variable "startup_script" {
 }
 
 variable "startup_script_file" {
-  description = "Shell script filename."
+  description = "The full path in the VM to the shell script to be executed at VM startup."
+  type        = string
+  default     = null
+}
+
+variable "startup_script_gcs_bucket_path" {
+  description = <<-EOT
+    The storage bucket full path to be used for storing the startup script.
+    Example: `gs://bucketName/dirName`
+
+    If the value is not provided, then a default storage bucket will be created for the script execution.
+    `storage.buckets.create` IAM permission is needed for creating the default storage bucket.
+    EOT
   type        = string
   default     = null
 }

@@ -281,7 +281,7 @@ entrypoint_helpers::read_tfvars () {
 #       a. use gs://aiinfra-terraform-${project_id} as default backend path
 #       b. Create the bucket if not exist.
 #   3. if the cluster type is mig or slurm, then
-#       a. if script_bucket does not exist in tfvars file, add backend-bucket as script-bucket.
+#       a. if startup_script_gcs_bucket_path does not exist in tfvars file, add backend-bucket as script-bucket.
 #   4. if the cluster type is gke then NOOP.
 #
 # Parameters: none
@@ -346,7 +346,7 @@ entrypoint_helpers::create_backend_config () {
         return 0
     fi
 
-    if [ -z "$(entrypoint_helpers::read_tfvars "script_bucket")" ]; then
-        echo "script_bucket = \"${backend_gcs_bucket}\"" >> $var_file
+    if [ -z "$(entrypoint_helpers::read_tfvars "startup_script_gcs_bucket_path")" ]; then
+        echo "startup_script_gcs_bucket_path = \"${backend_gcs_bucket}\"" >> $var_file
     fi
 }

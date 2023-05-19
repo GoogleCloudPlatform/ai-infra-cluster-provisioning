@@ -134,7 +134,7 @@ variable "compute_partitions" {
     ------------
     `compute_partitions[*].startup_script_file`
 
-    Filename of a shell script to run at boot. Defaults to `null`.
+    The full path in the VM to the shell script to be executed at VM startup. Defaults to `null`.
     EOT
 
   type = list(object({
@@ -263,7 +263,7 @@ variable "controller_var" {
     ------------
     `controller_var.startup_script_file`
 
-    Filename of a shell script to run at boot. Defaults to `null`.
+    The full path in the VM to the shell script to be executed at VM startup. Defaults to `null`.
     EOT
 
   type = object({
@@ -426,7 +426,7 @@ variable "login_var" {
     ------------
     `login_var.startup_script_file`
 
-    Filename of a shell script to run at boot. Defaults to `null`.
+    The full path in the VM to the shell script to be executed at VM startup. Defaults to `null`.
     EOT
 
   type = object({
@@ -488,4 +488,16 @@ variable "service_account" {
     scopes = set(string)
   })
   default = null
+}
+
+variable "startup_script_gcs_bucket_path" {
+  description = <<-EOT
+    The storage bucket full path to be used for storing the startup script.
+    Example: `gs://bucketName/dirName`
+
+    If the value is not provided, then a default storage bucket will be created for the script execution.
+    `storage.buckets.create` IAM permission is needed for creating the default storage bucket.
+    EOT
+  type        = string
+  default     = null
 }

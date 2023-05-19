@@ -178,6 +178,7 @@ module "compute_startups" {
   labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
   region          = local.compute_partitions[each.key].region
+  gcs_bucket_path = var.startup_script_gcs_bucket_path
   runners = concat(
     module.gcsfuse[*].client_install_runner,
     module.gcsfuse[*].mount_runner,
@@ -199,6 +200,7 @@ module "controller_startup" {
   labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
   region          = local.controller_var.region
+  gcs_bucket_path = var.startup_script_gcs_bucket_path
   runners = concat(
     module.gcsfuse[*].client_install_runner,
     module.gcsfuse[*].mount_runner,
@@ -220,6 +222,7 @@ module "login_startup" {
   labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
   region          = local.login_var.region
+  gcs_bucket_path = var.startup_script_gcs_bucket_path
   runners = concat(
     module.gcsfuse[*].client_install_runner,
     module.gcsfuse[*].mount_runner,
