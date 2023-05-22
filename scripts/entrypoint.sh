@@ -17,23 +17,83 @@
 . ./scripts/entrypoint_helpers.sh
 
 main () {
-    local arg_action arg_cluster
+
+    # Environment/arguments setup
+
+    local arg_action arg_cluster opt_backend_bucket opt_quiet
     local arg_var_file="${PWD}/input/terraform.tfvars"
-    local opt_backend_bucket=''
     {
         entrypoint_helpers::parse_args "${@}" \
         && entrypoint_helpers::validate_args
     } \
     || { echo; entrypoint_helpers::get_usage; return 1; } >&2
 
+    local -r module_path="$(entrypoint_helpers::module_path "${arg_cluster}")"
+
+    # Backend setup
+
+    local -r deployment_path=$(
+        entrypoint_helpers::setup_backend \
+            "${arg_cluster}" \
+            "${arg_var_file}" \
+            "${module_path}/backend.tf" \
+            "${opt_backend_bucket}") || {
+        echo 'Failed to set up backend.'
+        return 1
+    } >&2
+    echo "Terraform backend setup at '${deployment_path}'." >&2
+
+    # Logging setup
+
+    local -r log_file=$(mktemp)
+    local -r stdout_pipe=$(mktemp -u)
+    mkfifo -m 600 "${stdout_pipe}"
+    if [ "${opt_quiet}" = true ]; then
+        cat >"${log_file}" <"${stdout_pipe}" &
+    else
+        tee "${log_file}" <"${stdout_pipe}" &
+    fi
+    local -r log_pid="${!}"
+
+    # Call terraform
+
+    local terraform_success=true
     case "${arg_action}" in
         'create')
-            entrypoint_helpers::create "${arg_cluster}" "${arg_var_file}"
+            entrypoint_helpers::create \
+                "${arg_cluster}" \
+                "${arg_var_file}" \
+                "${module_path}"
             ;;
         'destroy')
-            entrypoint_helpers::destroy "${arg_cluster}" "${arg_var_file}"
+            entrypoint_helpers::destroy \
+                "${arg_cluster}" \
+                "${arg_var_file}" \
+                "${module_path}"
             ;;
-    esac
+    esac >"${stdout_pipe}" || terraform_success=false
+    wait "${log_pid}"
+    rm -f "${stdout_pipe}"
+
+    # Copy files to GCS
+
+    echo "Copying tfvars to GCS bucket..." >&2
+    gsutil cp \
+        "${arg_var_file}" \
+        "${deployment_path}/terraform.tfvars" || {
+        echo 'unable to upload tfvars to GCS bucket'
+        return 1
+    } >&2
+
+    echo "Copying terraform logs to GCS bucket..." >&2
+    gsutil cp \
+        "${log_file}" \
+        "${deployment_path}/terraform.log" || {
+        echo 'unable to upload terraform logs to GCS bucket'
+        return 1
+    } >&2
+
+    [ "${terraform_success}" = true ]
 }
 
 main "${@}"
