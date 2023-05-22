@@ -22,10 +22,15 @@ entrypoint_helpers::get_usage () {
 Usage: ./scripts/entrypoint.sh [options] action cluster [var_file]
 
 Options:
-    -h|--help            Print this help message.
-    -b|--backend-bucket  The GCS path to use for storing terraform state.
-                         example: 'gs://bucketName/dirName'
-                         The default value if not provided is 'gs://aiinfra-terraform-<project_id>'
+    -h|--help   Print this help message.
+    -b|--backend-bucket
+                The GCS path to use for storing terraform state. Example:
+                'gs://bucketName/dirName' The default value if not provided is
+                'gs://aiinfra-terraform-<project_id>' where '<project_id>' is
+                read from 'var_file'
+    -q|--quiet  Minimizes the terraform logging. It still shows the error if
+                terraform fails to create/destroy resources. Terraform logs are
+                copied to GCS bucket whether this flag is set or not
 
 Parameters:
     action      Action to perform. Options are:
@@ -61,6 +66,9 @@ entrypoint_helpers::parse_args () {
                 -h|--help)
                     echo "$(entrypoint_helpers::get_usage)"
                     exit 0
+                    ;;
+                -q|--quiet)
+                    opt_quiet=true
                     ;;
                 *)
                     echo >&2 "option '${1}' not supported"
@@ -169,6 +177,7 @@ entrypoint_helpers::module_path () {
 # Parameters:
 #   - `cluster`: type of cluster
 #   - `var_file`: tfvars file
+#   - `module_path`: path to the terraform module to create
 # Output: none
 # Exit status:
 #   - 0: all terraform calls were successful
@@ -176,44 +185,32 @@ entrypoint_helpers::module_path () {
 entrypoint_helpers::create () {
     local -r cluster="${1:?}"
     local -r var_file="${2:?}"
-    local -r module_path="$(entrypoint_helpers::module_path "${cluster}")"
-    local -r project_id="$(entrypoint_helpers::read_tfvars "project_id")"
-    local -r resource_prefix="$(entrypoint_helpers::read_tfvars "resource_prefix")"
+    local -r module_path="${3:?}"
 
-    echo "creating backend config"
-    entrypoint_helpers::create_backend_config \
-    || {
-        echo "Failed to create backend config"
-        return  1
-    } >&2
-
-    echo "running terraform init"
+    echo "Running terraform init..." >&2
     terraform -chdir="${module_path}" init || {
-        echo "terraform init failure"
+        echo "terraform init failure."
         return 1
     } >&2
 
-    echo "running terraform validate"
+    echo "Running terraform validate..." >&2
     terraform -chdir="${module_path}" validate || {
-        echo "terraform validate failure"
+        echo "terraform validate failure."
         return 1
     } >&2
 
-    echo "running terraform plan"
+    echo "Running terraform plan..." >&2
     tfplan=$(mktemp)
     terraform -chdir="${module_path}" \
-        plan -out="${tfplan}" -var-file="${var_file}" \
-    || {
-        echo "terraform plan failure"
+        plan -out="${tfplan}" -var-file="${var_file}" || {
+        echo "terraform plan failure."
         return 1
     } >&2
 
-    echo "running terraform apply"
+    echo "Running terraform apply..." >&2
     terraform -chdir="${module_path}" \
-        apply -auto-approve \
-        "${tfplan}" \
-    || {
-        echo "terraform apply failure"
+        apply -auto-approve "${tfplan}" ${extra_tf_args} || {
+        echo "terraform apply failure."
         rm -f "${tfplan}"
         return 1
     } >&2
@@ -227,6 +224,7 @@ entrypoint_helpers::create () {
 # Parameters:
 #   - `cluster`: type of cluster
 #   - `var_file`: tfvars file
+#   - `module_path`: path to the terraform module to destroy
 # Output: none
 # Exit status:
 #   - 0: all terraform calls were successful
@@ -234,29 +232,19 @@ entrypoint_helpers::create () {
 entrypoint_helpers::destroy () {
     local -r cluster="${1:?}"
     local -r var_file="${2:?}"
-    local -r module_path="$(entrypoint_helpers::module_path "${cluster}")"
-    local -r project_id="$(entrypoint_helpers::read_tfvars "project_id")"
-    local -r resource_prefix="$(entrypoint_helpers::read_tfvars "resource_prefix")"
+    local -r module_path="${3:?}"
 
-    echo "creating backend config"
-    entrypoint_helpers::create_backend_config \
-    || {
-        echo "skipping terraform destroy"
-        return  0
-    }
-
-    echo "running terraform init"
+    echo "Running terraform init..." >&2
     terraform -chdir="${module_path}" init || {
-        echo "terraform init failure"
+        echo "terraform init failure."
         return 1
     } >&2
 
-    echo "running terraform destroy"
+    echo "Running terraform destroy..." >&2
     terraform -chdir="${module_path}" \
         apply -auto-approve -var-file="${var_file}" \
-        -destroy \
-    || {
-        echo "terraform destroy failure"
+        -destroy || {
+        echo "terraform destroy failure."
         return 1
     } >&2
 }
@@ -266,87 +254,169 @@ entrypoint_helpers::destroy () {
 # Parameters:
 #   - `var_name`: the variable name
 # Output: the variable value
-# Exit status: 0
-entrypoint_helpers::read_tfvars () {
-    local var_name="${1:?}"
-    local value=`grep "^${var_name} " $var_file | awk '{print $NF}'`
-    if [ -n $value ]; then
-        echo $value | sed 's/"//g'
-    fi
-}
-
-# This purpose of this function is
-#   1. if --backend-bucket is specified in command line validate the GCS path.
-#   2. if --backend-bucket is not specified in command line
-#       a. use gs://aiinfra-terraform-${project_id} as default backend path
-#       b. Create the bucket if not exist.
-#   3. if the cluster type is mig or slurm, then
-#       a. if startup_script_gcs_bucket_path does not exist in tfvars file, add backend-bucket as script-bucket.
-#   4. if the cluster type is gke then NOOP.
-#
-# Parameters: none
-# Output: none
 # Exit status:
-#   - 0: backend-bucket GCS path is valid and backend config successfully created.
-#   - 1: backend-bucket GCS path is invalid
-entrypoint_helpers::create_backend_config () {
-    local -r backend_config_path="${module_path}"/backend.tf
+#   - 0: value is parsed and printed
+#   - 1: value either could not be parsed
+entrypoint_helpers::get_tfvar () {
+    local -r var_file="${1:?}"
+    local -r var_name="${2:?}"
 
-    if [ -z "${opt_backend_bucket}" ]; then
-        local -r backend_gcs_bucket="gs://aiinfra-terraform-${project_id}"
-        list_tf_bucket_ret=0
-        list_tf_bucket_out=`gcloud storage buckets list ${backend_gcs_bucket}` || list_tf_bucket_ret=$?
-        if [ $list_tf_bucket_ret -eq 0 ]; then
-            echo "GCS bucket for terraform state ${backend_gcs_bucket} exists."
-        else
-            echo "GCS bucket for terraform state ${backend_gcs_bucket} does not exist. Creating..."
-            gcloud storage buckets create "${backend_gcs_bucket}" \
-                --project="${project_id}" --default-storage-class="REGIONAL" \
-                --uniform-bucket-level-access \
-            || {
-                echo "Failed to create bucket ${backend_gcs_bucket}."
-                return 1
-            }
-        fi
-    else
-        local -r backend_gcs_bucket="${opt_backend_bucket}"
-        if [[ ${backend_gcs_bucket: -1} == "/" ]]; then
-            echo "ERROR...The backend-bucket $backend_gcs_bucket is in incorrect format. Remove trailing /"
-            return 1
-        fi
-
-        gsutil ls "${backend_gcs_bucket}" \
-        || {
-            echo "ERROR...The backend-bucket ${backend_gcs_bucket} is not present."
-            return 1
-        }
-    fi
-
-    if [[ "$backend_gcs_bucket" =~ ^gs://([^/]*)/*(.*) ]]; then
-        local bucket_name=${BASH_REMATCH[1]}
-        if [[ -z "${BASH_REMATCH[2]}" ]]; then
-            local deployment_path=$resource_prefix-deployment
-        else
-            local deployment_path=${BASH_REMATCH[2]}/$resource_prefix-deployment
-        fi
-        echo "The backend-bucket is ${backend_gcs_bucket}. Terraform bucket is $bucket_name. Terraform backend path is $deployment_path."
-    else
-        echo "ERROR...The backend-bucket ${backend_gcs_bucket} is in incorrect format."
-        return 1
-    fi
-
-    echo "terraform {" > $backend_config_path
-    echo "  backend \"gcs\" {" >> $backend_config_path
-    echo "    bucket = \"$bucket_name\"" >> $backend_config_path
-    echo "    prefix = \"$deployment_path\"" >> $backend_config_path
-    echo "  }" >> $backend_config_path
-    echo "}" >> $backend_config_path
-
-    if [ "${cluster}" == "gke" ]; then 
+    local value=$(sed -n 's/ *'"${var_name}"' *= *"\(.*\)"/\1/p' "${var_file}")
+    if [ -n "${value}" ]; then
+        echo "${value}"
         return 0
     fi
 
-    if [ -z "$(entrypoint_helpers::read_tfvars "startup_script_gcs_bucket_path")" ]; then
-        echo "startup_script_gcs_bucket_path = \"${backend_gcs_bucket}\"" >> $var_file
+    return 1
+}
+
+# Checks if a bucket exists and then creates it if it doesn't
+#
+# Parameters:
+#   - `project_id`: GCP Project ID pertaining to the GCS bucket
+#   - `bucket_name`: Name of the GCS bucket
+# Output: none
+# Exit status:
+#   - 0: Either the bucket already existed or it just got created
+#   - 1: The bucket did not exist and could not be created
+entrypoint_helpers::ensure_bucket_exists () {
+    local -r project_id="${1:?}"
+    local -r bucket_name="${2:?}"
+
+    echo "Checking if GCS bucket '${bucket_name}' exists..." >&2
+    gcloud storage buckets list "gs://${bucket_name}" >/dev/null \
+        --project="${project_id}" && {
+        echo "GCS bucket found." >&2
+        return 0
+    }
+
+    echo "Failed to find GCS bucket -- creating..." >&2
+    gcloud storage buckets create "gs://${bucket_name}" >/dev/null \
+        --project="${project_id}" \
+        --default-storage-class="REGIONAL" \
+        --uniform-bucket-level-access && {
+        echo "GCS bucket '${bucket_name}' created." >&2
+        return 0
+    }
+
+    echo "Failed to create GCS bucket." >&2
+    return 1
+}
+
+# Get the bucket name from a full GCS URL. Example:
+# 'gs://gce-ai-infra/aiinfra-terraform-gce-ai-infra/gcb-pr'
+# -> 'gce-ai-infra'
+#
+# Parameters:
+#   - `backend_path`: Full GCS URL
+# Output: The bucket name
+# Exit status:
+#   - 0: bucket name was retrieved
+#   - 1: URL is either malformed or without a bucket name
+entrypoint_helpers::get_bucket_name_from_path () {
+    local -r backend_path="${1:?}"
+
+    declare -ar backend_parts=($(echo "${backend_path}" | sed 's/\// /g'))
+    [ "${#backend_parts[@]}" -ge 2 ] && echo "${backend_parts[1]}"
+}
+
+# Get the bucket subdirectory from a full GCS URL. Example:
+# 'gs://gce-ai-infra/aiinfra-terraform-gce-ai-infra/gcb-pr'
+# -> 'aiinfra-terraform-gce-ai-infra/gcb-pr'
+#
+# Parameters:
+#   - `backend_path`: Full GCS URL
+# Output: The bucket subdir if it exists (else none)
+# Exit status: 0
+entrypoint_helpers::get_bucket_subdir_from_path () {
+    local -r backend_path="${1:?}"
+
+    declare -ar backend_parts=($(echo "${backend_path}" | sed 's/\// /g'))
+    if [ "${#backend_parts[@]}" -ge 3 ]; then
+        echo "${backend_parts[@]:2}" | sed 's/ /\//g'
     fi
+
+    return 0
+}
+
+# Generate a terraform backend block.
+#
+# Parameters:
+#   - `bucket_name`: The bucket name
+#   - `bucket_subdir`: Subdir in the bucket for the tfstate
+# Output: The terraform backend block
+# Exit status: 0
+entrypoint_helpers::generate_backend_block () {
+    local -r bucket_name="${1:?}"
+    local -r bucket_subdir="${2:?}"
+
+    cat <<EOT
+terraform {
+    backend "gcs" {
+        bucket = "${bucket_name}"
+        prefix = "${bucket_subdir}"
+    }
+}
+EOT
+}
+
+# This function:
+# - checks if a state backend exists and creates it if it doesn't
+# - creates a backend config file
+# - propagates state backend to script backend in tfvars if necessary
+# - copies the tfvars file to the backend
+#
+# Params:
+#   - `cluster`: type of cluster
+#   - `var_file`: tfvars file
+#   - `backend_config_path`: path to terraform backend config file
+#   - `opt_backend_path`: backend path possibly given by the user
+# Output: Path to the deployment in the GCS bucket
+# Exit status:
+#   - 0: All actions succeeded
+#   - 1: One of the actions failed
+entrypoint_helpers::setup_backend () {
+    local -r cluster="${1:?}"
+    local -r var_file="${2:?}"
+    local -r backend_config_path="${3:?}"
+    local -r opt_backend_path="$(echo "${4}" | sed 's/\/*$//')"
+
+    # String manipulation
+
+    local -r project_id="$(entrypoint_helpers::get_tfvar "${var_file}" 'project_id')" || {
+        echo "unable to find variable 'project_id' in var file '${var_file}'"
+        return 1
+    } >&2
+    local -r resource_prefix="$(entrypoint_helpers::get_tfvar "${var_file}" 'resource_prefix')" || {
+        echo "unable to find variable 'resource_prefix' in var file '${var_file}'"
+        return 1
+    } >&2
+    local -r backend_path="${opt_backend_path:-"gs://aiinfra-terraform-${project_id}"}"
+    local -r bucket_name="$(entrypoint_helpers::get_bucket_name_from_path "${backend_path}")"
+    local -r given_subdir="$(entrypoint_helpers::get_bucket_subdir_from_path "${backend_path}")"
+    local -r deployment_subdir="$(echo "${given_subdir}/${resource_prefix}-deployment" | sed 's/^\/*//')"
+
+    # Actions
+
+    entrypoint_helpers::ensure_bucket_exists "${project_id}" "${bucket_name}" || {
+        echo "unable to find or create GCS bucket '${bucket_name}' in project '${project_id}'."
+        return 1
+    } >&2
+
+    entrypoint_helpers::generate_backend_block >"${backend_config_path}" \
+        "${bucket_name}" \
+        "${deployment_subdir}"
+
+    if {
+        { [ "${cluster}" = 'mig' ] || [ "${cluster}" = 'slurm' ]; } \
+        && {
+            ! entrypoint_helpers::get_tfvar >/dev/null \
+                "${var_file}" \
+                startup_script_gcs_bucket_path
+        }
+    }; then
+        echo "startup_script_gcs_bucket_path = \"${backend_path}\"" >>"${var_file}"
+    fi
+
+    echo "gs://${bucket_name}/${deployment_subdir}"
 }
