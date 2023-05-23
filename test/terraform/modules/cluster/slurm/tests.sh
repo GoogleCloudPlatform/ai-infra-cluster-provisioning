@@ -13,7 +13,7 @@ slurm::output_dir () {
 }
 
 test::terraform::slurm () {
-    EXPECT_SUCCEED terraform -chdir="$(slurm::src_dir)" init -reconfigure
+    EXPECT_SUCCEED helpers::terraform_init "$(slurm::src_dir)"
 }
 
 test::terraform::slurm::defaults () {

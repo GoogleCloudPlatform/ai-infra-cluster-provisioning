@@ -13,11 +13,7 @@ instance_template::output_dir () {
 }
 
 test::terraform::instance_template () {
-    EXPECT_SUCCEED terraform -chdir="$(instance_template::src_dir)" init -reconfigure
-}
-
-test::terraform::instance_template::fmt () {
-    EXPECT_SUCCEED terraform -chdir="$(instance_template::src_dir)" fmt -check -recursive
+    EXPECT_SUCCEED helpers::terraform_init "$(instance_template::src_dir)"
 }
 
 test::terraform::instance_template::simple_create_resource () {

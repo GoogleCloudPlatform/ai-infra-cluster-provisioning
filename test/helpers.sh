@@ -174,6 +174,19 @@ EXPECT_FILE_REGULAR () {
     return 0
 }
 
+# Call `terraform init` on a module.
+#
+# Parameters:
+#   - `src_dir`: path to the module directory
+# Output: the stdout of `terraform init`
+# Exit status:
+#   - 0: terraform init succeeded
+#   - 1: terraform init failed
+helpers::terraform_init () {
+    local -r src_dir="${1:?}"
+    terraform -chdir="${src_dir}" init -no-color -reconfigure
+}
+
 # Call `terraform plan` and save tfplan to a file
 #
 # Parameters:
