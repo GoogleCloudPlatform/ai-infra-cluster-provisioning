@@ -13,7 +13,7 @@ mig::output_dir () {
 }
 
 test::terraform::mig () {
-    EXPECT_SUCCEED terraform -chdir="$(mig::src_dir)" init -reconfigure
+    EXPECT_SUCCEED helpers::terraform_init "$(mig::src_dir)"
 }
 
 test::terraform::mig::simple_create_modules () {

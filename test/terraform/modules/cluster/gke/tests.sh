@@ -13,7 +13,7 @@ gke::output_dir () {
 }
 
 test::terraform::gke () {
-    EXPECT_SUCCEED terraform -chdir="$(gke::src_dir)" init -reconfigure
+    EXPECT_SUCCEED helpers::terraform_init "$(gke::src_dir)"
 }
 
 test::terraform::gke::gke_gpu_create_modules () {
