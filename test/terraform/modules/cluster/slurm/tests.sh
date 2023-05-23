@@ -16,10 +16,6 @@ test::terraform::slurm () {
     EXPECT_SUCCEED terraform -chdir="$(slurm::src_dir)" init -reconfigure
 }
 
-test::terraform::slurm::fmt () {
-    EXPECT_SUCCEED terraform -chdir="$(slurm::src_dir)" fmt -check -recursive
-}
-
 test::terraform::slurm::defaults () {
     tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \

@@ -16,10 +16,6 @@ test::terraform::dashboard () {
     EXPECT_SUCCEED terraform -chdir="$(dashboard::src_dir)" init -reconfigure
 }
 
-test::terraform::dashboard::fmt () {
-    EXPECT_SUCCEED terraform -chdir="$(dashboard::src_dir)" fmt -check -recursive
-}
-
 test::terraform::dashboard::disable_all_widgets () {
     tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \

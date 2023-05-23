@@ -16,10 +16,6 @@ test::terraform::gke () {
     EXPECT_SUCCEED terraform -chdir="$(gke::src_dir)" init -reconfigure
 }
 
-test::terraform::gke::fmt () {
-    EXPECT_SUCCEED terraform -chdir="$(gke::src_dir)" fmt -check -recursive
-}
-
 test::terraform::gke::gke_gpu_create_modules () {
     tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \

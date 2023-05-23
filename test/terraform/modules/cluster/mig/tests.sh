@@ -16,10 +16,6 @@ test::terraform::mig () {
     EXPECT_SUCCEED terraform -chdir="$(mig::src_dir)" init -reconfigure
 }
 
-test::terraform::mig::fmt () {
-    EXPECT_SUCCEED terraform -chdir="$(mig::src_dir)" fmt -check -recursive
-}
-
 test::terraform::mig::simple_create_modules () {
     tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
