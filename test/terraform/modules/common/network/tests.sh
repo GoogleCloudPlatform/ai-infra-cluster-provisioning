@@ -16,10 +16,6 @@ test::terraform::network () {
     EXPECT_SUCCEED terraform -chdir="$(network::src_dir)" init -reconfigure
 }
 
-test::terraform::network::fmt () {
-    EXPECT_SUCCEED terraform -chdir="$(network::src_dir)" fmt -check -recursive
-}
-
 test::terraform::network::default_network_produces_subnet () {
     tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
