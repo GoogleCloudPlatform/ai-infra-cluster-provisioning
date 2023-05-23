@@ -13,7 +13,7 @@ dashboard::output_dir () {
 }
 
 test::terraform::dashboard () {
-    EXPECT_SUCCEED terraform -chdir="$(dashboard::src_dir)" init -reconfigure
+    EXPECT_SUCCEED helpers::terraform_init "$(dashboard::src_dir)"
 }
 
 test::terraform::dashboard::disable_all_widgets () {

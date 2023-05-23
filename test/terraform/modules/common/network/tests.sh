@@ -13,7 +13,7 @@ network::output_dir () {
 }
 
 test::terraform::network () {
-    EXPECT_SUCCEED terraform -chdir="$(network::src_dir)" init -reconfigure
+    EXPECT_SUCCEED helpers::terraform_init "$(network::src_dir)"
 }
 
 test::terraform::network::default_network_produces_subnet () {

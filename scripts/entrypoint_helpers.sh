@@ -188,13 +188,13 @@ entrypoint_helpers::create () {
     local -r module_path="${3:?}"
 
     echo "Running terraform init..." >&2
-    terraform -chdir="${module_path}" init || {
+    terraform -chdir="${module_path}" init -no-color || {
         echo "terraform init failure."
         return 1
     } >&2
 
     echo "Running terraform validate..." >&2
-    terraform -chdir="${module_path}" validate || {
+    terraform -chdir="${module_path}" validate -no-color || {
         echo "terraform validate failure."
         return 1
     } >&2
@@ -202,14 +202,14 @@ entrypoint_helpers::create () {
     echo "Running terraform plan..." >&2
     tfplan=$(mktemp)
     terraform -chdir="${module_path}" \
-        plan -out="${tfplan}" -var-file="${var_file}" || {
+        plan -out="${tfplan}" -var-file="${var_file}" -no-color || {
         echo "terraform plan failure."
         return 1
     } >&2
 
     echo "Running terraform apply..." >&2
     terraform -chdir="${module_path}" \
-        apply -auto-approve "${tfplan}" ${extra_tf_args} || {
+        apply -auto-approve "${tfplan}" ${extra_tf_args} -no-color || {
         echo "terraform apply failure."
         rm -f "${tfplan}"
         return 1
@@ -235,7 +235,7 @@ entrypoint_helpers::destroy () {
     local -r module_path="${3:?}"
 
     echo "Running terraform init..." >&2
-    terraform -chdir="${module_path}" init || {
+    terraform -chdir="${module_path}" init -no-color || {
         echo "terraform init failure."
         return 1
     } >&2
@@ -243,7 +243,7 @@ entrypoint_helpers::destroy () {
     echo "Running terraform destroy..." >&2
     terraform -chdir="${module_path}" \
         apply -auto-approve -var-file="${var_file}" \
-        -destroy || {
+        -destroy -no-color || {
         echo "terraform destroy failure."
         return 1
     } >&2
