@@ -29,13 +29,15 @@ main () {
     || { echo; entrypoint_helpers::get_usage; return 1; } >&2
 
     local -r module_path="$(entrypoint_helpers::module_path "${arg_cluster}")"
+    local -r tmp_var_file=$(mktemp)
+    cp "${arg_var_file}" "${tmp_var_file}"
 
     # Backend setup
 
     local -r deployment_path=$(
         entrypoint_helpers::setup_backend \
             "${arg_cluster}" \
-            "${arg_var_file}" \
+            "${tmp_var_file}" \
             "${module_path}/backend.tf" \
             "${opt_backend_bucket}") || {
         echo 'Failed to set up backend.'
@@ -62,13 +64,13 @@ main () {
         'create')
             entrypoint_helpers::create \
                 "${arg_cluster}" \
-                "${arg_var_file}" \
+                "${tmp_var_file}" \
                 "${module_path}"
             ;;
         'destroy')
             entrypoint_helpers::destroy \
                 "${arg_cluster}" \
-                "${arg_var_file}" \
+                "${tmp_var_file}" \
                 "${module_path}"
             ;;
     esac >"${stdout_pipe}" || terraform_success=false
@@ -79,7 +81,7 @@ main () {
 
     echo "Copying tfvars to GCS bucket..." >&2
     gsutil cp \
-        "${arg_var_file}" \
+        "${tmp_var_file}" \
         "${deployment_path}/terraform.tfvars" || {
         echo 'unable to upload tfvars to GCS bucket'
         return 1
