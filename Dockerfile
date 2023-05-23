@@ -17,7 +17,7 @@ COPY terraform ./terraform
 FROM base as test
 COPY scripts ./scripts
 COPY test ./test
-ENTRYPOINT ["./test/run_tests.sh"]
+ENTRYPOINT ["./test/pr.sh"]
 
 FROM base as deploy
 RUN for cluster in gke mig slurm; do \
