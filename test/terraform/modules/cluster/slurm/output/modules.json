@@ -28,6 +28,9 @@
         },
         {
           "address": "module.login_startup"
+        },
+        {
+          "address": "module.network"
         }
       ]
     }
