@@ -407,6 +407,7 @@ entrypoint_helpers::setup_backend () {
         "${bucket_name}" \
         "${deployment_subdir}"
 
+    local deployment_full_path="gs://${bucket_name}/${deployment_subdir}"
     if {
         { [ "${cluster}" = 'mig' ] || [ "${cluster}" = 'slurm' ]; } \
         && {
@@ -415,8 +416,8 @@ entrypoint_helpers::setup_backend () {
                 startup_script_gcs_bucket_path
         }
     }; then
-        echo "startup_script_gcs_bucket_path = \"${backend_path}\"" >>"${var_file}"
+        echo "startup_script_gcs_bucket_path = \"${deployment_full_path}\"" >>"${var_file}"
     fi
 
-    echo "gs://${bucket_name}/${deployment_subdir}"
+    echo "${deployment_full_path}"
 }

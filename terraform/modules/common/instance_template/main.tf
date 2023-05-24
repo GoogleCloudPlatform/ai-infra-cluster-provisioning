@@ -83,10 +83,6 @@ resource "google_compute_instance_template" "template" {
   machine_type = var.machine_type
   metadata     = local.metadata
 
-  advanced_machine_features {
-    threads_per_core = 1
-  }
-
   disk {
     boot         = true
     source_image = data.google_compute_image.image.self_link
