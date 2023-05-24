@@ -29,7 +29,7 @@ steps:
     '.' ]
 
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '--tag=test', '--target=test', '.' ]
+  args: [ 'build', '--tag=test', '--target=test-pr', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'run', '--network=cloudbuild', 'test' ]
 

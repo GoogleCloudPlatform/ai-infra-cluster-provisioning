@@ -17,80 +17,24 @@ steps:
 # Pull the latest version to speed up builds when only later layers have changed.
 # See https://cloud.google.com/build/docs/speeding-up-builds#using_a_cached_docker_image
 - name: 'gcr.io/cloud-builders/docker'
-  entrypoint: 'bash'
-  args: ['-c', 'docker pull us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest || exit 0']
+  args: [ 'pull', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest' ]
+  allowFailure: true
+
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:${SHORT_SHA}',
-          '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:${_VERSION}',
-          '--cache-from', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          '-f', 'Dockerfile', '.' ]
-# Test for default VPC
+  args: [
+    'build',
+    '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+    '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:${SHORT_SHA}',
+    '--tag', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:${_VERSION}',
+    '--cache-from', 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
+    '--file', 'Dockerfile',
+    '.' ]
+
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/default-vpc-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-def',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Destroy' ]
+  args: [ 'build', '--tag=test', '--target=test-continuous', '.' ]
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/default-vpc-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-def',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Create' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/default-vpc-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-def',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Destroy' ]
-# Test for multi-NIC VPC
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/multinic-vpc-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-mn',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Destroy' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/multinic-vpc-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-mn',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Create' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/multinic-vpc-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-mn',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Destroy' ]
-# Test for GKE
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/gke-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-gke',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Destroy' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/gke-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-gke',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Create' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'run',
-          '--env-file', 'test/continuous/gke-env.list',
-          '--env', 'NAME_PREFIX=continuous${SHORT_SHA}-gke',
-          '--network=cloudbuild',
-          'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image:latest',
-          'Destroy' ]
+  args: [ 'run', '--network=cloudbuild', 'test' ]
+
 
 images:
 - 'us-docker.pkg.dev/${PROJECT_ID}/cluster-provision-dev/cluster-provision-image'
