@@ -5,11 +5,11 @@ dashboard::src_dir () {
 }
 
 dashboard::input_dir () {
-    echo "${PWD}/test/terraform/modules/common/dashboard/input"
+    echo "${PWD}/test/pr/terraform/modules/common/dashboard/input"
 }
 
 dashboard::output_dir () {
-    echo "${PWD}/test/terraform/modules/common/dashboard/output"
+    echo "${PWD}/test/pr/terraform/modules/common/dashboard/output"
 }
 
 test::terraform::dashboard () {

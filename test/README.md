@@ -1,9 +1,18 @@
+# Structure
+
+## Continuous and PR
+
 # How to run
 
-In order to run the tests, you must be in the top-level directory of the
-repository. This is because paths passed to the `source` command are relative to
-the directory from which you are executing. The top level was chosen in order to
-eliminate having to follow a bunch of `../../../`s.
+## On host machine
+
+In order to run the tests, you must be in the top-level directory of the repository (this is because paths passed to the `source` command are relative to the directory from which you are executing -- the top level was chosen in order to eliminate having to follow a bunch of `../../../`s).
+
+Then run:
+```bash
+./test/pr/run.sh
+./test/continuous/run.sh
+```
 
 The only way for that to happen right now is to run the docker container.
 Support for host-machine running will come later. For now, this is the docker

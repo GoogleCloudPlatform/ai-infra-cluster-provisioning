@@ -5,11 +5,11 @@ slurm::src_dir () {
 }
 
 slurm::input_dir () {
-    echo "${PWD}/test/terraform/modules/cluster/slurm/input"
+    echo "${PWD}/test/pr/terraform/modules/cluster/slurm/input"
 }
 
 slurm::output_dir () {
-    echo "${PWD}/test/terraform/modules/cluster/slurm/output"
+    echo "${PWD}/test/pr/terraform/modules/cluster/slurm/output"
 }
 
 test::terraform::slurm () {
