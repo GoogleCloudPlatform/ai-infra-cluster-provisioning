@@ -11,7 +11,7 @@ repos:
           entry: tools/terraform-doc.sh
           language: script
           types: [terraform]
-          exclude: (\.terraform|test\/.*$|examples\/.*$)
+          exclude: (\.terraform|test\/.*$|samples\/.*$)
           pass_filenames: true
           require_serial: true
           always_run: true

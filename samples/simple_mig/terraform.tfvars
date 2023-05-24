@@ -1,4 +1,4 @@
-project_id      = "soumyapani-testing"
+project_id      = "project-id"
 resource_prefix = "simple-mig"
 target_size     = 1
 zone            = "us-central1-a"
