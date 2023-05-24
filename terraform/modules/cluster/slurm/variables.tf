@@ -207,14 +207,14 @@ variable "controller_var" {
     ------------
     `controller_var.disk_size_gb`
 
-    Size of the disk attached to each node, specified in GB. Defaults to 128.
+    Size of the disk attached to each node, specified in GB. Defaults to 50.
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#disk_size_gb), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--boot-disk-size).
 
     ------------
     `controller_var.disk_type`
 
-    Type of the disk attached to each node. Defaults to `"pd-standard"`.
+    Type of the disk attached to each node. Defaults to `"pd-ssd"`.
 
     Possible values: `["pd-standard", "pd-balanced", "pd-ssd"]`.
 
@@ -251,7 +251,7 @@ variable "controller_var" {
     ------------
     `controller_var.machine_type`
 
-    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource). Defaults to `"a2-highgpu-2g"`
+    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource). Defaults to `"c2-standard-4"`
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
 
@@ -370,7 +370,7 @@ variable "login_var" {
     ------------
     `login_var.disk_size_gb`
 
-    Size of the disk attached to each node, specified in GB. Defaults to 128.
+    Size of the disk attached to each node, specified in GB. Defaults to 50.
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#disk_size_gb), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--boot-disk-size).
 
@@ -414,7 +414,7 @@ variable "login_var" {
     ------------
     `login_var.machine_type`
 
-    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource). Defaults to `"a2-highgpu-2g"`
+    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource). Defaults to `"n2-standard-2"`
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
 
@@ -449,17 +449,17 @@ variable "network_config" {
   description = <<-EOT
     The network configuration to specify the type of VPC to be used.
 
-    Possible values: `["default", "new_multi_nic", "new_single_nic"]`
+    Possible values: `["new_multi_nic", "new_single_nic"]`
     EOT
   type        = string
-  default     = "default"
+  default     = "new_single_nic"
 
   validation {
     condition = contains(
-      ["default", "new_multi_nic", "new_single_nic"],
+      ["new_multi_nic", "new_single_nic"],
       var.network_config
     )
-    error_message = "network_config must be one of ['default', 'new_multi_nic', 'new_single_nic']."
+    error_message = "network_config must be one of ['new_multi_nic', 'new_single_nic']."
   }
 }
 

@@ -1,0 +1,14 @@
+The slurm cluster created with this `terraform.tfvars` file has:
+- a single partition named `compute` consisting of two nodes in the `us-central1-a` zone, each with:
+  - a disk of size 128GB and type `pd-standard`
+  - machine type of `a2-highgpu-2g`
+  - boot image of project `schedmd-slurm-public` and family `schedmd-v5-slurm-22-05-8-ubuntu-2004-lts`
+- a controller node in the `us-central1-a` zone with:
+  - a disk of size 50GB and type `pd-ssd`
+  - machine type of `c2-standard-4`
+  - boot image of project `schedmd-slurm-public` and family `schedmd-v5-slurm-22-05-8-ubuntu-2004-lts`
+- a login node in the `us-central1-a` zone with:
+  - a disk of size 50GB and type `pd-standard`
+  - machine type of `n2-standard-2`
+  - boot image of project `schedmd-slurm-public` and family `schedmd-v5-slurm-22-05-8-ubuntu-2004-lts`
+- one new VPC with which all the above nodes are connected
