@@ -5,11 +5,6 @@
         {
           "address": "google_compute_instance_template.template",
           "values": {
-            "advanced_machine_features": [
-              {
-                "threads_per_core": 1
-              }
-            ],
             "disk": [
               {
                 "auto_delete": true,
