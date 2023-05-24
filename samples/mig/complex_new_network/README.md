@@ -13,7 +13,7 @@ Groups](https://cloud.google.com/compute/docs/instance-groups). This cluster use
 
 ## Usage via Docker Image
 Please find detailed set up instruction for docker image
-[here](../../README.md#usage-via-docker-image)
+[here](../../../README.md#usage-via-docker-image)
 
 Please copy the [terraform.tfvars](./terraform.tfvars) file to your current working
 directory of your local machine. Then follow the below instructions to create the cluster.
@@ -30,7 +30,7 @@ docker run \
 
 ## Usage via Terraform
 Please find detailed instructions to set up terraform
-[here](../../README.md#usage-via-terraform)
+[here](../../../README.md#usage-via-terraform)
 
 Please copy the [main.tf](./main.tf) and [terraform.tfvars](./terraform.tfvars) file to your current working
 directory of your local machine. Then follow the below instructions to create the cluster
