@@ -28,11 +28,3 @@ test::terraform::mig::simple_create_modules () {
         "$(mig::output_dir)/modules.json" \
         "${tfshow}"
 }
-
-test::terraform::mig::a2vm_validation_modules () {
-    tfplan=$(mktemp)
-    EXPECT_FAIL helpers::terraform_plan 2>/dev/null \
-        "$(mig::src_dir)" \
-        "$(mig::input_dir)/fail_a2vm.tfvars" \
-        "${tfplan}"
-}

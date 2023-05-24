@@ -28,3 +28,11 @@ test::terraform::instance_template::simple_create_resource () {
         "$(instance_template::output_dir)/resources.json" \
         "${tfshow}"
 }
+
+test::terraform::instance_template::fails_on_guest_acc_with_acc_machine () {
+    tfplan=$(mktemp)
+    EXPECT_FAIL helpers::terraform_plan 2>/dev/null \
+        "$(instance_template::src_dir)" \
+        "$(instance_template::input_dir)/guest_acc_and_acc_machine.tfvars" \
+        "${tfplan}"
+}
