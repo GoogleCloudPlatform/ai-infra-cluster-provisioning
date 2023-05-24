@@ -16,11 +16,11 @@
 
 output "network_id" {
   description = "ID of the network"
-  value = one(toset(flatten([
+  value = flatten([
     module.default_vpc[*].network_id,
     module.single_new_vpc[*].network_id,
     module.multiple_new_vpcs[*].network_id,
-  ])))
+  ])[0]
 }
 
 output "network_self_links" {
