@@ -416,7 +416,7 @@ entrypoint_helpers::setup_backend () {
                 startup_script_gcs_bucket_path
         }
     }; then
-        echo "startup_script_gcs_bucket_path = \"${deployment_full_path}\"" >>"${var_file}"
+        echo -e "\nstartup_script_gcs_bucket_path = \"${deployment_full_path}\"" >>"${var_file}"
     fi
 
     echo "${deployment_full_path}"
