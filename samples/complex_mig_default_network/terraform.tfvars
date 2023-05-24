@@ -3,11 +3,7 @@ resource_prefix = "complex-mig1"
 zone            = "us-central1-a"
 machine_type    = "a2-highgpu-1g"
 target_size     = 1
-guest_accelerator = {
-  count = 1
-  type  = "nvidia-tesla-a100"
-}
-enable_ray = true
+enable_ray      = true
 filestore_new = [{
   filestore_tier = "BASIC_HDD"
   local_mount    = "/usr/fsmount"
@@ -15,7 +11,7 @@ filestore_new = [{
 }]
 gcsfuse_existing = [{
   local_mount  = "/usr/gcsmount"
-  remote_mount = "spani-mount-test"
+  remote_mount = "bucketName-To-Mount"
 }]
 labels = { purpose = "testing", }
 machine_image = {
