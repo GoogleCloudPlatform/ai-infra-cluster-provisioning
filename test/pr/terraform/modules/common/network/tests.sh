@@ -5,11 +5,11 @@ network::src_dir () {
 }
 
 network::input_dir () {
-    echo "${PWD}/test/terraform/modules/common/network/input"
+    echo "${PWD}/test/pr/terraform/modules/common/network/input"
 }
 
 network::output_dir () {
-    echo "${PWD}/test/terraform/modules/common/network/output"
+    echo "${PWD}/test/pr/terraform/modules/common/network/output"
 }
 
 test::terraform::network () {

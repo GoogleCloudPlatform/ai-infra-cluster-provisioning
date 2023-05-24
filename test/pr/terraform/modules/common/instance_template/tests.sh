@@ -5,11 +5,11 @@ instance_template::src_dir () {
 }
 
 instance_template::input_dir () {
-    echo "${PWD}/test/terraform/modules/common/instance_template/input"
+    echo "${PWD}/test/pr/terraform/modules/common/instance_template/input"
 }
 
 instance_template::output_dir () {
-    echo "${PWD}/test/terraform/modules/common/instance_template/output"
+    echo "${PWD}/test/pr/terraform/modules/common/instance_template/output"
 }
 
 test::terraform::instance_template () {
@@ -27,4 +27,12 @@ test::terraform::instance_template::simple_create_resource () {
     EXPECT_SUCCEED helpers::json_contains \
         "$(instance_template::output_dir)/resources.json" \
         "${tfshow}"
+}
+
+test::terraform::instance_template::fails_on_guest_acc_with_acc_machine () {
+    tfplan=$(mktemp)
+    EXPECT_FAIL helpers::terraform_plan 2>/dev/null \
+        "$(instance_template::src_dir)" \
+        "$(instance_template::input_dir)/guest_acc_and_acc_machine.tfvars" \
+        "${tfplan}"
 }

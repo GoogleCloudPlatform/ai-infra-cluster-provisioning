@@ -121,6 +121,11 @@ variable "machine_type" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
     EOT
   type        = string
+
+  validation {
+    condition     = var.machine_type != null
+    error_message = "must not be null"
+  }
 }
 
 variable "metadata" {
@@ -148,6 +153,11 @@ variable "project_id" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#project).
     EOT
   type        = string
+
+  validation {
+    condition     = var.project_id != null
+    error_message = "must not be null"
+  }
 }
 
 variable "region" {
@@ -157,11 +167,21 @@ variable "region" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#region).
     EOT
   type        = string
+
+  validation {
+    condition     = var.region != null
+    error_message = "must not be null"
+  }
 }
 
 variable "resource_prefix" {
   description = "Arbitrary string with which all names of newly created resources will be prefixed."
   type        = string
+
+  validation {
+    condition     = var.resource_prefix != null
+    error_message = "must not be null"
+  }
 }
 
 variable "service_account" {
@@ -202,6 +222,11 @@ variable "subnetwork_self_links" {
   type        = list(string)
 
   validation {
+    condition     = var.subnetwork_self_links != null
+    error_message = "must not be null"
+  }
+
+  validation {
     condition     = length(var.subnetwork_self_links) != 0
     error_message = "Must have one or more subnetwork self-link"
   }
@@ -210,6 +235,11 @@ variable "subnetwork_self_links" {
 variable "network_self_links" {
   description = "The network self-links for all the VPCs."
   type        = list(string)
+
+  validation {
+    condition     = var.network_self_links != null
+    error_message = "must not be null"
+  }
 
   validation {
     condition     = length(var.network_self_links) != 0

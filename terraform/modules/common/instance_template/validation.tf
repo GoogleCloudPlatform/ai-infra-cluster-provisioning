@@ -15,7 +15,10 @@
 */
 
 locals {
-  machine_family = split("-", var.machine_type)[0]
+  accelerator_optimized = contains(
+    ["a2", "a3", "g2"],
+    split("-", var.machine_type)[0],
+  )
 }
 
 resource "null_resource" "validation" {
@@ -26,8 +29,8 @@ resource "null_resource" "validation" {
 
   lifecycle {
     precondition {
-      condition     = (local.machine_family == "a2" || local.machine_family == "a3") && var.guest_accelerator == null
-      error_message = "a2 and a3 machine family have fixed GPU type and count. Please remove the guest_accelerator block. For more details please check https://cloud.google.com/compute/docs/gpus#a100-40gb"
+      condition     = !(local.accelerator_optimized && var.guest_accelerator != null)
+      error_message = "a2, a3, and g2 machine families have fixed GPU type and count. Please remove the guest_accelerator block or change the machine type to be one of the n1 family. For more details please check https://cloud.google.com/compute/docs/gpus#a100-40gb"
     }
   }
 }

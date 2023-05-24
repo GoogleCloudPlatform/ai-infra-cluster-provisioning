@@ -5,11 +5,11 @@ gke::src_dir () {
 }
 
 gke::input_dir () {
-    echo "${PWD}/test/terraform/modules/cluster/gke/input"
+    echo "${PWD}/test/pr/terraform/modules/cluster/gke/input"
 }
 
 gke::output_dir () {
-    echo "${PWD}/test/terraform/modules/cluster/gke/output"
+    echo "${PWD}/test/pr/terraform/modules/cluster/gke/output"
 }
 
 test::terraform::gke () {
