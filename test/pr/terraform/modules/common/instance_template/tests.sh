@@ -5,11 +5,11 @@ instance_template::src_dir () {
 }
 
 instance_template::input_dir () {
-    echo "${PWD}/test/terraform/modules/common/instance_template/input"
+    echo "${PWD}/test/pr/terraform/modules/common/instance_template/input"
 }
 
 instance_template::output_dir () {
-    echo "${PWD}/test/terraform/modules/common/instance_template/output"
+    echo "${PWD}/test/pr/terraform/modules/common/instance_template/output"
 }
 
 test::terraform::instance_template () {

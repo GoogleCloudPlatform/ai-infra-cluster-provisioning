@@ -15,9 +15,14 @@ RUN curl -s https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
 COPY terraform ./terraform
 
 FROM base as test
-COPY scripts ./scripts
 COPY test ./test
-ENTRYPOINT ["./test/pr.sh"]
+COPY scripts ./scripts
+
+FROM test as test-pr
+ENTRYPOINT ["./test/pr/run.sh"]
+
+FROM test as test-continuous
+ENTRYPOINT ["./test/continuous/run.sh"]
 
 FROM base as deploy
 RUN for cluster in gke mig slurm; do \

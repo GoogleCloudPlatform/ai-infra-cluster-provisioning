@@ -5,11 +5,11 @@ mig::src_dir () {
 }
 
 mig::input_dir () {
-    echo "${PWD}/test/terraform/modules/cluster/mig/input"
+    echo "${PWD}/test/pr/terraform/modules/cluster/mig/input"
 }
 
 mig::output_dir () {
-    echo "${PWD}/test/terraform/modules/cluster/mig/output"
+    echo "${PWD}/test/pr/terraform/modules/cluster/mig/output"
 }
 
 test::terraform::mig () {
@@ -31,7 +31,7 @@ test::terraform::mig::simple_create_modules () {
 
 test::terraform::mig::a2vm_validation_modules () {
     tfplan=$(mktemp)
-    EXPECT_FAIL helpers::terraform_plan \
+    EXPECT_FAIL helpers::terraform_plan 2>/dev/null \
         "$(mig::src_dir)" \
         "$(mig::input_dir)/fail_a2vm.tfvars" \
         "${tfplan}"
