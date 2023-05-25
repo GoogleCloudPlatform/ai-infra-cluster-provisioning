@@ -1,8 +1,8 @@
 This provides a sample for creating a complex full featured AI cluster using [Managed Instance
 Groups](https://cloud.google.com/compute/docs/instance-groups). This cluster uses:
 1. Single instance of
-   [a2-highgpu-1g](https://cloud.google.com/compute/docs/accelerator-optimized-machines) VM.
-1. [Nvidia A100](https://cloud.google.com/compute/docs/gpus) GPU.
+   [a3-highgpu-8g](https://cloud.google.com/compute/docs/accelerator-optimized-machines) VM.
+1. [nvidia-h100-80gb](https://cloud.google.com/compute/docs/gpus) GPU.
 1. [Multi-NIC VPC](https://cloud.google.com/vpc/docs/create-use-multiple-interfaces) in the project.
 1. [NFS Filestore](https://cloud.google.com/filestore)
 1. GCS Bucket mounted in the VM via [GCSFuse](https://cloud.google.com/storage/docs/gcs-fuse).
