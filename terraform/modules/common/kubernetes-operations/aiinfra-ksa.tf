@@ -20,6 +20,7 @@ locals {
 
 data "google_container_cluster" "gke_cluster" {
   count    = var.gke_cluster_exists ? 1 : 0
+  project  = var.project_id
   name     = local.split_cluster_id[5]
   location = local.split_cluster_id[3]
 }
