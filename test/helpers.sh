@@ -184,7 +184,7 @@ EXPECT_FILE_REGULAR () {
 #   - 1: terraform init failed
 helpers::terraform_init () {
     local -r src_dir="${1:?}"
-    terraform -chdir="${src_dir}" init -no-color -reconfigure >/dev/null
+    terraform -chdir="${src_dir}" init -no-color -reconfigure
 }
 
 # Call `terraform plan` and save tfplan to a file
@@ -278,7 +278,7 @@ helpers::json_omits () {
 # Append the project_id variable to a tfvars file
 helpers::append_project () {
     local -r var_file="${1:?}"
-    local -r project_id="gce-ai-infra"
+    local -r project_id="borisko-test"
     cat "${var_file}" <(echo -e "\nproject_id = \"${project_id}\"")
 }
 

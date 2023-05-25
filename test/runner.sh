@@ -1,3 +1,75 @@
+# Parse command line arguments for the test runner
+
+# Print the usage help message for the entrypoint.
+#
+# Parameters: none
+# Output: usage help message
+# Exit status: 0
+entrypoint_helpers::get_usage () {
+    cat <<EOT
+Usage: ./test/<test_set>/run.sh project_id [resource_prefix] [test_regex]
+
+Options:
+    -h|--help   Print this help message.
+
+Parameters:
+    project_id  String to replace the value of the project_id variable in all
+                tfvars input files
+    resource_prefix
+                String to replace the value of the resource_prefix variable in
+                all tfvars input files. Defaults to 'ci'.
+    test_regex  Regex that will be used to filter which tests run. Defaults to
+                'test::.*'.
+EOT
+}
+
+# Parse the arguments/flags/options of the entrypoint.
+#
+# Parameters: all provided by the user
+# Output: help messages and errors
+# Exit status:
+#   - 0: successfully read all args/flags/opts
+#   - 1: unable to read at least one arg/flag/opt
+#
+# Note: will actually exit 0 (not return) when given a `help` flag
+entrypoint_helpers::parse_args () {
+    local parameter_index=1
+    while [ "${#}" -gt 0 ]; do
+        if grep -q '^-' <(echo "${1}"); then
+            case "${1}" in
+                -h|--help)
+                    echo "$(entrypoint_helpers::get_usage)"
+                    exit 0
+                    ;;
+                *)
+                    echo >&2 "option '${1}' not supported"
+                    return 1
+                    ;;
+            esac
+        else
+            case "${parameter_index}" in
+                1)
+                    arg_project_id="${1}"
+                    ;;
+                2)
+                    arg_resource_prefix="${1}"
+                    ;;
+                3)
+                    arg_test_regex="${1}"
+                    ;;
+                *)
+                    echo >&2 "too many parameters starting at '${1}'"
+                    return 1
+                    ;;
+            esac
+            ((++parameter_index))
+        fi
+        shift
+    done
+    return 0
+}
+
+
 # Run all tests in sourced files
 #
 # Parameters:
