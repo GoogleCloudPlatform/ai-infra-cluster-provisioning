@@ -188,7 +188,7 @@ entrypoint_helpers::create () {
     local -r module_path="${3:?}"
 
     echo "Running terraform init..." >&2
-    terraform -chdir="${module_path}" init -no-color || {
+    terraform -chdir="${module_path}" init -migrate-state -no-color || {
         echo "terraform init failure."
         return 1
     } >&2

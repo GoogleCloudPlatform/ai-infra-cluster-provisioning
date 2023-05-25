@@ -184,7 +184,7 @@ EXPECT_FILE_REGULAR () {
 #   - 1: terraform init failed
 helpers::terraform_init () {
     local -r src_dir="${1:?}"
-    terraform -chdir="${src_dir}" init -no-color -reconfigure
+    terraform -chdir="${src_dir}" init -no-color -reconfigure >/dev/null
 }
 
 # Call `terraform plan` and save tfplan to a file
@@ -273,5 +273,12 @@ helpers::json_omits () {
     # https://stedolan.github.io/jq/manual/#Builtinoperatorsandfunctions
     jq "contains($(cat ${element_file})) | if not then empty else halt_error end" \
         "${input_file}"
+}
+
+# Append the project_id variable to 
+helpers::append_project () {
+    local -r var_file="${1:?}"
+    local -r project_id="borisko-test"
+    cat "${var_file}" <(echo -e "\nproject_id = \"${project_id}\"")
 }
 
