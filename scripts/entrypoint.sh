@@ -69,7 +69,7 @@ main () {
                 "${module_path}" \
                 && echo "Successfully created Cluster...." >&2
             } \
-            || { echo "Failed to create Cluster...."; return 1;} >&2
+            || echo "Failed to create Cluster...." >&2
             ;;
         'destroy')
             {
@@ -79,7 +79,7 @@ main () {
                 "${module_path}" \
                 && echo "Successfully destroyed Cluster...." >&2
             } \
-            || { echo "Failed to destroy Cluster...."; return 1;} >&2
+            || echo "Failed to destroy Cluster...." >&2
             ;;
     esac >"${stdout_pipe}" || terraform_success=false
     wait "${log_pid}"
