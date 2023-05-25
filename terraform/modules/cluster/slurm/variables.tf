@@ -282,6 +282,18 @@ variable "controller_var" {
   default = null
 }
 
+variable "enable_cleanup_compute" {
+  description = <<-EOT
+      Enables automatic cleanup of compute nodes and resource policies (e.g. placement groups) managed by this module, when cluster is destroyed.
+
+      In order to use this, this `pip install` must be run in the same environment from which terraform is called: `pip3 install -r https://raw.githubusercontent.com/SchedMD/slurm-gcp/5.7.2/scripts/requirements.txt`
+
+      Related docs: [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/community/modules/scheduler/schedmd-slurm-gcp-v5-controller#input_enable_cleanup_compute)
+      EOT
+  type        = bool
+  default     = false
+}
+
 variable "filestore_new" {
   description = <<-EOT
     Configurations to mount newly created network storage. Each object describes NFS file-servers to be hosted in Filestore.

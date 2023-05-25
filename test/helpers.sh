@@ -275,10 +275,10 @@ helpers::json_omits () {
         "${input_file}"
 }
 
-# Append the project_id variable to 
+# Append the project_id variable to a tfvars file
 helpers::append_project () {
     local -r var_file="${1:?}"
-    local -r project_id="borisko-test"
+    local -r project_id="gce-ai-infra"
     cat "${var_file}" <(echo -e "\nproject_id = \"${project_id}\"")
 }
 
