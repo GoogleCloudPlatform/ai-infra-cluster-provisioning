@@ -1,74 +1,77 @@
 # Structure
 
+## Test Runner
+
+Each set of tests are run with a single script (`run.sh` in their respective
+directories) which source two collections of functions -- the runner and the
+tests. The test runner's `main` function will look for all functions that match
+the prefix `test::` or any regex given as a command line argument.
+
 ## Continuous and PR
+
+There are two `cloudbuild.yaml` files at the top-level directory of this
+repository -- [pr](../cloudbuild-pr.yaml) and
+[continuous](../cloudbuild-continuous.yaml) which correspond to the two sets of
+tests found in this directory and are run via the two test targets in the
+dockerfile.
+
+### PR tests
+
+PR tests run during every pull request into a protected branch -- `develop` and
+`main`. These tests are unit tests for all bash code and as close to unit tests
+as we can get for all terraform modules. The terraform tests have a few steps:
+- `terraform init`: this is called in a dummy test before all the other tests
+  of a module
+- `terraform plan`: checks if the configuration is valid and generates a file
+  with all the changes to the infrastructure
+- `terraform show`: converts the terraform plan into json
+- `jq contains`: checks if a json object is completely contained within another
+
+The `jq` step is how we tell whether all the modules and resources actually get
+created and whether they have the correct configurationo after any manipulation
+of variables within the `locals` blocks.
+
+### Continuous
+
+Continuous tests run on every update to a protected branch -- so after a PR is
+merged. These tests are more of end-to-end tests and use the [docker
+entrypoint](../scripts/entrypoint.sh) to actually create and destroy
+infrastructure. This only tests that infrastructure can be created -- nothing
+to do with whether it is created correctly.
 
 # How to run
 
 ## On host machine
 
-In order to run the tests, you must be in the top-level directory of the repository (this is because paths passed to the `source` command are relative to the directory from which you are executing -- the top level was chosen in order to eliminate having to follow a bunch of `../../../`s).
-
-Then run:
+In order to run the tests, you must be in the top-level directory of the
+repository (this is because paths passed to the `source` command are relative
+to the directory from which you are executing -- the top level was chosen in
+order to eliminate having to follow a bunch of `../../../`s). Once there, run:
 ```bash
 ./test/pr/run.sh
 ./test/continuous/run.sh
 ```
 
-The only way for that to happen right now is to run the docker container.
-Support for host-machine running will come later. For now, this is the docker
-command:
-```bash
-tag='prov-test' # or whatever
-docker build --pull --target test --tag "${tag}" .
-docker run -it -v "${HOME}/.config/gcloud:/root/.config/gcloud:rw" "${tag}"
-```
+## In a docker container
 
-One unfortunate aspect of building inside a docker container is that it will have to download modules and plugins each time you change any terraform code. This can be circumvented by disabling docker-build-time `terraform init` and providing the docker run command with a host-machine directory in which the downloads may persist between runs.
+Each set of tests has a separate target in the dockerfile. For PR tests, run:
 ```bash
-mkdir ./.terraform
-tag='prov-test' # or whatever
 docker build --pull \
-  --build-arg TF_INIT=false \
-  --target test \
-  --tag "${tag}" \
+  --target test-pr \
+  --tag test \
   .
-docker run -it \
-  -v "${HOME}/.config/gcloud:/root/.config/gcloud:rw" \
-  -v "${PWD}/.terraform:/usr/primary/.terraform:rw" \
-  ${tag}"
+docker run --rm \
+  --volume "${HOME}/.config/gcloud:/root/.config/gcloud:rw" \
+  test
 ```
 
-# Structure
-
-## Test naming convention
-
-`test::group::case`:
-- `test`: the literal string `test`.
-- `group`: group into which tests will be organized to run -- typically the
-  name of the function or script.
-- `case`: the individual test case name/description.
-
-## helpers.sh
-
-File that should be `source`d -- not ran -- which contains functions common to
-many test files.
-
-## test files
-
-The directory structure or `/test/` will be similar to the directory structure
-of `/`. The location of test files within `/test/` should match the location
-within `/` of the functions the files are testing.
-
-Most if not all of these files will `source ./test/helpers.sh`.
-
-## run_tests.sh
-
-Usage:
+And then for continuous tests, similarly run:
+```bash
+docker build --pull \
+  --target test-continuous \
+  --tag test \
+  .
+docker run --rm \
+  --volume "${HOME}/.config/gcloud:/root/.config/gcloud:rw" \
+  test
 ```
-./test/run_tests.sh [FILTER]
-
-Parameters:
-- FILTER (default: 'test::'): regex to filter which tests run
-```
-
-This script `source`s all the test files.
