@@ -402,7 +402,8 @@ The HPC Toolkit Repo is open-source and available
 
 | Slurm Scenarios | Docker | Terraform | HPC Toolkit |
 |-----------------|--------|-----------|-------------|
-| Simple with no GPU | [terraform.tfvars](./samples/slurm/minimal/terraform.tfvars) | [main.tf](./samples/slurm/minimal/main.tf) | [blueprint](./samples/slurm/minimal) |
+| Simple with no GPU | [terraform.tfvars](./samples/slurm/minimal/terraform.tfvars) | [main.tf](./samples/slurm/minimal/main.tf) | [blueprint](./samples/slurm/minimal/blueprint.yaml) |
+| Full featured with multi-NIC network | [terraform.tfvars](./samples/slurm/complex_multi_nic/terraform.tfvars) | [main.tf](./samples/slurm/complex_multi_nic/main.tf) | [blueprint](./samples/slurm/complex_multi_nic/blueprint.yaml) |
 
 
 # **Billing Reports**
