@@ -16,26 +16,34 @@ test::terraform::gke () {
     EXPECT_SUCCEED helpers::terraform_init "$(gke::src_dir)"
 }
 
-test::terraform::gke::gke_gpu_create_modules () {
-    tfplan=$(mktemp)
+test::terraform::gke::gpu_create_modules () {
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(gke::input_dir)/gke-gpu.tfvars" >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
         "$(gke::src_dir)" \
-        "$(gke::input_dir)/gke-gpu.tfvars" \
+        "${tfvars}" \
         "${tfplan}"
-    tfshow=$(mktemp)
+
+    local -r tfshow=$(mktemp)
     helpers::terraform_show "$(gke::src_dir)" "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(gke::output_dir)/gke-gpu.json" \
         "${tfshow}"
 }
 
-test::terraform::gke::gke_nongpu_create_modules () {
-    tfplan=$(mktemp)
+test::terraform::gke::nongpu_create_modules () {
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(gke::input_dir)/gke-nongpu.tfvars" >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
         "$(gke::src_dir)" \
-        "$(gke::input_dir)/gke-nongpu.tfvars" \
+        "${tfvars}" \
         "${tfplan}"
-    tfshow=$(mktemp)
+
+    local -r tfshow=$(mktemp)
     helpers::terraform_show "$(gke::src_dir)" "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(gke::output_dir)/gke-nongpu.json" \

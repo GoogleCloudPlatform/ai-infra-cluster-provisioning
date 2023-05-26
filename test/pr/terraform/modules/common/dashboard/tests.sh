@@ -17,12 +17,16 @@ test::terraform::dashboard () {
 }
 
 test::terraform::dashboard::disable_all_widgets () {
-    tfplan=$(mktemp)
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(dashboard::input_dir)/disable.tfvars" >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
         "$(dashboard::src_dir)" \
-        "$(dashboard::input_dir)/disable.tfvars" \
+        "${tfvars}" \
         "${tfplan}"
-    tfshow=$(mktemp)
+
+    local -r tfshow=$(mktemp)
     helpers::terraform_show "$(dashboard::src_dir)" "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(dashboard::output_dir)/modules.json" \
@@ -33,12 +37,16 @@ test::terraform::dashboard::disable_all_widgets () {
 }
 
 test::terraform::dashboard::enable_all_widgets () {
-    tfplan=$(mktemp)
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(dashboard::input_dir)/enable.tfvars" >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
         "$(dashboard::src_dir)" \
-        "$(dashboard::input_dir)/enable.tfvars" \
+        "${tfvars}" \
         "${tfplan}"
-    tfshow=$(mktemp)
+
+    local -r tfshow=$(mktemp)
     helpers::terraform_show "$(dashboard::src_dir)" "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(dashboard::output_dir)/modules.json" \
