@@ -24,7 +24,7 @@ working directory on your local machine and run:
 ```bash
 docker pull us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest
 
-docker run --rm \
+docker run -it --rm \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
