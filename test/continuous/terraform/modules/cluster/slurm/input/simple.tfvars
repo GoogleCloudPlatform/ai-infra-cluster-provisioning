@@ -11,5 +11,4 @@ compute_partitions = [{
   startup_script      = null
   startup_script_file = null
 }]
-resource_prefix        = "ci"
 enable_cleanup_compute = true

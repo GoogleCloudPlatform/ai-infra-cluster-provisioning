@@ -1,6 +1,4 @@
-project_id      = "gce-ai-infra"
-resource_prefix = "ci"
-region          = "us-central1"
+region = "us-central1"
 node_pools = [{
   zone                     = "us-central1-a"
   node_count               = 1

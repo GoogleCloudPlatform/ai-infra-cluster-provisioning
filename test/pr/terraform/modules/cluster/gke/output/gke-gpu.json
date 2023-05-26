@@ -16,9 +16,6 @@
           {
             "address": "google_container_cluster.gke-cluster",
             "values": {
-                "name":"ci-gke",
-                "network":"https://www.googleapis.com/compute/v1/projects/gce-ai-infra/global/networks/default",
-                "project":"gce-ai-infra",
                 "release_channel":[
                    {
                       "channel":"UNSPECIFIED"
@@ -30,12 +27,10 @@
           {
             "address":"google_container_node_pool.gke-node-pools[\"0\"]",
             "values": {
-                "name":"ci-nodepool-0",
                 "node_count":1,
                 "node_locations":[
                    "us-central1-a"
                 ],
-                "project":"gce-ai-infra",
                 "node_config":[
                     {
                         "disk_size_gb":200,

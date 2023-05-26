@@ -276,9 +276,10 @@ helpers::json_omits () {
 }
 
 # Append the project_id variable to a tfvars file
-helpers::append_project () {
+helpers::append_tfvars () {
     local -r var_file="${1:?}"
-    local -r project_id="borisko-test"
-    cat "${var_file}" <(echo -e "\nproject_id = \"${project_id}\"")
+    cat "${var_file}" \
+        <(echo -e "\nproject_id = \"${runner_arg_project_id}\"") \
+        <(echo -e "\nresource_prefix = \"${runner_arg_resource_prefix}\"")
 }
 

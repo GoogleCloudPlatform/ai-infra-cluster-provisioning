@@ -5,5 +5,4 @@ node_pools = [{
   guest_accelerator        = null
   enable_compact_placement = false
 }]
-resource_prefix = "ci"
-region          = "us-central1"
+region = "us-central1"
