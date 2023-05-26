@@ -62,23 +62,35 @@ main () {
     local terraform_success=true
     case "${arg_action}" in
         'create')
-            entrypoint_helpers::create \
+            {
+                entrypoint_helpers::create \
                 "${arg_cluster}" \
                 "${tmp_var_file}" \
-                "${module_path}"
+                "${module_path}" \
+                && echo "Successfully created Cluster...." >&2
+            } || {
+                echo "Failed to create Cluster...." >&2
+                terraform_success=false
+            }
             ;;
         'destroy')
-            entrypoint_helpers::destroy \
+            {
+                entrypoint_helpers::destroy \
                 "${arg_cluster}" \
                 "${tmp_var_file}" \
-                "${module_path}"
+                "${module_path}" \
+                && echo "Successfully destroyed Cluster...." >&2
+            } || {
+                echo "Failed to destroy Cluster...." >&2
+                terraform_success=false
+            }
             ;;
-    esac >"${stdout_pipe}" || terraform_success=false
+    esac >"${stdout_pipe}"
     wait "${log_pid}"
     rm -f "${stdout_pipe}"
 
     # Copy files to GCS
-
+    echo -e '\n========================================================\n' >&2
     echo "Copying tfvars to GCS bucket..." >&2
     gsutil cp \
         "${tmp_var_file}" \
