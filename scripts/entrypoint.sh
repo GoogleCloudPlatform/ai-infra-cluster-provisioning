@@ -68,8 +68,10 @@ main () {
                 "${tmp_var_file}" \
                 "${module_path}" \
                 && echo "Successfully created Cluster...." >&2
-            } \
-            || echo "Failed to create Cluster...." >&2
+            } || {
+                echo "Failed to create Cluster...." >&2
+                terraform_success=false
+            }
             ;;
         'destroy')
             {
@@ -78,10 +80,12 @@ main () {
                 "${tmp_var_file}" \
                 "${module_path}" \
                 && echo "Successfully destroyed Cluster...." >&2
-            } \
-            || echo "Failed to destroy Cluster...." >&2
+            } || {
+                echo "Failed to destroy Cluster...." >&2
+                terraform_success=false
+            }
             ;;
-    esac >"${stdout_pipe}" || terraform_success=false
+    esac >"${stdout_pipe}"
     wait "${log_pid}"
     rm -f "${stdout_pipe}"
 
