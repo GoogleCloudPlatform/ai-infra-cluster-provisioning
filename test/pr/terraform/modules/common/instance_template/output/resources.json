@@ -27,7 +27,6 @@
               "startup-script": "echo hello world",
               "VmDnsSetting": "ZonalPreferred"
             },
-            "name": "ci-tpl",
             "network_interface": [
               {
                 "access_config": [
@@ -38,7 +37,6 @@
                 "subnetwork": "subnetwork_self_link"
               }
             ],
-            "project": "gce-ai-infra",
             "region": "us-central1",
             "scheduling": [
               {

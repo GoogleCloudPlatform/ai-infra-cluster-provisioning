@@ -17,12 +17,16 @@ test::terraform::slurm () {
 }
 
 test::terraform::slurm::defaults () {
-    tfplan=$(mktemp)
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
         "$(slurm::src_dir)" \
-        "$(slurm::input_dir)/simple.tfvars" \
+        "${tfvars}" \
         "${tfplan}"
-    tfshow=$(mktemp)
+
+    local -r tfshow=$(mktemp)
     helpers::terraform_show "$(slurm::src_dir)" "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(slurm::output_dir)/defaults.json" \
@@ -30,12 +34,16 @@ test::terraform::slurm::defaults () {
 }
 
 test::terraform::slurm::simple_create_modules () {
-    tfplan=$(mktemp)
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
         "$(slurm::src_dir)" \
-        "$(slurm::input_dir)/simple.tfvars" \
+        "${tfvars}" \
         "${tfplan}"
-    tfshow=$(mktemp)
+
+    local -r tfshow=$(mktemp)
     helpers::terraform_show "$(slurm::src_dir)" "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(slurm::output_dir)/modules.json" \
@@ -43,12 +51,16 @@ test::terraform::slurm::simple_create_modules () {
 }
 
 test::terraform::slurm::multiple_partitions () {
-    tfplan=$(mktemp)
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(slurm::input_dir)/multiple_partitions.tfvars" >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
         "$(slurm::src_dir)" \
-        "$(slurm::input_dir)/multiple_partitions.tfvars" \
+        "${tfvars}" \
         "${tfplan}"
-    tfshow=$(mktemp)
+
+    local -r tfshow=$(mktemp)
     helpers::terraform_show "$(slurm::src_dir)" "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(slurm::output_dir)/multiple_partitions.json" \

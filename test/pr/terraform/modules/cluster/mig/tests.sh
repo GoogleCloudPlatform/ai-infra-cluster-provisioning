@@ -17,12 +17,16 @@ test::terraform::mig () {
 }
 
 test::terraform::mig::simple_create_modules () {
-    tfplan=$(mktemp)
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(mig::input_dir)/simple.tfvars" >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
         "$(mig::src_dir)" \
-        "$(mig::input_dir)/simple.tfvars" \
+        "${tfvars}" \
         "${tfplan}"
-    tfshow=$(mktemp)
+
+    local -r tfshow=$(mktemp)
     helpers::terraform_show "$(mig::src_dir)" "${tfplan}" >"${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(mig::output_dir)/modules.json" \
