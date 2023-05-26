@@ -14,32 +14,42 @@ The slurm cluster created with this `terraform.tfvars` file has:
 - one new VPC with which all the above nodes are connected
 
 ## Usage via Docker Image
-Please find detailed set up instruction for docker image
-[here](../../../README.md#usage-via-docker-image)
 
-Please copy the [terraform.tfvars](./terraform.tfvars) file to your current working
-directory of your local machine. Then follow the below instructions to create the cluster.
+Detailed docker instructions can be found
+[here](../../../README.md#usage-via-docker-image).
 
-```docker
+Copy the [terraform.tfvars](./terraform.tfvars) file to your current
+working directory on your local machine and run:
+
+```bash
 docker pull us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest
 
-docker run \
+docker run -it --rm \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
-  --rm us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
+  us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
   create slurm
 ```
 
 ## Usage via Terraform
-Please find detailed instructions to set up terraform
-[here](../../../README.md#usage-via-terraform)
 
-Please copy the [main.tf](./main.tf) and [terraform.tfvars](./terraform.tfvars) file to your current working
-directory of your local machine. Then follow the below instructions to create the cluster
-via terraform.
+Detailed terraform instructions can be found
+[here](../../../README.md#usage-via-terraform).
 
-```cmd
+Copy the [main.tf](./main.tf) and [terraform.tfvars](./terraform.tfvars) file
+to your current working directory on your local machine and run:
+```bash
 terraform init
 terraform validate
 terraform apply
+```
+
+## Usage via HPC Toolkit Blueprint
+
+Copy the [blueprint.yaml](./blueprint.yaml) file into your
+[hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit) directory and
+run:
+```bash
+./ghpc create ./blueprint.yaml
+./ghpc deploy slurm-cluster
 ```
