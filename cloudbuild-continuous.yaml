@@ -35,7 +35,7 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'run', '--network=cloudbuild',
-    'test', "${PROJECT_ID}", "${SHORT_SHA}" ]
+    'test', "${PROJECT_ID}", "ci-${SHORT_SHA}" ]
 
 
 images:
