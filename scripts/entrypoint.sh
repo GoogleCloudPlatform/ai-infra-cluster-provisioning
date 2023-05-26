@@ -32,6 +32,14 @@ main () {
     local -r tmp_var_file=$(mktemp)
     cp "${arg_var_file}" "${tmp_var_file}"
 
+    # Auth setup
+
+    entrypoint_helpers::ensure_auth_token \
+        "${tmp_var_file}" || {
+            echo 'Failed to set up auth token.'
+            return 1
+        } >&2
+
     # Backend setup
 
     local -r deployment_path=$(

@@ -421,3 +421,39 @@ entrypoint_helpers::setup_backend () {
 
     echo "${deployment_full_path}"
 }
+
+# Checks if a auth token exists or prompts for authentication if it doesn't.
+#
+# Parameters:
+#   - `var_file`: tfvars file
+# Output: none
+# Exit status:
+#   - 0: auth token successfully ensured.
+#   - 1: Failed to set up auth token.
+entrypoint_helpers::ensure_auth_token () {
+    local -r var_file="${1:?}"
+    local -r project_id="$(entrypoint_helpers::get_tfvar "${var_file}" 'project_id')" || {
+        echo "unable to find variable 'project_id' in var file '${var_file}'"
+        return 1
+    } >&2
+
+    local -r auth_account="$(gcloud auth list --filter=status:ACTIVE --format="value(account)")" || {
+        echo "Failed to get the auth accounts."
+        return 1
+    } >&2
+
+    if [ -z "${auth_account}" ]; then
+        echo "No authenticated account found."
+        gcloud auth login --update-adc || {
+            echo "Failed to authenticate user."
+            return 1
+        } >&2
+    else
+        echo "Logged in as ${auth_account}" >&2
+    fi
+
+    gcloud config set project "${project_id}" || {
+        echo "Failed to set project_id to ${project_id}"
+        return 1
+    } >&2
+}
