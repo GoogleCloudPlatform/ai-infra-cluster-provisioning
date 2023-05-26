@@ -96,12 +96,6 @@ EOT
     EXPECT_FAIL entrypoint_helpers::get_tfvar "${tfvars}" 'invalid'
 }
 
-test::entrypoint_helpers::ensure_bucket_exists::succeeds_when_bucket_exists () {
-    EXPECT_SUCCEED entrypoint_helpers::ensure_bucket_exists \
-        'gce-ai-infra' \
-        'aiinfra-terraform-gce-ai-infra'
-}
-
 test::entrypoint_helpers::get_bucket_name_from_path::gets_name_from_path () {
     EXPECT_STREQ \
         "$(entrypoint_helpers::get_bucket_name_from_path 'gs://name/and/subdir')" \

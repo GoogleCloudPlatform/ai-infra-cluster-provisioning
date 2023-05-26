@@ -14,9 +14,7 @@ machine_type = "n1-standard-8"
 metadata = {
   foo = "bar"
 }
-project_id      = "gce-ai-infra"
-region          = "us-central1"
-resource_prefix = "ci"
+region = "us-central1"
 service_account = {
   email  = "foo@bar.xyz"
   scopes = ["foobar"]

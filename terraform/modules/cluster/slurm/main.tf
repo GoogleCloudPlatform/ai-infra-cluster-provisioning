@@ -326,7 +326,6 @@ module "compute_partitions" {
   enable_placement     = false
   deployment_name      = var.resource_prefix
   is_default           = each.key == local.partition_names[0]
-  network_storage      = [] // TODO: flatten([var.network_storage])
   node_groups          = [module.compute_node_groups[each.key].node_groups]
   partition_name       = each.key
   project_id           = var.project_id
@@ -345,9 +344,9 @@ module "controller" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//community/modules/scheduler/schedmd-slurm-gcp-v5-controller//?ref=v1.17.0"
 
   deployment_name           = var.resource_prefix
+  enable_cleanup_compute    = var.enable_cleanup_compute
   instance_template         = local.controller_instance_template
   labels                    = merge(var.labels, { ghpc_role = "scheduler" })
-  network_storage           = [] // flatten([var.network_storage])
   partition                 = [for k in local.partition_names : module.compute_partitions[k].partition]
   project_id                = var.project_id
   region                    = local.controller_var.region

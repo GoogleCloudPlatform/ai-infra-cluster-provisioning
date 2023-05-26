@@ -16,9 +16,6 @@
         {
           "address": "google_compute_instance_group_manager.mig",
           "values": {
-            "base_instance_name": "ci-vm",
-            "name": "ci-mig",
-            "project": "gce-ai-infra",
             "target_size": 1,
             "update_policy": [
               {
