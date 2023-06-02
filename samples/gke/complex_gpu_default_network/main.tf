@@ -8,7 +8,7 @@ variable "disk_size_gb" {}
 variable "node_pools" {}
 variable "kubernetes_setup_config" {}
 module "complex-gke" {
-  source                  = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/gke//?ref=rework"
+  source                  = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/gke"
   project_id              = var.project_id
   resource_prefix         = var.resource_prefix
   region                  = var.region

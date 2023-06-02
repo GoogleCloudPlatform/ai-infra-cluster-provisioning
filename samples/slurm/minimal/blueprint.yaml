@@ -37,4 +37,4 @@ deployment_groups:
   - group: "primary"
     modules:
       - id: "aiinfra-cluster"
-        source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/slurm?ref=rework"
+        source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/slurm"
