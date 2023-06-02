@@ -17,8 +17,8 @@ test::terraform::slurm::simple () {
     local success=true
     helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" >"${tfvars}"
 
-    ./scripts/entrypoint.sh -q create slurm "${tfvars}" || success=false
-    ./scripts/entrypoint.sh -q destroy slurm "${tfvars}" || success=false
+    ./scripts/entrypoint.sh create slurm "${tfvars}" || success=false
+    ./scripts/entrypoint.sh destroy slurm "${tfvars}" || success=false
 
     [ "${success}" = true ]
 }
