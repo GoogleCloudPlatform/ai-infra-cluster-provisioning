@@ -17,8 +17,8 @@ test::terraform::gke::simple () {
     local success=true
     helpers::append_tfvars "$(gke::input_dir)/simple.tfvars" >"${tfvars}"
 
-    ./scripts/entrypoint.sh -q create gke "${tfvars}" || success=false
-    ./scripts/entrypoint.sh -q destroy gke "${tfvars}" || success=false
+    ./scripts/entrypoint.sh create gke "${tfvars}" || success=false
+    ./scripts/entrypoint.sh destroy gke "${tfvars}" || success=false
 
     [ "${success}" = true ]
 }

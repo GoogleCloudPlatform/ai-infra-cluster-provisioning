@@ -10,7 +10,7 @@ variable "labels" {}
 variable "machine_image" {}
 variable "startup_script" {}
 module "complex-mig1" {
-  source           = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig//?ref=rework"
+  source           = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig"
   project_id       = var.project_id
   resource_prefix  = var.resource_prefix
   target_size      = var.target_size

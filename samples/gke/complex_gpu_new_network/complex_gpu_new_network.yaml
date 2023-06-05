@@ -42,4 +42,4 @@ deployment_groups:
 - group: primary
   modules:
   - id: complex-gpu-new-network-gke
-    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/gke//?ref=rework"
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/gke"

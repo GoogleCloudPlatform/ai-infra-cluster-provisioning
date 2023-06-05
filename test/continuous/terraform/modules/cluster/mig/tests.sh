@@ -17,8 +17,8 @@ test::terraform::mig::simple () {
     local success=true
     helpers::append_tfvars "$(mig::input_dir)/simple.tfvars" >"${tfvars}"
 
-    ./scripts/entrypoint.sh -q create mig "${tfvars}" || success=false
-    ./scripts/entrypoint.sh -q destroy mig "${tfvars}" || success=false
+    ./scripts/entrypoint.sh create mig "${tfvars}" || success=false
+    ./scripts/entrypoint.sh destroy mig "${tfvars}" || success=false
 
     [ "${success}" = true ]
 }

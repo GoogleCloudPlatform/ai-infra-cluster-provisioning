@@ -28,4 +28,4 @@ deployment_groups:
 - group: primary
   modules:
   - id: simple-mig
-    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig//?ref=rework"
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig"
