@@ -1,0 +1,47 @@
+{
+  "planned_values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.compute_instance_templates[\"comp0\"]"
+        },
+        {
+          "address": "module.compute_partitions[\"comp0\"]"
+        },
+        {
+          "address": "module.compute_startups[\"comp0\"]"
+        },
+        {
+          "address": "module.compute_instance_templates[\"comp1\"]"
+        },
+        {
+          "address": "module.compute_partitions[\"comp1\"]"
+        },
+        {
+          "address": "module.compute_startups[\"comp1\"]"
+        },
+        {
+          "address": "module.controller"
+        },
+        {
+          "address": "module.controller_instance_template"
+        },
+        {
+          "address": "module.controller_startup"
+        },
+        {
+          "address": "module.login"
+        },
+        {
+          "address": "module.login_instance_template"
+        },
+        {
+          "address": "module.login_startup"
+        },
+        {
+          "address": "module.network"
+        }
+      ]
+    }
+  }
+}

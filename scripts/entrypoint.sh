@@ -14,53 +14,108 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
+. ./scripts/entrypoint_helpers.sh
 
-source /usr/_env_var_util.sh
-source /usr/_terraform_util.sh
-source /usr/_storage_util.sh
-source /usr/_script_util.sh
-source /usr/_debug_util.sh
+main () {
 
-trap _terraform_cleanup EXIT SIGTERM SIGINT
+    # Environment/arguments setup
 
+    local arg_action arg_cluster opt_backend_bucket opt_quiet
+    local arg_var_file="${PWD}/input/terraform.tfvars"
+    {
+        entrypoint_helpers::parse_args "${@}" \
+        && entrypoint_helpers::validate_args
+    } \
+    || { echo; entrypoint_helpers::get_usage; return 1; } >&2
 
+    local -r module_path="$(entrypoint_helpers::module_path "${arg_cluster}")"
+    local -r tmp_var_file=$(mktemp)
+    cp "${arg_var_file}" "${tmp_var_file}"
 
-export GREEN='\e[1;32m'
-export RED='\e[0;31m'
-export NOC='\e[0m'
+    # Auth setup
 
-echo "================SETTING UP ENVIRONMENT FOR TERRAFORM================"
-if [ ! -z "$1" ]; then
-    export ACTION=$1
-    echo "Setting Action to $ACTION"
-fi
+    entrypoint_helpers::ensure_auth_token \
+        "${tmp_var_file}" || {
+            echo 'Failed to set up auth token.'
+            return 1
+        } >&2
 
-_debug_hold
-_env_var_util::setup || {
-    echo >&2 "failed to set up environment"
-    exit 1;
+    # Backend setup
+
+    local -r deployment_path=$(
+        entrypoint_helpers::setup_backend \
+            "${arg_cluster}" \
+            "${tmp_var_file}" \
+            "${module_path}/backend.tf" \
+            "${opt_backend_bucket}") || {
+        echo 'Failed to set up backend.'
+        return 1
+    } >&2
+    echo "Terraform backend setup at '${deployment_path}'." >&2
+
+    # Logging setup
+
+    local -r log_file=$(mktemp)
+    local -r stdout_pipe=$(mktemp -u)
+    mkfifo -m 600 "${stdout_pipe}"
+    if [ "${opt_quiet}" = true ]; then
+        cat >"${log_file}" <"${stdout_pipe}" &
+    else
+        tee "${log_file}" <"${stdout_pipe}" &
+    fi
+    local -r log_pid="${!}"
+
+    # Call terraform
+
+    local terraform_success=true
+    case "${arg_action}" in
+        'create')
+            {
+                entrypoint_helpers::create \
+                "${arg_cluster}" \
+                "${tmp_var_file}" \
+                "${module_path}" \
+                && echo "Successfully created Cluster...." >&2
+            } || {
+                echo "Failed to create Cluster...." >&2
+                terraform_success=false
+            }
+            ;;
+        'destroy')
+            {
+                entrypoint_helpers::destroy \
+                "${arg_cluster}" \
+                "${tmp_var_file}" \
+                "${module_path}" \
+                && echo "Successfully destroyed Cluster...." >&2
+            } || {
+                echo "Failed to destroy Cluster...." >&2
+                terraform_success=false
+            }
+            ;;
+    esac >"${stdout_pipe}"
+    wait "${log_pid}"
+    rm -f "${stdout_pipe}"
+
+    # Copy files to GCS
+    echo -e '\n========================================================\n' >&2
+    echo "Copying tfvars to GCS bucket..." >&2
+    gsutil cp \
+        "${tmp_var_file}" \
+        "${deployment_path}/terraform.tfvars" || {
+        echo 'unable to upload tfvars to GCS bucket'
+        return 1
+    } >&2
+
+    echo "Copying terraform logs to GCS bucket..." >&2
+    gsutil cp \
+        "${log_file}" \
+        "${deployment_path}/terraform.log" || {
+        echo 'unable to upload terraform logs to GCS bucket'
+        return 1
+    } >&2
+
+    [ "${terraform_success}" = true ]
 }
 
-echo 'tfvars:'
-echo '```terraform'
-_env_var_util::print_tfvars \
-    $(dbus-uuidgen | head -c6) \
-| tee /usr/primary/tf.auto.tfvars
-echo '```'
-
-_expand_files_to_copy
-
-gcloud config set project "${PROJECT_ID}" || {
-    echo >&2 "failed to set current project to '${PROJECT_ID}'"
-    exit 1;
-}
-_set_terraform_backend
-echo "====================================================================="
-action_err=0
-_perform_terraform_action || action_err=$?
-if [ $action_err -eq 0 ]; then
-    echo -e "${GREEN}Cluster provisioning successful.. ${NOC}"
-else
-    echo -e "${RED}Cluster provisioning Failed.. ${NOC}"
-fi
+main "${@}"

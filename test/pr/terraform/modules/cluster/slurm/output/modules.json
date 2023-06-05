@@ -1,0 +1,38 @@
+{
+  "planned_values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.compute_instance_templates[\"compute\"]"
+        },
+        {
+          "address": "module.compute_partitions[\"compute\"]"
+        },
+        {
+          "address": "module.compute_startups[\"compute\"]"
+        },
+        {
+          "address": "module.controller"
+        },
+        {
+          "address": "module.controller_instance_template"
+        },
+        {
+          "address": "module.controller_startup"
+        },
+        {
+          "address": "module.login"
+        },
+        {
+          "address": "module.login_instance_template"
+        },
+        {
+          "address": "module.login_startup"
+        },
+        {
+          "address": "module.network"
+        }
+      ]
+    }
+  }
+}

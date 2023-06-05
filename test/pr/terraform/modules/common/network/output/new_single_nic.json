@@ -1,0 +1,11 @@
+{
+  "planned_values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.single_new_vpc[0]"
+        }
+      ]
+    }
+  }
+}

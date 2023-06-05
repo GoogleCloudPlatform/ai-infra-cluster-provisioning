@@ -20,7 +20,7 @@
 #   - `params` (variadic): the parameters to the assertion function
 # Output: formatted error prefix
 # Exit status: 0
-get_error_prefix () {
+helpers::get_error_prefix () {
     local -r fn_name="${1}"
     declare -ar params=("${@:2}")
     local params_str=""
@@ -47,7 +47,7 @@ get_error_prefix () {
 #   - 1: command failed (also exits shell)
 EXPECT_SUCCEED () {
     if ! "${@}"; then
-        echo >&2 $(get_error_prefix EXPECT_SUCCEED "${*}") "failed"
+        echo >&2 $(helpers::get_error_prefix EXPECT_SUCCEED "${*}") "failed"
         exit 1
     fi
     return 0
@@ -63,7 +63,7 @@ EXPECT_SUCCEED () {
 #   - 1: command succeeded (also exits shell)
 EXPECT_FAIL () {
     if "${@}"; then
-        echo >&2 $(get_error_prefix EXPECT_FAIL "${*}") "succeeded"
+        echo >&2 $(helpers::get_error_prefix EXPECT_FAIL "${*}") "succeeded"
         exit 1
     fi
     return 0
@@ -83,7 +83,7 @@ EXPECT_ARREQ () {
     local -r right_name="${2}"
     local -nr left="${left_name}"
     local -nr right="${right_name}"
-    local -r error_prefix=$(get_error_prefix EXPECT_ARREQ "${left_name}" "${right_name}")
+    local -r error_prefix=$(helpers::get_error_prefix EXPECT_ARREQ "${left_name}" "${right_name}")
 
     if [ "${#left[@]}" -ne "${#right[@]}" ]; then
         echo >&2 "${error_prefix}" "unequal lengths (${#left[@]}, ${#right[@]})"
@@ -115,7 +115,7 @@ EXPECT_EQ () {
     local -r left="${1}"
     local -r right="${2}"
     if [ "${left}" -ne "${right}" ]; then
-        echo >&2 $(get_error_prefix EXPECT_EQ "${left}" "${right}") "not equal"
+        echo >&2 $(helpers::get_error_prefix EXPECT_EQ "${left}" "${right}") "not equal"
         exit 1
     fi
     return 0
@@ -132,7 +132,7 @@ EXPECT_EQ () {
 EXPECT_STR_EMPTY () {
     local -r str="${1}"
     if [ -n "${str}" ]; then
-        echo >&2 $(get_error_prefix EXPECT_EQ "${str}") "not empty"
+        echo >&2 $(helpers::get_error_prefix EXPECT_EQ "${str}") "not empty"
         exit 1
     fi
     return 0
@@ -151,7 +151,7 @@ EXPECT_STREQ () {
     local -r left="${1}"
     local -r right="${2}"
     if [ "${left}" != "${right}" ]; then
-        echo >&2 $(get_error_prefix EXPECT_STREQ "${left}" "${right}") "not equal"
+        echo >&2 $(helpers::get_error_prefix EXPECT_STREQ "${left}" "${right}") "not equal"
         exit 1
     fi
     return 0
@@ -168,8 +168,118 @@ EXPECT_STREQ () {
 EXPECT_FILE_REGULAR () {
     local -r filename="${1}"
     if ! [ -f "${filename}" ]; then
-        echo >&2 $(get_error_prefix EXPECT_EQ "${str}") "not regular file"
+        echo >&2 $(helpers::get_error_prefix EXPECT_EQ "${str}") "not regular file"
         exit 1
     fi
     return 0
 }
+
+# Call `terraform init` on a module.
+#
+# Parameters:
+#   - `src_dir`: path to the module directory
+# Output: the stdout of `terraform init`
+# Exit status:
+#   - 0: terraform init succeeded
+#   - 1: terraform init failed
+helpers::terraform_init () {
+    local -r src_dir="${1:?}"
+    terraform -chdir="${src_dir}" init -no-color -reconfigure
+}
+
+# Call `terraform plan` and save tfplan to a file
+#
+# Parameters:
+#   - `src_dir`: path to the module directory
+#   - `var_file`: path to input tfvars file
+#   - `out_file`: path to output tfplan file
+# Output: none
+# Exit status:
+#   - 0: terraform plan produced zero errors (may have info or warn)
+#   - 1: terraform plan produced one or more errors
+helpers::terraform_plan () {
+    local -r src_dir="${1:?}"
+    local -r var_file="${2:?}"
+    local -r out_file="${3:?}"
+    ! jq -e 'select(."@level" == "error")' >&2 \
+        <(terraform -chdir="${src_dir}" plan \
+            -no-color -json -lock=false \
+            -var-file="${var_file}" -out="${out_file}" \
+        && echo '{"@level":"info","@message":"success"}')
+}
+
+# Call `terraform show` on a tfplan file
+#
+# Parameters:
+#   - `src_dir`: path to the module directory
+#   - `plan_file`: path to the tfplan file
+# Output: terraform show output in json format
+# Exit status:
+#   - 0: `terraform show` exited successfully
+#   - 1: `terraform show` exited unsuccessfully
+helpers::terraform_show () {
+    local -r src_dir="${1:?}"
+    local -r plan_file="${2:?}"
+    terraform -chdir="${src_dir}" show \
+        -no-color -json "${plan_file}"
+}
+
+# Retrieve an output value from a tfplan file
+#
+# Parameters:
+#   - `plan_json_file`: path to the file which is the output of `terraform show`
+#   - `variable_name`: output variable name to retrieve
+# Output: the value from the tfplan file
+# Exit status:
+#   - 0: the variable was found in the tfplan file
+#   - 1: the variable was not found in the tfplan file
+helpers::plan_output () {
+    local -r plan_json_file="${1:?}"
+    local -r variable_name="${2:?}"
+    jq -rc ".planned_values.outputs.${variable_name}.value" "${plan_json_file}"
+}
+
+# Check if a json object contains another json object
+#
+# Parameters:
+#   - `element_file`: file with a json object
+#   - `input_file`: file with a json object which might be in `element_file`
+# Output: if not found, `element_file`, else none
+# Exit status:
+#   - 0: `input_file` is contained within `element_file`
+#   - 1: `input_file` is not contained within `element_file`
+helpers::json_contains () {
+    element_file="${1:?}"
+    input_file="${2:?}"
+    # reference for `contains(element)` function:
+    # https://stedolan.github.io/jq/manual/#Builtinoperatorsandfunctions
+    jq "if contains($(cat ${element_file})) then empty else halt_error end" \
+        "${input_file}"
+}
+
+# Check if a json object does not contain another json object
+#
+# Parameters:
+#   - `element_file`: file with a json object
+#   - `input_file`: file with a json object which might be in `element_file`
+# Output: if found, `element_file`, else none
+# Exit status:
+#   - 0: `input_file` is not contained within `element_file`
+#   - 1: `input_file` is contained within `element_file`
+helpers::json_omits () {
+    element_file="${1:?}"
+    input_file="${2:?}"
+    # reference for `contains(element)` function:
+    # https://stedolan.github.io/jq/manual/#Builtinoperatorsandfunctions
+    jq "contains($(cat ${element_file})) | if not then empty else halt_error end" \
+        "${input_file}"
+}
+
+# Append the project_id variable to a tfvars file
+helpers::append_tfvars () {
+    local -r var_file="${1:?}"
+    cat "${var_file}" \
+        <(echo -e "\nproject_id = \"${runner_arg_project_id}\"") \
+        <(echo -e "\nresource_prefix = \"${runner_arg_resource_prefix}\"")
+}
+

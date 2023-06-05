@@ -1,2 +1,5 @@
-.terraform
 .git
+**/.terraform
+**/terraform.tf*
+**/tfplan
+**/backend.tf

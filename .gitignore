@@ -1,2 +1,6 @@
-/env.list
-/.terraform
+/*.list
+**/.terraform*
+**/terraform.tf*
+!samples/**/terraform.tfvars
+**/tfplan
+**/backend.tf
