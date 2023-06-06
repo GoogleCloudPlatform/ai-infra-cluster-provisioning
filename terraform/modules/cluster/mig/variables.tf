@@ -42,6 +42,15 @@ variable "zone" {
   type        = string
 }
 
+// TODO: All `local_mount`s found in `gcsfuse_existing` and `filestore_new` should be visible within the container.
+variable "container_image" {
+  description = <<-EOT
+    Container image to start on boot on each instance. When this is set, the default for machine_image will be changed to `{ project = "cos-cloud", family = "cos-stable" }`.
+    EOT
+  type        = string
+  default     = null
+}
+
 variable "disk_size_gb" {
   description = <<-EOT
     The size of the image in gigabytes for the boot disk of each instance.
@@ -219,33 +228,7 @@ variable "machine_image" {
     name    = string
     project = string
   })
-  default = {
-    project = "deeplearning-platform-release"
-    family  = "pytorch-latest-gpu-debian-11-py310"
-    name    = null
-  }
-
-  validation {
-    condition = (
-      var.machine_image != null
-      // project is non-empty
-      && alltrue([
-        for empty in [null, ""]
-        : var.machine_image.project != empty
-      ])
-      // at least one is non-empty
-      && anytrue([
-        for value in [var.machine_image.name, var.machine_image.family]
-        : alltrue([for empty in [null, ""] : value != empty])
-      ])
-      // at least one is empty
-      && anytrue([
-        for value in [var.machine_image.name, var.machine_image.family]
-        : anytrue([for empty in [null, ""] : value == empty])
-      ])
-    )
-    error_message = "project must be non-empty exactly one of family or name must be non-empty"
-  }
+  default = null
 }
 
 variable "machine_type" {

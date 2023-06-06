@@ -41,6 +41,38 @@ locals {
     }] : [],
   )
 
+  _machine_image_default = var.container_image != null ? {
+    project = "cos-cloud"
+    family  = "cos-stable"
+    name    = null
+    } : {
+    project = "deeplearning-platform-release"
+    family  = "pytorch-latest-gpu-debian-11-py310"
+    name    = null
+  }
+  machine_image = var.machine_image != null ? var.machine_image : local._machine_image_default
+
+  _local_mounts = concat(
+    [for g in var.gcsfuse_existing : g.local_mount],
+    [for f in var.filestore_new : f.local_mount],
+  )
+  cloudinit_template_variables = {
+    image = var.container_image != null ? var.container_image : ""
+  }
+
+  _machine_has_gpu = var.guest_accelerator != null || contains(
+    ["a2", "a3", "g2"],
+    split("-", var.machine_type)[0],
+  )
+  metadata = merge(
+    var.container_image != null ? {
+      user-data = (
+        local._machine_has_gpu
+        ? "${data.cloudinit_config.config-gpu.rendered}"
+        : "${data.cloudinit_config.config.rendered}"
+      )
+    } : {}
+  )
 }
 
 module "dashboard" {
@@ -106,15 +138,43 @@ module "startup" {
   )
 }
 
+data "cloudinit_config" "config" {
+  gzip          = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    content = templatefile(
+      "${path.module}/userdata.yaml",
+      local.cloudinit_template_variables,
+    )
+    filename = "userdata.yaml"
+  }
+}
+
+data "cloudinit_config" "config-gpu" {
+  gzip          = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    content = templatefile(
+      "${path.module}/userdata-gpu.yaml",
+      local.cloudinit_template_variables,
+    )
+    filename = "userdata-gpu.yaml"
+  }
+}
+
 module "compute_instance_template" {
   source = "../../common/instance_template"
 
   disk_size_gb          = var.disk_size_gb
   disk_type             = var.disk_type
   guest_accelerator     = var.guest_accelerator
-  machine_image         = var.machine_image
+  machine_image         = local.machine_image
   machine_type          = var.machine_type
-  metadata              = null
+  metadata              = local.metadata
   project_id            = var.project_id
   region                = local.region
   resource_prefix       = var.resource_prefix

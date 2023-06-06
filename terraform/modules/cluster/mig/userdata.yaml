@@ -1,0 +1,54 @@
+# cloud-config
+
+write_files:
+  - path: /etc/systemd/system/pull_image.sh
+    permissions: 0755
+    owner: root
+    content: |
+      #!/bin/sh
+      image='${image}'
+      /usr/bin/docker pull $${image}
+  - path: /etc/systemd/system/pull-image.service
+    permissions: 0644
+    owner: root
+    content: |
+      [Unit]
+      Description=Run a GPU application container
+      Wants=gcr-online.target docker.socket
+      After=gcr-online.target docker.socket
+      [Service]
+      User=root
+      Type=oneshot
+      RemainAfterExit=true
+      ExecStart=/etc/systemd/system/pull_image.sh
+      StandardOutput=journal+console
+      StandardError=journal+console
+  - path: /etc/systemd/system/start_container.sh
+    permissions: 0755
+    owner: root
+    content: |
+      #!/bin/sh
+      image='${image}'
+      /usr/bin/docker run \
+        --detach \
+        --restart always \
+        --name aiinfra \
+        $${image}
+  - path: /etc/systemd/system/start-container.service
+    permissions: 0644
+    owner: root
+    content: |
+      [Unit]
+      Description=Run a GPU application container
+      Requires=pull-image.service
+      After=pull-image.service
+      [Service]
+      User=root
+      Type=oneshot
+      RemainAfterExit=true
+      ExecStart=/etc/systemd/system/start_container.sh
+      StandardOutput=journal+console
+      StandardError=journal+console
+runcmd:
+  - systemctl daemon-reload
+  - systemctl start pull-image start-container

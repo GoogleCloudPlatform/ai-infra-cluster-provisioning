@@ -1,0 +1,83 @@
+# cloud-config
+
+write_files:
+  - path: /etc/systemd/system/install_gpu.sh
+    permissions: 0755
+    owner: root
+    content: |
+      #!/bin/sh
+      cos-extensions install gpu
+      mount --bind /var/lib/nvidia /var/lib/nvidia
+      mount -o remount,exec /var/lib/nvidia
+  - path: /etc/systemd/system/install-gpu.service
+    permissions: 0644
+    owner: root
+    content: |
+      [Unit]
+      Description=Install GPU drivers
+      Wants=gcr-online.target docker.socket
+      After=gcr-online.target docker.socket
+      [Service]
+      User=root
+      Type=oneshot
+      RemainAfterExit=true
+      ExecStart=/etc/systemd/system/install_gpu.sh
+      StandardOutput=journal+console
+      StandardError=journal+console
+  - path: /etc/systemd/system/pull_image.sh
+    permissions: 0755
+    owner: root
+    content: |
+      #!/bin/sh
+      image='${image}'
+      /usr/bin/docker pull $${image}
+  - path: /etc/systemd/system/pull-image.service
+    permissions: 0644
+    owner: root
+    content: |
+      [Unit]
+      Description=Run a GPU application container
+      Wants=gcr-online.target docker.socket
+      After=gcr-online.target docker.socket
+      [Service]
+      User=root
+      Type=oneshot
+      RemainAfterExit=true
+      ExecStart=/etc/systemd/system/pull_image.sh
+      StandardOutput=journal+console
+      StandardError=journal+console
+  - path: /etc/systemd/system/start_container.sh
+    permissions: 0755
+    owner: root
+    content: |
+      #!/bin/sh
+      device_flags=$(find /dev -type c -regex '\/dev\/nvidia[0-9]*' -printf '--device %p:%p ')
+      image='${image}'
+      /usr/bin/docker run \
+        --detach \
+        --restart always \
+        --name aiinfra \
+        --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64 \
+        --volume /var/lib/nvidia/bin:/usr/local/nvidia/bin \
+        --device /dev/nvidia-uvm:/dev/nvidia-uvm \
+        --device /dev/nvidiactl:/dev/nvidiactl \
+        $${device_flags} \
+        $${image}
+  - path: /etc/systemd/system/start-container.service
+    permissions: 0644
+    owner: root
+    content: |
+      [Unit]
+      Description=Run a GPU application container
+      Requires=install-gpu.service pull-image.service
+      After=install-gpu.service pull-image.service
+      [Service]
+      User=root
+      Type=oneshot
+      RemainAfterExit=true
+      ExecStart=/etc/systemd/system/start_container.sh
+      StandardOutput=journal+console
+      StandardError=journal+console
+runcmd:
+  - systemctl daemon-reload
+  - systemctl start install-gpu pull-image start-container
