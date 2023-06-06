@@ -281,6 +281,6 @@ helpers::append_tfvars () {
     local -r cluster_type="${2:?}"
     cat "${var_file}" \
         <(echo -e "\nproject_id = \"${runner_arg_project_id}\"") \
-        <(echo -e "\nresource_prefix = \"${runner_arg_resource_prefix}-${cluster_type}-${RANDOM}\"")
+        <(echo -e "\nresource_prefix = \"${runner_arg_resource_prefix}-${cluster_type}\"")
 }
 
