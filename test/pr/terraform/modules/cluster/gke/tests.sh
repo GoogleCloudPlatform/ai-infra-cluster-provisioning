@@ -18,7 +18,7 @@ test::terraform::gke () {
 
 test::terraform::gke::gpu_create_modules () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(gke::input_dir)/gke-gpu.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(gke::input_dir)/gke-gpu.tfvars" gke >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
@@ -35,7 +35,7 @@ test::terraform::gke::gpu_create_modules () {
 
 test::terraform::gke::nongpu_create_modules () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(gke::input_dir)/gke-nongpu.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(gke::input_dir)/gke-nongpu.tfvars" gke >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \

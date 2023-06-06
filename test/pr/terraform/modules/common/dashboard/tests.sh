@@ -18,7 +18,7 @@ test::terraform::dashboard () {
 
 test::terraform::dashboard::disable_all_widgets () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(dashboard::input_dir)/disable.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(dashboard::input_dir)/disable.tfvars" mig >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
@@ -38,7 +38,7 @@ test::terraform::dashboard::disable_all_widgets () {
 
 test::terraform::dashboard::enable_all_widgets () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(dashboard::input_dir)/enable.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(dashboard::input_dir)/enable.tfvars" mig >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
