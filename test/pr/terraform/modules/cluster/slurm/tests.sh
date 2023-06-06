@@ -18,7 +18,7 @@ test::terraform::slurm () {
 
 test::terraform::slurm::defaults () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" slurm >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
@@ -35,7 +35,7 @@ test::terraform::slurm::defaults () {
 
 test::terraform::slurm::simple_create_modules () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" slurm >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
@@ -52,7 +52,7 @@ test::terraform::slurm::simple_create_modules () {
 
 test::terraform::slurm::multiple_partitions () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(slurm::input_dir)/multiple_partitions.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(slurm::input_dir)/multiple_partitions.tfvars" slurm >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \

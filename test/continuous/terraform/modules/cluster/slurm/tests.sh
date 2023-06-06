@@ -15,7 +15,7 @@ test::terraform::slurm () {
 test::terraform::slurm::simple () {
     local -r tfvars=$(mktemp)
     local success=true
-    helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" slurm >"${tfvars}"
 
     ./scripts/entrypoint.sh create slurm "${tfvars}" || success=false
     ./scripts/entrypoint.sh destroy slurm "${tfvars}" || success=false

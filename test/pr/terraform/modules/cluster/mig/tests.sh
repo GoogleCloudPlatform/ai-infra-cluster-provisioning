@@ -18,7 +18,7 @@ test::terraform::mig () {
 
 test::terraform::mig::simple_create_modules () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(mig::input_dir)/simple.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(mig::input_dir)/simple.tfvars" mig >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \

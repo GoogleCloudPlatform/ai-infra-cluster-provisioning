@@ -18,7 +18,7 @@ test::terraform::network () {
 
 test::terraform::network::default_network_produces_subnet () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(network::input_dir)/default.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(network::input_dir)/default.tfvars" mig >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
@@ -38,7 +38,7 @@ test::terraform::network::default_network_produces_subnet () {
 
 test::terraform::network::new_network_plans_single_new_vpc () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(network::input_dir)/new_single_nic.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(network::input_dir)/new_single_nic.tfvars" mig >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
@@ -61,7 +61,7 @@ test::terraform::network::new_network_plans_single_new_vpc () {
 
 test::terraform::network::multi_nic_network_plans_multiple_new_vpcs () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(network::input_dir)/new_multi_nic.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(network::input_dir)/new_multi_nic.tfvars" mig >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \

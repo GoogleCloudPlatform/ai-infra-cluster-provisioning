@@ -15,7 +15,7 @@ test::terraform::gke () {
 test::terraform::gke::simple () {
     local -r tfvars=$(mktemp)
     local success=true
-    helpers::append_tfvars "$(gke::input_dir)/simple.tfvars" >"${tfvars}"
+    helpers::append_tfvars "$(gke::input_dir)/simple.tfvars" gke >"${tfvars}"
 
     ./scripts/entrypoint.sh create gke "${tfvars}" || success=false
     ./scripts/entrypoint.sh destroy gke "${tfvars}" || success=false
