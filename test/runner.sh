@@ -99,7 +99,7 @@ runner::validate_args () {
 
     [ "${#runner_arg_resource_prefix}" -gt 11 ] && {
         echo "Splitting resource_prefix".
-        local runner_arg_resource_prefix=${runner_arg_resource_prefix:0:11}
+        runner_arg_resource_prefix=${runner_arg_resource_prefix:0:11}
         echo "New resource_prefix is ${runner_arg_resource_prefix}."
     } >&2
 
