@@ -132,6 +132,9 @@ resource "google_container_cluster" "gke-cluster" {
     gce_persistent_disk_csi_driver_config {
       enabled = true
     }
+    gcs_fuse_csi_driver_config {
+      enabled = true
+    }
   }
 
   lifecycle {
