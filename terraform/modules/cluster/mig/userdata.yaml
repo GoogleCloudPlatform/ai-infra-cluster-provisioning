@@ -1,54 +1,61 @@
 # cloud-config
 
 write_files:
-  - path: /etc/systemd/system/pull_image.sh
+  - path: /etc/systemd/system/aiinfra_pull_image.sh
     permissions: 0755
     owner: root
     content: |
       #!/bin/sh
-      image='${image}'
-      /usr/bin/docker pull $${image}
-  - path: /etc/systemd/system/pull-image.service
+      docker_image='${docker_image}'
+      docker pull $${docker_image}
+  - path: /etc/systemd/system/aiinfra-pull-image.service
     permissions: 0644
     owner: root
     content: |
       [Unit]
-      Description=Run a GPU application container
-      Wants=gcr-online.target docker.socket
       After=gcr-online.target docker.socket
+      Description=Pull a docker image
+      Wants=gcr-online.target docker.socket
       [Service]
-      User=root
-      Type=oneshot
+      ExecStart=/etc/systemd/system/aiinfra_pull_image.sh
       RemainAfterExit=true
-      ExecStart=/etc/systemd/system/pull_image.sh
       StandardOutput=journal+console
       StandardError=journal+console
-  - path: /etc/systemd/system/start_container.sh
+      Type=oneshot
+      User=root
+  - path: /etc/systemd/system/aiinfra_start_container.sh
     permissions: 0755
     owner: root
     content: |
       #!/bin/sh
-      image='${image}'
-      /usr/bin/docker run \
-        --detach \
-        --restart always \
+      docker_cmd='${docker_cmd}'
+      docker_image='${docker_image}'
+      docker_volume_flags='${docker_volume_flags}'
+      host_mountpoints='${host_mountpoints}'
+      [ -z "$${host_mountpoints}" ] || mkdir -p $${host_mountpoints}
+      mount -a && docker run \
+        --rm \
         --name aiinfra \
-        $${image}
-  - path: /etc/systemd/system/start-container.service
+        $${docker_volume_flags} \
+        $${docker_image} $${docker_cmd}
+  - path: /etc/systemd/system/aiinfra-start-container.service
     permissions: 0644
     owner: root
     content: |
       [Unit]
-      Description=Run a GPU application container
-      Requires=pull-image.service
-      After=pull-image.service
+      After=aiinfra-pull-image.service
+      Description=Run a docker container
+      Requires=aiinfra-pull-image.service
       [Service]
-      User=root
-      Type=oneshot
+      ExecStart=/etc/systemd/system/aiinfra_start_container.sh
       RemainAfterExit=true
-      ExecStart=/etc/systemd/system/start_container.sh
-      StandardOutput=journal+console
       StandardError=journal+console
+      StandardOutput=journal+console
+      Type=oneshot
+      User=root
+
+mounts: ${fstab_lines}
+
 runcmd:
   - systemctl daemon-reload
-  - systemctl start pull-image start-container
+  - systemctl start aiinfra-pull-image aiinfra-start-container

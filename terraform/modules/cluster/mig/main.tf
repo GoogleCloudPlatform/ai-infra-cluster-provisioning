@@ -41,7 +41,7 @@ locals {
     }] : [],
   )
 
-  _machine_image_default = var.container_image != null ? {
+  _machine_image_default = var.container != null ? {
     project = "cos-cloud"
     family  = "cos-stable"
     name    = null
@@ -52,12 +52,30 @@ locals {
   }
   machine_image = var.machine_image != null ? var.machine_image : local._machine_image_default
 
-  _local_mounts = concat(
-    [for g in var.gcsfuse_existing : g.local_mount],
-    [for f in var.filestore_new : f.local_mount],
-  )
   cloudinit_template_variables = {
-    image = var.container_image != null ? var.container_image : ""
+    docker_cmd   = try(var.container.cmd, "")
+    docker_image = try(var.container.image, "")
+    docker_volume_flags = join(
+      " ",
+      [
+        for m in module.filestore[*].network_storage.local_mount
+        : "--volume /var/mnt${m}:${m}:rw"
+      ],
+    )
+    fstab_lines = format("[ %s ]", join(
+      ", ",
+      [
+        for n in module.filestore[*].network_storage
+        : "[ \"${n.server_ip}:${n.remote_mount}\", \"/var/mnt${n.local_mount}\", \"${n.fs_type}\", \"async,hard,rw\", \"0\", \"2\" ]"
+      ],
+    ))
+    host_mountpoints = join(
+      " ",
+      [
+        for m in module.filestore[*].network_storage.local_mount
+        : "/var/mnt${m}"
+      ]
+    )
   }
 
   _machine_has_gpu = var.guest_accelerator != null || contains(
@@ -65,7 +83,7 @@ locals {
     split("-", var.machine_type)[0],
   )
   metadata = merge(
-    var.container_image != null ? {
+    var.container != null ? {
       user-data = (
         local._machine_has_gpu
         ? "${data.cloudinit_config.config-gpu.rendered}"

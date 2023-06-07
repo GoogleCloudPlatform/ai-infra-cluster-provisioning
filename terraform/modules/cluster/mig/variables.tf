@@ -42,13 +42,16 @@ variable "zone" {
   type        = string
 }
 
-// TODO: All `local_mount`s found in `gcsfuse_existing` and `filestore_new` should be visible within the container.
-variable "container_image" {
+// TODO: All `local_mount`s found in `gcsfuse_existing` should be visible within the container.
+variable "container" {
   description = <<-EOT
-    Container image to start on boot on each instance. When this is set, the default for machine_image will be changed to `{ project = "cos-cloud", family = "cos-stable" }`.
+    Container image to start on boot on each instance. When this is set, the default for machine_image will be changed to `{ project = "cos-cloud", family = "cos-stable" }`. All `local_mount`s found in `filestore_new` will be visible within the container.
     EOT
-  type        = string
-  default     = null
+  type = object({
+    image = string
+    cmd   = string
+  })
+  default = null
 }
 
 variable "disk_size_gb" {
