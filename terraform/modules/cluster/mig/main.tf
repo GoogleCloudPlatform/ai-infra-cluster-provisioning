@@ -52,44 +52,8 @@ locals {
   }
   machine_image = var.machine_image != null ? var.machine_image : local._machine_image_default
 
-  cloudinit_template_variables = {
-    docker_cmd   = try(var.container.cmd, "")
-    docker_image = try(var.container.image, "")
-    docker_volume_flags = join(
-      " ",
-      [
-        for m in module.filestore[*].network_storage.local_mount
-        : "--volume /var/mnt${m}:${m}:rw"
-      ],
-    )
-    fstab_lines = format("[ %s ]", join(
-      ", ",
-      [
-        for n in module.filestore[*].network_storage
-        : "[ \"${n.server_ip}:${n.remote_mount}\", \"/var/mnt${n.local_mount}\", \"${n.fs_type}\", \"async,hard,rw\", \"0\", \"2\" ]"
-      ],
-    ))
-    host_mountpoints = join(
-      " ",
-      [
-        for m in module.filestore[*].network_storage.local_mount
-        : "/var/mnt${m}"
-      ]
-    )
-  }
-
-  _machine_has_gpu = var.guest_accelerator != null || contains(
-    ["a2", "a3", "g2"],
-    split("-", var.machine_type)[0],
-  )
   metadata = merge(
-    var.container != null ? {
-      user-data = (
-        local._machine_has_gpu
-        ? "${data.cloudinit_config.config-gpu.rendered}"
-        : "${data.cloudinit_config.config.rendered}"
-      )
-    } : {}
+    var.container != null ? { user-data = module.cloudinit.user-data } : {},
   )
 }
 
@@ -156,32 +120,22 @@ module "startup" {
   )
 }
 
-data "cloudinit_config" "config" {
-  gzip          = false
-  base64_encode = false
+module "cloudinit" {
+  source = "./cloudinit"
 
-  part {
-    content_type = "text/cloud-config"
-    content = templatefile(
-      "${path.module}/userdata.yaml",
-      local.cloudinit_template_variables,
-    )
-    filename = "userdata.yaml"
-  }
-}
-
-data "cloudinit_config" "config-gpu" {
-  gzip          = false
-  base64_encode = false
-
-  part {
-    content_type = "text/cloud-config"
-    content = templatefile(
-      "${path.module}/userdata-gpu.yaml",
-      local.cloudinit_template_variables,
-    )
-    filename = "userdata-gpu.yaml"
-  }
+  container = var.container
+  filestores = [
+    for n in module.filestore[*].network_storage
+    : {
+      fs_type      = n.fs_type
+      local_mount  = n.local_mount
+      remote_mount = "${n.server_ip}:${n.remote_mount}"
+    }
+  ]
+  machine_has_gpu = var.guest_accelerator != null || contains(
+    ["a2", "a3", "g2"],
+    split("-", var.machine_type)[0],
+  )
 }
 
 module "compute_instance_template" {

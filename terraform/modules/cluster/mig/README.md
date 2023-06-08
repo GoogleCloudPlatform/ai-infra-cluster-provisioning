@@ -21,13 +21,14 @@ No requirements.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cloudinit"></a> [cloudinit](#provider\_cloudinit) | n/a |
 | <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | n/a |
+| <a name="provider_null"></a> [null](#provider\_null) | n/a |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
+| <a name="module_cloudinit"></a> [cloudinit](#module\_cloudinit) | ./cloudinit | n/a |
 | <a name="module_compute_instance_template"></a> [compute\_instance\_template](#module\_compute\_instance\_template) | ../../common/instance_template | n/a |
 | <a name="module_dashboard"></a> [dashboard](#module\_dashboard) | ../../common/dashboard | n/a |
 | <a name="module_filestore"></a> [filestore](#module\_filestore) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore// | v1.17.0 |
@@ -40,8 +41,7 @@ No requirements.
 | Name | Type |
 |------|------|
 | [google-beta_google_compute_instance_group_manager.mig](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_compute_instance_group_manager) | resource |
-| [cloudinit_config.config](https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/config) | data source |
-| [cloudinit_config.config-gpu](https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/config) | data source |
+| [null_resource.validation](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 
 ## Inputs
 
