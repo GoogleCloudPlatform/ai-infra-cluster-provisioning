@@ -132,6 +132,9 @@ resource "google_container_cluster" "gke-cluster" {
     gce_persistent_disk_csi_driver_config {
       enabled = true
     }
+    gcs_fuse_csi_driver_config {
+      enabled = true
+    }
   }
 
   lifecycle {
@@ -256,7 +259,7 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
 }
 
 module "kubernetes-operations" {
-  source             = "../../common/kubernetes-operations"
+  source             = "./kubernetes-operations"
   project_id         = var.project_id
   cluster_id         = resource.google_container_cluster.gke-cluster.id
   gke_cluster_exists = local.kubernetes_setup_config.enable_kubernetes_setup

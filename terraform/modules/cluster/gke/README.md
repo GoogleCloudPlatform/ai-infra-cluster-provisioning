@@ -29,7 +29,7 @@ No requirements.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_dashboard"></a> [dashboard](#module\_dashboard) | ../../common/dashboard | n/a |
-| <a name="module_kubernetes-operations"></a> [kubernetes-operations](#module\_kubernetes-operations) | ../../common/kubernetes-operations | n/a |
+| <a name="module_kubernetes-operations"></a> [kubernetes-operations](#module\_kubernetes-operations) | ./kubernetes-operations | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ../../common/network | n/a |
 
 ## Resources
