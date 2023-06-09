@@ -23,7 +23,13 @@ variable "container" {
 
 variable "filestores" {
   type = list(object({
-    fs_type      = string
+    local_mount  = string
+    remote_mount = string
+  }))
+}
+
+variable "gcsfuses" {
+  type = list(object({
     local_mount  = string
     remote_mount = string
   }))

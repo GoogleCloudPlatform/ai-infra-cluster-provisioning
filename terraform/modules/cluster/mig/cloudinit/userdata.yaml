@@ -1,6 +1,74 @@
 # cloud-config
 
 write_files:
+  - path: /tmp/cloud/gcsfuse/Dockerfile
+    permissions: 0644
+    owner: root
+    content: |
+      FROM debian:bullseye-slim
+      RUN apt-get update -qq \
+          && apt-get install -y curl gnupg \
+          && echo "deb http://packages.cloud.google.com/apt gcsfuse-xenial main" >/etc/apt/sources.list.d/gcsfuse.list \
+          && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor >/etc/apt/trusted.gpg.d/apt-key.gpg \
+          && apt-get update -qq \
+          && apt-get install -y gcsfuse \
+          && rm -rf /var/lib/{apt,dpkg,cache,log}/
+      CMD ["sleep", "infinity"]
+
+  - path: /etc/systemd/system/aiinfra_network_storage.sh
+    permissions: 0755
+    owner: root
+    content: |
+      #!/bin/sh
+      host_mountpoints='${host_mountpoints}'
+      filestore_mount_commands='${filestore_mount_commands}'
+      gcsfuse_host_mount='${gcsfuse_host_mount}'
+      gcsfuse_mount_commands='${gcsfuse_mount_commands}'
+
+      [ -n "$${host_mountpoints}" ] || exit 0
+      mkdir -p $${host_mountpoints}
+
+      mount_filestores () {
+        [ -n "$${filestore_mount_commands}" ] || return 0
+
+        ${filestore_mount_commands}
+      }
+
+      start_gcsfuse_container () {
+        [ -n "$${gcsfuse_mount_commands}" ] || return 0
+
+        docker build --tag gcsfuse /tmp/cloud/gcsfuse \
+        && docker run --detach --rm \
+          --privileged \
+          --volume "$${HOME}/.config/gcloud:/root/.config/gcloud:rw" \
+          --volume "$${gcsfuse_host_mount}:$${gcsfuse_host_mount}:rw,rshared" \
+          --name gcsfuse \
+          gcsfuse
+      }
+
+      mount_gcsfuses () {
+        [ -n "$${gcsfuse_mount_commands}" ] || return 0
+
+        ${gcsfuse_mount_commands}
+      }
+
+      mount_filestores && start_gcsfuse_container && mount_gcsfuses
+  - path: /etc/systemd/system/aiinfra-network-storage.service
+    permissions: 0644
+    owner: root
+    content: |
+      [Unit]
+      After=gcr-online.target docker.socket
+      Description=Set up network storage
+      Wants=gcr-online.target docker.socket
+      [Service]
+      ExecStart=/etc/systemd/system/aiinfra_network_storage.sh
+      RemainAfterExit=true
+      StandardOutput=journal+console
+      StandardError=journal+console
+      Type=oneshot
+      User=root
+
   - path: /etc/systemd/system/aiinfra_pull_image.sh
     permissions: 0755
     owner: root
@@ -23,6 +91,7 @@ write_files:
       StandardError=journal+console
       Type=oneshot
       User=root
+
   - path: /etc/systemd/system/aiinfra_start_container.sh
     permissions: 0755
     owner: root
@@ -31,9 +100,7 @@ write_files:
       docker_cmd='${docker_cmd}'
       docker_image='${docker_image}'
       docker_volume_flags='${docker_volume_flags}'
-      host_mountpoints='${host_mountpoints}'
-      [ -z "$${host_mountpoints}" ] || mkdir -p $${host_mountpoints}
-      mount -a && docker run \
+      docker run \
         --rm \
         --name aiinfra \
         $${docker_volume_flags} \
@@ -43,9 +110,9 @@ write_files:
     owner: root
     content: |
       [Unit]
-      After=aiinfra-pull-image.service
+      After=aiinfra-network-storage.service aiinfra-pull-image.service
       Description=Run a docker container
-      Requires=aiinfra-pull-image.service
+      Requires=aiinfra-network-storage.service aiinfra-pull-image.service
       [Service]
       ExecStart=/etc/systemd/system/aiinfra_start_container.sh
       RemainAfterExit=true
@@ -54,8 +121,6 @@ write_files:
       Type=oneshot
       User=root
 
-mounts: ${fstab_lines}
-
 runcmd:
   - systemctl daemon-reload
-  - systemctl start aiinfra-pull-image aiinfra-start-container
+  - systemctl start aiinfra-network-storage aiinfra-pull-image aiinfra-start-container

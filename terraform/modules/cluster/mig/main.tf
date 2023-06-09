@@ -127,9 +127,15 @@ module "cloudinit" {
   filestores = [
     for n in module.filestore[*].network_storage
     : {
-      fs_type      = n.fs_type
       local_mount  = n.local_mount
       remote_mount = "${n.server_ip}:${n.remote_mount}"
+    }
+  ]
+  gcsfuses = [
+    for n in module.gcsfuse[*].network_storage
+    : {
+      local_mount  = n.local_mount
+      remote_mount = n.remote_mount
     }
   ]
   machine_has_gpu = var.guest_accelerator != null || contains(
