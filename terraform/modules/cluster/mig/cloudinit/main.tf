@@ -30,11 +30,11 @@ locals {
       concat(
         [
           for m in var.filestores[*].local_mount
-          : "--volume \"${local._filestore_host_mount}${m}:${m}:rw\""
+          : "--volume ${local._filestore_host_mount}${m}:${m}:rw"
         ],
         [
           for m in var.gcsfuses[*].local_mount
-          : "--volume \"${local._gcsfuse_host_mount}${m}:${m}:rw\""
+          : "--volume ${local._gcsfuse_host_mount}${m}:${m}:rw,rslave"
         ],
       ),
     ) : ""
@@ -42,7 +42,7 @@ locals {
       " && ",
       [
         for f in var.filestores
-        : "mount -t nfs -o async,hard,rw \"${f.remote_mount}\" \"${local._filestore_host_mount}${f.local_mount}\""
+        : "mount -t nfs -o async,hard,rw ${f.remote_mount} ${local._filestore_host_mount}${f.local_mount}"
       ],
     ) : ""
     gcsfuse_host_mount = local._gcsfuse_host_mount
@@ -50,7 +50,7 @@ locals {
       " && ",
       [
         for g in var.gcsfuses
-        : "docker exec gcsfuse gcsfuse --implicit-dirs \"${g.remote_mount}\" \"${local._gcsfuse_host_mount}${g.local_mount}\""
+        : "docker exec gcsfuse gcsfuse --implicit-dirs ${g.remote_mount} ${local._gcsfuse_host_mount}${g.local_mount}"
       ],
     ) : ""
     host_mountpoints = local._has_network_storage ? join(

@@ -20,33 +20,28 @@ write_files:
     owner: root
     content: |
       #!/bin/sh
-      host_mountpoints='${host_mountpoints}'
-      filestore_mount_commands='${filestore_mount_commands}'
-      gcsfuse_host_mount='${gcsfuse_host_mount}'
-      gcsfuse_mount_commands='${gcsfuse_mount_commands}'
-
-      [ -n "$${host_mountpoints}" ] || exit 0
-      mkdir -p $${host_mountpoints}
+      [ -n "${host_mountpoints}" ] || exit 0
+      mkdir -p ${host_mountpoints}
 
       mount_filestores () {
-        [ -n "$${filestore_mount_commands}" ] || return 0
+        [ -n "${filestore_mount_commands}" ] || return 0
 
         ${filestore_mount_commands}
       }
 
       start_gcsfuse_container () {
-        [ -n "$${gcsfuse_mount_commands}" ] || return 0
+        [ -n "${gcsfuse_mount_commands}" ] || return 0
 
         docker build --tag gcsfuse /tmp/cloud/gcsfuse \
         && docker run --detach --rm \
           --privileged \
-          --volume "$${gcsfuse_host_mount}:$${gcsfuse_host_mount}:rw,rshared" \
+          --volume ${gcsfuse_host_mount}:${gcsfuse_host_mount}:rw,rshared \
           --name gcsfuse \
           gcsfuse
       }
 
       mount_gcsfuses () {
-        [ -n "$${gcsfuse_mount_commands}" ] || return 0
+        [ -n "${gcsfuse_mount_commands}" ] || return 0
 
         ${gcsfuse_mount_commands}
       }
@@ -97,8 +92,7 @@ write_files:
     owner: root
     content: |
       #!/bin/sh
-      docker_image='${docker_image}'
-      docker pull $${docker_image}
+      docker pull ${docker_image}
   - path: /etc/systemd/system/aiinfra-pull-image.service
     permissions: 0644
     owner: root
@@ -121,19 +115,17 @@ write_files:
     content: |
       #!/bin/sh
       docker_device_flags=$(find /dev -type c -regex '\/dev\/nvidia[0-9]*' -printf '--device %p:%p ')
-      docker_cmd='${docker_cmd}'
-      docker_image='${docker_image}'
-      docker_volume_flags='${docker_volume_flags}'
       docker run \
-        --rm \
+        --detach \
+        --restart always \
         --name aiinfra \
         --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64 \
         --volume /var/lib/nvidia/bin:/usr/local/nvidia/bin \
         --device /dev/nvidia-uvm:/dev/nvidia-uvm \
         --device /dev/nvidiactl:/dev/nvidiactl \
         $${docker_device_flags} \
-        $${docker_volume_flags} \
-        $${docker_image} $${docker_cmd}
+        ${docker_volume_flags} \
+        ${docker_image} ${docker_cmd}
   - path: /etc/systemd/system/aiinfra-start-container.service
     permissions: 0644
     owner: root
