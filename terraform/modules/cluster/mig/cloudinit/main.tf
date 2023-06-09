@@ -34,7 +34,7 @@ locals {
         ],
         [
           for m in var.gcsfuses[*].local_mount
-          : "--volume \"${local._gcsfuse_host_mount}${m}:${m}:rw,rshared\""
+          : "--volume \"${local._gcsfuse_host_mount}${m}:${m}:rw\""
         ],
       ),
     ) : ""

@@ -40,7 +40,6 @@ write_files:
         docker build --tag gcsfuse /tmp/cloud/gcsfuse \
         && docker run --detach --rm \
           --privileged \
-          --volume "$${HOME}/.config/gcloud:/root/.config/gcloud:rw" \
           --volume "$${gcsfuse_host_mount}:$${gcsfuse_host_mount}:rw,rshared" \
           --name gcsfuse \
           gcsfuse
