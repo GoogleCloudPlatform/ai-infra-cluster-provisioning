@@ -22,12 +22,17 @@ locals {
   _has_gcsfuses        = try(length(var.gcsfuses) != 0, false)
   _has_network_storage = local._has_filestores || local._has_gcsfuses
   _has_env_flags       = try(length(keys(var.container.env)) != 0, false)
+  _has_options         = try(length(var.container.extra_args) != 0, false)
 
   _base_template_variables = {
     docker_cmd = var.container.cmd != null ? var.container.cmd : ""
     docker_env_flags = local._has_env_flags ? join(
       " ",
       [for name, value in var.container.env : "--env ${name}=${value}"],
+    ) : ""
+    docker_options = local._has_options ? join(
+      " ",
+      var.container.options
     ) : ""
     docker_image = var.container.image
     docker_volume_flags = local._has_network_storage ? join(

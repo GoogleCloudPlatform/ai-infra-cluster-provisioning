@@ -16,9 +16,10 @@
 
 variable "container" {
   type = object({
-    image = string
-    cmd   = string
-    env   = map(string)
+    image   = string
+    cmd     = string
+    env     = map(string)
+    options = list(string)
   })
 
   validation {

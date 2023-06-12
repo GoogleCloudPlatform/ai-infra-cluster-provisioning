@@ -46,6 +46,7 @@ ${aiinfra_pull_image}
       $${docker_device_flags} \
       ${docker_volume_flags} \
       ${docker_env_flags} \
+      ${docker_options} \
       ${docker_image} ${docker_cmd}
 - path: /etc/systemd/system/aiinfra-start-container.service
   permissions: 0644

@@ -17,11 +17,19 @@
 variable "container" {
   description = <<-EOT
     Container image to start on boot on each instance. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
+
+    Attributes:
+    - `image`: docker image which will get pulled and started at boot on each instance (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/build/#tag)).
+    - `cmd`: arguments to the entrypoint of the docker image (Related docs: [docker](https://docs.docker.com/engine/reference/builder/#cmd)).
+    - `env`: environment variables for the docker container (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#env)).
+    - `options`: any other `docker run` options (Related docs: [docker]()https://docs.docker.com/engine/reference/commandline/run/#options).
+    image:
     EOT
   type = object({
-    image = string
-    cmd   = string
-    env   = map(string)
+    image   = string
+    cmd     = string
+    env     = map(string)
+    options = list(string)
   })
 }
 
