@@ -21,11 +21,15 @@ variable "container" {
   })
 
   validation {
-    condition = (
-      var.container != null
-      && alltrue([for empty in [null, ""] : var.container.image != empty])
+    condition     = var.container != null
+    error_message = "must not be null"
+  }
+
+  validation {
+    condition = alltrue(
+      [for empty in [null, ""] : var.container.image != empty]
     )
-    error_message = "must not be null and must have non-empty image"
+    error_message = "must have non-empty image"
   }
 }
 
@@ -36,16 +40,18 @@ variable "filestores" {
   }))
 
   validation {
-    condition = try(
-      alltrue([
-        for f in var.filestores
-        : alltrue([
-          for empty in [null, ""]
-          : f.local_mount != empty && f.remote_mount != empty
-        ])
-      ]),
-      true
-    )
+    condition     = var.filestores != null
+    error_message = "must not be null"
+  }
+
+  validation {
+    condition = alltrue([
+      for f in var.filestores
+      : alltrue([
+        for empty in [null, ""]
+        : f.local_mount != empty && f.remote_mount != empty
+      ])
+    ])
     error_message = "local_mount and remote_mount must not be null"
   }
 }
@@ -55,6 +61,11 @@ variable "gcsfuses" {
     local_mount  = string
     remote_mount = string
   }))
+
+  validation {
+    condition     = var.gcsfuses != null
+    error_message = "must not be null"
+  }
 
   validation {
     condition = try(

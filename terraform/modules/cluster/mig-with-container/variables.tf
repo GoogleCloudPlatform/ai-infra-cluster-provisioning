@@ -44,7 +44,7 @@ variable "zone" {
 
 variable "container" {
   description = <<-EOT
-    Container image to start on boot on each instance. When this is set, the default for machine_image will be changed to `{ project = "cos-cloud", family = "cos-stable" }`. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
+    Container image to start on boot on each instance. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
     EOT
   type = object({
     image = string
@@ -177,17 +177,6 @@ variable "enable_ops_agent" {
   }
 }
 
-variable "enable_ray" {
-  description = "Install [Ray](https://docs.ray.io/en/latest/cluster/getting-started.html)."
-  type        = bool
-  default     = false
-
-  validation {
-    condition     = var.enable_ray != null
-    error_message = "must not be null"
-  }
-}
-
 variable "labels" {
   description = <<-EOT
     The resource labels (a map of key/value pairs) to be applied to the GPU cluster.
@@ -196,41 +185,6 @@ variable "labels" {
     EOT
   type        = map(string)
   default     = {}
-}
-
-variable "machine_image" {
-  description = <<-EOT
-    The image with which this disk will initialize.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#source_image).
-
-    ------------
-    `machine_image.family`
-
-    The family of images from which the latest non-deprecated image will be selected. Conflicts with `machine_image.name`.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-family).
-
-    ------------
-    `machine_image.name`
-
-    The name of a specific image. Conflicts with `machine_image.family`.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image).
-
-    ------------
-    `machine_image.project`
-
-    The project_id to which this image belongs.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#project), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-project).
-    EOT
-  type = object({
-    family  = string
-    name    = string
-    project = string
-  })
-  default = null
 }
 
 variable "machine_type" {
