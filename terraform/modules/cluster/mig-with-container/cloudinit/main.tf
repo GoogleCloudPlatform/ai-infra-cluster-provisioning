@@ -23,8 +23,8 @@ locals {
   _has_network_storage = local._has_filestores || local._has_gcsfuses
 
   template_variables = {
-    docker_cmd   = try(var.container.cmd, "")
-    docker_image = try(var.container.image, "")
+    docker_cmd   = var.container.cmd != null ? var.container.cmd : ""
+    docker_image = var.container.image
     docker_volume_flags = local._has_network_storage ? join(
       " ",
       concat(

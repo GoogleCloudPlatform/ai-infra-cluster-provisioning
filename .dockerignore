@@ -1,4 +1,7 @@
-.git
+/docs
+/samples
+/tools
+/.git
 **/.terraform
 **/terraform.tf*
 **/tfplan

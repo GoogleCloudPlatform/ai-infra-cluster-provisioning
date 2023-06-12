@@ -17,29 +17,11 @@
 locals {
   region = join("-", slice(split("-", var.zone), 0, 2))
 
-  startup_runners = concat(
-    var.enable_ops_agent ? [{
-      type        = "shell"
-      destination = "/tmp/enable_ops_agent.sh"
-      source      = "${path.module}/../../../../scripts/enable_ops_agent.sh"
-    }] : [],
-    var.enable_ray ? [{
-      type        = "shell"
-      destination = "/tmp/enable_ray.sh"
-      source      = "${path.module}/../../../../scripts/enable_ray.sh"
-      args        = "1.12.1 26379 ${try(var.guest_accelerator.count, 0)}"
-    }] : [],
-    var.startup_script != null && var.startup_script != "" ? [{
-      type        = "shell"
-      destination = "/tmp/startup_script.sh"
-      content     = var.startup_script
-    }] : [],
-    var.startup_script_file != null && var.startup_script_file != "" ? [{
-      type        = "shell"
-      destination = "/tmp/startup_script_file.sh"
-      source      = var.startup_script_file
-    }] : [],
-  )
+  machine_image = {
+    project = "cos-cloud"
+    family  = "cos-stable"
+    name    = null
+  }
 }
 
 module "dashboard" {
@@ -62,16 +44,6 @@ module "network" {
   resource_prefix = var.resource_prefix
 }
 
-module "gcsfuse" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/pre-existing-network-storage//?ref=v1.17.0"
-  count  = length(var.gcsfuse_existing)
-
-  fs_type       = "gcsfuse"
-  local_mount   = var.gcsfuse_existing[count.index].local_mount
-  mount_options = "defaults,_netdev,implicit_dirs,allow_other"
-  remote_mount  = var.gcsfuse_existing[count.index].remote_mount
-}
-
 module "filestore" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore//?ref=v1.17.0"
   count  = length(var.filestore_new)
@@ -88,20 +60,21 @@ module "filestore" {
   labels               = merge(var.labels, { ghpc_role = "file-system" })
 }
 
-module "startup" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/scripts/startup-script/?ref=v1.17.0"
+module "cloudinit" {
+  source = "./cloudinit"
 
-  deployment_name = var.resource_prefix
-  labels          = merge(var.labels, { ghpc_role = "scripts" })
-  project_id      = var.project_id
-  region          = local.region
-  gcs_bucket_path = var.startup_script_gcs_bucket_path
-  runners = concat(
-    module.gcsfuse[*].client_install_runner,
-    module.gcsfuse[*].mount_runner,
-    module.filestore[*].install_nfs_client_runner,
-    module.filestore[*].mount_runner,
-    local.startup_runners,
+  container = var.container
+  filestores = [
+    for n in module.filestore[*].network_storage
+    : {
+      local_mount  = n.local_mount
+      remote_mount = "${n.server_ip}:${n.remote_mount}"
+    }
+  ]
+  gcsfuses = var.gcsfuse_existing != null ? var.gcsfuse_existing : []
+  machine_has_gpu = var.guest_accelerator != null || contains(
+    ["a2", "a3", "g2"],
+    split("-", var.machine_type)[0],
   )
 }
 
@@ -111,14 +84,14 @@ module "compute_instance_template" {
   disk_size_gb          = var.disk_size_gb
   disk_type             = var.disk_type
   guest_accelerator     = var.guest_accelerator
-  machine_image         = var.machine_image
+  machine_image         = local.machine_image
   machine_type          = var.machine_type
-  metadata              = null
+  metadata              = { user-data = module.cloudinit.user-data }
   project_id            = var.project_id
   region                = local.region
   resource_prefix       = var.resource_prefix
   service_account       = var.service_account
-  startup_script        = module.startup.startup_script
+  startup_script        = null
   subnetwork_self_links = module.network.subnetwork_self_links
   network_self_links    = module.network.network_self_links
   labels                = merge(var.labels, { ghpc_role = "compute" })

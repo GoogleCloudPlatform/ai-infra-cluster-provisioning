@@ -119,13 +119,13 @@ write_files:
         --detach \
         --restart always \
         --name aiinfra \
+        --network host \
         --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64 \
         --volume /var/lib/nvidia/bin:/usr/local/nvidia/bin \
         --device /dev/nvidia-uvm:/dev/nvidia-uvm \
         --device /dev/nvidiactl:/dev/nvidiactl \
         $${docker_device_flags} \
-        ${docker_volume_flags} \
-        ${docker_image} ${docker_cmd}
+        ${docker_volume_flags} ${docker_image} ${docker_cmd}
   - path: /etc/systemd/system/aiinfra-start-container.service
     permissions: 0644
     owner: root

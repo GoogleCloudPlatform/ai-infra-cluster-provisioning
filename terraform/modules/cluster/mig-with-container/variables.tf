@@ -42,6 +42,17 @@ variable "zone" {
   type        = string
 }
 
+variable "container" {
+  description = <<-EOT
+    Container image to start on boot on each instance. When this is set, the default for machine_image will be changed to `{ project = "cos-cloud", family = "cos-stable" }`. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
+    EOT
+  type = object({
+    image = string
+    cmd   = string
+  })
+  default = null
+}
+
 variable "disk_size_gb" {
   description = <<-EOT
     The size of the image in gigabytes for the boot disk of each instance.
@@ -219,11 +230,7 @@ variable "machine_image" {
     name    = string
     project = string
   })
-  default = {
-    project = "deeplearning-platform-release"
-    family  = "pytorch-latest-gpu-debian-11-py310"
-    name    = null
-  }
+  default = null
 }
 
 variable "machine_type" {
