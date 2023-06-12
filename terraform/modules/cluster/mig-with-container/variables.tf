@@ -174,6 +174,42 @@ variable "labels" {
   default     = {}
 }
 
+variable "machine_image" {
+  description = <<-EOT
+    The image with which this disk will initialize. This image must be in the project `cos-cloud`.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#source_image).
+
+    ------------
+    `machine_image.family`
+
+    The family of images from which the latest non-deprecated image will be selected. Conflicts with `machine_image.name`.
+
+    Examples:
+    - `cos-stable`
+    - `cos-arm64-stable`
+    - `cos-beta`
+    - `cos-dev`
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-family).
+
+    ------------
+    `machine_image.name`
+
+    The name of a specific image. Conflicts with `machine_image.family`.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image).
+    EOT
+  type = object({
+    family = string
+    name   = string
+  })
+  default = {
+    family = "cos-stable"
+    name   = null
+  }
+}
+
 variable "machine_type" {
   description = <<-EOT
     The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource).

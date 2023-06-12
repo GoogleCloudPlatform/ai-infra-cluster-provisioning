@@ -19,8 +19,8 @@ locals {
 
   machine_image = {
     project = "cos-cloud"
-    family  = "cos-stable"
-    name    = null
+    family  = var.machine_image.family
+    name    = var.machine_image.name
   }
 }
 
