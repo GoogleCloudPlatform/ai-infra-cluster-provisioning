@@ -35,7 +35,7 @@ variable "container" {
 
   validation {
     condition = var.container.env != null ? alltrue(
-      [for k, v in var.container : v != null]
+      [for k, v in var.container.env : v != null]
     ) : true
     error_message = "values must not be null"
   }

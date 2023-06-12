@@ -13,6 +13,7 @@ ${aiinfra_pull_image}
       --restart always \
       --name aiinfra \
       --network host \
+      --privileged \
       ${docker_volume_flags} \
       ${docker_env_flags} \
       ${docker_image} ${docker_cmd}

@@ -14,6 +14,17 @@
  * limitations under the License.
 */
 
+variable "container" {
+  description = <<-EOT
+    Container image to start on boot on each instance. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
+    EOT
+  type = object({
+    image = string
+    cmd   = string
+    env   = map(string)
+  })
+}
+
 variable "project_id" {
   description = "GCP Project ID to which the cluster will be deployed."
   type        = string
@@ -40,18 +51,6 @@ variable "zone" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone).
     EOT
   type        = string
-}
-
-variable "container" {
-  description = <<-EOT
-    Container image to start on boot on each instance. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
-    EOT
-  type = object({
-    image = string
-    cmd   = string
-    env   = map(string)
-  })
-  default = null
 }
 
 variable "disk_size_gb" {
@@ -165,19 +164,6 @@ variable "guest_accelerator" {
   default = null
 }
 
-variable "enable_ops_agent" {
-  description = <<-EOT
-    Install [Google Cloud Ops Agent](https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent).
-    EOT
-  type        = bool
-  default     = true
-
-  validation {
-    condition     = var.enable_ops_agent != null
-    error_message = "must not be null"
-  }
-}
-
 variable "labels" {
   description = <<-EOT
     The resource labels (a map of key/value pairs) to be applied to the GPU cluster.
@@ -241,28 +227,4 @@ variable "service_account" {
     scopes = set(string)
   })
   default = null
-}
-
-variable "startup_script" {
-  description = "Shell script -- the actual script (not the filename)."
-  type        = string
-  default     = null
-}
-
-variable "startup_script_file" {
-  description = "The full path in the VM to the shell script to be executed at VM startup."
-  type        = string
-  default     = null
-}
-
-variable "startup_script_gcs_bucket_path" {
-  description = <<-EOT
-    The storage bucket full path to be used for storing the startup script.
-    Example: `gs://bucketName/dirName`
-
-    If the value is not provided, then a default storage bucket will be created for the script execution.
-    `storage.buckets.create` IAM permission is needed for creating the default storage bucket.
-    EOT
-  type        = string
-  default     = null
 }
