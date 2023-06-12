@@ -13,7 +13,9 @@ ${aiinfra_pull_image}
       --restart always \
       --name aiinfra \
       --network host \
-      ${docker_volume_flags} ${docker_image} ${docker_cmd}
+      ${docker_volume_flags} \
+      ${docker_env_flags} \
+      ${docker_image} ${docker_cmd}
 - path: /etc/systemd/system/aiinfra-start-container.service
   permissions: 0644
   owner: root

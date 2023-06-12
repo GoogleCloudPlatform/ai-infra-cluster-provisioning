@@ -49,6 +49,7 @@ variable "container" {
   type = object({
     image = string
     cmd   = string
+    env   = map(string)
   })
   default = null
 }

@@ -6,6 +6,7 @@ target_size     = 1
 container = {
   image = "gcr.io/deeplearning-platform-release/base-gpu.py310"
   cmd   = "sleep infinity"
+  env   = { some_key = "some_value" }
 }
 enable_ops_agent = false
 filestore_new = [{

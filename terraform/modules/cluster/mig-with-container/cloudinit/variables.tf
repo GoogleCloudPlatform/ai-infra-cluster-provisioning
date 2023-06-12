@@ -18,6 +18,7 @@ variable "container" {
   type = object({
     image = string
     cmd   = string
+    env   = map(string)
   })
 
   validation {
@@ -30,6 +31,13 @@ variable "container" {
       [for empty in [null, ""] : var.container.image != empty]
     )
     error_message = "must have non-empty image"
+  }
+
+  validation {
+    condition = var.container.env != null ? alltrue(
+      [for k, v in var.container : v != null]
+    ) : true
+    error_message = "values must not be null"
   }
 }
 
