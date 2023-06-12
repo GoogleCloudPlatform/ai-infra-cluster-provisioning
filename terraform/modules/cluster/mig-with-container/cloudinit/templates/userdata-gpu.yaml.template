@@ -1,0 +1,65 @@
+# cloud-config
+
+write_files:
+${aiinfra_network_storage}
+${aiinfra_pull_image}
+- path: /etc/systemd/system/aiinfra_install_gpu.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh
+    cos-extensions install gpu
+    mount --bind /var/lib/nvidia /var/lib/nvidia
+    mount -o remount,exec /var/lib/nvidia
+- path: /etc/systemd/system/aiinfra-install-gpu.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Unit]
+    After=gcr-online.target docker.socket
+    Description=Install GPU drivers
+    Wants=gcr-online.target docker.socket
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra_install_gpu.sh
+    RemainAfterExit=true
+    StandardOutput=journal+console
+    StandardError=journal+console
+    Type=oneshot
+    User=root
+
+- path: /etc/systemd/system/aiinfra_start_container.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh
+    docker_device_flags=$(find /dev -type c -regex '\/dev\/nvidia[0-9]*' -printf '--device %p:%p ')
+    docker run \
+      --detach \
+      --restart always \
+      --name aiinfra \
+      --network host \
+      --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64 \
+      --volume /var/lib/nvidia/bin:/usr/local/nvidia/bin \
+      --device /dev/nvidia-uvm:/dev/nvidia-uvm \
+      --device /dev/nvidiactl:/dev/nvidiactl \
+      $${docker_device_flags} \
+      ${docker_volume_flags} ${docker_image} ${docker_cmd}
+- path: /etc/systemd/system/aiinfra-start-container.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Unit]
+    After=aiinfra-install-gpu.service aiinfra-network-storage.service aiinfra-pull-image.service
+    Requires=aiinfra-install-gpu.service aiinfra-network-storage.service aiinfra-pull-image.service
+    Description=Run a GPU docker container
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra_start_container.sh
+    RemainAfterExit=true
+    StandardError=journal+console
+    StandardOutput=journal+console
+    Type=oneshot
+    User=root
+
+runcmd:
+- systemctl daemon-reload
+- systemctl start aiinfra-install-gpu aiinfra-network-storage aiinfra-pull-image aiinfra-start-container

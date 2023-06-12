@@ -22,7 +22,7 @@ locals {
   _has_gcsfuses        = try(length(var.gcsfuses) != 0, false)
   _has_network_storage = local._has_filestores || local._has_gcsfuses
 
-  template_variables = {
+  _base_template_variables = {
     docker_cmd   = var.container.cmd != null ? var.container.cmd : ""
     docker_image = var.container.image
     docker_volume_flags = local._has_network_storage ? join(
@@ -67,6 +67,22 @@ locals {
       ),
     ) : ""
   }
+  _aiinfra_network_storage = templatefile(
+    "${path.module}/templates/aiinfra_network_storage.yaml.template",
+    local._base_template_variables,
+  )
+  _aiinfra_pull_image = templatefile(
+    "${path.module}/templates/aiinfra_pull_image.yaml.template",
+    local._base_template_variables,
+  )
+
+  template_variables = merge(
+    local._base_template_variables,
+    {
+      aiinfra_network_storage = local._aiinfra_network_storage,
+      aiinfra_pull_image      = local._aiinfra_pull_image
+    },
+  )
 }
 
 data "cloudinit_config" "config" {
@@ -76,7 +92,7 @@ data "cloudinit_config" "config" {
   part {
     content_type = "text/cloud-config"
     content = templatefile(
-      "${path.module}/userdata.yaml",
+      "${path.module}/templates/userdata.yaml.template",
       local.template_variables,
     )
     filename = "userdata.yaml"
@@ -90,7 +106,7 @@ data "cloudinit_config" "config-gpu" {
   part {
     content_type = "text/cloud-config"
     content = templatefile(
-      "${path.module}/userdata-gpu.yaml",
+      "${path.module}/templates/userdata-gpu.yaml.template",
       local.template_variables,
     )
     filename = "userdata-gpu.yaml"

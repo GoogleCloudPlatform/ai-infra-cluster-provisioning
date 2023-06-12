@@ -1,0 +1,21 @@
+- path: /etc/systemd/system/aiinfra_pull_image.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh
+    docker pull ${docker_image}
+- path: /etc/systemd/system/aiinfra-pull-image.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Unit]
+    After=gcr-online.target docker.socket
+    Description=Pull a GPU docker image
+    Wants=gcr-online.target docker.socket
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra_pull_image.sh
+    RemainAfterExit=true
+    StandardError=journal+console
+    StandardOutput=journal+console
+    Type=oneshot
+    User=root
