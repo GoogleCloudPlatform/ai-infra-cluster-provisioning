@@ -24,17 +24,6 @@ locals {
   }
 }
 
-module "dashboard" {
-  source = "../../common/dashboard"
-  count  = var.enable_ops_agent ? 1 : 0
-
-  enable_gce_gke_gpu_utilization_widgets = false
-  enable_nvidia_dcgm_widgets             = true
-  enable_nvidia_nvml_widgets             = true
-  project_id                             = var.project_id
-  resource_prefix                        = var.resource_prefix
-}
-
 module "network" {
   source = "../../common/network"
 

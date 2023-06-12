@@ -29,7 +29,6 @@ No requirements.
 |------|--------|---------|
 | <a name="module_cloudinit"></a> [cloudinit](#module\_cloudinit) | ./cloudinit | n/a |
 | <a name="module_compute_instance_template"></a> [compute\_instance\_template](#module\_compute\_instance\_template) | ../../common/instance_template | n/a |
-| <a name="module_dashboard"></a> [dashboard](#module\_dashboard) | ../../common/dashboard | n/a |
 | <a name="module_filestore"></a> [filestore](#module\_filestore) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore// | v1.17.0 |
 | <a name="module_network"></a> [network](#module\_network) | ../../common/network | n/a |
 
@@ -61,7 +60,5 @@ No requirements.
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_instructions"></a> [instructions](#output\_instructions) | Instructions for accessing the dashboard |
+No outputs.
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
