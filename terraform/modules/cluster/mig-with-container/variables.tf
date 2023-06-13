@@ -14,6 +14,26 @@
  * limitations under the License.
 */
 
+variable "container" {
+  description = <<-EOT
+    Container image to start on boot on each instance. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
+
+    Attributes:
+    - `image`: docker image which will get pulled and started at boot on each instance (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/build/#tag)).
+    - `cmd`: arguments to the entrypoint of the docker image (Related docs: [docker](https://docs.docker.com/engine/reference/builder/#cmd)).
+    - `env`: environment variables for the docker container (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#env)).
+    - `options`: any other `docker run` options (Related docs: [docker]()https://docs.docker.com/engine/reference/commandline/run/#options).
+
+    Default `docker run` flags (`options` will be appended to this list):` --detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`
+    EOT
+  type = object({
+    image   = string
+    cmd     = string
+    env     = map(string)
+    options = list(string)
+  })
+}
+
 variable "project_id" {
   description = "GCP Project ID to which the cluster will be deployed."
   type        = string
@@ -153,30 +173,6 @@ variable "guest_accelerator" {
   default = null
 }
 
-variable "enable_ops_agent" {
-  description = <<-EOT
-    Install [Google Cloud Ops Agent](https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent).
-    EOT
-  type        = bool
-  default     = true
-
-  validation {
-    condition     = var.enable_ops_agent != null
-    error_message = "must not be null"
-  }
-}
-
-variable "enable_ray" {
-  description = "Install [Ray](https://docs.ray.io/en/latest/cluster/getting-started.html)."
-  type        = bool
-  default     = false
-
-  validation {
-    condition     = var.enable_ray != null
-    error_message = "must not be null"
-  }
-}
-
 variable "labels" {
   description = <<-EOT
     The resource labels (a map of key/value pairs) to be applied to the GPU cluster.
@@ -189,7 +185,7 @@ variable "labels" {
 
 variable "machine_image" {
   description = <<-EOT
-    The image with which this disk will initialize.
+    The image with which this disk will initialize. This image must be in the project `cos-cloud`.
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#source_image).
 
@@ -197,6 +193,12 @@ variable "machine_image" {
     `machine_image.family`
 
     The family of images from which the latest non-deprecated image will be selected. Conflicts with `machine_image.name`.
+
+    Examples:
+    - `cos-stable`
+    - `cos-arm64-stable`
+    - `cos-beta`
+    - `cos-dev`
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-family).
 
@@ -206,23 +208,14 @@ variable "machine_image" {
     The name of a specific image. Conflicts with `machine_image.family`.
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image).
-
-    ------------
-    `machine_image.project`
-
-    The project_id to which this image belongs.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#project), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-project).
     EOT
   type = object({
-    family  = string
-    name    = string
-    project = string
+    family = string
+    name   = string
   })
   default = {
-    project = "deeplearning-platform-release"
-    family  = "pytorch-latest-gpu-debian-11-py310"
-    name    = null
+    family = "cos-stable"
+    name   = null
   }
 }
 
@@ -279,28 +272,4 @@ variable "service_account" {
     scopes = set(string)
   })
   default = null
-}
-
-variable "startup_script" {
-  description = "Shell script -- the actual script (not the filename)."
-  type        = string
-  default     = null
-}
-
-variable "startup_script_file" {
-  description = "The full path in the VM to the shell script to be executed at VM startup."
-  type        = string
-  default     = null
-}
-
-variable "startup_script_gcs_bucket_path" {
-  description = <<-EOT
-    The storage bucket full path to be used for storing the startup script.
-    Example: `gs://bucketName/dirName`
-
-    If the value is not provided, then a default storage bucket will be created for the script execution.
-    `storage.buckets.create` IAM permission is needed for creating the default storage bucket.
-    EOT
-  type        = string
-  default     = null
 }

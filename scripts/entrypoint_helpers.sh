@@ -22,12 +22,12 @@ entrypoint_helpers::get_usage () {
 Usage: ./scripts/entrypoint.sh [options] action cluster [var_file]
 
 Options:
-    -h|--help   Print this help message.
     -b|--backend-bucket
                 The GCS path to use for storing terraform state. Example:
                 'gs://bucketName/dirName' The default value if not provided is
                 'gs://aiinfra-terraform-<project_id>' where '<project_id>' is
                 read from 'var_file'
+    -h|--help   Print this help message.
     -q|--quiet  Minimizes the terraform logging. It still shows the error if
                 terraform fails to create/destroy resources. Terraform logs are
                 copied to GCS bucket whether this flag is set or not
@@ -39,6 +39,8 @@ Parameters:
     cluster     Type of cluster to act on. Options are:
                 - gke: Google Kubernetes Engine -- terraform/modules/cluster/gke
                 - mig: Managed Instange Group -- terraform/modules/cluster/mig
+                - mig-with-container: MIG with docker container --
+                    terraform/modules/cluster/mig-with-container
                 - slurm: Slurm Workload Manager -- terraform/modules/cluster/slurm
     var_file    Terraform variables file. Defaults to:
                 '${PWD}/input/terraform.tfvars'
@@ -149,7 +151,7 @@ entrypoint_helpers::validate_args () {
     declare -ar expected_actions=('create' 'destroy')
     entrypoint_helpers::expect_contains expected_actions arg_action || valid=false
 
-    declare -ar expected_clusters=('gke' 'mig' 'slurm')
+    declare -ar expected_clusters=('gke' 'mig' 'mig-with-container' 'slurm')
     entrypoint_helpers::expect_contains expected_clusters arg_cluster || valid=false
 
     [ -f "${arg_var_file}" ] || {

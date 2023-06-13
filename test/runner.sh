@@ -59,9 +59,6 @@ runner::parse_args () {
                 2)
                     runner_arg_resource_prefix="${1}"
                     ;;
-                3)
-                    runner_opt_filter="${1}"
-                    ;;
                 *)
                     echo >&2 "too many parameters starting at '${1}'"
                     return 1
