@@ -391,6 +391,10 @@ The HPC Toolkit Repo is open-source and available
 | a3 VM type full featured with multi-NIC VPC | [terraform.tfvars](./samples/mig/a3_multi_nic_network/terraform.tfvars) | [main.tf](./samples/mig/a3_multi_nic_network/main.tf) | [blueprint](./samples/mig/a3_multi_nic_network/a3_multi_nic_network.yaml) |
 
 
+| MIG-with-Container Scenarios | Docker | Terraform | HPC Toolkit |
+|---------------|--------|-----------|-------------|
+| Full featured | [terraform.tfvars](./samples/mig-with-container/simple/terraform.tfvars) | [main.tf](./samples/mig-with-container/simple/main.tf) | [blueprint](./samples/mig-with-container/simple/blueprint.yaml) |
+
 
 | GKE Scenarios | Docker | Terraform | HPC Toolkit |
 |---------------|--------|-----------|-------------|
