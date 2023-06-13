@@ -23,7 +23,8 @@ variable "container" {
     - `cmd`: arguments to the entrypoint of the docker image (Related docs: [docker](https://docs.docker.com/engine/reference/builder/#cmd)).
     - `env`: environment variables for the docker container (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#env)).
     - `options`: any other `docker run` options (Related docs: [docker]()https://docs.docker.com/engine/reference/commandline/run/#options).
-    image:
+
+    Default `docker run` flags (`options` will be appended to this list):` --detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`
     EOT
   type = object({
     image   = string

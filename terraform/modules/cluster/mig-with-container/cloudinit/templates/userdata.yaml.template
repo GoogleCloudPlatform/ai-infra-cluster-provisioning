@@ -10,10 +10,12 @@ ${aiinfra_pull_image}
     #!/bin/sh
     docker run \
       --detach \
-      --restart always \
+      --hostname $(hostname) \
+      --ipc host \
       --name aiinfra \
       --network host \
       --privileged \
+      --restart always \
       ${docker_volume_flags} \
       ${docker_env_flags} \
       ${docker_options} \
