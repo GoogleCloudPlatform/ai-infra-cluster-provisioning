@@ -19,5 +19,5 @@ gcsfuse_existing = [{
   local_mount  = "/usr/gcsmount"
   remote_mount = "bucketName-To-Mount"
 }]
-machine_type = "a2-standard-1g"
+machine_type = "a2-highgpu-1g"
 labels       = { purpose = "testing", }
