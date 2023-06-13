@@ -32,14 +32,17 @@ other cases they will be mandated by AI Accelerator exp. team (eg: GKE host imag
 Users can use the cluster provisioning tool to create GPU clusters in few different
 ways. They are Managed instance groups (MIGs), Google kubernetes engine (GKE) and
 Slurm. The configurations are different for different type of GPU clusters.
-1. These are the configurations for a GPU cluster using
-   [MIG](./terraform/modules/cluster/mig/README.md). An example of a simple GPU
+1. The configurations for a GPU cluster using
+   [MIG are here](./terraform/modules/cluster/mig/README.md). An example of a simple GPU
    cluster using MIG can be found [here](./samples/mig/simple/terraform.tfvars).
-2. These are the configurations for a GPU cluster using
-   [GKE](./terraform/modules/cluster/gke/README.md). An example of a simple GPU
+1. The configurations for a GPU cluster using
+   [MIG with Containers are here](./terraform/modules/cluster/mig-with-container/README.md). An example of a simple GPU
+   cluster using MIG-with-container can be found [here](./samples/mig-with-container/simple/terraform.tfvars).
+1. The configurations for a GPU cluster using
+   [GKE are here](./terraform/modules/cluster/gke/README.md). An example of a simple GPU
    cluster using GKE can be found [here](./samples/gke/simple/terraform.tfvars).
-3. These are the configurations for a GPU cluster using
-   [Slurm](./terraform/modules/cluster/slurm/README.md). An example of a simple GPU
+1. Tje configurations for a GPU cluster using
+   [Slurm are here](./terraform/modules/cluster/slurm/README.md). An example of a simple GPU
    cluster using Slurm can be found [here](./samples/slurm/minimal/terraform.tfvars).
 
 For more complex GPU clusters, please use examples from [this section
