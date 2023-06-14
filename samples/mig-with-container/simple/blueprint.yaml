@@ -47,6 +47,7 @@ vars:
       JOB_TIMESTAMP      : 2023-06-13-19-11-11
       NCCL_SOCKET_IFNAME : enp
     options : null
+    enable_cloud_logging: true
 }
 
 deployment_groups:

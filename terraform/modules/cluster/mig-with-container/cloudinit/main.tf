@@ -18,23 +18,24 @@ locals {
   _filestore_host_mount = "/tmp/cloud/filestore_mnt"
   _gcsfuse_host_mount   = "/tmp/cloud/gcsfuse_mnt"
 
-  _has_filestores      = try(length(var.filestores) != 0, false)
-  _has_gcsfuses        = try(length(var.gcsfuses) != 0, false)
-  _has_network_storage = local._has_filestores || local._has_gcsfuses
-  _has_env_flags       = try(length(keys(var.container.env)) != 0, false)
-  _has_options         = try(length(var.container.extra_args) != 0, false)
+  _has_filestores               = try(length(var.filestores) != 0, false)
+  _has_gcsfuses                 = try(length(var.gcsfuses) != 0, false)
+  _has_network_storage          = local._has_filestores || local._has_gcsfuses
+  _has_env_flags                = try(length(keys(var.container.env)) != 0, false)
+  _has_options                  = try(length(var.container.options) != 0, false)
+  _enable_cloud_logging_options = var.container.enable_cloud_logging ? "--log-driver=gcplogs" : ""
 
   _base_template_variables = {
-    enable_cloud_logging = var.enable_cloud_logging
-    docker_cmd           = var.container.cmd != null ? var.container.cmd : ""
+    docker_cmd = var.container.cmd != null ? var.container.cmd : ""
     docker_env_flags = local._has_env_flags ? join(
       " ",
       [for name, value in var.container.env : "--env ${name}=${value}"],
     ) : ""
     docker_options = local._has_options ? join(
       " ",
-      var.container.options
-    ) : ""
+      var.container.options,
+      local._enable_cloud_logging_options
+    ) : local._enable_cloud_logging_options
     docker_image = var.container.image
     docker_volume_flags = local._has_network_storage ? join(
       " ",

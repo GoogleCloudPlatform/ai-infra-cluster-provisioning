@@ -22,15 +22,17 @@ variable "container" {
     - `image`: docker image which will get pulled and started at boot on each instance (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/build/#tag)).
     - `cmd`: arguments to the entrypoint of the docker image (Related docs: [docker](https://docs.docker.com/engine/reference/builder/#cmd)).
     - `env`: environment variables for the docker container (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#env)).
-    - `options`: any other `docker run` options (Related docs: [docker]()https://docs.docker.com/engine/reference/commandline/run/#options).
+    - `options`: any other `docker run` options (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#options)).
+    - `enable_cloud_logging`: the flag to enable GCP cloud logging for the containers (Related docs: [docker](https://cloud.google.com/community/tutorials/docker-gcplogs-driver))
 
     Default `docker run` flags (`options` will be appended to this list):` --detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`
     EOT
   type = object({
-    image   = string
-    cmd     = string
-    env     = map(string)
-    options = list(string)
+    image                = string
+    cmd                  = string
+    env                  = map(string)
+    options              = list(string)
+    enable_cloud_logging = bool
   })
 }
 
@@ -272,14 +274,4 @@ variable "service_account" {
     scopes = set(string)
   })
   default = null
-}
-
-variable "enable_cloud_logging" {
-  description = <<-EOT
-    The flag to enable GCP cloud logging for the containers.
-
-    Related docs: https://cloud.google.com/community/tutorials/docker-gcplogs-driver
-    EOT
-  type        = bool
-  default     = true
 }
