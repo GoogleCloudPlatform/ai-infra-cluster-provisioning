@@ -1,0 +1,56 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+blueprint_name: mig-with-container
+
+vars:
+  project_id      : project-id
+  resource_prefix : mig-with-container
+  deployment_name : mig-with-container-dpl
+  zone            : us-central1-c
+  network_config  : default
+  machine_type    : a2-highgpu-1g
+  target_size     : 1
+  filestore_new :
+    - filestore_tier : BASIC_HDD
+      local_mount    : /usr/fsmount
+      size_gb        : 1024
+  gcsfuse_existing : 
+    - local_mount  : /usr/gcsmount
+      remote_mount : bucketName-To-Mount
+  labels : 
+    purpose : testing
+  machine_image :
+    family  : cos-105-17412-101-17
+    name    : null
+  container :
+    image : us-central1-docker.pkg.dev/supercomputer-testing/official/nemo-megatron:v539099959
+    cmd   : null
+    env   :  
+      some_key           : some_value 
+      MASTER_ADDR        : localhost
+      NODE_RANK          : 0
+      TRAINING_FILENAME  : 5b_1_node.yaml
+      JOB_TIMESTAMP      : 2023-06-13-19-11-11
+      NCCL_SOCKET_IFNAME : enp
+    options : null
+}
+
+deployment_groups:
+- group: primary
+  modules:
+  - id: mig-with-container
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-with-container"

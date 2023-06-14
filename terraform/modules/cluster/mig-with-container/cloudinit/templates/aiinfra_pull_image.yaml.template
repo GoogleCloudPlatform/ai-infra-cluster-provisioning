@@ -3,6 +3,10 @@
   owner: root
   content: |
     #!/bin/sh
+    mount -t tmpfs tmpfs /root
+    docker-credential-gcr configure-docker
+    image_name=${docker_image}
+    docker-credential-gcr configure-docker --registries $${image_name%%/*}
     docker pull ${docker_image}
 - path: /etc/systemd/system/aiinfra-pull-image.service
   permissions: 0644
