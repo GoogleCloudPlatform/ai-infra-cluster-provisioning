@@ -16,11 +16,13 @@
 
 variable "container" {
   type = object({
-    image                = string
-    cmd                  = string
-    env                  = map(string)
-    options              = list(string)
-    enable_cloud_logging = bool
+    image = string
+    cmd   = string
+    run_options = object({
+      custom               = list(string)
+      enable_cloud_logging = bool
+      env                  = map(string)
+    })
   })
 
   validation {
@@ -33,20 +35,6 @@ variable "container" {
       [for empty in [null, ""] : var.container.image != empty]
     )
     error_message = "must have non-empty image"
-  }
-
-  validation {
-    condition = var.container.env != null ? alltrue(
-      [for k, v in var.container.env : v != null]
-    ) : true
-    error_message = "values must not be null"
-  }
-
-  validation {
-    condition = alltrue(
-      [for empty in [null, ""] : var.container.enable_cloud_logging != empty]
-    )
-    error_message = "must have non-empty enable_cloud_logging value"
   }
 }
 

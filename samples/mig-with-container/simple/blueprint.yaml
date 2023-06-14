@@ -39,16 +39,11 @@ vars:
   container :
     image : us-central1-docker.pkg.dev/supercomputer-testing/official/nemo-megatron:v539099959
     cmd   : null
-    env   :  
-      some_key           : some_value 
-      MASTER_ADDR        : localhost
-      NODE_RANK          : 0
-      TRAINING_FILENAME  : 5b_1_node.yaml
-      JOB_TIMESTAMP      : 2023-06-13-19-11-11
-      NCCL_SOCKET_IFNAME : enp
-    options : null
-    enable_cloud_logging: true
-}
+    run_options :
+      custom               : ["--shm-size=250g"]
+      enable_cloud_logging : true
+      env :  
+        some_key : "some_value"
 
 deployment_groups:
 - group: primary

@@ -28,11 +28,13 @@ variable "container" {
     Default `docker run` flags (`options` will be appended to this list):` --detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`
     EOT
   type = object({
-    image                = string
-    cmd                  = string
-    env                  = map(string)
-    options              = list(string)
-    enable_cloud_logging = bool
+    image = string
+    cmd   = string
+    run_options = object({
+      custom               = list(string)
+      enable_cloud_logging = bool
+      env                  = map(string)
+    })
   })
 }
 
