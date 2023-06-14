@@ -65,6 +65,7 @@ module "cloudinit" {
     ["a2", "a3", "g2"],
     split("-", var.machine_type)[0],
   )
+  enable_cloud_logging = var.enable_cloud_logging
 }
 
 module "compute_instance_template" {

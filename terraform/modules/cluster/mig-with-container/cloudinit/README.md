@@ -39,6 +39,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_container"></a> [container](#input\_container) | n/a | <pre>object({<br>    image   = string<br>    cmd     = string<br>    env     = map(string)<br>    options = list(string)<br>  })</pre> | n/a | yes |
+| <a name="input_enable_cloud_logging"></a> [enable\_cloud\_logging](#input\_enable\_cloud\_logging) | n/a | `bool` | `true` | no |
 | <a name="input_filestores"></a> [filestores](#input\_filestores) | n/a | <pre>list(object({<br>    local_mount  = string<br>    remote_mount = string<br>  }))</pre> | n/a | yes |
 | <a name="input_gcsfuses"></a> [gcsfuses](#input\_gcsfuses) | n/a | <pre>list(object({<br>    local_mount  = string<br>    remote_mount = string<br>  }))</pre> | n/a | yes |
 | <a name="input_machine_has_gpu"></a> [machine\_has\_gpu](#input\_machine\_has\_gpu) | n/a | `bool` | n/a | yes |

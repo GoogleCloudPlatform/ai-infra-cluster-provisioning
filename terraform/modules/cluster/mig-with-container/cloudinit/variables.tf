@@ -99,3 +99,13 @@ variable "machine_has_gpu" {
     error_message = "must not be null"
   }
 }
+
+variable "enable_cloud_logging" {
+  type    = bool
+  default = true
+
+  validation {
+    condition     = var.enable_cloud_logging != null
+    error_message = "must not be null"
+  }
+}

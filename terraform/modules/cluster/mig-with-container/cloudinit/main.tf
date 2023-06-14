@@ -25,7 +25,8 @@ locals {
   _has_options         = try(length(var.container.extra_args) != 0, false)
 
   _base_template_variables = {
-    docker_cmd = var.container.cmd != null ? var.container.cmd : ""
+    enable_cloud_logging = var.enable_cloud_logging
+    docker_cmd           = var.container.cmd != null ? var.container.cmd : ""
     docker_env_flags = local._has_env_flags ? join(
       " ",
       [for name, value in var.container.env : "--env ${name}=${value}"],

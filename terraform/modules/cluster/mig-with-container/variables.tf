@@ -273,3 +273,13 @@ variable "service_account" {
   })
   default = null
 }
+
+variable "enable_cloud_logging" {
+  description = <<-EOT
+    The flag to enable GCP cloud logging for the containers.
+
+    Related docs: https://cloud.google.com/community/tutorials/docker-gcplogs-driver
+    EOT
+  type        = bool
+  default     = true
+}
