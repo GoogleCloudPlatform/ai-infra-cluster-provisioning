@@ -14,31 +14,6 @@
  * limitations under the License.
 */
 
-variable "container" {
-  description = <<-EOT
-    Container image to start on boot on each instance. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
-
-    Attributes:
-    - `image`: docker image which will get pulled and started at boot on each instance (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/build/#tag)).
-    - `cmd`: arguments to the entrypoint of the docker image (Related docs: [docker](https://docs.docker.com/engine/reference/builder/#cmd)).
-    - `run_options`: the additional options to pass during docker run
-      - `custom`: any other `docker run` options (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#options)). Default `docker run` flags (`container.run_options.custom` will be appended to this list): `--detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`
-      - `enable_cloud_logging`: the flag to enable GCP cloud logging (`--log-driver=gcplogs`) for the containers (Related docs: [docker](https://cloud.google.com/community/tutorials/docker-gcplogs-driver))
-      - `env`: environment variables for the docker container (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#env)).
-
-    EOT
-  type = object({
-    image       = string
-    cmd         = string
-    run_at_boot = bool
-    run_options = object({
-      custom               = list(string)
-      enable_cloud_logging = bool
-      env                  = map(string)
-    })
-  })
-}
-
 variable "project_id" {
   description = "GCP Project ID to which the cluster will be deployed."
   type        = string
@@ -65,6 +40,33 @@ variable "zone" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone).
     EOT
   type        = string
+}
+
+variable "container" {
+  description = <<-EOT
+    Container image to start on boot on each instance. All `local_mount`s found in `filestore_new` and `gcsfuse_existing` will be visible within the container.
+
+    Attributes:
+    - `image`: docker image which will get pulled and started at boot on each instance (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/build/#tag)).
+    - `cmd`: arguments to the entrypoint of the docker image (Related docs: [docker](https://docs.docker.com/engine/reference/builder/#cmd)). Defaults to `[]`.
+    - `run_at_boot`: automatically start a container on each instance when they are created. Defaults to `true`.
+    - `run_options`: the additional options to pass during docker run.
+      - `custom`: any other `docker run` options (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#options)). `docker run` flags already added (`container.run_options.custom` will be appended to this list): `--detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`. Defaults to `[]`.
+      - `enable_cloud_logging`: the flag to enable GCP cloud logging (`--log-driver=gcplogs`) for the containers (Related docs: [docker](https://cloud.google.com/community/tutorials/docker-gcplogs-driver)). Defaults to `false`.
+      - `env`: environment variables for the docker container (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#env)). Defaults to `{}`.
+
+    EOT
+  type = object({
+    image       = string
+    cmd         = string
+    run_at_boot = bool
+    run_options = object({
+      custom               = list(string)
+      enable_cloud_logging = bool
+      env                  = map(string)
+    })
+  })
+  default = null
 }
 
 variable "disk_size_gb" {
