@@ -201,12 +201,6 @@ variable "machine_image" {
 
     The family of images from which the latest non-deprecated image will be selected. Conflicts with `machine_image.name`.
 
-    Examples:
-    - `cos-stable`
-    - `cos-arm64-stable`
-    - `cos-beta`
-    - `cos-dev`
-
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-family).
 
     ------------
@@ -215,14 +209,23 @@ variable "machine_image" {
     The name of a specific image. Conflicts with `machine_image.family`.
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#name), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image).
+
+    ------------
+    `machine_image.project`
+
+    The project_id to which this image belongs.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#project), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-project).
     EOT
   type = object({
-    family = string
-    name   = string
+    family  = string
+    name    = string
+    project = string
   })
   default = {
-    family = "cos-stable"
-    name   = null
+    family  = "cos-stable"
+    name    = null
+    project = "cos-cloud"
   }
 }
 

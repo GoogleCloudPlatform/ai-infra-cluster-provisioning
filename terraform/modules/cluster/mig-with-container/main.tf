@@ -18,7 +18,7 @@ locals {
   region = join("-", slice(split("-", var.zone), 0, 2))
 
   machine_image = {
-    project = "cos-cloud"
+    project = var.machine_image.project
     family  = var.machine_image.family
     name    = var.machine_image.name
   }
