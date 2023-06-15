@@ -165,6 +165,16 @@ locals {
       start_container_gpu = { file = "", service = null, }
     },
   )
+  _services = [
+    local._userdata_template_variables.network_storage,
+    local._userdata_template_variables.pull_image,
+    local._userdata_template_variables.start_container,
+  ]
+  _services_gpu = [
+    local._userdata_template_variables.network_storage,
+    local._userdata_template_variables.pull_image,
+    local._userdata_template_variables.start_container_gpu,
+  ]
   userdata_template_variables = {
     aiinfra_network_storage     = local._userdata_template_variables.network_storage.file
     aiinfra_pull_image          = local._userdata_template_variables.pull_image.file
@@ -173,8 +183,15 @@ locals {
     aiinfra_services = join(
       " ",
       [
-        for k, v in local._userdata_template_variables
-        : v.service if v.service != null
+        for s in local._services
+        : s.service if s.service != null
+      ],
+    )
+    aiinfra_services_gpu = join(
+      " ",
+      [
+        for s in local._services_gpu
+        : s.service if s.service != null
       ],
     )
   }

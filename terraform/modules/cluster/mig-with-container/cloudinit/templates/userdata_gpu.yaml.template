@@ -30,4 +30,4 @@ ${aiinfra_start_container_gpu}
 
 runcmd:
 - systemctl daemon-reload
-- systemctl start ${aiinfra_services}
+- systemctl start aiinfra-install-gpu ${aiinfra_services_gpu}
