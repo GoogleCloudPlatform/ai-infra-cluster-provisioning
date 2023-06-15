@@ -29,7 +29,7 @@
     Requires=aiinfra-install-gpu.service aiinfra-network-storage.service aiinfra-pull-image.service
     Description=Run a GPU docker container
     [Service]
-    ExecStart=/etc/systemd/system/aiinfra_start_container.sh
+    ExecStart=/etc/systemd/system/aiinfra_start_container_gpu.sh
     RemainAfterExit=true
     StandardError=journal+console
     StandardOutput=journal+console

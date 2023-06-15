@@ -143,7 +143,7 @@ locals {
         service = "aiinfra-pull-image"
       }
       } : {
-      pull_image = { file = "", service = "", }
+      pull_image = { file = "", service = null, }
     },
     local.container.run_at_boot ? {
       start_container = {

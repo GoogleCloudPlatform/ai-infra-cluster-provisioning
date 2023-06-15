@@ -49,7 +49,7 @@ variable "container" {
     Attributes:
     - `image`: docker image which will get pulled and started at boot on each instance (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/build/#tag)).
     - `cmd`: arguments to the entrypoint of the docker image (Related docs: [docker](https://docs.docker.com/engine/reference/builder/#cmd)). Defaults to `[]`.
-    - `run_at_boot`: automatically start a container on each instance when they are created. Defaults to `true`.
+    - `run_at_boot`: automatically start a container on each instance when they are created (will still pull image at boot when set to `false`). Defaults to `true`.
     - `run_options`: the additional options to pass during docker run.
       - `custom`: any other `docker run` options (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#options)). `docker run` flags already added (`container.run_options.custom` will be appended to this list): `--detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`. Defaults to `[]`.
       - `enable_cloud_logging`: the flag to enable GCP cloud logging (`--log-driver=gcplogs`) for the containers (Related docs: [docker](https://cloud.google.com/community/tutorials/docker-gcplogs-driver)). Defaults to `false`.
