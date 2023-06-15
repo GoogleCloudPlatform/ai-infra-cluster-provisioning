@@ -22,15 +22,15 @@ variable "container" {
     - `image`: docker image which will get pulled and started at boot on each instance (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/build/#tag)).
     - `cmd`: arguments to the entrypoint of the docker image (Related docs: [docker](https://docs.docker.com/engine/reference/builder/#cmd)).
     - `run_options`: the additional options to pass during docker run
-      - `custom`: any other `docker run` options (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#options)).
-      - `enable_cloud_logging`: the flag to enable GCP cloud logging for the containers (Related docs: [docker](https://cloud.google.com/community/tutorials/docker-gcplogs-driver))
+      - `custom`: any other `docker run` options (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#options)). Default `docker run` flags (`container.run_options.custom` will be appended to this list): `--detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`
+      - `enable_cloud_logging`: the flag to enable GCP cloud logging (`--log-driver=gcplogs`) for the containers (Related docs: [docker](https://cloud.google.com/community/tutorials/docker-gcplogs-driver))
       - `env`: environment variables for the docker container (Related docs: [docker](https://docs.docker.com/engine/reference/commandline/run/#env)).
 
-    Default `docker run` flags (`options` will be appended to this list):` --detach --hostname $(hostname) --ipc host --name aiinfra --network host --privileged --restart always`
     EOT
   type = object({
-    image = string
-    cmd   = string
+    image       = string
+    cmd         = string
+    run_at_boot = bool
     run_options = object({
       custom               = list(string)
       enable_cloud_logging = bool

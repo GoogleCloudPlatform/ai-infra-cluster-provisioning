@@ -18,31 +18,57 @@ locals {
   _filestore_host_mount = "/tmp/cloud/filestore_mnt"
   _gcsfuse_host_mount   = "/tmp/cloud/gcsfuse_mnt"
 
-  _has_filestores      = try(length(var.filestores) != 0, false)
-  _has_gcsfuses        = try(length(var.gcsfuses) != 0, false)
-  _has_network_storage = local._has_filestores || local._has_gcsfuses
+  container = {
+    cmd   = try(var.container.cmd != null ? var.container.cmd : "", "")
+    image = try(var.container.image, "")
+    run_at_boot = try(
+      var.container.run_at_boot != null ? var.container.run_at_boot : true,
+      false
+    )
+    run_options = try(
+      {
+        custom = (
+          var.container.run_options.custom != null
+          ? var.container.run_options.custom
+          : []
+        )
+        enable_cloud_logging = (
+          var.container.run_options.enable_cloud_logging != null
+          ? var.container.run_options.enable_cloud_logging
+          : false
+        )
+        env = (
+          var.container.run_options.env != null
+          ? var.container.run_options.env
+          : {}
+        )
+      },
+      {
+        custom               = []
+        enable_cloud_logging = false
+        env                  = {}
+      }
+    )
+  }
 
-  _has_custom_run_flags       = try(length(var.container.run_options.custom) != 0, false)
-  _has_cloud_logging_run_flag = try(var.container.run_options.enable_cloud_logging, false)
-  _has_env_run_flags          = try(length(keys(var.container.run_options.env)) != 0, false)
-  _has_run_options = anytrue([
-    local._has_custom_run_flags,
-    local._has_env_run_flags,
-    local._has_cloud_logging_run_flag,
-  ])
-
-  _base_template_variables = {
-    docker_cmd   = var.container.cmd != null ? var.container.cmd : ""
-    docker_image = var.container.image
-    docker_run_options = local._has_run_options ? join(
+  _container_template_variables = {
+    docker_cmd   = local.container.cmd
+    docker_image = local.container.image
+    docker_run_options = join(
       " ",
-      local._has_env_run_flags ? [
-        for name, value in var.container.run_options.env : "--env ${name}=${value}"
-      ] : [],
-      local._has_cloud_logging_run_flag ? ["--log-driver=gcplogs"] : [],
-      local._has_custom_run_flags ? var.container.run_options.custom : [],
-    ) : ""
-    docker_volume_flags = local._has_network_storage ? join(
+      concat(
+        [
+          for name, value in local.container.run_options.env
+          : "--env ${name}=${value}"
+        ],
+        local.container.run_options.enable_cloud_logging ? [
+          "--log-driver=gcplogs"
+        ] : [],
+        local.container.run_options.custom,
+        [""], // dummy to make join return non-null
+      ),
+    )
+    docker_volume_flags = join(
       " ",
       concat(
         [
@@ -53,24 +79,36 @@ locals {
           for m in var.gcsfuses[*].local_mount
           : "--volume ${local._gcsfuse_host_mount}${m}:${m}:rw,rslave"
         ],
+        [""], // dummy to make join return non-null
       ),
-    ) : ""
-    filestore_mount_commands = local._has_filestores ? join(
+    )
+  }
+
+  _network_storage_template_variables = {
+    filestore_mount_commands = join(
       " && ",
-      [
-        for f in var.filestores
-        : "mount -t nfs -o async,hard,rw ${f.remote_mount} ${local._filestore_host_mount}${f.local_mount}"
-      ],
-    ) : ""
+      concat(
+        ["true"], // dummy to make join return non-null
+        [
+          for f in var.filestores
+          : "mount -t nfs -o async,hard,rw ${f.remote_mount} ${local._filestore_host_mount}${f.local_mount}"
+        ],
+        ["true"], // dummy to make join return non-null
+      )
+    )
     gcsfuse_host_mount = local._gcsfuse_host_mount
-    gcsfuse_mount_commands = local._has_gcsfuses ? join(
+    gcsfuse_mount_commands = join(
       " && ",
-      [
-        for g in var.gcsfuses
-        : "docker exec gcsfuse gcsfuse --implicit-dirs ${g.remote_mount} ${local._gcsfuse_host_mount}${g.local_mount}"
-      ],
-    ) : ""
-    host_mountpoints = local._has_network_storage ? join(
+      concat(
+        ["true"], // dummy to make join return non-null
+        [
+          for g in var.gcsfuses
+          : "docker exec gcsfuse gcsfuse --implicit-dirs ${g.remote_mount} ${local._gcsfuse_host_mount}${g.local_mount}"
+        ],
+        ["true"], // dummy to make join return non-null
+      )
+    )
+    host_mountpoints = join(
       " ",
       concat(
         [
@@ -81,25 +119,65 @@ locals {
           for m in var.gcsfuses[*].local_mount
           : "${local._gcsfuse_host_mount}${m}"
         ],
+        ["."], // dummy to make join return non-null and have mkdir succeed
       ),
-    ) : ""
+    )
   }
-  _aiinfra_network_storage = templatefile(
-    "${path.module}/templates/aiinfra_network_storage.yaml.template",
-    local._base_template_variables,
-  )
-  _aiinfra_pull_image = templatefile(
-    "${path.module}/templates/aiinfra_pull_image.yaml.template",
-    local._base_template_variables,
-  )
 
-  template_variables = merge(
-    local._base_template_variables,
+  _userdata_template_variables = merge(
     {
-      aiinfra_network_storage = local._aiinfra_network_storage,
-      aiinfra_pull_image      = local._aiinfra_pull_image
+      network_storage = {
+        file = templatefile(
+          "${path.module}/templates/aiinfra_network_storage.yaml.template",
+          local._network_storage_template_variables,
+        )
+        service = "aiinfra-network-storage"
+      }
+    },
+    var.container != null ? {
+      pull_image = {
+        file = templatefile(
+          "${path.module}/templates/aiinfra_pull_image.yaml.template",
+          local._container_template_variables,
+        )
+        service = "aiinfra-pull-image"
+      }
+      } : {
+      pull_image = { file = "", service = "", }
+    },
+    local.container.run_at_boot ? {
+      start_container = {
+        file = templatefile(
+          "${path.module}/templates/aiinfra_start_container.yaml.template",
+          local._container_template_variables,
+        )
+        service = "aiinfra-start-container"
+      }
+      start_container_gpu = {
+        file = templatefile(
+          "${path.module}/templates/aiinfra_start_container_gpu.yaml.template",
+          local._container_template_variables,
+        )
+        service = "aiinfra-start-container-gpu"
+      }
+      } : {
+      start_container     = { file = "", service = null, }
+      start_container_gpu = { file = "", service = null, }
     },
   )
+  userdata_template_variables = {
+    aiinfra_network_storage     = local._userdata_template_variables.network_storage.file
+    aiinfra_pull_image          = local._userdata_template_variables.pull_image.file
+    aiinfra_start_container     = local._userdata_template_variables.start_container.file
+    aiinfra_start_container_gpu = local._userdata_template_variables.start_container_gpu.file
+    aiinfra_services = join(
+      " ",
+      [
+        for k, v in local._userdata_template_variables
+        : v.service if v.service != null
+      ],
+    )
+  }
 }
 
 data "cloudinit_config" "config" {
@@ -110,7 +188,7 @@ data "cloudinit_config" "config" {
     content_type = "text/cloud-config"
     content = templatefile(
       "${path.module}/templates/userdata.yaml.template",
-      local.template_variables,
+      local.userdata_template_variables,
     )
     filename = "userdata.yaml"
   }
@@ -123,8 +201,8 @@ data "cloudinit_config" "config-gpu" {
   part {
     content_type = "text/cloud-config"
     content = templatefile(
-      "${path.module}/templates/userdata-gpu.yaml.template",
-      local.template_variables,
+      "${path.module}/templates/userdata_gpu.yaml.template",
+      local.userdata_template_variables,
     )
     filename = "userdata-gpu.yaml"
   }

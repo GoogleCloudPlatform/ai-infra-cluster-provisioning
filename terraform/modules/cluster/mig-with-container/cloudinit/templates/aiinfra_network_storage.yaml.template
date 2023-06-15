@@ -16,14 +16,14 @@
   owner: root
   content: |
     #!/bin/sh
-    [ -n "${host_mountpoints}" ] || exit 0
+    [ "${host_mountpoints}" != '.' ] || exit 0
     mkdir -p ${host_mountpoints}
     mount_filestores () {
-      [ -n "${filestore_mount_commands}" ] || return 0
+      [ "${filestore_mount_commands}" != 'true && true' ] || return 0
       ${filestore_mount_commands}
     }
     start_gcsfuse_container () {
-      [ -n "${gcsfuse_mount_commands}" ] || return 0
+      [ "${gcsfuse_mount_commands}" != 'true && true' ] || return 0
       docker build --tag gcsfuse /tmp/cloud/gcsfuse \
       && docker run --detach --rm \
         --privileged \
@@ -32,7 +32,7 @@
         gcsfuse
     }
     mount_gcsfuses () {
-      [ -n "${gcsfuse_mount_commands}" ] || return 0
+      [ "${gcsfuse_mount_commands}" != 'true && true' ] || return 0
       ${gcsfuse_mount_commands}
     }
     mount_filestores && start_gcsfuse_container && mount_gcsfuses
