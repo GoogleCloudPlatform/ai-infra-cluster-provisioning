@@ -142,25 +142,22 @@ locals {
         )
         service = "aiinfra-pull-image"
       }
-      } : {
-      pull_image = { file = "", service = null, }
-    },
-    local.container.run_at_boot ? {
       start_container = {
         file = templatefile(
           "${path.module}/templates/aiinfra_start_container.yaml.template",
           local._container_template_variables,
         )
-        service = "aiinfra-start-container"
+        service = local.container.run_at_boot ? "aiinfra-start-container" : null
       }
       start_container_gpu = {
         file = templatefile(
           "${path.module}/templates/aiinfra_start_container_gpu.yaml.template",
           local._container_template_variables,
         )
-        service = "aiinfra-start-container-gpu"
+        service = local.container.run_at_boot ? "aiinfra-start-container-gpu" : null
       }
       } : {
+      pull_image          = { file = "", service = null }
       start_container     = { file = "", service = null, }
       start_container_gpu = { file = "", service = null, }
     },
@@ -182,17 +179,11 @@ locals {
     aiinfra_start_container_gpu = local._userdata_template_variables.start_container_gpu.file
     aiinfra_services = join(
       " ",
-      [
-        for s in local._services
-        : s.service if s.service != null
-      ],
+      [for s in local._services : s.service if s.service != null],
     )
     aiinfra_services_gpu = join(
       " ",
-      [
-        for s in local._services_gpu
-        : s.service if s.service != null
-      ],
+      [for s in local._services_gpu : s.service if s.service != null],
     )
   }
 }
