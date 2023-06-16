@@ -16,8 +16,9 @@
 
 variable "container" {
   type = object({
-    image = string
-    cmd   = string
+    image       = string
+    cmd         = string
+    run_at_boot = bool
     run_options = object({
       custom               = list(string)
       enable_cloud_logging = bool
@@ -26,14 +27,9 @@ variable "container" {
   })
 
   validation {
-    condition     = var.container != null
-    error_message = "must not be null"
-  }
-
-  validation {
-    condition = alltrue(
+    condition = var.container != null ? alltrue(
       [for empty in [null, ""] : var.container.image != empty]
-    )
+    ) : true
     error_message = "must have non-empty image"
   }
 }

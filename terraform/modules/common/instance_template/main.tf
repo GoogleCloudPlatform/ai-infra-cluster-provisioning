@@ -27,8 +27,8 @@ locals {
     local.machine_image.name,
   )
   nic_type = anytrue([
-    for pattern in ["debian-11", "ubuntu", "gvnic"] :
-    length(regexall(pattern, local._image_or_family)) > 0
+    for pattern in ["debian-11", "ubuntu", "gvnic", "cos"]
+    : length(regexall(pattern, local._image_or_family)) > 0
   ]) ? "GVNIC" : "VIRTIO_NET"
 
 

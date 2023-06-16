@@ -3,38 +3,8 @@
 write_files:
 ${aiinfra_network_storage}
 ${aiinfra_pull_image}
-- path: /etc/systemd/system/aiinfra_start_container.sh
-  permissions: 0755
-  owner: root
-  content: |
-    #!/bin/sh
-    docker run \
-      --detach \
-      --hostname $(hostname) \
-      --ipc host \
-      --name aiinfra \
-      --network host \
-      --privileged \
-      --restart always \
-      ${docker_volume_flags} \
-      ${docker_run_options} \
-      ${docker_image} ${docker_cmd}
-- path: /etc/systemd/system/aiinfra-start-container.service
-  permissions: 0644
-  owner: root
-  content: |
-    [Unit]
-    After=aiinfra-network-storage.service aiinfra-pull-image.service
-    Description=Run a docker container
-    Requires=aiinfra-network-storage.service aiinfra-pull-image.service
-    [Service]
-    ExecStart=/etc/systemd/system/aiinfra_start_container.sh
-    RemainAfterExit=true
-    StandardError=journal+console
-    StandardOutput=journal+console
-    Type=oneshot
-    User=root
+${aiinfra_start_container}
 
 runcmd:
 - systemctl daemon-reload
-- systemctl start aiinfra-network-storage aiinfra-pull-image aiinfra-start-container
+- systemctl start ${aiinfra_services}

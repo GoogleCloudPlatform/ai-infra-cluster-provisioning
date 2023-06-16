@@ -16,26 +16,23 @@
   owner: root
   content: |
     #!/bin/sh
-    [ -n "${host_mountpoints}" ] || exit 0
+    [ "${host_mountpoints}" != '.' ] || exit 0
     mkdir -p ${host_mountpoints}
     mount_filestores () {
-      [ -n "${filestore_mount_commands}" ] || return 0
+      [ "${filestore_mount_commands}" != 'true && true' ] || return 0
       ${filestore_mount_commands}
     }
-    start_gcsfuse_container () {
-      [ -n "${gcsfuse_mount_commands}" ] || return 0
+    mount_gcsfuses () {
+      [ "${gcsfuse_mount_commands}" != 'true && true' ] || return 0
       docker build --tag gcsfuse /tmp/cloud/gcsfuse \
       && docker run --detach --rm \
         --privileged \
         --volume ${gcsfuse_host_mount}:${gcsfuse_host_mount}:rw,rshared \
         --name gcsfuse \
-        gcsfuse
+        gcsfuse \
+      && ${gcsfuse_mount_commands}
     }
-    mount_gcsfuses () {
-      [ -n "${gcsfuse_mount_commands}" ] || return 0
-      ${gcsfuse_mount_commands}
-    }
-    mount_filestores && start_gcsfuse_container && mount_gcsfuses
+    mount_filestores && mount_gcsfuses
 - path: /etc/systemd/system/aiinfra-network-storage.service
   permissions: 0644
   owner: root
