@@ -35,7 +35,7 @@ steps:
     'run', '--network=cloudbuild',
     'test', "${PROJECT_ID}", "ci-${BUILD_ID}" ]
 
-timeout: 3600s
+timeout: 5400s
 
 substitutions:
   _VERSION: 'v0.7.0'
