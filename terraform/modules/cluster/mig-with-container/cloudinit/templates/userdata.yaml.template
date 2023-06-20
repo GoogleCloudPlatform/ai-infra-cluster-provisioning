@@ -1,0 +1,10 @@
+# cloud-config
+
+write_files:
+${aiinfra_network_storage}
+${aiinfra_pull_image}
+${aiinfra_start_container}
+
+runcmd:
+- systemctl daemon-reload
+- systemctl start ${aiinfra_services}

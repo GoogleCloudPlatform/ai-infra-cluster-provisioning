@@ -59,9 +59,6 @@ runner::parse_args () {
                 2)
                     runner_arg_resource_prefix="${1}"
                     ;;
-                3)
-                    runner_opt_filter="${1}"
-                    ;;
                 *)
                     echo >&2 "too many parameters starting at '${1}'"
                     return 1
@@ -95,6 +92,12 @@ runner::validate_args () {
         echo "resource_prefix='${runner_arg_resource_prefix}'"
         echo "  - Must non-empty string"
         valid=false
+    } >&2
+
+    [ "${#runner_arg_resource_prefix}" -gt 11 ] && {
+        echo "Splitting resource_prefix".
+        runner_arg_resource_prefix=${runner_arg_resource_prefix:0:11}
+        echo "New resource_prefix is ${runner_arg_resource_prefix}."
     } >&2
 
     [ -n "${runner_opt_filter}" ] || {

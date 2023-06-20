@@ -40,7 +40,6 @@ locals {
       source      = var.startup_script_file
     }] : [],
   )
-
 }
 
 module "dashboard" {
@@ -114,7 +113,7 @@ module "compute_instance_template" {
   guest_accelerator     = var.guest_accelerator
   machine_image         = var.machine_image
   machine_type          = var.machine_type
-  metadata              = null
+  metadata              = var.metadata
   project_id            = var.project_id
   region                = local.region
   resource_prefix       = var.resource_prefix

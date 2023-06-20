@@ -1,7 +1,7 @@
 compute_partitions = [{
   node_count_static = 2
   partition_name    = "compute"
-  zone              = "us-central1-a"
+  zone              = "us-central1-f"
 
   disk_size_gb        = null
   disk_type           = null

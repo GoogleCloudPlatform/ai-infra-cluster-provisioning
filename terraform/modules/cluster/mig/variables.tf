@@ -224,28 +224,6 @@ variable "machine_image" {
     family  = "pytorch-latest-gpu-debian-11-py310"
     name    = null
   }
-
-  validation {
-    condition = (
-      var.machine_image != null
-      // project is non-empty
-      && alltrue([
-        for empty in [null, ""]
-        : var.machine_image.project != empty
-      ])
-      // at least one is non-empty
-      && anytrue([
-        for value in [var.machine_image.name, var.machine_image.family]
-        : alltrue([for empty in [null, ""] : value != empty])
-      ])
-      // at least one is empty
-      && anytrue([
-        for value in [var.machine_image.name, var.machine_image.family]
-        : anytrue([for empty in [null, ""] : value == empty])
-      ])
-    )
-    error_message = "project must be non-empty exactly one of family or name must be non-empty"
-  }
 }
 
 variable "machine_type" {
@@ -256,6 +234,16 @@ variable "machine_type" {
     EOT
   type        = string
   default     = "a2-highgpu-2g"
+}
+
+variable "metadata" {
+  description = <<-EOT
+    GCE metadata to attach to each instance.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#metadata), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--metadata).
+    EOT
+  type        = map(string)
+  default     = {}
 }
 
 variable "network_config" {

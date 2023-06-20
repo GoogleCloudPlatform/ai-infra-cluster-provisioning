@@ -31,7 +31,7 @@ ENTRYPOINT ["./test/continuous/run.sh"]
 
 
 FROM base as deploy
-RUN for cluster in gke mig slurm; do \
+RUN for cluster in gke mig mig-with-container slurm; do \
     terraform -chdir="./terraform/modules/cluster/${cluster}" init; done
 COPY scripts ./scripts
 ENTRYPOINT ["./scripts/entrypoint.sh"]
