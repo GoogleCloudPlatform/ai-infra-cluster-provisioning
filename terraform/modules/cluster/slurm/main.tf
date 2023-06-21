@@ -251,6 +251,7 @@ module "compute_instance_templates" {
   project_id            = var.project_id
   region                = local.compute_partitions[each.key].region
   resource_prefix       = "${var.resource_prefix}-${each.key}"
+  use_static_naming     = true
   service_account       = var.service_account
   startup_script        = module.compute_startups[each.key].startup_script
   subnetwork_self_links = module.network.subnetwork_self_links
@@ -274,6 +275,7 @@ module "controller_instance_template" {
   project_id            = var.project_id
   region                = local.controller_var.region
   resource_prefix       = "${var.resource_prefix}-controller"
+  use_static_naming     = true
   service_account       = var.service_account
   startup_script        = module.controller_startup.startup_script
   subnetwork_self_links = module.network.subnetwork_self_links
@@ -297,6 +299,7 @@ module "login_instance_template" {
   project_id            = var.project_id
   region                = local.login_var.region
   resource_prefix       = "${var.resource_prefix}-login"
+  use_static_naming     = true
   service_account       = var.service_account
   startup_script        = null
   subnetwork_self_links = module.network.subnetwork_self_links

@@ -25,7 +25,7 @@ docker run \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
   --rm us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create mig 
+  create mig-with-container
 ```
 
 ## Usage via Terraform
