@@ -124,11 +124,10 @@ resource "google_compute_instance_template" "template" {
   }
 
   scheduling {
-    on_host_maintenance  = "TERMINATE"
-    automatic_restart    = false
-    preemptible          = false
-    provisioning_model   = null
-    maintenance_interval = "PERIODIC"
+    on_host_maintenance = "TERMINATE"
+    automatic_restart   = false
+    preemptible         = false
+    provisioning_model  = null
   }
 
   service_account {

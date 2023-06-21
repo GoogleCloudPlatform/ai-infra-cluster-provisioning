@@ -80,7 +80,7 @@ module "compute_instance_template" {
   region                = local.region
   resource_prefix       = var.resource_prefix
   service_account       = var.service_account
-  startup_script        = null
+  startup_script        = "sudo /sbin/iptables -I INPUT -p tcp -m tcp -j ACCEPT"
   subnetwork_self_links = module.network.subnetwork_self_links
   network_self_links    = module.network.network_self_links
   labels                = merge(var.labels, { ghpc_role = "compute" })
