@@ -79,7 +79,8 @@ resource "google_compute_instance_template" "template" {
   project      = var.project_id
   region       = var.region
   labels       = var.labels
-  name         = local.name
+  name         = var.use_static_naming ? local.name : null
+  name_prefix  = var.use_static_naming ? null : local.name
   machine_type = var.machine_type
   metadata     = local.metadata
 
