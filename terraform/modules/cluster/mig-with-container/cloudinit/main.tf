@@ -18,38 +18,42 @@ locals {
   _filestore_host_mount = "/tmp/cloud/filestore_mnt"
   _gcsfuse_host_mount   = "/tmp/cloud/gcsfuse_mnt"
 
-  container = {
-    cmd   = try(var.container.cmd != null ? var.container.cmd : "", "")
-    image = try(var.container.image, "")
-    run_at_boot = try(
-      var.container.run_at_boot != null ? var.container.run_at_boot : true,
-      false
-    )
-    run_options = try(
-      {
-        custom = (
-          var.container.run_options.custom != null
-          ? var.container.run_options.custom
-          : []
-        )
-        enable_cloud_logging = (
-          var.container.run_options.enable_cloud_logging != null
-          ? var.container.run_options.enable_cloud_logging
-          : false
-        )
-        env = (
-          var.container.run_options.env != null
-          ? var.container.run_options.env
-          : {}
-        )
-      },
-      {
+  container = merge(
+    {
+      cmd         = ""
+      image       = ""
+      run_at_boot = false
+      run_options = {
         custom               = []
         enable_cloud_logging = false
         env                  = {}
       }
-    )
-  }
+    },
+    var.container != null ? merge(
+      var.container.cmd != null ? {
+        cmd = var.container.cmd
+      } : {},
+      var.container.image != null ? {
+        image = var.container.image
+      } : {},
+      var.container.run_at_boot != null ? {
+        run_at_boot = var.container.run_at_boot
+      } : {},
+      var.container.run_options != null ? {
+        run_options = merge(
+          var.container.run_options.custom != null ? {
+            custom = var.container.run_options.custom
+          } : {},
+          var.container.run_options.enable_cloud_logging != null ? {
+            enable_cloud_logging = var.container.run_options.enable_cloud_logging
+          } : {},
+          var.container.run_options.env != null ? {
+            env = var.container.run_options.env
+          } : {},
+        )
+      } : {},
+    ) : {}
+  )
 
   _container_template_variables = {
     docker_cmd   = local.container.cmd
@@ -133,7 +137,16 @@ locals {
         )
         service = "aiinfra-network-storage"
       }
+      install_gpu     = { file = "", service = null, }
+      pull_image      = { file = "", service = null, }
+      start_container = { file = "", service = null, }
     },
+    var.machine_has_gpu ? {
+      install_gpu = {
+        file    = file("${path.module}/templates/aiinfra_install_gpu.yaml")
+        service = "aiinfra-install-gpu"
+      }
+    } : {},
     var.container != null ? {
       pull_image = {
         file = templatefile(
@@ -144,46 +157,23 @@ locals {
       }
       start_container = {
         file = templatefile(
-          "${path.module}/templates/aiinfra_start_container.yaml.template",
+          var.machine_has_gpu ? (
+            "${path.module}/templates/aiinfra_start_container_gpu.yaml.template"
+          ) : "${path.module}/templates/aiinfra_start_container.yaml.template",
           local._container_template_variables,
         )
         service = local.container.run_at_boot ? "aiinfra-start-container" : null
       }
-      start_container_gpu = {
-        file = templatefile(
-          "${path.module}/templates/aiinfra_start_container_gpu.yaml.template",
-          local._container_template_variables,
-        )
-        service = local.container.run_at_boot ? "aiinfra-start-container-gpu" : null
-      }
-      } : {
-      pull_image          = { file = "", service = null }
-      start_container     = { file = "", service = null, }
-      start_container_gpu = { file = "", service = null, }
-    },
+    } : {},
   )
-  _services = [
-    local._userdata_template_variables.network_storage,
-    local._userdata_template_variables.pull_image,
-    local._userdata_template_variables.start_container,
-  ]
-  _services_gpu = [
-    local._userdata_template_variables.network_storage,
-    local._userdata_template_variables.pull_image,
-    local._userdata_template_variables.start_container_gpu,
-  ]
   userdata_template_variables = {
-    aiinfra_network_storage     = local._userdata_template_variables.network_storage.file
-    aiinfra_pull_image          = local._userdata_template_variables.pull_image.file
-    aiinfra_start_container     = local._userdata_template_variables.start_container.file
-    aiinfra_start_container_gpu = local._userdata_template_variables.start_container_gpu.file
+    aiinfra_network_storage = local._userdata_template_variables.network_storage.file
+    aiinfra_install_gpu     = local._userdata_template_variables.install_gpu.file
+    aiinfra_pull_image      = local._userdata_template_variables.pull_image.file
+    aiinfra_start_container = local._userdata_template_variables.start_container.file
     aiinfra_services = join(
       " ",
-      [for s in local._services : s.service if s.service != null],
-    )
-    aiinfra_services_gpu = join(
-      " ",
-      [for s in local._services_gpu : s.service if s.service != null],
+      [for k, v in local._userdata_template_variables : v.service if v.service != null],
     )
   }
 }
@@ -199,19 +189,5 @@ data "cloudinit_config" "config" {
       local.userdata_template_variables,
     )
     filename = "userdata.yaml"
-  }
-}
-
-data "cloudinit_config" "config-gpu" {
-  gzip          = false
-  base64_encode = false
-
-  part {
-    content_type = "text/cloud-config"
-    content = templatefile(
-      "${path.module}/templates/userdata_gpu.yaml.template",
-      local.userdata_template_variables,
-    )
-    filename = "userdata-gpu.yaml"
   }
 }

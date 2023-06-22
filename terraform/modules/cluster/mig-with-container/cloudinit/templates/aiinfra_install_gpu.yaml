@@ -1,6 +1,3 @@
-# cloud-config
-
-write_files:
 - path: /etc/systemd/system/aiinfra_install_gpu.sh
   permissions: 0755
   owner: root
@@ -24,10 +21,3 @@ write_files:
     StandardError=journal+console
     Type=oneshot
     User=root
-${aiinfra_network_storage}
-${aiinfra_pull_image}
-${aiinfra_start_container_gpu}
-
-runcmd:
-- systemctl daemon-reload
-- systemctl start aiinfra-install-gpu ${aiinfra_services_gpu}

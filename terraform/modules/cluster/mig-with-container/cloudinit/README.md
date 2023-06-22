@@ -32,7 +32,6 @@ No modules.
 | Name | Type |
 |------|------|
 | [cloudinit_config.config](https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/config) | data source |
-| [cloudinit_config.config-gpu](https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/config) | data source |
 
 ## Inputs
 

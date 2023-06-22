@@ -1,6 +1,7 @@
 # cloud-config
 
 write_files:
+${aiinfra_install_gpu}
 ${aiinfra_network_storage}
 ${aiinfra_pull_image}
 ${aiinfra_start_container}

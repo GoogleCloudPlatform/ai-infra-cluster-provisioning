@@ -15,9 +15,5 @@
 */
 
 output "user-data" {
-  value = (
-    var.machine_has_gpu
-    ? "${data.cloudinit_config.config-gpu.rendered}"
-    : "${data.cloudinit_config.config.rendered}"
-  )
+  value = data.cloudinit_config.config.rendered
 }

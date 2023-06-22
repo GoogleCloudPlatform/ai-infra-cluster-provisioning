@@ -1,4 +1,4 @@
-- path: /etc/systemd/system/aiinfra_start_container_gpu.sh
+- path: /etc/systemd/system/aiinfra_start_container.sh
   permissions: 0755
   owner: root
   content: |
@@ -20,7 +20,7 @@
       ${docker_volume_flags} \
       ${docker_run_options} \
       ${docker_image} ${docker_cmd}
-- path: /etc/systemd/system/aiinfra-start-container-gpu.service
+- path: /etc/systemd/system/aiinfra-start-container.service
   permissions: 0644
   owner: root
   content: |
@@ -29,7 +29,7 @@
     Requires=aiinfra-install-gpu.service aiinfra-network-storage.service aiinfra-pull-image.service
     Description=Run a GPU docker container
     [Service]
-    ExecStart=/etc/systemd/system/aiinfra_start_container_gpu.sh
+    ExecStart=/etc/systemd/system/aiinfra_start_container.sh
     RemainAfterExit=true
     StandardError=journal+console
     StandardOutput=journal+console
