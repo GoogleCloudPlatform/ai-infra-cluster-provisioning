@@ -19,24 +19,21 @@ No requirements.
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | n/a |
+No providers.
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_cloudinit"></a> [cloudinit](#module\_cloudinit) | ./cloudinit | n/a |
+| <a name="module_compute_instance_group_manager"></a> [compute\_instance\_group\_manager](#module\_compute\_instance\_group\_manager) | ../../common/instance_group_manager | n/a |
 | <a name="module_compute_instance_template"></a> [compute\_instance\_template](#module\_compute\_instance\_template) | ../../common/instance_template | n/a |
 | <a name="module_filestore"></a> [filestore](#module\_filestore) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore// | v1.17.0 |
 | <a name="module_network"></a> [network](#module\_network) | ../../common/network | n/a |
 
 ## Resources
 
-| Name | Type |
-|------|------|
-| [google-beta_google_compute_instance_group_manager.mig](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_compute_instance_group_manager) | resource |
+No resources.
 
 ## Inputs
 
@@ -56,6 +53,7 @@ No requirements.
 | <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | Arbitrary string with which all names of newly created resources will be prefixed. | `string` | n/a | yes |
 | <a name="input_service_account"></a> [service\_account](#input\_service\_account) | Service account to attach to the instance.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#service_account).<br><br>------------<br>`service_account.email`<br><br>The service account e-mail address. If not given, the default Google Compute Engine service account is used.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#email), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--service-account).<br><br>------------<br>`service_account.scopes`<br><br>A list of service scopes. Both OAuth2 URLs and gcloud short names are supported. To allow full access to all Cloud APIs, use the `"cloud-platform"` scope. See a complete list of scopes [here](https://cloud.google.com/sdk/gcloud/reference/alpha/compute/instances/set-scopes#--scopes).<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#scopes), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--scopes). | <pre>object({<br>    email  = string,<br>    scopes = set(string)<br>  })</pre> | `null` | no |
 | <a name="input_target_size"></a> [target\_size](#input\_target\_size) | The number of running instances for this managed instance group.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#target_size), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--size). | `number` | n/a | yes |
+| <a name="input_wait_for_instance"></a> [wait\_for\_instance](#input\_wait\_for\_instance) | Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_group_manager#wait_for_instances). | `bool` | `true` | no |
 | <a name="input_zone"></a> [zone](#input\_zone) | The zone that instances in this group should be created in.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone). | `string` | n/a | yes |
 
 ## Outputs

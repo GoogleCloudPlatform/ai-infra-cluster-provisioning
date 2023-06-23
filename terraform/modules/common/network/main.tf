@@ -26,9 +26,10 @@ module "single_new_vpc" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=v1.17.0"
   count  = var.network_config == "new_single_nic" ? 1 : 0
 
-  project_id      = var.project_id
-  region          = var.region
-  deployment_name = var.resource_prefix
+  project_id           = var.project_id
+  region               = var.region
+  deployment_name      = var.resource_prefix
+  network_routing_mode = "REGIONAL"
 }
 
 module "multiple_new_vpcs" {
@@ -41,9 +42,10 @@ module "multiple_new_vpcs" {
     subnet_name   = "${var.resource_prefix}-primary-subnet-${count.index}"
     subnet_region = var.region
   }]
-  ips_per_nat     = count.index == 0 ? 2 : 0
-  region          = var.region
-  deployment_name = var.resource_prefix
-  project_id      = var.project_id
-  network_name    = "${var.resource_prefix}-net-${count.index}"
+  ips_per_nat          = count.index == 0 ? 2 : 0
+  region               = var.region
+  deployment_name      = var.resource_prefix
+  project_id           = var.project_id
+  network_name         = "${var.resource_prefix}-net-${count.index}"
+  network_routing_mode = "REGIONAL"
 }
