@@ -40,7 +40,7 @@
             "region": "us-central1",
             "scheduling": [
               {
-                "automatic_restart": false,
+                "automatic_restart": true,
                 "on_host_maintenance": "TERMINATE"
               }
             ],

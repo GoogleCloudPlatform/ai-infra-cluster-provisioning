@@ -4,30 +4,9 @@
       "child_modules": [
         {
           "address": "module.compute_instance_template"
-        }
-      ],
-      "resources": [
+        },
         {
-          "address": "google_compute_instance_group_manager.mig",
-          "values": {
-            "target_size": 1,
-            "update_policy": [
-              {
-                "max_unavailable_fixed": 1,
-                "minimal_action": "RESTART",
-                "replacement_method": "RECREATE",
-                "type": "OPPORTUNISTIC"
-              }
-            ],
-            "version": [
-              {
-                "name": "default",
-                "target_size": []
-              }
-            ],
-            "wait_for_instances": true,
-            "zone": "us-central1-a"
-          }
+          "address": "module.compute_instance_group_manager"
         }
       ]
     }

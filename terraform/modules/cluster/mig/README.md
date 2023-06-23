@@ -19,14 +19,13 @@ No requirements.
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | n/a |
+No providers.
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
+| <a name="module_compute_instance_group_manager"></a> [compute\_instance\_group\_manager](#module\_compute\_instance\_group\_manager) | ../../common/instance_group_manager | n/a |
 | <a name="module_compute_instance_template"></a> [compute\_instance\_template](#module\_compute\_instance\_template) | ../../common/instance_template | n/a |
 | <a name="module_dashboard"></a> [dashboard](#module\_dashboard) | ../../common/dashboard | n/a |
 | <a name="module_filestore"></a> [filestore](#module\_filestore) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/file-system/filestore// | v1.17.0 |
@@ -36,9 +35,7 @@ No requirements.
 
 ## Resources
 
-| Name | Type |
-|------|------|
-| [google-beta_google_compute_instance_group_manager.mig](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_compute_instance_group_manager) | resource |
+No resources.
 
 ## Inputs
 
@@ -63,6 +60,7 @@ No requirements.
 | <a name="input_startup_script_file"></a> [startup\_script\_file](#input\_startup\_script\_file) | The full path in the VM to the shell script to be executed at VM startup. | `string` | `null` | no |
 | <a name="input_startup_script_gcs_bucket_path"></a> [startup\_script\_gcs\_bucket\_path](#input\_startup\_script\_gcs\_bucket\_path) | The storage bucket full path to be used for storing the startup script.<br>Example: `gs://bucketName/dirName`<br><br>If the value is not provided, then a default storage bucket will be created for the script execution.<br>`storage.buckets.create` IAM permission is needed for creating the default storage bucket. | `string` | `null` | no |
 | <a name="input_target_size"></a> [target\_size](#input\_target\_size) | The number of running instances for this managed instance group.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#target_size), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--size). | `number` | n/a | yes |
+| <a name="input_wait_for_instance"></a> [wait\_for\_instance](#input\_wait\_for\_instance) | Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_group_manager#wait_for_instances). | `bool` | `true` | no |
 | <a name="input_zone"></a> [zone](#input\_zone) | The zone that instances in this group should be created in.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone). | `string` | n/a | yes |
 
 ## Outputs

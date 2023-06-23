@@ -119,14 +119,9 @@ resource "google_compute_instance_template" "template" {
     }
   }
 
-  // This needs to be set to TIER_1 for maximum VM egress bandwidth.
-  network_performance_config {
-    total_egress_bandwidth_tier = "DEFAULT"
-  }
-
   scheduling {
     on_host_maintenance = "TERMINATE"
-    automatic_restart   = false
+    automatic_restart   = true
     preemptible         = false
     provisioning_model  = null
   }
