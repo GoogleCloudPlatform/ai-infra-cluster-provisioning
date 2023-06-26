@@ -34,6 +34,7 @@ module "default_vpc" {
 resource "google_compute_network" "networks" {
   count                   = local.vpc_count
   name                    = "${var.resource_prefix}-net-${count.index}"
+  project                 = var.project_id
   auto_create_subnetworks = false
   mtu                     = 8896
 }
@@ -41,6 +42,7 @@ resource "google_compute_network" "networks" {
 resource "google_compute_subnetwork" "subnets" {
   count         = local.vpc_count
   name          = "${var.resource_prefix}-sub-${count.index}"
+  project       = var.project_id
   ip_cidr_range = "192.168.${count.index}.0/24"
   region        = var.region
   network       = google_compute_network.networks[count.index].self_link
@@ -49,6 +51,7 @@ resource "google_compute_subnetwork" "subnets" {
 resource "google_compute_firewall" "firewall-allow-tcp-udp-icmp" {
   count         = local.vpc_count
   name          = "${var.resource_prefix}-internal-${count.index}"
+  project       = var.project_id
   description   = "allow traffic between nodes of this VPC"
   direction     = "INGRESS"
   network       = google_compute_network.networks[count.index].self_link
@@ -70,6 +73,7 @@ resource "google_compute_firewall" "firewall-allow-tcp-udp-icmp" {
 resource "google_compute_firewall" "firewall-allow-icmp" {
   count         = local.vpc_count > 0 ? 1 : 0
   name          = "${var.resource_prefix}-allow-ping-net-0"
+  project       = var.project_id
   description   = "allow icmp ping access"
   direction     = "INGRESS"
   network       = google_compute_network.networks[0].self_link
@@ -82,6 +86,7 @@ resource "google_compute_firewall" "firewall-allow-icmp" {
 resource "google_compute_firewall" "firewall-allow-iap-ssh" {
   count       = local.vpc_count > 0 ? 1 : 0
   name        = "${var.resource_prefix}-allow-iap-ssh-net-0"
+  project     = var.project_id
   description = "allow SSH access via Identity-Aware Proxy"
   direction   = "INGRESS"
   network     = google_compute_network.networks[0].self_link
