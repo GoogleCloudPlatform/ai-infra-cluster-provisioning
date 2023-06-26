@@ -23,19 +23,25 @@ limitations under the License.
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_google"></a> [google](#provider\_google) | >= 3.83 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_default_vpc"></a> [default\_vpc](#module\_default\_vpc) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc// | v1.17.0 |
-| <a name="module_multiple_new_vpcs"></a> [multiple\_new\_vpcs](#module\_multiple\_new\_vpcs) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc// | v1.17.0 |
-| <a name="module_single_new_vpc"></a> [single\_new\_vpc](#module\_single\_new\_vpc) | github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc// | v1.17.0 |
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [google_compute_firewall.all_ssh](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.firewalls](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.firewalls-ping](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_network.networks](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network) | resource |
+| [google_compute_subnetwork.subnets](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork) | resource |
 
 ## Inputs
 
