@@ -1,4 +1,4 @@
-- path: /etc/systemd/system/aiinfra_install_gpu.sh
+- path: /etc/systemd/system/aiinfra/install_gpu.sh
   permissions: 0755
   owner: root
   content: |
@@ -15,7 +15,7 @@
     Description=Install GPU drivers
     Wants=gcr-online.target docker.socket
     [Service]
-    ExecStart=/etc/systemd/system/aiinfra_install_gpu.sh
+    ExecStart=/etc/systemd/system/aiinfra/install_gpu.sh
     RemainAfterExit=true
     StandardOutput=journal+console
     StandardError=journal+console

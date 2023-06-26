@@ -1,0 +1,32 @@
+- path: /etc/systemd/system/aiinfra/startup_scripts_all.sh
+  permissions: 0755
+  owner: root
+  content: |
+    /etc/systemd/system/aiinfra/startup_script.sh
+    /etc/systemd/system/aiinfra/startup_scripts_all.sh
+- path: /etc/systemd/system/aiinfra/startup_script.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh
+    /sbin/iptables -I INPUT -p tcp -m tcp -j ACCEPT
+- path: /etc/systemd/system/aiinfra/startup_script_custom.sh
+  permissions: 0755
+  owner: root
+  content: |
+    ${script}
+- path: /etc/systemd/system/aiinfra-install-gpu.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Unit]
+    After=${requirements}
+    Description=Install GPU drivers
+    Wants=${requirements}
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra/startup_scripts_all.sh
+    RemainAfterExit=true
+    StandardOutput=journal+console
+    StandardError=journal+console
+    Type=oneshot
+    User=root

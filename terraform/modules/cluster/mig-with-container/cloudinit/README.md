@@ -41,6 +41,7 @@ No modules.
 | <a name="input_filestores"></a> [filestores](#input\_filestores) | n/a | <pre>list(object({<br>    local_mount  = string<br>    remote_mount = string<br>  }))</pre> | n/a | yes |
 | <a name="input_gcsfuses"></a> [gcsfuses](#input\_gcsfuses) | n/a | <pre>list(object({<br>    local_mount  = string<br>    remote_mount = string<br>  }))</pre> | n/a | yes |
 | <a name="input_machine_has_gpu"></a> [machine\_has\_gpu](#input\_machine\_has\_gpu) | n/a | `bool` | n/a | yes |
+| <a name="input_startup_script"></a> [startup\_script](#input\_startup\_script) | n/a | `string` | n/a | yes |
 
 ## Outputs
 

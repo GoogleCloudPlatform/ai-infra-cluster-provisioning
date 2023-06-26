@@ -284,6 +284,12 @@ variable "service_account" {
   default = null
 }
 
+variable "startup_script" {
+  description = "Shell script -- the actual script (not the filename)."
+  type        = string
+  default     = null
+}
+
 variable "wait_for_instance" {
   description = <<-EOT
     Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.

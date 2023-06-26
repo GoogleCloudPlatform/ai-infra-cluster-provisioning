@@ -91,3 +91,7 @@ variable "machine_has_gpu" {
     error_message = "must not be null"
   }
 }
+
+variable "startup_script" {
+  type = string
+}
