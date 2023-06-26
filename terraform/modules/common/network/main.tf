@@ -46,7 +46,7 @@ resource "google_compute_subnetwork" "subnets" {
   network       = google_compute_network.networks[count.index].self_link
 }
 
-resource "google_compute_firewall" "firewalls" {
+resource "google_compute_firewall" "firewall-allow-tcp-udp-icmp" {
   count         = local.vpc_count
   name          = "${var.resource_prefix}-internal-${count.index}"
   description   = "allow traffic between nodes of this VPC"
@@ -67,7 +67,7 @@ resource "google_compute_firewall" "firewalls" {
 }
 
 // Assumes that an external IP is only created for vNIC 0
-resource "google_compute_firewall" "firewalls-ping" {
+resource "google_compute_firewall" "firewall-allow-icmp" {
   count         = local.vpc_count > 0 ? 1 : 0
   name          = "${var.resource_prefix}-allow-ping-net-0"
   description   = "allow icmp ping access"
@@ -79,7 +79,7 @@ resource "google_compute_firewall" "firewalls-ping" {
   }
 }
 
-resource "google_compute_firewall" "all_ssh" {
+resource "google_compute_firewall" "firewall-allow-iap-ssh" {
   count       = local.vpc_count > 0 ? 1 : 0
   name        = "${var.resource_prefix}-allow-iap-ssh-net-0"
   description = "allow SSH access via Identity-Aware Proxy"

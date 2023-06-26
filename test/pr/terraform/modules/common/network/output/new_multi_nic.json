@@ -3,7 +3,7 @@
     "root_module": {
       "resources":[
         {
-           "address":"google_compute_firewall.all_ssh[0]",
+           "address":"google_compute_firewall.firewall-allow-iap-ssh[0]",
            "values":{
               "source_ranges":[
                  "35.235.240.0/20"
@@ -11,13 +11,13 @@
            }
         },
         {
-           "address":"google_compute_firewall.firewalls-ping[0]",
+           "address":"google_compute_firewall.firewall-allow-icmp[0]",
            "values":{
               "description":"allow icmp ping access"
            }
         },
         {
-           "address":"google_compute_firewall.firewalls[0]",
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[0]",
            "values":{
               "source_ranges":[
                  "192.168.0.0/16"
@@ -25,7 +25,7 @@
            }
         },
         {
-           "address":"google_compute_firewall.firewalls[1]",
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[1]",
            "values":{
               "source_ranges":[
                  "192.168.0.0/16"
@@ -33,7 +33,7 @@
            }
         },
         {
-           "address":"google_compute_firewall.firewalls[2]",
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[2]",
            "values":{
               "source_ranges":[
                  "192.168.0.0/16"
@@ -41,7 +41,7 @@
            }
         },
         {
-           "address":"google_compute_firewall.firewalls[3]",
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[3]",
            "values":{
               "source_ranges":[
                  "192.168.0.0/16"
@@ -49,7 +49,7 @@
            }
         },
         {
-           "address":"google_compute_firewall.firewalls[4]",
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[4]",
            "values":{
               "source_ranges":[
                  "192.168.0.0/16"
