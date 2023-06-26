@@ -1,23 +1,122 @@
 {
   "planned_values": {
     "root_module": {
-      "child_modules": [
+      "resources":[
         {
-          "address": "module.multiple_new_vpcs[0]"
+           "address":"google_compute_firewall.firewall-allow-iap-ssh[0]",
+           "values":{
+              "source_ranges":[
+                 "35.235.240.0/20"
+              ]
+           }
         },
         {
-          "address": "module.multiple_new_vpcs[1]"
+           "address":"google_compute_firewall.firewall-allow-icmp[0]",
+           "values":{
+              "description":"allow icmp ping access"
+           }
         },
         {
-          "address": "module.multiple_new_vpcs[2]"
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[0]",
+           "values":{
+              "source_ranges":[
+                 "192.168.0.0/16"
+              ]
+           }
         },
         {
-          "address": "module.multiple_new_vpcs[3]"
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[1]",
+           "values":{
+              "source_ranges":[
+                 "192.168.0.0/16"
+              ]
+           }
         },
         {
-          "address": "module.multiple_new_vpcs[4]"
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[2]",
+           "values":{
+              "source_ranges":[
+                 "192.168.0.0/16"
+              ]
+           }
+        },
+        {
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[3]",
+           "values":{
+              "source_ranges":[
+                 "192.168.0.0/16"
+              ]
+           }
+        },
+        {
+           "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[4]",
+           "values":{
+              "source_ranges":[
+                 "192.168.0.0/16"
+              ]
+           }
+        },
+        {
+           "address":"google_compute_network.networks[0]",
+           "values":{
+              "mtu":8896
+           }
+        },
+        {
+           "address":"google_compute_network.networks[1]",
+           "values":{
+              "mtu":8896
+           }
+        },
+        {
+           "address":"google_compute_network.networks[2]",
+           "values":{
+              "mtu":8896
+           }
+        },
+        {
+           "address":"google_compute_network.networks[3]",
+           "values":{
+              "mtu":8896
+           }
+        },
+        {
+           "address":"google_compute_network.networks[4]",
+           "values":{
+              "mtu":8896
+           }
+        },
+        {
+           "address":"google_compute_subnetwork.subnets[0]",
+           "values":{
+              "ip_cidr_range":"192.168.0.0/24"
+           }
+        },
+        {
+           "address":"google_compute_subnetwork.subnets[1]",
+           "values":{
+              "ip_cidr_range":"192.168.1.0/24"
+           }
+        },
+        {
+           "address":"google_compute_subnetwork.subnets[2]",
+           "values":{
+              "ip_cidr_range":"192.168.2.0/24"
+           }
+        },
+        {
+           "address":"google_compute_subnetwork.subnets[3]",
+           "values":{
+              "ip_cidr_range":"192.168.3.0/24"
+           }
+        },
+        {
+           "address":"google_compute_subnetwork.subnets[4]",
+           "values":{
+              "ip_cidr_range":"192.168.4.0/24"
+           }
         }
-      ]
+     ]
     }
   }
 }

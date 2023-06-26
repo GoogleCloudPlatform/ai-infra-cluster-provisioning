@@ -14,6 +14,15 @@
  * limitations under the License.
 */
 
+locals {
+  vpc_count_map = {
+    "default"        = 0
+    "new_multi_nic"  = 5
+    "new_single_nic" = 1
+  }
+  vpc_count = lookup(local.vpc_count_map, var.network_config, 0)
+}
+
 module "default_vpc" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=v1.17.0"
   count  = var.network_config == "default" ? 1 : 0
@@ -22,30 +31,63 @@ module "default_vpc" {
   region     = var.region
 }
 
-module "single_new_vpc" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=v1.17.0"
-  count  = var.network_config == "new_single_nic" ? 1 : 0
-
-  project_id           = var.project_id
-  region               = var.region
-  deployment_name      = var.resource_prefix
-  network_routing_mode = "REGIONAL"
+resource "google_compute_network" "networks" {
+  count                   = local.vpc_count
+  name                    = "${var.resource_prefix}-net-${count.index}"
+  auto_create_subnetworks = false
+  mtu                     = 8896
 }
 
-module "multiple_new_vpcs" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/vpc//?ref=v1.17.0"
-  count  = var.network_config == "new_multi_nic" ? 5 : 0
+resource "google_compute_subnetwork" "subnets" {
+  count         = local.vpc_count
+  name          = "${var.resource_prefix}-sub-${count.index}"
+  ip_cidr_range = "192.168.${count.index}.0/24"
+  region        = var.region
+  network       = google_compute_network.networks[count.index].self_link
+}
 
-  network_address_range = "10.${count.index}.0.0/16"
-  subnetworks = [{
-    new_bits      = 8
-    subnet_name   = "${var.resource_prefix}-primary-subnet-${count.index}"
-    subnet_region = var.region
-  }]
-  ips_per_nat          = count.index == 0 ? 2 : 0
-  region               = var.region
-  deployment_name      = var.resource_prefix
-  project_id           = var.project_id
-  network_name         = "${var.resource_prefix}-net-${count.index}"
-  network_routing_mode = "REGIONAL"
+resource "google_compute_firewall" "firewall-allow-tcp-udp-icmp" {
+  count         = local.vpc_count
+  name          = "${var.resource_prefix}-internal-${count.index}"
+  description   = "allow traffic between nodes of this VPC"
+  direction     = "INGRESS"
+  network       = google_compute_network.networks[count.index].self_link
+  source_ranges = ["192.168.0.0/16"]
+  allow {
+    protocol = "icmp"
+  }
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+}
+
+// Assumes that an external IP is only created for vNIC 0
+resource "google_compute_firewall" "firewall-allow-icmp" {
+  count         = local.vpc_count > 0 ? 1 : 0
+  name          = "${var.resource_prefix}-allow-ping-net-0"
+  description   = "allow icmp ping access"
+  direction     = "INGRESS"
+  network       = google_compute_network.networks[0].self_link
+  source_ranges = ["0.0.0.0/0"]
+  allow {
+    protocol = "icmp"
+  }
+}
+
+resource "google_compute_firewall" "firewall-allow-iap-ssh" {
+  count       = local.vpc_count > 0 ? 1 : 0
+  name        = "${var.resource_prefix}-allow-iap-ssh-net-0"
+  description = "allow SSH access via Identity-Aware Proxy"
+  direction   = "INGRESS"
+  network     = google_compute_network.networks[0].self_link
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  source_ranges = ["35.235.240.0/20"]
 }

@@ -70,16 +70,16 @@ module "cloudinit" {
 module "compute_instance_template" {
   source = "../../common/instance_template"
 
-  disk_size_gb          = var.disk_size_gb
-  disk_type             = var.disk_type
-  guest_accelerator     = var.guest_accelerator
-  machine_image         = local.machine_image
-  machine_type          = var.machine_type
-  metadata              = {
-                            user-data = module.cloudinit.user-data
-                            google-logging-use-fluentbit = "true"
-                            google-logging-enabled = "true"
-                          }
+  disk_size_gb      = var.disk_size_gb
+  disk_type         = var.disk_type
+  guest_accelerator = var.guest_accelerator
+  machine_image     = local.machine_image
+  machine_type      = var.machine_type
+  metadata = {
+    user-data                    = module.cloudinit.user-data
+    google-logging-use-fluentbit = "true"
+    google-logging-enabled       = "true"
+  }
   project_id            = var.project_id
   region                = local.region
   resource_prefix       = var.resource_prefix
