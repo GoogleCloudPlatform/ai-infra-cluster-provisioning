@@ -75,7 +75,11 @@ module "compute_instance_template" {
   guest_accelerator     = var.guest_accelerator
   machine_image         = local.machine_image
   machine_type          = var.machine_type
-  metadata              = { user-data = module.cloudinit.user-data }
+  metadata              = {
+                            user-data = module.cloudinit.user-data
+                            google-logging-use-fluentbit = "true"
+                            google-logging-enabled = "true"
+                          }
   project_id            = var.project_id
   region                = local.region
   resource_prefix       = var.resource_prefix
