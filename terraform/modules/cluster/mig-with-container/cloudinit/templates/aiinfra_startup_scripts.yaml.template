@@ -1,0 +1,35 @@
+- path: /etc/systemd/system/aiinfra/startup_scripts.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh -e
+    /etc/systemd/system/aiinfra/startup_script_aiinfra.sh
+    /etc/systemd/system/aiinfra/startup_script_custom.sh
+- path: /etc/systemd/system/aiinfra/startup_script_aiinfra.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh -e
+    /sbin/iptables -I INPUT -p tcp -m tcp -j ACCEPT
+- path: /etc/systemd/system/aiinfra/startup_script_custom.sh
+  permissions: 0755
+  owner: root
+  content: |
+    ${script}
+- path: /etc/systemd/system/aiinfra-startup-scripts.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Install]
+    WantedBy=aiinfra.target
+    [Unit]
+    After=${requirements}
+    Description=Startup scripts
+    Requires=${requirements}
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra/startup_scripts.sh
+    RemainAfterExit=true
+    StandardOutput=journal+console
+    StandardError=journal+console
+    Type=oneshot
+    User=root

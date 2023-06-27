@@ -69,6 +69,18 @@ variable "container" {
   default = null
 }
 
+variable "cos_extensions_flags" {
+  description = <<-EOT
+    Flags to insert in command `cos-extensions install gpu -- <flags>` when installing gpu drivers.
+
+    Default: '--version=latest'
+
+    Related docs: [gcloud](https://cloud.google.com/container-optimized-os/docs/how-to/run-gpus#install-driver).
+    EOT
+  type        = string
+  default     = null
+}
+
 variable "disk_size_gb" {
   description = <<-EOT
     The size of the image in gigabytes for the boot disk of each instance.
@@ -239,6 +251,16 @@ variable "machine_type" {
   default     = "a2-highgpu-2g"
 }
 
+variable "metadata" {
+  description = <<-EOT
+    GCE metadata to attach to each instance.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#metadata), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--metadata).
+    EOT
+  type        = map(string)
+  default     = {}
+}
+
 variable "network_config" {
   description = <<-EOT
     The network configuration to specify the type of VPC to be used.
@@ -282,6 +304,12 @@ variable "service_account" {
     scopes = set(string)
   })
   default = null
+}
+
+variable "startup_script" {
+  description = "Shell script -- the actual script (not the filename)."
+  type        = string
+  default     = null
 }
 
 variable "wait_for_instance" {

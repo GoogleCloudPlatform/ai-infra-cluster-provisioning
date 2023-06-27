@@ -14,6 +14,17 @@
  * limitations under the License.
 */
 
-output "user-data" {
-  value = data.cloudinit_config.config.rendered
+resource "null_resource" "validation" {
+
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.machine_has_gpu || var.cos_extensions_flags == null
+      error_message = "cannot install drivers on a machine with no gpu"
+    }
+  }
 }
+

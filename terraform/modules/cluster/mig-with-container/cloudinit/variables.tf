@@ -34,6 +34,10 @@ variable "container" {
   }
 }
 
+variable "cos_extensions_flags" {
+  type = string
+}
+
 variable "filestores" {
   type = list(object({
     local_mount  = string
@@ -90,4 +94,8 @@ variable "machine_has_gpu" {
     condition     = var.machine_has_gpu != null
     error_message = "must not be null"
   }
+}
+
+variable "startup_script" {
+  type = string
 }
