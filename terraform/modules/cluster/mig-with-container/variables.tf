@@ -69,6 +69,18 @@ variable "container" {
   default = null
 }
 
+variable "cos_extensions_flags" {
+  description = <<-EOT
+    Flags to insert in command `cos-extensions install gpu -- <flags>` when installing gpu drivers.
+
+    Default: '--version=latest'
+
+    Related docs: [gcloud](https://cloud.google.com/container-optimized-os/docs/how-to/run-gpus#install-driver).
+    EOT
+  type        = string
+  default     = null
+}
+
 variable "disk_size_gb" {
   description = <<-EOT
     The size of the image in gigabytes for the boot disk of each instance.

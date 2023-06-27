@@ -52,7 +52,8 @@ module "filestore" {
 module "cloudinit" {
   source = "./cloudinit"
 
-  container = var.container
+  container            = var.container
+  cos_extensions_flags = var.cos_extensions_flags
   filestores = [
     for n in module.filestore[*].network_storage
     : {

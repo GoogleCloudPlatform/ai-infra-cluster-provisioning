@@ -18,6 +18,18 @@ locals {
   _filestore_host_mount = "/tmp/cloud/filestore_mnt"
   _gcsfuse_host_mount   = "/tmp/cloud/gcsfuse_mnt"
 
+  _startup_scripts_template_variables = {
+    script       = var.startup_script != null ? var.startup_script : ""
+    requirements = var.machine_has_gpu ? "aiinfra-install-gpu.service" : ""
+  }
+
+  cos_extensions_flags = var.cos_extensions_flags != null ? (
+    var.cos_extensions_flags
+  ) : "--version=latest"
+  _install_gpu_template_variables = {
+    cos_extensions_flags = local.cos_extensions_flags
+  }
+
   _network_storage_template_variables = {
     filestore_mount_commands = join(
       " && ",
@@ -56,11 +68,6 @@ locals {
         ["."], // dummy to make join return non-null and have mkdir succeed
       ),
     )
-  }
-
-  _startup_scripts_template_variables = {
-    script       = var.startup_script != null ? var.startup_script : ""
-    requirements = var.machine_has_gpu ? "aiinfra-install-gpu.service" : ""
   }
 
   _container = {
@@ -148,13 +155,6 @@ locals {
 
   _userdata_template_variables = merge(
     {
-      network_storage = {
-        file = templatefile(
-          "${path.module}/templates/aiinfra_network_storage.yaml.template",
-          local._network_storage_template_variables,
-        )
-        service = "aiinfra-network-storage"
-      }
       startup_scripts = {
         file = templatefile(
           "${path.module}/templates/aiinfra_startup_scripts.yaml.template",
@@ -163,16 +163,27 @@ locals {
         service = "aiinfra-startup-scripts"
       }
       install_gpu     = { file = "", service = null, }
+      network_storage = { file = "", service = null, }
       pull_image      = { file = "", service = null, }
       start_container = { file = "", service = null, }
     },
     var.machine_has_gpu ? {
       install_gpu = {
-        file    = file("${path.module}/templates/aiinfra_install_gpu.yaml")
+        file = templatefile(
+          "${path.module}/templates/aiinfra_install_gpu.yaml.template",
+          local._install_gpu_template_variables
+        )
         service = "aiinfra-install-gpu"
       }
     } : {},
     var.container != null ? {
+      network_storage = {
+        file = templatefile(
+          "${path.module}/templates/aiinfra_network_storage.yaml.template",
+          local._network_storage_template_variables,
+        )
+        service = "aiinfra-network-storage"
+      }
       pull_image = {
         file = templatefile(
           "${path.module}/templates/aiinfra_pull_image.yaml.template",

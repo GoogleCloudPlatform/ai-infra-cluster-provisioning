@@ -34,6 +34,10 @@ variable "container" {
   }
 }
 
+variable "cos_extensions_flags" {
+  type = string
+}
+
 variable "filestores" {
   type = list(object({
     local_mount  = string

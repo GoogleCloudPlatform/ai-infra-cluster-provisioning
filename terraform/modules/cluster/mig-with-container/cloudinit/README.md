@@ -22,6 +22,7 @@ No requirements.
 | Name | Version |
 |------|---------|
 | <a name="provider_cloudinit"></a> [cloudinit](#provider\_cloudinit) | n/a |
+| <a name="provider_null"></a> [null](#provider\_null) | n/a |
 
 ## Modules
 
@@ -31,6 +32,7 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [null_resource.validation](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [cloudinit_config.config](https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/config) | data source |
 
 ## Inputs
@@ -38,6 +40,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_container"></a> [container](#input\_container) | n/a | <pre>object({<br>    image       = string<br>    cmd         = string<br>    run_at_boot = bool<br>    run_options = object({<br>      custom               = list(string)<br>      enable_cloud_logging = bool<br>      env                  = map(string)<br>    })<br>  })</pre> | n/a | yes |
+| <a name="input_cos_extensions_flags"></a> [cos\_extensions\_flags](#input\_cos\_extensions\_flags) | n/a | `string` | n/a | yes |
 | <a name="input_filestores"></a> [filestores](#input\_filestores) | n/a | <pre>list(object({<br>    local_mount  = string<br>    remote_mount = string<br>  }))</pre> | n/a | yes |
 | <a name="input_gcsfuses"></a> [gcsfuses](#input\_gcsfuses) | n/a | <pre>list(object({<br>    local_mount  = string<br>    remote_mount = string<br>  }))</pre> | n/a | yes |
 | <a name="input_machine_has_gpu"></a> [machine\_has\_gpu](#input\_machine\_has\_gpu) | n/a | `bool` | n/a | yes |

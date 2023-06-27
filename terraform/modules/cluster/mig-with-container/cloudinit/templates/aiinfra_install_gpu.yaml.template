@@ -3,9 +3,10 @@
   owner: root
   content: |
     #!/bin/sh
-    cos-extensions install gpu -- --version=latest
+    cos-extensions install gpu -- ${cos_extensions_flags}
     mount --bind /var/lib/nvidia /var/lib/nvidia
     mount -o remount,exec /var/lib/nvidia
+    /var/lib/nvidia/bin/nvidia-smi -pm 1
 - path: /etc/systemd/system/aiinfra-install-gpu.service
   permissions: 0644
   owner: root
