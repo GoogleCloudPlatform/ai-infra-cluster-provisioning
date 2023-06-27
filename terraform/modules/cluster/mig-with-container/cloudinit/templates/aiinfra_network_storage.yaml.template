@@ -42,7 +42,7 @@
     [Unit]
     After=gcr-online.target docker.socket
     Description=Set up network storage
-    Wants=gcr-online.target docker.socket
+    Requires=gcr-online.target docker.socket
     [Service]
     ExecStart=/etc/systemd/system/aiinfra/network_storage.sh
     RemainAfterExit=true

@@ -10,10 +10,12 @@
   permissions: 0644
   owner: root
   content: |
+    [Install]
+    WantedBy=aiinfra.target
     [Unit]
     After=gcr-online.target docker.socket
     Description=Install GPU drivers
-    Wants=gcr-online.target docker.socket
+    Requires=gcr-online.target docker.socket
     [Service]
     ExecStart=/etc/systemd/system/aiinfra/install_gpu.sh
     RemainAfterExit=true

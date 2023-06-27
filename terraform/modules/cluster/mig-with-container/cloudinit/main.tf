@@ -196,7 +196,7 @@ locals {
     aiinfra_pull_image      = local._userdata_template_variables.pull_image.file
     aiinfra_start_container = local._userdata_template_variables.start_container.file
     aiinfra_services = join(
-      ", ",
+      " ",
       [for k, v in local._userdata_template_variables : v.service if v.service != null],
     )
   }

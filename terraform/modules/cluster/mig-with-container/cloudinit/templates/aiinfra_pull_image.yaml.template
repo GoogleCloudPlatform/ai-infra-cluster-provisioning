@@ -17,7 +17,7 @@
     [Unit]
     After=gcr-online.target docker.socket
     Description=Pull a docker image
-    Wants=gcr-online.target docker.socket
+    Requires=gcr-online.target docker.socket
     [Service]
     ExecStart=/etc/systemd/system/aiinfra/pull_image.sh
     RemainAfterExit=true
