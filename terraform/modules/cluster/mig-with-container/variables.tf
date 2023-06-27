@@ -251,6 +251,16 @@ variable "machine_type" {
   default     = "a2-highgpu-2g"
 }
 
+variable "metadata" {
+  description = <<-EOT
+    GCE metadata to attach to each instance.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#metadata), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--metadata).
+    EOT
+  type        = map(string)
+  default     = {}
+}
+
 variable "network_config" {
   description = <<-EOT
     The network configuration to specify the type of VPC to be used.
