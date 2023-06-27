@@ -184,6 +184,21 @@ variable "resource_prefix" {
   }
 }
 
+variable "use_static_naming" {
+  description = <<-EOT
+    Flag to determine whether to use static naming for instance_template name. If used static naming, then instance_template cannot be updated. it needs to be destroyed and then recreated.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#name_prefix).
+    EOT
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = var.use_static_naming != null
+    error_message = "must not be null"
+  }
+}
+
 variable "service_account" {
   description = <<-EOT
     Service account to attach to the instance.

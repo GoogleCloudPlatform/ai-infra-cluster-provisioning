@@ -10,6 +10,7 @@
 . ./test/pr/terraform/modules/cluster/gke/tests.sh
 . ./test/pr/terraform/modules/common/dashboard/tests.sh
 . ./test/pr/terraform/modules/common/instance_template/tests.sh
+. ./test/pr/terraform/modules/common/instance_group_manager/tests.sh
 . ./test/pr/terraform/modules/common/network/tests.sh
 
 runner::main "${@}"

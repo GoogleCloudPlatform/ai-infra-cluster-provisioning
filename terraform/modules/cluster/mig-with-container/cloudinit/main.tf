@@ -18,70 +18,16 @@ locals {
   _filestore_host_mount = "/tmp/cloud/filestore_mnt"
   _gcsfuse_host_mount   = "/tmp/cloud/gcsfuse_mnt"
 
-  container = {
-    cmd   = try(var.container.cmd != null ? var.container.cmd : "", "")
-    image = try(var.container.image, "")
-    run_at_boot = try(
-      var.container.run_at_boot != null ? var.container.run_at_boot : true,
-      false
-    )
-    run_options = try(
-      {
-        custom = (
-          var.container.run_options.custom != null
-          ? var.container.run_options.custom
-          : []
-        )
-        enable_cloud_logging = (
-          var.container.run_options.enable_cloud_logging != null
-          ? var.container.run_options.enable_cloud_logging
-          : false
-        )
-        env = (
-          var.container.run_options.env != null
-          ? var.container.run_options.env
-          : {}
-        )
-      },
-      {
-        custom               = []
-        enable_cloud_logging = false
-        env                  = {}
-      }
-    )
+  _startup_scripts_template_variables = {
+    script       = var.startup_script != null ? var.startup_script : ""
+    requirements = var.machine_has_gpu ? "aiinfra-install-gpu.service" : ""
   }
 
-  _container_template_variables = {
-    docker_cmd   = local.container.cmd
-    docker_image = local.container.image
-    docker_run_options = join(
-      " ",
-      concat(
-        [
-          for name, value in local.container.run_options.env
-          : "--env ${name}=${value}"
-        ],
-        local.container.run_options.enable_cloud_logging ? [
-          "--log-driver=gcplogs"
-        ] : [],
-        local.container.run_options.custom,
-        [""], // dummy to make join return non-null
-      ),
-    )
-    docker_volume_flags = join(
-      " ",
-      concat(
-        [
-          for m in var.filestores[*].local_mount
-          : "--volume ${local._filestore_host_mount}${m}:${m}:rw"
-        ],
-        [
-          for m in var.gcsfuses[*].local_mount
-          : "--volume ${local._gcsfuse_host_mount}${m}:${m}:rw,rslave"
-        ],
-        [""], // dummy to make join return non-null
-      ),
-    )
+  cos_extensions_flags = var.cos_extensions_flags != null ? (
+    var.cos_extensions_flags
+  ) : "--version=latest"
+  _install_gpu_template_variables = {
+    cos_extensions_flags = local.cos_extensions_flags
   }
 
   _network_storage_template_variables = {
@@ -124,8 +70,113 @@ locals {
     )
   }
 
+  _container = {
+    cmd   = try(var.container.cmd != null ? var.container.cmd : "", "")
+    image = try(var.container.image != null ? var.container.image : "", "")
+    run_at_boot = try(
+      var.container.run_at_boot != null ? var.container.run_at_boot : true,
+      false,
+    )
+    run_options = {
+      custom = try(
+        var.container.run_options.custom != null ? (
+          var.container.run_options.custom
+        ) : [],
+        [],
+      )
+      enable_cloud_logging = try(
+        var.container.run_options.enable_cloud_logging != null ? (
+          var.container.run_options.enable_cloud_logging
+        ) : false,
+        false,
+      )
+      env = try(
+        var.container.run_options.env != null ? (
+          var.container.run_options.env
+        ) : {},
+        {}
+      )
+    }
+  }
+
+  _container_template_variables = {
+    docker_cmd   = local._container.cmd
+    docker_image = local._container.image
+    docker_run_options = join(
+      " ",
+      concat(
+        [
+          for name, value in local._container.run_options.env
+          : "--env ${name}=${value}"
+        ],
+        local._container.run_options.enable_cloud_logging ? [
+          "--log-driver=gcplogs"
+        ] : [],
+        local._container.run_options.custom,
+        [""], // dummy to make join return non-null
+      ),
+    )
+    docker_volume_flags = join(
+      " ",
+      concat(
+        [
+          for m in var.filestores[*].local_mount
+          : "--volume ${local._filestore_host_mount}${m}:${m}:rw"
+        ],
+        [
+          for m in var.gcsfuses[*].local_mount
+          : "--volume ${local._gcsfuse_host_mount}${m}:${m}:rw,rslave"
+        ],
+        [""], // dummy to make join return non-null
+      ),
+    )
+    docker_device_flags = join(
+      " ",
+      var.machine_has_gpu ? [
+        "--volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64",
+        "--volume /var/lib/nvidia/bin:/usr/local/nvidia/bin",
+        "--device /dev/nvidia-uvm:/dev/nvidia-uvm",
+        "--device /dev/nvidiactl:/dev/nvidiactl",
+        "$${device_flags}",
+      ] : [""],
+    )
+    requirements = join(
+      " ",
+      concat(
+        [
+          "aiinfra-network-storage.service",
+          "aiinfra-pull-image.service",
+          "aiinfra-startup-scripts.service",
+        ],
+        var.machine_has_gpu ? ["aiinfra-install-gpu.service"] : [],
+      )
+    )
+  }
+
   _userdata_template_variables = merge(
     {
+      startup_scripts = {
+        file = templatefile(
+          "${path.module}/templates/aiinfra_startup_scripts.yaml.template",
+          local._startup_scripts_template_variables,
+        )
+        service = "aiinfra-startup-scripts"
+      }
+      install_gpu     = { file = "", service = null, }
+      network_storage = { file = "", service = null, }
+      pull_image      = { file = "", service = null, }
+      start_container = { file = "", service = null, }
+    },
+    var.machine_has_gpu ? {
+      install_gpu = {
+        file = templatefile(
+          "${path.module}/templates/aiinfra_install_gpu.yaml.template",
+          local._install_gpu_template_variables
+        )
+        service = "aiinfra-install-gpu"
+      }
+    } : {},
+    var.container != null ? {
       network_storage = {
         file = templatefile(
           "${path.module}/templates/aiinfra_network_storage.yaml.template",
@@ -133,8 +184,6 @@ locals {
         )
         service = "aiinfra-network-storage"
       }
-    },
-    var.container != null ? {
       pull_image = {
         file = templatefile(
           "${path.module}/templates/aiinfra_pull_image.yaml.template",
@@ -147,43 +196,19 @@ locals {
           "${path.module}/templates/aiinfra_start_container.yaml.template",
           local._container_template_variables,
         )
-        service = local.container.run_at_boot ? "aiinfra-start-container" : null
+        service = local._container.run_at_boot ? "aiinfra-start-container" : null
       }
-      start_container_gpu = {
-        file = templatefile(
-          "${path.module}/templates/aiinfra_start_container_gpu.yaml.template",
-          local._container_template_variables,
-        )
-        service = local.container.run_at_boot ? "aiinfra-start-container-gpu" : null
-      }
-      } : {
-      pull_image          = { file = "", service = null }
-      start_container     = { file = "", service = null, }
-      start_container_gpu = { file = "", service = null, }
-    },
+    } : {},
   )
-  _services = [
-    local._userdata_template_variables.network_storage,
-    local._userdata_template_variables.pull_image,
-    local._userdata_template_variables.start_container,
-  ]
-  _services_gpu = [
-    local._userdata_template_variables.network_storage,
-    local._userdata_template_variables.pull_image,
-    local._userdata_template_variables.start_container_gpu,
-  ]
   userdata_template_variables = {
-    aiinfra_network_storage     = local._userdata_template_variables.network_storage.file
-    aiinfra_pull_image          = local._userdata_template_variables.pull_image.file
-    aiinfra_start_container     = local._userdata_template_variables.start_container.file
-    aiinfra_start_container_gpu = local._userdata_template_variables.start_container_gpu.file
+    aiinfra_network_storage = local._userdata_template_variables.network_storage.file
+    aiinfra_startup_scripts = local._userdata_template_variables.startup_scripts.file
+    aiinfra_install_gpu     = local._userdata_template_variables.install_gpu.file
+    aiinfra_pull_image      = local._userdata_template_variables.pull_image.file
+    aiinfra_start_container = local._userdata_template_variables.start_container.file
     aiinfra_services = join(
       " ",
-      [for s in local._services : s.service if s.service != null],
-    )
-    aiinfra_services_gpu = join(
-      " ",
-      [for s in local._services_gpu : s.service if s.service != null],
+      [for k, v in local._userdata_template_variables : v.service if v.service != null],
     )
   }
 }
@@ -199,19 +224,5 @@ data "cloudinit_config" "config" {
       local.userdata_template_variables,
     )
     filename = "userdata.yaml"
-  }
-}
-
-data "cloudinit_config" "config-gpu" {
-  gzip          = false
-  base64_encode = false
-
-  part {
-    content_type = "text/cloud-config"
-    content = templatefile(
-      "${path.module}/templates/userdata_gpu.yaml.template",
-      local.userdata_template_variables,
-    )
-    filename = "userdata-gpu.yaml"
   }
 }

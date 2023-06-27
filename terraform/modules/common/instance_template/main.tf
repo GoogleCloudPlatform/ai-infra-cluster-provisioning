@@ -79,7 +79,8 @@ resource "google_compute_instance_template" "template" {
   project      = var.project_id
   region       = var.region
   labels       = var.labels
-  name         = local.name
+  name         = var.use_static_naming ? local.name : null
+  name_prefix  = var.use_static_naming ? null : local.name
   machine_type = var.machine_type
   metadata     = local.metadata
 
@@ -118,14 +119,9 @@ resource "google_compute_instance_template" "template" {
     }
   }
 
-  // This needs to be set to TIER_1 for maximum VM egress bandwidth.
-  network_performance_config {
-    total_egress_bandwidth_tier = "DEFAULT"
-  }
-
   scheduling {
     on_host_maintenance = "TERMINATE"
-    automatic_restart   = false
+    automatic_restart   = true
     preemptible         = false
     provisioning_model  = null
   }

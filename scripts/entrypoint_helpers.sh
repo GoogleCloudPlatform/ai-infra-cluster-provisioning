@@ -38,7 +38,7 @@ Parameters:
                 - destroy: destroys the cluster created on Google Cloud
     cluster     Type of cluster to act on. Options are:
                 - gke: Google Kubernetes Engine -- terraform/modules/cluster/gke
-                - mig: Managed Instange Group -- terraform/modules/cluster/mig
+                - mig: Managed Instance Group -- terraform/modules/cluster/mig
                 - mig-with-container: MIG with docker container --
                     terraform/modules/cluster/mig-with-container
                 - slurm: Slurm Workload Manager -- terraform/modules/cluster/slurm

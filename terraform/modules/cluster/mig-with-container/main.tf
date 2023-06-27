@@ -22,6 +22,15 @@ locals {
     family  = var.machine_image.family
     name    = var.machine_image.name
   }
+
+  metadata = merge(
+    {
+      user-data                    = module.cloudinit.user-data
+      google-logging-use-fluentbit = "true"
+      google-logging-enabled       = "true"
+    },
+    var.metadata != null ? var.metadata : {},
+  )
 }
 
 module "network" {
@@ -52,7 +61,8 @@ module "filestore" {
 module "cloudinit" {
   source = "./cloudinit"
 
-  container = var.container
+  container            = var.container
+  cos_extensions_flags = var.cos_extensions_flags
   filestores = [
     for n in module.filestore[*].network_storage
     : {
@@ -65,6 +75,7 @@ module "cloudinit" {
     ["a2", "a3", "g2"],
     split("-", var.machine_type)[0],
   )
+  startup_script = var.startup_script
 }
 
 module "compute_instance_template" {
@@ -75,41 +86,24 @@ module "compute_instance_template" {
   guest_accelerator     = var.guest_accelerator
   machine_image         = local.machine_image
   machine_type          = var.machine_type
-  metadata              = { user-data = module.cloudinit.user-data }
+  metadata              = local.metadata
   project_id            = var.project_id
   region                = local.region
   resource_prefix       = var.resource_prefix
   service_account       = var.service_account
-  startup_script        = "sudo /sbin/iptables -I INPUT -p tcp -m tcp -j ACCEPT"
+  startup_script        = null
   subnetwork_self_links = module.network.subnetwork_self_links
   network_self_links    = module.network.network_self_links
   labels                = merge(var.labels, { ghpc_role = "compute" })
 }
 
-resource "google_compute_instance_group_manager" "mig" {
-  provider = google-beta
+module "compute_instance_group_manager" {
+  source = "../../common/instance_group_manager"
 
-  base_instance_name = "${var.resource_prefix}-vm"
-  name               = "${var.resource_prefix}-mig"
-  project            = var.project_id
-  target_size        = var.target_size
-  wait_for_instances = true
-  zone               = var.zone
-
-  update_policy {
-    minimal_action        = "RESTART"
-    max_unavailable_fixed = 1
-    type                  = "OPPORTUNISTIC"
-    replacement_method    = "RECREATE" # Instance name will be preserved
-  }
-
-  version {
-    name              = "default"
-    instance_template = module.compute_instance_template.id
-  }
-
-  timeouts {
-    create = "30m"
-    update = "30m"
-  }
+  project_id           = var.project_id
+  resource_prefix      = var.resource_prefix
+  zone                 = var.zone
+  instance_template_id = module.compute_instance_template.id
+  target_size          = var.target_size
+  wait_for_instance    = var.wait_for_instance
 }

@@ -15,18 +15,11 @@
 */
 
 output "id" {
-  description = "`id` output of the google_compute_instance_template resource created."
-  value       = resource.google_compute_instance_template.template.id
-}
-
-output "name" {
-  description = "`name` output of the google_compute_instance_template resource created."
-  value       = var.use_static_naming ? local.name : resource.google_compute_instance_template.template.name
+  description = "`id` output of the google_compute_instance_group_manager resource created."
+  value       = resource.google_compute_instance_group_manager.mig.id
 }
 
 output "self_link" {
-  description = "`self_link` output of the google_compute_instance_template resource created"
-  value       = resource.google_compute_instance_template.template.self_link
+  description = "`self_link` output of the google_compute_instance_group_manager resource created"
+  value       = resource.google_compute_instance_group_manager.mig.self_link
 }
-
-output "service_account" { value = local.service_account }

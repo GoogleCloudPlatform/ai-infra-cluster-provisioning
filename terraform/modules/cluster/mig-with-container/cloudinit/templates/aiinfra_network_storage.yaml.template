@@ -1,4 +1,4 @@
-- path: /tmp/cloud/gcsfuse/Dockerfile
+- path: /etc/systemd/system/aiinfra/gcsfuse/Dockerfile
   permissions: 0644
   owner: root
   content: |
@@ -11,7 +11,7 @@
         && apt-get install -y gcsfuse \
         && rm -rf /var/lib/{apt,dpkg,cache,log}/
     CMD ["sleep", "infinity"]
-- path: /etc/systemd/system/aiinfra_network_storage.sh
+- path: /etc/systemd/system/aiinfra/network_storage.sh
   permissions: 0755
   owner: root
   content: |
@@ -24,7 +24,7 @@
     }
     mount_gcsfuses () {
       [ "${gcsfuse_mount_commands}" != 'true && true' ] || return 0
-      docker build --tag gcsfuse /tmp/cloud/gcsfuse \
+      docker build --tag gcsfuse /etc/systemd/system/aiinfra/gcsfuse \
       && docker run --detach --rm \
         --privileged \
         --volume ${gcsfuse_host_mount}:${gcsfuse_host_mount}:rw,rshared \
@@ -37,12 +37,14 @@
   permissions: 0644
   owner: root
   content: |
+    [Install]
+    WantedBy=aiinfra.target
     [Unit]
     After=gcr-online.target docker.socket
     Description=Set up network storage
-    Wants=gcr-online.target docker.socket
+    Requires=gcr-online.target docker.socket
     [Service]
-    ExecStart=/etc/systemd/system/aiinfra_network_storage.sh
+    ExecStart=/etc/systemd/system/aiinfra/network_storage.sh
     RemainAfterExit=true
     StandardOutput=journal+console
     StandardError=journal+console
