@@ -22,6 +22,15 @@ locals {
     family  = var.machine_image.family
     name    = var.machine_image.name
   }
+
+  metadata = merge(
+    {
+      user-data                    = module.cloudinit.user-data
+      google-logging-use-fluentbit = "true"
+      google-logging-enabled       = "true"
+    },
+    var.metadata != null ? var.metadata : {},
+  )
 }
 
 module "network" {
@@ -52,7 +61,8 @@ module "filestore" {
 module "cloudinit" {
   source = "./cloudinit"
 
-  container = var.container
+  container            = var.container
+  cos_extensions_flags = var.cos_extensions_flags
   filestores = [
     for n in module.filestore[*].network_storage
     : {
@@ -65,26 +75,23 @@ module "cloudinit" {
     ["a2", "a3", "g2"],
     split("-", var.machine_type)[0],
   )
+  startup_script = var.startup_script
 }
 
 module "compute_instance_template" {
   source = "../../common/instance_template"
 
-  disk_size_gb      = var.disk_size_gb
-  disk_type         = var.disk_type
-  guest_accelerator = var.guest_accelerator
-  machine_image     = local.machine_image
-  machine_type      = var.machine_type
-  metadata = {
-    user-data                    = module.cloudinit.user-data
-    google-logging-use-fluentbit = "true"
-    google-logging-enabled       = "true"
-  }
+  disk_size_gb          = var.disk_size_gb
+  disk_type             = var.disk_type
+  guest_accelerator     = var.guest_accelerator
+  machine_image         = local.machine_image
+  machine_type          = var.machine_type
+  metadata              = local.metadata
   project_id            = var.project_id
   region                = local.region
   resource_prefix       = var.resource_prefix
   service_account       = var.service_account
-  startup_script        = "sudo /sbin/iptables -I INPUT -p tcp -m tcp -j ACCEPT"
+  startup_script        = null
   subnetwork_self_links = module.network.subnetwork_self_links
   network_self_links    = module.network.network_self_links
   labels                = merge(var.labels, { ghpc_role = "compute" })
