@@ -11,7 +11,7 @@
                 "max_unavailable_fixed": 1,
                 "minimal_action": "RESTART",
                 "replacement_method": "RECREATE",
-                "type": "OPPORTUNISTIC"
+                "type": "PROACTIVE"
               }
             ],
             "version": [
