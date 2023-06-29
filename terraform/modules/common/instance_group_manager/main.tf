@@ -9,9 +9,10 @@ resource "google_compute_instance_group_manager" "mig" {
   zone               = var.zone
 
   update_policy {
-    minimal_action     = "RESTART"
-    type               = var.enable_auto_config_apply ? "PROACTIVE" : "OPPORTUNISTIC"
-    replacement_method = "RECREATE" # Instance name will be preserved
+    max_unavailable_fixed = 1
+    minimal_action        = "RESTART"
+    type                  = var.enable_auto_config_apply ? "PROACTIVE" : "OPPORTUNISTIC"
+    replacement_method    = "RECREATE" # Instance name will be preserved
   }
 
   version {

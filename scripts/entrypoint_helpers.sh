@@ -295,7 +295,6 @@ entrypoint_helpers::ensure_bucket_exists () {
     echo "Failed to find GCS bucket -- creating..." >&2
     gcloud storage buckets create "gs://${bucket_name}" >/dev/null \
         --project="${project_id}" \
-        --default-storage-class="REGIONAL" \
         --uniform-bucket-level-access && {
         echo "GCS bucket '${bucket_name}' created." >&2
         return 0
