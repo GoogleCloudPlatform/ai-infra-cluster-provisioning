@@ -12,6 +12,8 @@ Usage: ./test/<test_set>/run.sh project_id [resource_prefix] \\
 
 Options:
     -h|--help   Print this help message.
+    -e|--exclude
+                Regex that will be used to exclude tests from being run.
     -f|--filter Regex that will be used to filter which tests run. Defaults to
                 'test::.*'.
 
@@ -41,6 +43,10 @@ runner::parse_args () {
                 -h|--help)
                     echo "$(runner::get_usage)"
                     exit 0
+                    ;;
+                -e|--exclude)
+                    runner_opt_exclude="${2}"
+                    shift
                     ;;
                 -f|--filter)
                     runner_opt_filter="${2}"
@@ -130,12 +136,19 @@ runner::run () {
         echo -e "> ${test_command} ${comment}"
     }
 
-    declare -ar test_commands=($(declare -F | awk "/${filter}/"'{print $NF}'))
+    declare -ar test_commands=($(declare -F | awk '$NF ~ /test::/ {print $NF}'))
     declare -a tests_skipped=()
     declare -a tests_passed=()
     declare -a tests_failed=()
     for test_command in "${test_commands[@]}"; do
-        if grep -q '^skip::test::' <<< "${test_command}"; then
+        if {
+            grep -q '^skip::test::' <<< "${test_command}" \
+            || grep -qv "${runner_opt_filter}" <<< "${test_command}" \
+            || {
+                [ -n "${runner_opt_exclude}" ] \
+                && grep -q "${runner_opt_exclude}" <<< "${test_command}"
+            }
+        }; then
             skipped_test_command="${test_command#skip::}"
             tests_skipped+=("${skipped_test_command}")
             print_test "${skipped_test_command}" 'skipped'
@@ -192,6 +205,7 @@ runner::main () {
     local runner_arg_project_id
     local runner_arg_resource_prefix='ci'
     local runner_opt_filter='test::.*'
+    local runner_opt_exclude
 
     { runner::parse_args "${@}" && runner::validate_args; } \
     || { echo; runner::get_usage; return 1; } >&2

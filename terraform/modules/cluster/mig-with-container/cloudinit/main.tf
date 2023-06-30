@@ -19,7 +19,7 @@ locals {
   _gcsfuse_host_mount   = "/tmp/cloud/gcsfuse_mnt"
 
   _startup_scripts_template_variables = {
-    script       = var.startup_script != null ? var.startup_script : ""
+    script       = var.startup_script != null ? replace(var.startup_script, "\n", "\n    ") : ""
     requirements = var.machine_has_gpu ? "aiinfra-install-gpu.service" : ""
   }
 
