@@ -10,6 +10,13 @@ VM instances. Each instance has:
   (one VPC for the host network and four dedicated to the GPUs),
 - a [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) machine
   image,
+- a custom container started at boot (recommended:
+  [Deep Learning Container](https://cloud.google.com/deep-learning-containers)
+  image),
+- a newly created [Filestore](https://cloud.google.com/filestore) mounted in
+  the container via NFS,
+- a pre-existing [GCS bucket](https://cloud.google.com/storage) mounted in the
+  container via [GCSFuse](https://cloud.google.com/storage/docs/gcs-fuse)
 
 ## The tfvars file
 

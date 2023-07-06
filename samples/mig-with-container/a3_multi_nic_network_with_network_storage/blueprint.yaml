@@ -28,9 +28,17 @@ vars:
     image: gcr.io/deeplearning-platform-release/base-gpu.py310
     run_at_boot: true
     run_options: null
-  startup_script: |
-    #!/bin/sh
-    echo hello world
+  disk_size_gb: 1024
+  disk_type: pd-ssd
+  filestore_new:
+  - filestore_tier: BASIC_HDD
+    local_mount: /mnt/nfsmount
+    size_gb: 1024
+  gcsfuse_existing:
+    - local_mount: /mnt/gcsmount
+      remote_mount: my-bucket
+  labels:
+    purpose: testing
 
 deployment_groups:
 - group: primary
