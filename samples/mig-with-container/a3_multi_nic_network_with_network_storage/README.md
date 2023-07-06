@@ -16,7 +16,8 @@ VM instances. Each instance has:
 - a newly created [Filestore](https://cloud.google.com/filestore) mounted in
   the container via NFS,
 - a pre-existing [GCS bucket](https://cloud.google.com/storage) mounted in the
-  container via [GCSFuse](https://cloud.google.com/storage/docs/gcs-fuse)
+  container via [GCSFuse](https://cloud.google.com/storage/docs/gcs-fuse),
+- a startup script to run on each boot which installs TCPDirect
 
 ## The tfvars file
 
