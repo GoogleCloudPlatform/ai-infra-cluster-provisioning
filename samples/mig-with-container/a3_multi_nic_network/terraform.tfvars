@@ -1,6 +1,6 @@
 project_id      = "my-project-id"
 resource_prefix = "my-cluster-name"
-target_size     = 1
+target_size     = 4
 zone            = "us-central1-c"
 
 container = {

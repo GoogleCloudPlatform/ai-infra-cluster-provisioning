@@ -14,9 +14,10 @@
 
 ---
 
-blueprint_name: a3-multi-nic
+blueprint_name: a3-mig-with-container
 
 vars:
+  deployment_name: a3-mig-with-container
   project_id: my-project-id
   resource_prefix: my-cluster-name
   target_size: 1
@@ -42,5 +43,5 @@ vars:
 deployment_groups:
 - group: primary
   modules:
-  - id: mig-with-container
+  - id: a3-mig-with-container
     source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-with-container"

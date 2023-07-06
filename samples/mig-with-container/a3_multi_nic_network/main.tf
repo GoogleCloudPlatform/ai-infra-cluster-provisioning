@@ -13,7 +13,7 @@ variable "machine_type" {}
 variable "network_config" {}
 
 module "a3-mig" {
-  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig"
+  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-with-container"
 
   project_id      = var.project_id
   resource_prefix = var.resource_prefix
