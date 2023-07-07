@@ -18,19 +18,14 @@ blueprint_name: a3-mig-with-container
 
 vars:
   deployment_name: a3-mig-with-container
+
   project_id: my-project-id
   resource_prefix: my-cluster-name
-  target_size: 1
+  target_size: 8
   zone: us-central1-c
 
-  container:
-    cmd: null
-    image: gcr.io/deeplearning-platform-release/base-gpu.py310
-    run_at_boot: true
-    run_options: null
-  startup_script: |
-    #!/bin/sh
-    echo hello world
+  machine_type: a3-highgpu-8g
+  network_config: new_multi_nic
 
 deployment_groups:
 - group: primary
