@@ -34,8 +34,13 @@ variable "container" {
   }
 }
 
-variable "cos_extensions_flags" {
-  type = string
+variable "custom_gpu_drivers" {
+  type = bool
+
+  validation {
+    condition     = var.custom_gpu_drivers != null
+    error_message = "must not be null"
+  }
 }
 
 variable "filestores" {

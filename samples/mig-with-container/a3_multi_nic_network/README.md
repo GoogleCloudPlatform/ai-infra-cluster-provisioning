@@ -23,7 +23,7 @@ Required variables:
 
 Optional variables:
 - `container`
-- `cos_extensions_flags`
+- `custom_gpu_drivers`
 - `disk_size_gb`
 - `disk_type`
 - `filestore_new`

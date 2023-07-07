@@ -22,7 +22,7 @@ resource "null_resource" "validation" {
 
   lifecycle {
     precondition {
-      condition     = var.machine_has_gpu || var.cos_extensions_flags == null
+      condition     = var.machine_has_gpu || !var.custom_gpu_drivers
       error_message = "cannot install drivers on a machine with no gpu"
     }
   }
