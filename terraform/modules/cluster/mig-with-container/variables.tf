@@ -251,7 +251,7 @@ variable "machine_type" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
     EOT
   type        = string
-  default     = "a2-highgpu-2g"
+  default     = "a3-highgpu-8g"
 }
 
 variable "metadata" {
@@ -271,7 +271,7 @@ variable "network_config" {
     Possible values: `["default", "new_multi_nic", "new_single_nic"]`
     EOT
   type        = string
-  default     = "default"
+  default     = "new_multi_nic"
 
   validation {
     condition = contains(
