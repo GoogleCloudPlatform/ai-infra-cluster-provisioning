@@ -17,7 +17,8 @@
 resource "null_resource" "validation" {
 
   triggers = {
-    always_run = "${timestamp()}"
+    machine_has_gpu    = var.machine_has_gpu
+    custom_gpu_drivers = var.custom_gpu_drivers
   }
 
   lifecycle {
