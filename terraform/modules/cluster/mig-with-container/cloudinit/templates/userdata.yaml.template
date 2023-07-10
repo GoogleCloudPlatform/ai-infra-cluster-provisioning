@@ -7,7 +7,6 @@ write_files:
     [Unit]
     Description=aiinfra target
     After=cloud-init.target
-${aiinfra_install_gpu}
 ${aiinfra_network_storage}
 ${aiinfra_startup_scripts}
 ${aiinfra_pull_image}

@@ -24,7 +24,8 @@ locals {
 resource "null_resource" "validation" {
 
   triggers = {
-    always_run = "${timestamp()}"
+    accelerator_optimized = local.accelerator_optimized
+    guest_accelerator     = var.guest_accelerator != null
   }
 
   lifecycle {

@@ -61,8 +61,8 @@ module "filestore" {
 module "cloudinit" {
   source = "./cloudinit"
 
-  container            = var.container
-  cos_extensions_flags = var.cos_extensions_flags
+  container          = var.container
+  custom_gpu_drivers = var.custom_gpu_drivers
   filestores = [
     for n in module.filestore[*].network_storage
     : {

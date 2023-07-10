@@ -2,7 +2,7 @@
 
 ## The cluster
 
-This configuration creates a cluster of four
+This configuration creates a cluster of eight
 [a3-highgpu-8g](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus)
 VM instances. Each instance has:
 - eight [NVidia H100 GPUs](https://www.nvidia.com/en-us/data-center/h100/),
@@ -23,7 +23,7 @@ Required variables:
 
 Optional variables:
 - `container`
-- `cos_extensions_flags`
+- `custom_gpu_drivers`
 - `disk_size_gb`
 - `disk_type`
 - `filestore_new`
