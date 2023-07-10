@@ -19,15 +19,8 @@ locals {
   _gcsfuse_host_mount   = "/tmp/cloud/gcsfuse_mnt"
 
   _startup_scripts_template_variables = {
-    script       = var.startup_script != null ? replace(var.startup_script, "\n", "\n    ") : ""
-    requirements = var.machine_has_gpu ? "aiinfra-install-gpu.service" : ""
-  }
-
-  cos_extensions_flags = var.cos_extensions_flags != null ? (
-    var.cos_extensions_flags
-  ) : "--version=latest"
-  _install_gpu_template_variables = {
-    cos_extensions_flags = local.cos_extensions_flags
+    install_gpu = tostring(var.machine_has_gpu && !var.custom_gpu_drivers)
+    script      = var.startup_script != null ? replace(var.startup_script, "\n", "\n    ") : ""
   }
 
   _network_storage_template_variables = {
@@ -148,7 +141,6 @@ locals {
           "aiinfra-pull-image.service",
           "aiinfra-startup-scripts.service",
         ],
-        var.machine_has_gpu ? ["aiinfra-install-gpu.service"] : [],
       )
     )
   }
@@ -162,20 +154,10 @@ locals {
         )
         service = "aiinfra-startup-scripts"
       }
-      install_gpu     = { file = "", service = null, }
       network_storage = { file = "", service = null, }
       pull_image      = { file = "", service = null, }
       start_container = { file = "", service = null, }
     },
-    var.machine_has_gpu ? {
-      install_gpu = {
-        file = templatefile(
-          "${path.module}/templates/aiinfra_install_gpu.yaml.template",
-          local._install_gpu_template_variables
-        )
-        service = "aiinfra-install-gpu"
-      }
-    } : {},
     var.container != null ? {
       network_storage = {
         file = templatefile(
@@ -203,7 +185,6 @@ locals {
   userdata_template_variables = {
     aiinfra_network_storage = local._userdata_template_variables.network_storage.file
     aiinfra_startup_scripts = local._userdata_template_variables.startup_scripts.file
-    aiinfra_install_gpu     = local._userdata_template_variables.install_gpu.file
     aiinfra_pull_image      = local._userdata_template_variables.pull_image.file
     aiinfra_start_container = local._userdata_template_variables.start_container.file
     aiinfra_services = join(
