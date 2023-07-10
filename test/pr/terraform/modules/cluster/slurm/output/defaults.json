@@ -12,7 +12,7 @@
               "family": "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts",
               "name": null
             },
-            "machine_type": "a3-highgpu-8g",
+            "machine_type": "a2-highgpu-2g",
             "node_count_static": 1,
             "partition_name": "compute",
             "region": "us-central1",
