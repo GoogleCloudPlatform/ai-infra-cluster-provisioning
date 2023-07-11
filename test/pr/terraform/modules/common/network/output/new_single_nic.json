@@ -28,7 +28,7 @@
        {
           "address":"google_compute_network.networks[0]",
           "values":{
-             "mtu":8896
+             "mtu":8228
           }
        },
        {
