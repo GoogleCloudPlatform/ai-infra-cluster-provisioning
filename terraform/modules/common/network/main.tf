@@ -36,7 +36,7 @@ resource "google_compute_network" "networks" {
   name                    = "${var.resource_prefix}-net-${count.index}"
   project                 = var.project_id
   auto_create_subnetworks = false
-  mtu                     = 8896
+  mtu                     = 8228
 }
 
 resource "google_compute_subnetwork" "subnets" {
