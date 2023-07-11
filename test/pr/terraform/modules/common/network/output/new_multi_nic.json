@@ -59,31 +59,31 @@
         {
            "address":"google_compute_network.networks[0]",
            "values":{
-              "mtu":8896
+              "mtu":8228
            }
         },
         {
            "address":"google_compute_network.networks[1]",
            "values":{
-              "mtu":8896
+              "mtu":8228
            }
         },
         {
            "address":"google_compute_network.networks[2]",
            "values":{
-              "mtu":8896
+              "mtu":8228
            }
         },
         {
            "address":"google_compute_network.networks[3]",
            "values":{
-              "mtu":8896
+              "mtu":8228
            }
         },
         {
            "address":"google_compute_network.networks[4]",
            "values":{
-              "mtu":8896
+              "mtu":8228
            }
         },
         {
