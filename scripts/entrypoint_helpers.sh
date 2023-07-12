@@ -38,6 +38,8 @@ Parameters:
                 - destroy: destroys the cluster created on Google Cloud
     cluster     Type of cluster to act on. Options are:
                 - gke: Google Kubernetes Engine -- terraform/modules/cluster/gke
+                - gke-beta: Google Kubernetes Engine with beta features not yet
+                    supported by terraform -- terraform/modules/cluster/gke-beta
                 - mig: Managed Instance Group -- terraform/modules/cluster/mig
                 - mig-with-container: MIG with docker container --
                     terraform/modules/cluster/mig-with-container
@@ -151,7 +153,13 @@ entrypoint_helpers::validate_args () {
     declare -ar expected_actions=('create' 'destroy')
     entrypoint_helpers::expect_contains expected_actions arg_action || valid=false
 
-    declare -ar expected_clusters=('gke' 'mig' 'mig-with-container' 'slurm')
+    declare -ar expected_clusters=(
+        'gke'
+        'gke-beta'
+        'mig'
+        'mig-with-container'
+        'slurm'
+    )
     entrypoint_helpers::expect_contains expected_clusters arg_cluster || valid=false
 
     [ -f "${arg_var_file}" ] || {
