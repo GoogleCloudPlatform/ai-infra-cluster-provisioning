@@ -31,7 +31,8 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [null_resource.gke-create-cluster-command](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [null_resource.gke-cluster-command](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [null_resource.gke-node-pool-command](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 
 ## Inputs
 
