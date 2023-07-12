@@ -124,6 +124,7 @@ resource "google_compute_instance_template" "template" {
     automatic_restart   = true
     preemptible         = false
     provisioning_model  = null
+    maintenance_interval = "PERIODIC"
   }
 
   service_account {
