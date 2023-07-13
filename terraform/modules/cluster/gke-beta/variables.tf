@@ -40,24 +40,6 @@ variable "gke_version" {
   default     = null
 }
 
-variable "network_config" {
-  description = <<-EOT
-    The network configuration to specify the type of VPC to be used.
-
-    Possible values: `["default", "new_multi_nic", "new_single_nic"]`
-    EOT
-  type        = string
-  default     = "default"
-
-  validation {
-    condition = contains(
-      ["default", "new_multi_nic", "new_single_nic"],
-      var.network_config
-    )
-    error_message = "network_config must be one of ['default', 'new_multi_nic', 'new_single_nic']."
-  }
-}
-
 variable "disk_size_gb" {
   description = <<-EOT
     Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB. Defaults to 200GB.

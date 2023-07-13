@@ -14,31 +14,54 @@
   * limitations under the License.
   */
 locals {
+  gke_master_version   = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
+  node_service_account = var.node_service_account == null ? data.google_compute_default_service_account.account.email : var.node_service_account
+  oauth_scopes = [
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/dataaccessauditlogging",
+  ]
+
+  kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
+    enable_kubernetes_setup              = true
+    kubernetes_service_account_name      = "aiinfra-gke-sa"
+    kubernetes_service_account_namespace = "default"
+  }
+}
+
+data "google_compute_default_service_account" "account" {
+  project = var.project_id
+}
+
+data "google_client_config" "current" {}
+
+data "google_container_engine_versions" "gkeversion" {
+  location = var.region
+  project  = var.project_id
 }
 
 resource "null_resource" "gke-cluster-command" {
   triggers = {
+    project_id   = var.project_id
     cluster_name = "${var.resource_prefix}-gke"
     region       = var.region
+    gke_version  = local.gke_master_version
   }
 
   provisioner "local-exec" {
     when        = create
     interpreter = ["/bin/bash", "-c"]
     command     = <<-EOT
-            gcloud container clusters describe ${self.triggers.cluster_name} --region ${self.triggers.region} || 
-            gcloud container clusters create ${self.triggers.cluster_name} --region ${self.triggers.region}
-        EOT
+      "${path.module}/scripts/gke_cluster.sh create \
+      ${self.triggers.cluster_name} \
+      ${self.triggers.region}"
+    EOT
     on_failure  = fail
   }
 
   provisioner "local-exec" {
     when        = destroy
     interpreter = ["/bin/bash", "-c"]
-    command     = <<-EOT
-            gcloud container clusters describe ${self.triggers.cluster_name} --region ${self.triggers.region} &&
-            gcloud container clusters delete ${self.triggers.cluster_name} --region ${self.triggers.region} --quiet
-        EOT
+    command     = "${path.module}/scripts/gke_cluster.sh destroy ${self.triggers.cluster_name} ${self.triggers.region}"
     on_failure  = fail
   }
 }
@@ -57,20 +80,14 @@ resource "null_resource" "gke-node-pool-command" {
   provisioner "local-exec" {
     when        = create
     interpreter = ["/bin/bash", "-c"]
-    command     = <<-EOT
-            gcloud container node-pools describe ${self.triggers.node_pool_name} --cluster ${self.triggers.cluster_name} --region ${self.triggers.region} || 
-            gcloud container node-pools create ${self.triggers.node_pool_name} --cluster ${self.triggers.cluster_name} --region ${self.triggers.region}
-        EOT
+    command     = "${path.module}/scripts/gke_node_pool.sh create ${self.triggers.cluster_name} ${self.triggers.node_pool_name} ${self.triggers.region}"
     on_failure  = fail
   }
 
   provisioner "local-exec" {
     when        = destroy
     interpreter = ["/bin/bash", "-c"]
-    command     = <<-EOT
-            gcloud container node-pools describe ${self.triggers.node_pool_name} --cluster ${self.triggers.cluster_name} --region ${self.triggers.region} &&
-            gcloud container node-pools delete ${self.triggers.node_pool_name} --cluster ${self.triggers.cluster_name} --region ${self.triggers.region} --quiet
-        EOT
+    command     = "${path.module}/scripts/gke_node_pool.sh destroy ${self.triggers.cluster_name} ${self.triggers.node_pool_name} ${self.triggers.region}"
     on_failure  = fail
   }
 

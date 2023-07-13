@@ -112,10 +112,10 @@ entrypoint_helpers::parse_args () {
 #   - 0: _array contains the _value
 #   - 1: _array does not contain the _value
 entrypoint_helpers::expect_contains () {
-    local -r _array_name="${1}"
-    local -r _value_name="${2}"
-    local -nr _array="${_array_name}"
-    local -nr _value="${_value_name}"
+    local -r _array_name="${1}[@]"
+    local -r _value_name="${2}[@]"
+    local -r _array=("${!_array_name}")
+    local -r _value=("${!_value_name}")
 
     [ "${#_array[@]}" -gt 0 ] || {
         echo "Array '${_array_name}' contains zero elements"
