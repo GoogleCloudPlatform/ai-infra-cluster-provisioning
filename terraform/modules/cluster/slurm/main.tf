@@ -247,6 +247,7 @@ module "compute_instance_templates" {
   labels                = var.labels
   machine_image         = local.compute_partitions[each.key].machine_image
   machine_type          = local.compute_partitions[each.key].machine_type
+  maintenance_interval  = null
   metadata              = null
   project_id            = var.project_id
   region                = local.compute_partitions[each.key].region
@@ -271,6 +272,7 @@ module "controller_instance_template" {
   labels                = var.labels
   machine_image         = local.controller_var.machine_image
   machine_type          = local.controller_var.machine_type
+  maintenance_interval  = null
   metadata              = null
   project_id            = var.project_id
   region                = local.controller_var.region
@@ -295,6 +297,7 @@ module "login_instance_template" {
   labels                = var.labels
   machine_image         = local.login_var.machine_image
   machine_type          = local.login_var.machine_type
+  maintenance_interval  = null
   metadata              = null
   project_id            = var.project_id
   region                = local.login_var.region

@@ -86,6 +86,7 @@ module "compute_instance_template" {
   guest_accelerator     = var.guest_accelerator
   machine_image         = local.machine_image
   machine_type          = var.machine_type
+  maintenance_interval  = var.maintenance_interval
   metadata              = local.metadata
   project_id            = var.project_id
   region                = local.region

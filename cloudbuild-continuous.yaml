@@ -36,7 +36,6 @@ steps:
   args: [
     'run', '--network=cloudbuild',
     'test', "${PROJECT_ID}", "ci-${SHORT_SHA}",
-    '--exclude', 'slurm',
     ]
 
 

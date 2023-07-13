@@ -128,6 +128,15 @@ variable "machine_type" {
   }
 }
 
+variable "maintenance_interval" {
+  description = <<-EOT
+  Specifies the frequency of planned maintenance events.
+
+  Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#maintenance_interval).
+    EOT
+  type        = string
+}
+
 variable "metadata" {
   description = <<-EOT
     Metadata key/value pairs to make available from within instances created from this template.
