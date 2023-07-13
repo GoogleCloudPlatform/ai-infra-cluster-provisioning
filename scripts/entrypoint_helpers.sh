@@ -45,6 +45,8 @@ Parameters:
     var_file    Terraform variables file. Defaults to:
                 '${PWD}/input/terraform.tfvars'
 EOT
+#                - gke-beta: Google Kubernetes Engine with beta features not yet
+#                    supported by terraform -- terraform/modules/cluster/gke-beta
 }
 
 # Parse the arguments/flags/options of the entrypoint.
@@ -151,7 +153,13 @@ entrypoint_helpers::validate_args () {
     declare -ar expected_actions=('create' 'destroy')
     entrypoint_helpers::expect_contains expected_actions arg_action || valid=false
 
-    declare -ar expected_clusters=('gke' 'mig' 'mig-with-container' 'slurm')
+    declare -ar expected_clusters=(
+        'gke'
+        'gke-beta'
+        'mig'
+        'mig-with-container'
+        'slurm'
+    )
     entrypoint_helpers::expect_contains expected_clusters arg_cluster || valid=false
 
     [ -f "${arg_var_file}" ] || {
