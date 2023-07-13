@@ -254,6 +254,16 @@ variable "machine_type" {
   default     = "a3-highgpu-8g"
 }
 
+variable "maintenance_interval" {
+  description = <<-EOT
+  Specifies the frequency of planned maintenance events.
+
+  Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#maintenance_interval).
+    EOT
+  type        = string
+  default     = null
+}
+
 variable "metadata" {
   description = <<-EOT
     GCE metadata to attach to each instance.
