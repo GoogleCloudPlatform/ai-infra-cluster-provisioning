@@ -38,8 +38,6 @@ Parameters:
                 - destroy: destroys the cluster created on Google Cloud
     cluster     Type of cluster to act on. Options are:
                 - gke: Google Kubernetes Engine -- terraform/modules/cluster/gke
-                - gke-beta: Google Kubernetes Engine with beta features not yet
-                    supported by terraform -- terraform/modules/cluster/gke-beta
                 - mig: Managed Instance Group -- terraform/modules/cluster/mig
                 - mig-with-container: MIG with docker container --
                     terraform/modules/cluster/mig-with-container
@@ -47,6 +45,8 @@ Parameters:
     var_file    Terraform variables file. Defaults to:
                 '${PWD}/input/terraform.tfvars'
 EOT
+#                - gke-beta: Google Kubernetes Engine with beta features not yet
+#                    supported by terraform -- terraform/modules/cluster/gke-beta
 }
 
 # Parse the arguments/flags/options of the entrypoint.
