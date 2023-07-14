@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+kubernetes-setup::install_drivers () {
+    kubectl get nodes --selector=cloud.google.com/gke-nodepool=${NODE_POOL_NAME} --no-headers \
+    | awk '{print $1}' \
+    | xargs -I{} kubectl label node {} gke-no-default-nvidia-gpu-device-plugin=true
+    
+    # Deploy the latest GPU device plugin
+    kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml 
+    
+    # Install the drivers
+    kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml
+}
+
+kubernetes-setup::setup_ksa () {
+    echo "Binding IAM workload identity to default compute engine account ${gsa_name}"
+    gcloud iam service-accounts add-iam-policy-binding ${gsa_name} \
+        --role roles/iam.workloadIdentityUser \
+        --member "serviceAccount:${project_id}.svc.id.goog[${ksa_namespace}/${ksa_name}]"
+    
+    echo "Annotating default k8s service account to compute engine account ${gsa_name}"
+    kubectl annotate serviceaccount default --namespace default \
+        iam.gke.io/gcp-service-account=${gsa_name}
+}
+
+main () {
+    local -r project_id="${1:?}"
+    local -r gsa_name="${2:?}"
+    local -r ksa_name="${3:?}"
+    local -r ksa_namespace="${4:?}"
+
+    kubernetes-setup::install_drivers
+    kubernetes-setup::setup_ksa
+}
+
+main "${@}"

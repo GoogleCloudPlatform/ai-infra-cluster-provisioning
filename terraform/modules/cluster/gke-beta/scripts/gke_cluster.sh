@@ -15,14 +15,20 @@
 # limitations under the License.
 
 gke_cluster::create () {
-    gcloud beta container clusters describe ${cluster_name} --region ${region} \
-    || gcloud beta container clusters create ${cluster_name} --region ${region} \
-    --cluster-version ${version} --release-channel=rapid --enable-dataplane-v2 --project ${project_id}
+    gcloud container clusters describe ${cluster_name} --region ${region} \
+    || { gcloud container clusters create ${cluster_name} --region ${region} \
+      --project ${project_id} \
+      --cluster-version ${version} \
+      --release-channel=rapid \
+      --enable-dataplane-v2 \
+      --num-nodes 1 \
+      && gcloud container node-pools delete default-pool --cluster ${cluster_name} --region ${region} --quiet
+    }
 }
 
 gke_cluster::destroy () {
-    gcloud beta container clusters describe ${cluster_name} --region ${region} \
-    && gcloud beta  clusters delete ${cluster_name} --region ${region} --project ${project_id} --quiet
+    gcloud container clusters describe ${cluster_name} --region ${region} \
+    && gcloud container clusters delete ${cluster_name} --region ${region} --project ${project_id} --quiet
 }
 
 main () {
@@ -39,6 +45,7 @@ main () {
                 && echo "Successfully created GKE Cluster ${cluster_name}...." >&2
             } || {
                 echo "Failed to create GKE cluster ${cluster_name}...." >&2
+                return 1
             }
             ;;
         'destroy')
@@ -47,6 +54,7 @@ main () {
                 && echo "Successfully destroyed GKE Cluster ${cluster_name}...." >&2
             } || {
                 echo "Failed to destroy GKE cluster ${cluster_name}...." >&2
+                return 1
             }
             ;;
     esac
