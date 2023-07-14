@@ -179,5 +179,5 @@ resource "null_resource" "kubernetes-setup-command" {
     on_failure  = fail
   }
 
-  depends_on = [null_resource.gke-cluster-command]
+  depends_on = [null_resource.gke-node-pool-command]
 }

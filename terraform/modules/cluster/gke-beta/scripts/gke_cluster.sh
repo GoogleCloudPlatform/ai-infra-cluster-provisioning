@@ -21,6 +21,7 @@ gke_cluster::create () {
       --cluster-version ${version} \
       --release-channel=rapid \
       --enable-dataplane-v2 \
+      --workload-pool=${project_id}.svc.id.goog \
       --num-nodes 1 \
       && gcloud container node-pools delete default-pool --cluster ${cluster_name} --region ${region} --quiet
     }

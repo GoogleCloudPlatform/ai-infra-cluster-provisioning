@@ -33,7 +33,8 @@ kubernetes-setup::setup_ksa () {
         --member "serviceAccount:${project_id}.svc.id.goog[${ksa_namespace}/${ksa_name}]"
     
     echo "Annotating default k8s service account to compute engine account ${gsa_name}"
-    kubectl annotate serviceaccount default --namespace default \
+    kubectl create serviceaccount ${ksa_name} --namespace ${ksa_namespace}
+    kubectl annotate serviceaccount ${ksa_name} --namespace ${ksa_namespace} \
         iam.gke.io/gcp-service-account=${gsa_name}
 }
 

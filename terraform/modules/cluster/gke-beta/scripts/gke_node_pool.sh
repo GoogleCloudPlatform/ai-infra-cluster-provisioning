@@ -24,6 +24,7 @@ gke_node_pool::create () {
     --disk-type ${disk_type} \
     --disk-size ${disk_size} \
     --placement-type ${placement_type} \
+    --workload-metadata=GKE_METADATA \
     --scopes "https://www.googleapis.com/auth/cloud-platform"
 }
 
