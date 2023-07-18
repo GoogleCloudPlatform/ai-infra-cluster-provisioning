@@ -15,10 +15,6 @@
 # limitations under the License.
 
 kubernetes-setup::install_drivers () {
-    kubectl get nodes --selector=cloud.google.com/gke-nodepool=${NODE_POOL_NAME} --no-headers \
-    | awk '{print $1}' \
-    | xargs -I{} kubectl label node {} gke-no-default-nvidia-gpu-device-plugin=true
-    
     # Deploy the latest GPU device plugin
     kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml 
     

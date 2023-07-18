@@ -16,22 +16,26 @@
 
 gke_node_pool::create () {
     gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-    || gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-    --project ${project_id} \
-    --node-locations ${zone} \
-    --machine-type ${machine_type} \
-    --num-nodes ${node_count} \
-    --disk-type ${disk_type} \
-    --disk-size ${disk_size} \
-    --placement-type ${placement_type} \
-    --workload-metadata=GKE_METADATA \
-    --additional-node-network network=${prefix}-net-1,subnetwork=${prefix}-sub-1 \
-    --additional-node-network network=${prefix}-net-2,subnetwork=${prefix}-sub-2 \
-    --additional-node-network network=${prefix}-net-3,subnetwork=${prefix}-sub-3 \
-    --additional-node-network network=${prefix}-net-4,subnetwork=${prefix}-sub-4 \
-    --enable-gvnic \
-    --scopes "https://www.googleapis.com/auth/cloud-platform" \
-    --host-maintenance-interval PERIODIC 
+    || { gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --region ${region} \
+      --project ${project_id} \
+      --node-locations ${zone} \
+      --machine-type ${machine_type} \
+      --num-nodes ${node_count} \
+      --disk-type ${disk_type} \
+      --disk-size ${disk_size} \
+      --placement-type ${placement_type} \
+      --workload-metadata=GKE_METADATA \
+      --additional-node-network network=${prefix}-net-1,subnetwork=${prefix}-sub-1 \
+      --additional-node-network network=${prefix}-net-2,subnetwork=${prefix}-sub-2 \
+      --additional-node-network network=${prefix}-net-3,subnetwork=${prefix}-sub-3 \
+      --additional-node-network network=${prefix}-net-4,subnetwork=${prefix}-sub-4 \
+      --enable-gvnic \
+      --scopes "https://www.googleapis.com/auth/cloud-platform" \
+      --host-maintenance-interval PERIODIC \
+      && kubectl get nodes --selector=cloud.google.com/gke-nodepool=${node_pool_name} --no-headers \
+      | awk '{print $1}' \
+      | xargs -I{} kubectl label node {} gke-no-default-nvidia-gpu-device-plugin=true
+    }
 }
 
 gke_node_pool::destroy () {

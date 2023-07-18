@@ -30,12 +30,10 @@ Please copy the [terraform.tfvars](./terraform.tfvars) file to your current work
 directory of your local machine. Then follow the below instructions to create the cluster.
 
 ```docker
-docker pull us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest
-
 docker run \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
-  --rm us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
+  --it us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
   create gke-beta
 ```
 
