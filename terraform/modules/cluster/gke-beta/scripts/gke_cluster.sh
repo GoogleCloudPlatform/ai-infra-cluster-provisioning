@@ -16,10 +16,11 @@
 
 gke_cluster::create () {
     gcloud container clusters describe ${cluster_name} --region ${region} \
-    || { gcloud container clusters create ${cluster_name} --region ${region} \
+    || { gcloud beta container clusters create ${cluster_name} --region ${region} \
       --project ${project_id} \
       --cluster-version ${version} \
-      --release-channel=rapid \
+      --enable-ip-alias \
+      --enable-multi-networking \
       --enable-dataplane-v2 \
       --workload-pool=${project_id}.svc.id.goog \
       --num-nodes 1 \

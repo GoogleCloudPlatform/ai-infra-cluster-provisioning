@@ -25,7 +25,13 @@ gke_node_pool::create () {
     --disk-size ${disk_size} \
     --placement-type ${placement_type} \
     --workload-metadata=GKE_METADATA \
-    --scopes "https://www.googleapis.com/auth/cloud-platform"
+    --additional-node-network network=${prefix}-net-1,subnetwork=${prefix}-sub-1 \
+    --additional-node-network network=${prefix}-net-2,subnetwork=${prefix}-sub-2 \
+    --additional-node-network network=${prefix}-net-3,subnetwork=${prefix}-sub-3 \
+    --additional-node-network network=${prefix}-net-4,subnetwork=${prefix}-sub-4 \
+    --enable-gvnic \
+    --scopes "https://www.googleapis.com/auth/cloud-platform" \
+    --host-maintenance-interval PERIODIC 
 }
 
 gke_node_pool::destroy () {
@@ -44,11 +50,16 @@ main () {
     local -r node_count="${8:?}"
     local -r disk_type="${9:?}"
     local -r disk_size="${10:?}"
-    if [[ ${11} ]]; then
-      local -r placement_type="COMPACT"
-    else
-      local -r placement_type="UNSPECIFIED"
-    fi
+    #if [[ ${11} ]]; then
+    #  local -r placement_type="COMPACT"
+    #else
+    #  local -r placement_type="UNSPECIFIED"
+    #fi
+    local -r placement_type=$(
+      if [ "${11}" ]; then echo 'COMPACT'
+      else echo 'UNSPECIFIED'; fi
+    )
+    local -r prefix="${12:?}"
 
     case "${action}" in
         'create')

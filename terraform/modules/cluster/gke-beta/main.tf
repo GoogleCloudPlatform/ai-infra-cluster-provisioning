@@ -39,13 +39,21 @@ data "google_container_engine_versions" "gkeversion" {
   project  = var.project_id
 }
 
+module "network" {
+  source = "../../common/network"
+
+  network_config  = "new_multi_nic"
+  project_id      = var.project_id
+  region          = var.region
+  resource_prefix = var.resource_prefix
+}
+
 resource "null_resource" "gke-cluster-command" {
   triggers = {
     project_id   = var.project_id
     cluster_name = "${var.resource_prefix}-gke"
     region       = var.region
     gke_version  = local.gke_master_version
-    sa_name      = local.node_service_account
   }
 
   provisioner "local-exec" {
@@ -56,8 +64,7 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.project_id} \
       ${self.triggers.cluster_name} \
       ${self.triggers.region} \
-      ${self.triggers.gke_version} \
-      ${self.triggers.sa_name}
+      ${self.triggers.gke_version} 
     EOT
     on_failure  = fail
   }
@@ -83,6 +90,7 @@ resource "null_resource" "gke-node-pool-command" {
 
   triggers = {
     project_id               = var.project_id
+    prefix                   = var.resource_prefix
     cluster_name             = "${var.resource_prefix}-gke"
     node_pool_name           = "${var.resource_prefix}-nodepool-${each.key}"
     zone                     = each.value.zone
@@ -108,7 +116,8 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.node_count} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
-      ${self.triggers.enable_compact_placement} 
+      ${self.triggers.enable_compact_placement} \
+      ${self.triggers.prefix} 
     EOT
     on_failure  = fail
   }
@@ -127,7 +136,8 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.node_count} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
-      ${self.triggers.enable_compact_placement} 
+      ${self.triggers.enable_compact_placement} \
+      ${self.triggers.prefix} 
     EOT
     on_failure  = fail
   }

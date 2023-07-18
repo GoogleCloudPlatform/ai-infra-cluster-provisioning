@@ -26,7 +26,9 @@ No requirements.
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_network"></a> [network](#module\_network) | ../../common/network | n/a |
 
 ## Resources
 
