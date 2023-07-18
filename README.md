@@ -41,7 +41,11 @@ Slurm. The configurations are different for different type of GPU clusters.
 1. The configurations for a GPU cluster using
    [GKE are here](./terraform/modules/cluster/gke/README.md). An example of a simple GPU
    cluster using GKE can be found [here](./samples/gke/simple/terraform.tfvars).
-1. Tje configurations for a GPU cluster using
+1. The configurations for a GPU cluster using
+   [GKE-beta are here](./terraform/modules/cluster/gke-beta/README.md). An example of
+   a a3 multi-NIC GPU
+   cluster using GKE-beta can be found [here](./samples/gke-beta/a3_multiNIC_network/README.md).
+2. The configurations for a GPU cluster using
    [Slurm are here](./terraform/modules/cluster/slurm/README.md). An example of a simple GPU
    cluster using Slurm can be found [here](./samples/slurm/minimal/terraform.tfvars).
 
@@ -76,7 +80,7 @@ The user updates the `terraform.tfvars` file in their current working location a
 runs the docker image with this file to create resources using the ‘docker run’
 command. As part of the run command, users
 have to specify an action and a cluster. The action can be `create` or `destroy`. The
-cluster can be `mig`, `gke` or `slurm`. The sample command looks like
+cluster can be `mig`, `gke`, `gke-beta` or `slurm`. The sample command looks like
 
 #### docker command:
 ```docker
@@ -405,6 +409,10 @@ The HPC Toolkit Repo is open-source and available
 | Full featured with default network | [terraform.tfvars](./samples/gke/complex_gpu_default_network/terraform.tfvars) | [main.tf](./samples/gke/complex_gpu_default_network/main.tf) | [blueprint](./samples/gke/complex_gpu_default_network/complex_gpu_default_network.yaml) |
 | Full featured with new network | [terraform.tfvars](./samples/gke/complex_gpu_new_network/terraform.tfvars) | [main.tf](./samples/gke/complex_gpu_new_network/main.tf) | [blueprint](./samples/gke/complex_gpu_new_network/complex_gpu_new_network.yaml) |
 
+
+| GKE-beta Scenarios | Docker | Terraform | HPC Toolkit |
+|--------------------|--------|-----------|-------------|
+| Full featured with a3 machines and multi-NIC network | [terraform.tfvars](./samples/gke-beta/a3_multiNIC_network/terraform.tfvars) | Not Supported | Not Supported |
 
 
 | Slurm Scenarios | Docker | Terraform | HPC Toolkit |
