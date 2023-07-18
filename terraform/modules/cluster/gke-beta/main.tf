@@ -22,7 +22,6 @@ locals {
   ]
 
   kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
-    enable_kubernetes_setup              = true
     kubernetes_service_account_name      = "aiinfra-gke-sa"
     kubernetes_service_account_namespace = "default"
   }

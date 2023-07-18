@@ -107,7 +107,6 @@ variable "kubernetes_setup_config" {
   description = <<-EOT
     The configuration for setting up Kubernetes after GKE cluster is created.
     ```
-    enable_kubernetes_setup: Flag to enable kubernetes setup. Default value is `true`.
     kubernetes_service_account_name: The KSA (kubernetes service account) name to be used for Pods. Default value is `aiinfra-gke-sa`.
     kubernetes_service_account_namespace: The KSA (kubernetes service account) namespace to be used for Pods. Default value is `default`.
     ```
@@ -115,7 +114,6 @@ variable "kubernetes_setup_config" {
     Related Docs: [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
     EOT
   type = object({
-    enable_kubernetes_setup              = bool,
     kubernetes_service_account_name      = string,
     kubernetes_service_account_namespace = string
   })
