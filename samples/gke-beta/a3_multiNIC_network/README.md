@@ -1,4 +1,4 @@
-GKE-beta is purely experimental. Please use `gke` cluster type to create GKE
+GKE-beta is experimental. Please use `gke` cluster type to create GKE
 clusters. Please refrain from using the `gke-beta` cluster unless it is necessary.
 
 The `gke-beta` cluster type uses gcloud commands to create GKE clusters so many of
