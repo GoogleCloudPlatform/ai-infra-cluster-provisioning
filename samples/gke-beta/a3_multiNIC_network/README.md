@@ -3,7 +3,7 @@ clusters. Please refrain from using the `gke-beta` cluster unless it is necessar
 
 The `gke-beta` cluster type uses gcloud commands to create GKE clusters so many of
 the terraform cluster management capabilities are reduced or absent in this option.
-This is only an experimental workaround for create GKE cluster to use A3 machines
+This is only an experimental workaround for creation of GKE clusters with A3 machines
 with multi-NIC network.
 
 This provides a sample for creating a AI cluster using
