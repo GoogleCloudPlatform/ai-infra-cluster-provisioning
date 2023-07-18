@@ -6,7 +6,7 @@ the terraform cluster management capabilities are reduced or absent in this opti
 This is only an experimental workaround for creation of GKE clusters with A3 machines
 with multi-NIC network.
 
-This provides a sample for creating a AI cluster using
+This provides a sample for creating a ML cluster using
 [GKE](https://cloud.google.com/kubernetes-engine) with A3 machines and multi-NIC network. This cluster uses:
 1. Single GKE cluster with provided
    [version](https://cloud.google.com/kubernetes-engine/versioning#specifying_cluster_version)
