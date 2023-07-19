@@ -54,13 +54,8 @@ main () {
     local -r node_count="${8:?}"
     local -r disk_type="${9:?}"
     local -r disk_size="${10:?}"
-    #if [[ ${11} ]]; then
-    #  local -r placement_type="COMPACT"
-    #else
-    #  local -r placement_type="UNSPECIFIED"
-    #fi
     local -r placement_type=$(
-      if [ "${11}" ]; then echo 'COMPACT'
+      if [ "${11}" == "true" ]; then echo 'COMPACT'
       else echo 'UNSPECIFIED'; fi
     )
     local -r prefix="${12:?}"

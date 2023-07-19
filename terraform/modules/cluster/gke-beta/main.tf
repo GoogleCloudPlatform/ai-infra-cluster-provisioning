@@ -125,7 +125,7 @@ resource "null_resource" "gke-node-pool-command" {
     when        = destroy
     interpreter = ["/bin/bash", "-c"]
     command     = <<-EOT
-      ${path.module}/scripts/gke_node_pool.sh create \
+      ${path.module}/scripts/gke_node_pool.sh destroy \
       ${self.triggers.project_id} \
       ${self.triggers.cluster_name} \
       ${self.triggers.node_pool_name} \
