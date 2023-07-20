@@ -15,10 +15,11 @@
 */
 
 resource "google_compute_resource_policy" "placement_policy" {
+  provider = google-beta
+
   name    = var.resource_policy_name
   project = var.project_id
   region  = var.region
-
   group_placement_policy {
     availability_domain_count = var.availability_domain_count
     collocation               = "COLLOCATED"
