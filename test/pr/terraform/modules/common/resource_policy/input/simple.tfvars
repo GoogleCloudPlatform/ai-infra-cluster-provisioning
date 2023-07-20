@@ -1,2 +1,2 @@
-region       = "us-central1"
-policy_count = 2
+region               = "us-central1"
+resource_policy_name = "test-policy"

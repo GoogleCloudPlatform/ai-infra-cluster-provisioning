@@ -23,12 +23,16 @@ variable "project_id" {
   type        = string
 }
 
-variable "resource_prefix" {
-  description = "Arbitrary string with which all names of newly created resources will be prefixed."
+variable "resource_policy_name" {
+  description = <<-EOT
+    The name of the resource policy to be created. 
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name).
+    EOT
   type        = string
 
   validation {
-    condition     = var.resource_prefix != null
+    condition     = var.resource_policy_name != null
     error_message = "must not be null"
   }
 }
@@ -40,17 +44,6 @@ variable "region" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#region).
     EOT
   type        = string
-}
-
-variable "policy_count" {
-  description = "The number of resource policy(s) that needs to be created"
-  type        = number
-  default     = 1
-
-  validation {
-    condition     = var.policy_count != null
-    error_message = "must not be null"
-  }
 }
 
 variable "availability_domain_count" {

@@ -3,8 +3,7 @@
     "root_module": {
       "resources": [
          {
-            "address": "google_compute_resource_policy.placement_policy[0]",
-            "index": 0,
+            "address": "google_compute_resource_policy.placement_policy",
             "values": {
               "group_placement_policy": [
                 {
@@ -12,20 +11,8 @@
                   "collocation": "COLLOCATED",
                   "vm_count": null
                 }
-              ]
-            }
-         },
-         {
-            "address": "google_compute_resource_policy.placement_policy[1]",
-            "index": 1,
-            "values": {
-              "group_placement_policy": [
-                {
-                  "availability_domain_count": 1,
-                  "collocation": "COLLOCATED",
-                  "vm_count": null
-                }
-              ]
+              ],
+              "name": "test-policy"
             }
          }
        ]

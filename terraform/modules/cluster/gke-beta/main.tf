@@ -48,11 +48,13 @@ module "network" {
 }
 
 module "resource_policy" {
-  source          = "../../common/resource_policy"
-  policy_count    = var.enable_resource_policy_creation ? length(var.node_pools) : 0
-  project_id      = var.project_id
-  resource_prefix = var.resource_prefix
-  region          = var.region
+  source = "../../common/resource_policy"
+  for_each = {
+    for idx, node_pool in var.node_pools : idx => node_pool
+  }
+  project_id           = var.project_id
+  resource_policy_name = each.value.resource_policy
+  region               = var.region
 }
 
 resource "null_resource" "gke-cluster-command" {

@@ -15,9 +15,7 @@
 */
 
 resource "google_compute_resource_policy" "placement_policy" {
-  count = var.policy_count
-
-  name    = "${var.resource_prefix}-placement-policy-${count.index}"
+  name    = var.resource_policy_name
   project = var.project_id
   region  = var.region
 
