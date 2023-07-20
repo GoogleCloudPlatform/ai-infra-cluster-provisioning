@@ -22,5 +22,6 @@ resource "google_compute_resource_policy" "placement_policy" {
   group_placement_policy {
     availability_domain_count = var.availability_domain_count
     collocation               = "COLLOCATED"
+    max_distance              = 2
   }
 }
