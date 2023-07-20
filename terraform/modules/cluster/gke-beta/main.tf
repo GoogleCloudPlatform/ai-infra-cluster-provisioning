@@ -47,6 +47,14 @@ module "network" {
   resource_prefix = var.resource_prefix
 }
 
+module "resource_policy" {
+  source          = "../../common/resource_policy"
+  policy_count    = var.enable_resource_policy_creation ? length(var.node_pools) : 0
+  project_id      = var.project_id
+  resource_prefix = var.resource_prefix
+  region          = var.region
+}
+
 resource "null_resource" "gke-cluster-command" {
   triggers = {
     project_id   = var.project_id
@@ -141,7 +149,7 @@ resource "null_resource" "gke-node-pool-command" {
     on_failure  = fail
   }
 
-  depends_on = [null_resource.gke-cluster-command]
+  depends_on = [null_resource.gke-cluster-command, module.resource_policy, module.network]
 }
 
 output "gke-cluster-name" {

@@ -60,14 +60,6 @@ module "dashboard" {
   resource_prefix                        = var.resource_prefix
 }
 
-module "resource_policy" {
-  source          = "../../common/resource_policy"
-  policy_count    = var.enable_resource_policy_creation ? length(var.node_pools) : 0
-  project_id      = var.project_id
-  resource_prefix = var.resource_prefix
-  region          = var.region
-}
-
 # Definition of the private GKE cluster.
 resource "google_container_cluster" "gke-cluster" {
   provider = google-beta

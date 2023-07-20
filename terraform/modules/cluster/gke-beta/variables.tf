@@ -85,6 +85,19 @@ variable "enable_gke_dashboard" {
   }
 }
 
+variable "enable_resource_policy_creation" {
+  description = <<-EOT
+    Flag to enable resource policy creation for the GKE cluster.
+    EOT
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = var.enable_resource_policy_creation != null
+    error_message = "must not be null"
+  }
+}
+
 variable "node_pools" {
   description = <<-EOT
     The list of node pools for the GKE cluster.

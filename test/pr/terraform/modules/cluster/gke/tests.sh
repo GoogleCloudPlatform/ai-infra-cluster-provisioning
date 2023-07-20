@@ -49,20 +49,3 @@ test::terraform::gke::nongpu_create_modules () {
         "$(gke::output_dir)/gke-nongpu.json" \
         "${tfshow}"
 }
-
-test::terraform::gke::nongpu_resourcepolicy_create_modules () {
-    local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(gke::input_dir)/gke-nongpu-pp.tfvars" gke >"${tfvars}"
-
-    local -r tfplan=$(mktemp)
-    EXPECT_SUCCEED helpers::terraform_plan \
-        "$(gke::src_dir)" \
-        "${tfvars}" \
-        "${tfplan}"
-
-    local -r tfshow=$(mktemp)
-    helpers::terraform_show "$(gke::src_dir)" "${tfplan}" >"${tfshow}"
-    EXPECT_SUCCEED helpers::json_contains \
-        "$(gke::output_dir)/gke-nongpu-pp.json" \
-        "${tfshow}"
-}
