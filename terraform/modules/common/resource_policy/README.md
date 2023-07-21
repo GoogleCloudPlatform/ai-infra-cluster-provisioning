@@ -37,7 +37,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_availability_domain_count"></a> [availability\_domain\_count](#input\_availability\_domain\_count) | The number of availability domains instances will be spread across. If two instances are in different availability domain, they will not be put in the same low latency network<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#availability_domain_count). | `number` | `1` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The ID of the project in which the resource belongs.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#project). | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The region in which the resource policy(s) has been / will be created.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#region). | `string` | n/a | yes |
 | <a name="input_resource_policy_name"></a> [resource\_policy\_name](#input\_resource\_policy\_name) | The name of the resource policy to be created. <br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name). | `string` | n/a | yes |

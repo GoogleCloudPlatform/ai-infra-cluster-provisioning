@@ -7,7 +7,6 @@
             "values": {
               "group_placement_policy": [
                 {
-                  "availability_domain_count": 1,
                   "collocation": "COLLOCATED",
                   "max_distance": 2,
                   "vm_count": null

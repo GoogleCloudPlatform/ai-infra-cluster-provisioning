@@ -45,13 +45,3 @@ variable "region" {
     EOT
   type        = string
 }
-
-variable "availability_domain_count" {
-  description = <<-EOT
-    The number of availability domains instances will be spread across. If two instances are in different availability domain, they will not be put in the same low latency network
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#availability_domain_count).
-    EOT
-  type        = number
-  default     = 1
-}
