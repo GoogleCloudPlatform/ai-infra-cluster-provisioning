@@ -54,6 +54,24 @@
             ]
           }
         }
+      ],
+      "child_modules": [
+        {
+          "resources": [
+            {
+              "address": "module.resource_policy[0].google_compute_resource_policy.placement_policy",
+              "values": {
+                "group_placement_policy": [
+                  {
+                    "collocation": "COLLOCATED",
+                    "max_distance": 2
+                  }
+                ],
+                "name": "ci-mig-placement-policy"
+              }
+            }
+          ]
+        }
       ]
     }
   }

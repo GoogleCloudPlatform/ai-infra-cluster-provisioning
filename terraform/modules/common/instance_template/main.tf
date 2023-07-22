@@ -73,16 +73,25 @@ data "google_compute_image" "image" {
   project = var.machine_image.project
 }
 
+module "resource_policy" {
+  source               = "../resource_policy"
+  count                = var.use_compact_placement_policy ? 1 : 0
+  project_id           = var.project_id
+  resource_policy_name = "${var.resource_prefix}-placement-policy"
+  region               = var.region
+}
+
 resource "google_compute_instance_template" "template" {
   provider = google-beta
 
-  project      = var.project_id
-  region       = var.region
-  labels       = var.labels
-  name         = var.use_static_naming ? local.name : null
-  name_prefix  = var.use_static_naming ? null : local.name
-  machine_type = var.machine_type
-  metadata     = local.metadata
+  project           = var.project_id
+  region            = var.region
+  labels            = var.labels
+  name              = var.use_static_naming ? local.name : null
+  name_prefix       = var.use_static_naming ? null : local.name
+  machine_type      = var.machine_type
+  metadata          = local.metadata
+  resource_policies = var.use_compact_placement_policy ? [module.resource_policy[0].resource_self_link] : []
 
   disk {
     boot         = true

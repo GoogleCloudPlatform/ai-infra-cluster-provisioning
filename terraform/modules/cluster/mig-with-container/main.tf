@@ -81,21 +81,22 @@ module "cloudinit" {
 module "compute_instance_template" {
   source = "../../common/instance_template"
 
-  disk_size_gb          = var.disk_size_gb
-  disk_type             = var.disk_type
-  guest_accelerator     = var.guest_accelerator
-  machine_image         = local.machine_image
-  machine_type          = var.machine_type
-  maintenance_interval  = var.maintenance_interval
-  metadata              = local.metadata
-  project_id            = var.project_id
-  region                = local.region
-  resource_prefix       = var.resource_prefix
-  service_account       = var.service_account
-  startup_script        = null
-  subnetwork_self_links = module.network.subnetwork_self_links
-  network_self_links    = module.network.network_self_links
-  labels                = merge(var.labels, { ghpc_role = "compute" })
+  disk_size_gb                 = var.disk_size_gb
+  disk_type                    = var.disk_type
+  guest_accelerator            = var.guest_accelerator
+  machine_image                = local.machine_image
+  machine_type                 = var.machine_type
+  maintenance_interval         = var.maintenance_interval
+  metadata                     = local.metadata
+  project_id                   = var.project_id
+  region                       = local.region
+  resource_prefix              = var.resource_prefix
+  service_account              = var.service_account
+  use_compact_placement_policy = var.use_compact_placement_policy
+  startup_script               = null
+  subnetwork_self_links        = module.network.subnetwork_self_links
+  network_self_links           = module.network.network_self_links
+  labels                       = merge(var.labels, { ghpc_role = "compute" })
 }
 
 module "compute_instance_group_manager" {
