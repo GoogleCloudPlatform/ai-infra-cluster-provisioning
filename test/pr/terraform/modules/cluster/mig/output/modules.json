@@ -3,7 +3,12 @@
     "root_module": {
       "child_modules": [
         {
-          "address": "module.compute_instance_template"
+          "address": "module.compute_instance_template",
+          "child_modules": [
+            {
+              "address": "module.compute_instance_template.module.resource_policy[0]"
+            }
+          ]
         },
         {
           "address": "module.compute_instance_group_manager"

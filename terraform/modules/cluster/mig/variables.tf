@@ -335,3 +335,9 @@ variable "enable_auto_config_apply" {
   type        = bool
   default     = true
 }
+
+variable "use_compact_placement_policy" {
+  description = "The flag to create and use a superblock level compact placement policy for the instances. Currently GCE supports using only 1 placement policy."
+  type        = bool
+  default     = false
+}

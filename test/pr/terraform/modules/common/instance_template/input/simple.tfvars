@@ -24,5 +24,6 @@ service_account = {
   email  = "foo@bar.xyz"
   scopes = ["foobar"]
 }
-startup_script        = "echo hello world"
-subnetwork_self_links = ["subnetwork_self_link"]
+startup_script               = "echo hello world"
+subnetwork_self_links        = ["subnetwork_self_link"]
+use_compact_placement_policy = true
