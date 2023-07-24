@@ -66,8 +66,7 @@
                     "collocation": "COLLOCATED",
                     "max_distance": 2
                   }
-                ],
-                "name": "ci-mig-placement-policy"
+                ]
               }
             }
           ]
