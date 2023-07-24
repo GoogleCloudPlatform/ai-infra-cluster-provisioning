@@ -1,31 +1,174 @@
+# Table of Contents
+1. [Overview](#overview)
+    1. [Purpose](#purpose)
+    1. [Description](#description)
+1. [Types of Clusters](#types-of-clusters)
+    1. [A3 Clusters](#a3-clusters)
+    1. [Other Clusters](#other-clusters)
+1. [How to create a cluster](#how-to-create-a-cluster)
+    1. [Run the docker image](#run-the-docker-image)
+    1. [Integrate into an existing terraform project](#integrate-into-an-existing-terraform-project)
+    1. [Integrate into an existing HPC Toolkit Blueprint](#integrate-into-an-existing-hpc-toolkit-blueprint)
+
 # Overview
 
-The Cluster provisioning tool aims to provide a solution for the external users to
-provision a GPU cluster quickly and efficiently and run their AI/ML workload in
-minutes. Similarly it aims to provide an automated way of providing GPU clusters for
-the internal AI/ML pipeline. The cluster provisioning tool is a docker images which
-provision the cluster when run as a container. The docker image is self contained to
-create all the necessary resources for a GPU cluster. It has all the configs
-prepackaged and the tools installed. The configs packaged inside the image define the
-baseline GPU cluster. 
+## Purpose
 
-The cluster provisioning tool can also be used as a [terraform
-module](https://developer.hashicorp.com/terraform/language/modules) and integrated 
-into existing terraform blueprints.
+The purpose of this tool is to provide a very quick and simple way to provision
+a compute cluster on Google Cloud Platform (GCP).
 
-The cluster provisioning tool can also be used along with [Cloud HPC
-Toolkit](https://cloud.google.com/blog/products/compute/new-google-cloud-hpc-toolkit).
+## Description
 
-## Baseline cluster configuration
+This repository contains:
+- a set of terraform modules that creates GCP resources geared toward running
+  AI/ML workloads on [A3 VMs](#a3-clusters).
+- an [entrypoint script](./scripts/entrypoint.sh) that will find or create a
+  terraform backend in a Google Cloud Storage (GCS) bucket, call the
+  appropriate terraform commands using the terraform modules and a user
+  provided terraform variables (`tfvars`) file, and upload all logs to the GCS
+  backend bucket.
+- a [docker image](./Dockerfile) --
+  `us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image`
+  -- that has all necessary tools installed which calls the entrypoint script
+  and creates a cluster for you.
 
-The baseline GPU cluster is the collection of resources recommended/supported by the
-AI accelerator experience team. Examples of that include Supported VM types,
-accelerator types, VM images, shared storage solutions like GCSFuse etc. These are
-first tested within the AI Accelerator experience team and then they are integrated
-with the cluster provisioning tool. The way they are incorporated into the tool is
-via Terraform configs packaged within the docker container. In some cases these
-features can be optional and users may choose to use it (eg: GCSFuse) but in some
-other cases they will be mandated by AI Accelerator exp. team (eg: GKE host image).   
+# Types of clusters
+
+## A3 Clusters
+
+An A3 cluster provides the following resources:
+- one or many a3-highgpu-8g VM instances (full documentation not available yet,
+  description
+  [here](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus)).
+- five virtual network interface cards (vNIC) -- two H100 GPUs connected to each vNIC.
+- [Nvidia GPUDirect](https://developer.nvidia.com/gpudirect).
+
+In the future, any of the [other clusters](#other-clusters) may be an A3 cluster by setting these two variables in the `tfvars` file:
+```terraform
+machine_type = "a3-highgpu-8g"
+network_config = "new_multi_nic"
+```
+
+However, due to their recency, A3 clusters are supported by only:
+- [`mig-with-container`](./terraform/modules/cluster/mig-with-container): a
+  [Managed Instance Group (MIG)](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups)
+  of instances booting with a
+  [COS-Cloud image](https://cloud.google.com/container-optimized-os/docs).
+
+## Other Clusters
+
+Clusters of non-A3 machines may be created just as easy as those with A3
+machines though it is recommended to use A3 machines in order to acheive
+maximum performance. These cluster types are:
+- [`gke`](./terraform/modules/cluster/gke):
+  [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)
+  cluster of instances booting with a
+  [COS-Cloud image](https://cloud.google.com/container-optimized-os/docs).
+- [`mig`](./terraform/modules/cluster/mig):
+  [Managed Instance Group (MIG)](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups)
+  instances booting with a user-decided
+  [VM image](https://cloud.google.com/compute/docs/images)
+- [`slurm`](./terraform/modules/cluster/slurm):
+  [Slurm](https://slurm.schedmd.com/documentation.html) cluster of instances
+  booting with a
+  [SchedMD Slurm VM image](https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#published-image-family).
+
+# How to create a cluster
+
+You will need:
+- a GCP project with GCE API enabled.
+- a GCP account with IAM role
+  [`roles/editor`](https://cloud.google.com/iam/docs/understanding-roles#basic).
+- [`gcloud` authorization](https://cloud.google.com/sdk/docs/authorizing) --
+  you should be able to run `gcloud auth list` and see your account.
+
+There are a few ways to create a cluster:
+1. Run the docker image: do this if you don't have any existing infrastructure
+  as code.
+1. Integrate into an existing terraform project: do this if you already have
+  (or plan to have) a terraform project and would like to have the same
+  `terraform apply` create this cluster along with all your other
+  infrastructure.
+1. Integrate into an existing HPC Toolkit Blueprint: do this if you already have
+  (or plan to have) an HPC Toolkit Blueprint and would like to have the same
+  `ghpc deploy` create this cluster along with all your other infrastructure.
+
+## Run the docker image
+
+For this method, all you need (in addition to the above requirements) is a
+`terraform.tfvars` file (user generated or copied from an [example](./examples)) in your
+current directory and the ability to run [docker](https://www.docker.com/). In
+a terminal, change your current working directory to this one and run the command:
+```bash
+# create/update the cluster
+docker run \
+  --rm \
+  -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
+  -v "${PWD}:/root/aiinfra/input" \
+  us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
+  create mig-with-container
+
+# destroy the cluster
+docker run \
+  --rm \
+  -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
+  -v "${PWD}:/root/aiinfra/input" \
+  us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
+  destroy mig-with-container
+```
+
+Quick explanation of the `docker run` flags (in same order as above):
+- `-v "${HOME}/.config/gcloud:/root/.config/gcloud"` exposes gcloud credentials
+  to the container so that it can access your GCP project.
+- `-v "${PWD}:/root/aiinfra/input"` exposes the current working directory to
+  the container so the tool can read the `terraform.tfvars` file.
+- `create/destroy` tells the tool whether it should create or destroy the whole
+  cluster.
+- `mig-with-container` tells the tool to create a Managed Instance Group and
+  start a container at boot. Descriptions of clusters may be found
+  [above](#types-of-clusters).
+
+## Integrate into an existing terraform project
+
+For this method, you need to
+[install terraform](https://developer.hashicorp.com/terraform/downloads).
+Examples of usage as a terraform module can be found in the `main.tf` files in
+any of the directories found [here](./examples/a3). Cluster provisioning then
+happens the same as any other terraform:
+```bash
+# assuming the directory containing main.tf is the current working directory
+
+# create/update the cluster
+terraform init && terraform validate && terraform apply
+
+# destroy the cluster
+terraform init && terraform validate && terraform apply -destroy
+```
+
+## Integrate into an existing HPC Toolkit Blueprint
+
+For this method, you need to
+[build ghpc](https://github.com/GoogleCloudPlatform/hpc-toolkit#quickstart).
+The `a3-mig-with-container` deployment group in the `blueprint.yaml` shows how
+to use the `mig-with-container` module in your HPC Toolkit Blueprint. Cluster
+provisioning then happens the same as any blueprint:
+```bash
+# assuming the ghpc binary and blueprint.yaml are both in
+# the current working directory
+
+# create/update the cluster
+./ghpc create -w ./blueprint.yaml && ./ghpc deploy a3-mig-with-container
+
+# destroy the cluster
+./ghpc create -w ./blueprint.yaml && ./ghpc destroy a3-mig-with-container
+```
+
+---
+---
+### Old docs
+---
+---
+
 
 ## Configuration for Users
 
@@ -283,19 +426,6 @@ An example terraform config using the aiinfra-cluster module can be found
 [here](./samples/mig/simple/main.tf). For more complex use cases please find the
 example in the [section below](#samples-for-use-cases).
 
-### **Installing terraform dependencies**
-1. [Install Google Cloud CLI](https://cloud.google.com/sdk/docs/install)
-1. [Download Terraform version 1.3.7 or
-   later](https://developer.hashicorp.com/terraform/downloads)
-
-### **Supplying cloud credentials to Terraform**
-
-Terraform can discover credentials for authenticating to Google Cloud Platform in
-several ways. We will summarize Terraform's documentation for using
-[gcloud](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/getting_started#configuring-the-provider)
-from your workstation and for automatically finding credentials in cloud
-environments.
-
 #### **Cloud credentials on your workstation**
 
 You can generate cloud credentials associated with your Google Cloud account using
@@ -351,42 +481,6 @@ Here are some common reasons for the deployment to fail:
   * Ensure proper permissions are set in the cloud console [IAM
     section](https://console.cloud.google.com/iam-admin/iam).
 
-
-## **Usage via HPCToolkit**
-The cluster provisioning tool exposes the functionalities to provisioning a GPU
-cluster via Terraform modules. So the GPU cluster provisioning functionalities can be
-directly integrated with HPC toolkit.
-
-Below is a short introduction to [HPC
-toolkit](https://cloud.google.com/hpc-toolkit/docs/overview) and the resource
-materials for it.
-
-### **HPC Toolkit**
-
-[HPC toolkit](https://cloud.google.com/hpc-toolkit/docs/overview) is an open-source
-software offered by Google Cloud which makes it easy for customers to deploy HPC
-environments on Google Cloud.
-
-HPC Toolkit allows customers to deploy turnkey HPC environments (compute, networking,
-storage, etc.) following Google Cloud best-practices, in a repeatable manner. The HPC
-Toolkit is designed to be highly customizable and extensible, and intends to address
-the HPC deployment needs of a broad range of customers.
-
-The HPC Toolkit Repo is open-source and available
-[here](https://github.com/GoogleCloudPlatform/hpc-toolkit)
-
-### **Resources**
-
-1. [HPC Toolkit Repo](https://github.com/GoogleCloudPlatform/hpc-toolkit)
-2. [HPC Toolkit
-   Quickstart](https://github.com/GoogleCloudPlatform/hpc-toolkit#quickstart)
-3. [HPC Toolkit
-   dependencies](https://cloud.google.com/hpc-toolkit/docs/setup/install-dependencies)
-4. [Installing Terraform](https://developer.hashicorp.com/terraform/downloads)
-5. [Installing Packer](https://developer.hashicorp.com/packer/downloads)
-6. [Installing Go](https://go.dev/doc/install)
-7. [HPC toolkit
-   Troubleshooting](https://github.com/GoogleCloudPlatform/hpc-toolkit#troubleshooting)
 
 # **Samples for use cases**
 | MIG Scenarios | Docker | Terraform | HPC Toolkit |
