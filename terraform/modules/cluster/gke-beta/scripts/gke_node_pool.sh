@@ -31,10 +31,7 @@ gke_node_pool::create () {
       --additional-node-network network=${prefix}-net-4,subnetwork=${prefix}-sub-4 \
       --enable-gvnic \
       --scopes "https://www.googleapis.com/auth/cloud-platform" \
-      --host-maintenance-interval PERIODIC \
-      && kubectl get nodes --selector=cloud.google.com/gke-nodepool=${node_pool_name} --no-headers \
-      | awk '{print $1}' \
-      | xargs -I{} kubectl label node {} gke-no-default-nvidia-gpu-device-plugin=true
+      --host-maintenance-interval PERIODIC
     }
 }
 
