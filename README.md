@@ -96,7 +96,7 @@ There are a few ways to create a cluster:
 ## Run the docker image
 
 For this method, all you need (in addition to the above requirements) is a
-`terraform.tfvars` file (user generated or copied from an [example](./examples)) in your
+`terraform.tfvars` file (user generated or copied from an [example](./samples)) in your
 current directory and the ability to run [docker](https://www.docker.com/). In
 a terminal, change your current working directory to this one and run the command:
 ```bash
@@ -133,7 +133,7 @@ Quick explanation of the `docker run` flags (in same order as above):
 For this method, you need to
 [install terraform](https://developer.hashicorp.com/terraform/downloads).
 Examples of usage as a terraform module can be found in the `main.tf` files in
-any of the directories found [here](./examples/a3). Cluster provisioning then
+any of the directories found [here](./samples/a3). Cluster provisioning then
 happens the same as any other terraform:
 ```bash
 # assuming the directory containing main.tf is the current working directory
