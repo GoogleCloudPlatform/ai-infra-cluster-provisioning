@@ -1,42 +1,42 @@
 {
   "planned_values": {
     "root_module": {
-      "resources":[
+      "resources": [
         {
-          "address":"google_compute_firewall.firewall-allow-iap-ssh[0]",
-          "values":{
-             "source_ranges":[
-                "35.235.240.0/20"
-             ]
+          "address": "google_compute_firewall.firewall-allow-iap-ssh[0]",
+          "values": {
+            "source_ranges": [
+              "35.235.240.0/20"
+            ]
           }
-       },
-       {
-          "address":"google_compute_firewall.firewall-allow-icmp[0]",
-          "values":{
-             "description":"allow icmp ping access"
+        },
+        {
+          "address": "google_compute_firewall.firewall-allow-icmp[0]",
+          "values": {
+            "description": "allow icmp ping access"
           }
-       },
-       {
-          "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[0]",
-          "values":{
-             "description":"allow traffic between nodes of this VPC",
-             "source_ranges":[
-                "10.0.0.0/8"
-             ]
+        },
+        {
+          "address": "google_compute_firewall.firewall-allow-tcp-udp-icmp[0]",
+          "values": {
+            "description": "allow traffic between nodes of this VPC",
+            "source_ranges": [
+              "10.0.0.0/8"
+            ]
           }
-       },
-       {
-          "address":"google_compute_network.networks[0]",
-          "values":{
-             "mtu":8228
+        },
+        {
+          "address": "google_compute_network.networks[0]",
+          "values": {
+            "mtu": 8228
           }
-       },
-       {
-          "address":"google_compute_subnetwork.subnets[0]",
-          "values":{
-             "ip_cidr_range":"10.0.0.0/19"
+        },
+        {
+          "address": "google_compute_subnetwork.subnets[0]",
+          "values": {
+            "ip_cidr_range": "10.0.0.0/19"
           }
-       }
+        }
       ]
     }
   }
