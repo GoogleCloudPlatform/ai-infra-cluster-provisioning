@@ -53,7 +53,7 @@ module "resource_policy" {
     for idx, node_pool in var.node_pools : idx => node_pool
   }
   project_id           = var.project_id
-  resource_policy_name = each.value.resource_policy
+  resource_policy_name = "${var.resource_prefix}-policy-${each.key}"
   region               = var.region
 }
 
@@ -98,17 +98,17 @@ resource "null_resource" "gke-node-pool-command" {
   }
 
   triggers = {
-    project_id               = var.project_id
-    prefix                   = var.resource_prefix
-    cluster_name             = "${var.resource_prefix}-gke"
-    node_pool_name           = "${var.resource_prefix}-nodepool-${each.key}"
-    zone                     = each.value.zone
-    region                   = var.region
-    machine_type             = each.value.machine_type
-    node_count               = each.value.node_count
-    disk_type                = var.disk_type
-    disk_size                = var.disk_size_gb
-    enable_compact_placement = each.value.enable_compact_placement
+    project_id      = var.project_id
+    prefix          = var.resource_prefix
+    cluster_name    = "${var.resource_prefix}-gke"
+    node_pool_name  = "${var.resource_prefix}-nodepool-${each.key}"
+    zone            = each.value.zone
+    region          = var.region
+    machine_type    = each.value.machine_type
+    node_count      = each.value.node_count
+    disk_type       = var.disk_type
+    disk_size       = var.disk_size_gb
+    resource_policy = "${var.resource_prefix}-policy-${each.key}"
   }
 
   provisioner "local-exec" {
@@ -125,8 +125,8 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.node_count} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
-      ${self.triggers.enable_compact_placement} \
-      ${self.triggers.prefix} 
+      ${self.triggers.prefix} \
+      ${self.triggers.resource_policy} 
     EOT
     on_failure  = fail
   }
@@ -145,8 +145,8 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.node_count} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
-      ${self.triggers.enable_compact_placement} \
-      ${self.triggers.prefix} 
+      ${self.triggers.prefix} \
+      ${self.triggers.resource_policy} 
     EOT
     on_failure  = fail
   }
