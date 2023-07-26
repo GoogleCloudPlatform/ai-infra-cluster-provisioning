@@ -43,7 +43,7 @@ resource "google_compute_subnetwork" "subnets" {
   count         = local.vpc_count
   name          = "${var.resource_prefix}-sub-${count.index}"
   project       = var.project_id
-  ip_cidr_range = "192.${count.index}.0.0/21"
+  ip_cidr_range = "192.${count.index}.0.0/19"
   region        = var.region
   network       = google_compute_network.networks[count.index].self_link
 }
