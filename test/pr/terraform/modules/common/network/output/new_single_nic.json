@@ -21,7 +21,7 @@
           "values":{
              "description":"allow traffic between nodes of this VPC",
              "source_ranges":[
-                "192.168.0.0/16"
+                "10.0.0.0/8"
              ]
           }
        },
@@ -34,7 +34,7 @@
        {
           "address":"google_compute_subnetwork.subnets[0]",
           "values":{
-             "ip_cidr_range":"192.168.0.0/24"
+             "ip_cidr_range":"10.0.0.0/19"
           }
        }
       ]

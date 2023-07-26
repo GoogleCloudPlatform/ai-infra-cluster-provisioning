@@ -20,7 +20,7 @@
            "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[0]",
            "values":{
               "source_ranges":[
-                 "192.168.0.0/16"
+                 "10.0.0.0/8"
               ]
            }
         },
@@ -28,7 +28,7 @@
            "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[1]",
            "values":{
               "source_ranges":[
-                 "192.168.0.0/16"
+                 "10.0.0.0/8"
               ]
            }
         },
@@ -36,7 +36,7 @@
            "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[2]",
            "values":{
               "source_ranges":[
-                 "192.168.0.0/16"
+                 "10.0.0.0/8"
               ]
            }
         },
@@ -44,7 +44,7 @@
            "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[3]",
            "values":{
               "source_ranges":[
-                 "192.168.0.0/16"
+                 "10.0.0.0/8"
               ]
            }
         },
@@ -52,7 +52,7 @@
            "address":"google_compute_firewall.firewall-allow-tcp-udp-icmp[4]",
            "values":{
               "source_ranges":[
-                 "192.168.0.0/16"
+                 "10.0.0.0/8"
               ]
            }
         },
@@ -89,31 +89,31 @@
         {
            "address":"google_compute_subnetwork.subnets[0]",
            "values":{
-              "ip_cidr_range":"192.168.0.0/24"
+              "ip_cidr_range":"10.0.0.0/19"
            }
         },
         {
            "address":"google_compute_subnetwork.subnets[1]",
            "values":{
-              "ip_cidr_range":"192.168.1.0/24"
+              "ip_cidr_range":"10.1.0.0/19"
            }
         },
         {
            "address":"google_compute_subnetwork.subnets[2]",
            "values":{
-              "ip_cidr_range":"192.168.2.0/24"
+              "ip_cidr_range":"10.2.0.0/19"
            }
         },
         {
            "address":"google_compute_subnetwork.subnets[3]",
            "values":{
-              "ip_cidr_range":"192.168.3.0/24"
+              "ip_cidr_range":"10.3.0.0/19"
            }
         },
         {
            "address":"google_compute_subnetwork.subnets[4]",
            "values":{
-              "ip_cidr_range":"192.168.4.0/24"
+              "ip_cidr_range":"10.4.0.0/19"
            }
         }
      ]
