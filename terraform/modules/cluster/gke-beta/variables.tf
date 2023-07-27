@@ -96,19 +96,10 @@ variable "node_pools" {
     ```
     EOT
   type = list(object({
-    zone                     = string,
-    node_count               = number,
-    machine_type             = string
-    enable_compact_placement = bool,
-    resource_policy          = string
+    zone         = string,
+    node_count   = number,
+    machine_type = string
   }))
-  default = []
-  validation {
-    condition = alltrue([
-      for np in var.node_pools : (np.enable_compact_placement == false && np.resource_policy != null) || (np.enable_compact_placement == null && np.resource_policy != null) || (np.enable_compact_placement == true && np.resource_policy == null)
-    ])
-    error_message = "Only one of 'enable_compact_placement' and 'resource_policy' can be used. Please set 'enable_compact_placement' to null or false if you want to use 'resource_policy'."
-  }
 }
 
 variable "kubernetes_setup_config" {

@@ -23,13 +23,13 @@ gke_node_pool::create () {
       --num-nodes ${node_count} \
       --disk-type ${disk_type} \
       --disk-size ${disk_size} \
-      --placement-type ${placement_type} \
       --workload-metadata=GKE_METADATA \
       --additional-node-network network=${prefix}-net-1,subnetwork=${prefix}-sub-1 \
       --additional-node-network network=${prefix}-net-2,subnetwork=${prefix}-sub-2 \
       --additional-node-network network=${prefix}-net-3,subnetwork=${prefix}-sub-3 \
       --additional-node-network network=${prefix}-net-4,subnetwork=${prefix}-sub-4 \
       --enable-gvnic \
+      --placement-policy ${resource_policy} \
       --scopes "https://www.googleapis.com/auth/cloud-platform" \
       --host-maintenance-interval PERIODIC
     }
@@ -51,11 +51,8 @@ main () {
     local -r node_count="${8:?}"
     local -r disk_type="${9:?}"
     local -r disk_size="${10:?}"
-    local -r placement_type=$(
-      if [ "${11}" == "true" ]; then echo 'COMPACT'
-      else echo 'UNSPECIFIED'; fi
-    )
-    local -r prefix="${12:?}"
+    local -r prefix="${11:?}"
+    local -r resource_policy="${12:?}"
 
     case "${action}" in
         'create')
