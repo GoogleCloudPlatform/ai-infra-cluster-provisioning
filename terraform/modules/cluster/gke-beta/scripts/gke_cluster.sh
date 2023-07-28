@@ -40,6 +40,7 @@ main () {
     local -r region="${4:?}"
     local -r version="${5:?}"
 
+    alias staging_gcloud='CLOUDSDK_API_CLIENT_OVERRIDES_COMPUTE=staging_v1 /google/data/ro/teams/cloud-sdk/gcloud'
     export CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER=https://staging-container.sandbox.googleapis.com/
 
     case "${action}" in

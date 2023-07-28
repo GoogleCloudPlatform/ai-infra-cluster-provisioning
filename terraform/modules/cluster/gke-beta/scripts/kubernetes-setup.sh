@@ -43,6 +43,8 @@ main () {
     local -r ksa_name="${3:?}"
     local -r ksa_namespace="${4:?}"
 
+    alias staging_gcloud='CLOUDSDK_API_CLIENT_OVERRIDES_COMPUTE=staging_v1 /google/data/ro/teams/cloud-sdk/gcloud'
+
     kubernetes-setup::install_drivers
     kubernetes-setup::setup_ksa
 }
