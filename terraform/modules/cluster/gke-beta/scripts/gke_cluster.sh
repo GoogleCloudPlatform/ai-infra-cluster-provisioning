@@ -40,6 +40,8 @@ main () {
     local -r region="${4:?}"
     local -r version="${5:?}"
 
+    export CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER=https://staging-container.sandbox.googleapis.com/
+
     case "${action}" in
         'create')
             {
