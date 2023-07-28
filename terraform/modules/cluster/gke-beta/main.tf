@@ -90,6 +90,8 @@ resource "null_resource" "gke-cluster-command" {
     EOT
     on_failure  = fail
   }
+
+  depends_on = [module.resource_policy]
 }
 
 resource "null_resource" "gke-node-pool-command" {
@@ -151,7 +153,7 @@ resource "null_resource" "gke-node-pool-command" {
     on_failure  = fail
   }
 
-  depends_on = [null_resource.gke-cluster-command, module.resource_policy, module.network]
+  depends_on = [null_resource.gke-cluster-command, module.network]
 }
 
 output "gke-cluster-name" {
@@ -198,5 +200,5 @@ resource "null_resource" "kubernetes-setup-command" {
     on_failure  = fail
   }
 
-  depends_on = [null_resource.gke-node-pool-command]
+  depends_on = [null_resource.gke-cluster-command]
 }
