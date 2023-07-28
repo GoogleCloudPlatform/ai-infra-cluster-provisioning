@@ -15,8 +15,8 @@
 # limitations under the License.
 
 gke_cluster::create () {
-    staging_gcloud container clusters describe ${cluster_name} --region ${region} \
-    || { staging_gcloud beta container clusters create ${cluster_name} --region ${region} \
+    gcloud container clusters describe ${cluster_name} --region ${region} \
+    || { gcloud beta container clusters create ${cluster_name} --region ${region} \
       --project ${project_id} \
       --cluster-version ${version} \
       --enable-ip-alias \
@@ -24,13 +24,13 @@ gke_cluster::create () {
       --enable-dataplane-v2 \
       --workload-pool=${project_id}.svc.id.goog \
       --num-nodes 1 \
-      && staging_gcloud container node-pools delete default-pool --cluster ${cluster_name} --region ${region} --quiet
+      && gcloud container node-pools delete default-pool --cluster ${cluster_name} --region ${region} --quiet
     }
 }
 
 gke_cluster::destroy () {
-    staging_gcloud container clusters describe ${cluster_name} --region ${region} \
-    && staging_gcloud container clusters delete ${cluster_name} --region ${region} --project ${project_id} --quiet
+    gcloud container clusters describe ${cluster_name} --region ${region} \
+    && gcloud container clusters delete ${cluster_name} --region ${region} --project ${project_id} --quiet
 }
 
 main () {
@@ -40,7 +40,6 @@ main () {
     local -r region="${4:?}"
     local -r version="${5:?}"
 
-    alias staging_gcloud='CLOUDSDK_API_CLIENT_OVERRIDES_COMPUTE=staging_v1 /google/data/ro/teams/cloud-sdk/gcloud'
     export CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER=https://staging-container.sandbox.googleapis.com/
 
     case "${action}" in

@@ -27,7 +27,7 @@ kubernetes-setup::install_drivers () {
 
 kubernetes-setup::setup_ksa () {
     echo "Binding IAM workload identity to default compute engine account ${gsa_name}"
-    staging_gcloud iam service-accounts add-iam-policy-binding ${gsa_name} \
+    gcloud iam service-accounts add-iam-policy-binding ${gsa_name} \
         --role roles/iam.workloadIdentityUser \
         --member "serviceAccount:${project_id}.svc.id.goog[${ksa_namespace}/${ksa_name}]"
     
@@ -42,8 +42,6 @@ main () {
     local -r gsa_name="${2:?}"
     local -r ksa_name="${3:?}"
     local -r ksa_namespace="${4:?}"
-
-    alias staging_gcloud='CLOUDSDK_API_CLIENT_OVERRIDES_COMPUTE=staging_v1 /google/data/ro/teams/cloud-sdk/gcloud'
 
     kubernetes-setup::install_drivers
     kubernetes-setup::setup_ksa

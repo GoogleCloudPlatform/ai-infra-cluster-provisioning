@@ -15,8 +15,8 @@
 # limitations under the License.
 
 gke_node_pool::create () {
-    staging_gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-    || { staging_gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --region ${region} \
+    gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
+    || { gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --region ${region} \
       --project ${project_id} \
       --node-locations ${zone} \
       --machine-type ${machine_type} \
@@ -36,8 +36,8 @@ gke_node_pool::create () {
 }
 
 gke_node_pool::destroy () {
-    staging_gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-    && staging_gcloud container node-pools delete ${node_pool_name} --cluster ${cluster_name} --region ${region} --quiet
+    gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
+    && gcloud container node-pools delete ${node_pool_name} --cluster ${cluster_name} --region ${region} --quiet
 }
 
 main () {
@@ -53,8 +53,6 @@ main () {
     local -r disk_size="${10:?}"
     local -r prefix="${11:?}"
     local -r resource_policy="${12:?}"
-
-    alias staging_gcloud='CLOUDSDK_API_CLIENT_OVERRIDES_COMPUTE=staging_v1 /google/data/ro/teams/cloud-sdk/gcloud'
 
     case "${action}" in
         'create')
