@@ -203,3 +203,27 @@ resource "null_resource" "kubernetes-setup-command" {
 
   depends_on = [null_resource.gke-cluster-command]
 }
+
+resource "null_resource" "tcpx-setup-command" {
+  for_each = {
+    for idx, node_pool in var.node_pools : idx => node_pool
+  }
+
+  triggers = {
+    node_pool_name = "${var.resource_prefix}-nodepool-${each.key}"
+    zone           = each.value.zone
+  }
+
+  provisioner "local-exec" {
+    when        = create
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      ${path.module}/scripts/tcp-direct-setup.sh \
+      ${self.triggers.node_pool_name} \
+      ${self.triggers.zone} 
+    EOT
+    on_failure  = fail
+  }
+
+  depends_on = [null_resource.gke-node-pool-command]
+}
