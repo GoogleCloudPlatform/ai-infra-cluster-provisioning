@@ -1,0 +1,1 @@
+sudo iptables -I INPUT -p tcp -m tcp -j ACCEPT && sudo mount --bind /var/lib/tcpx /var/lib/tcpx && sudo mount -o remount,exec /var/lib/tcpx

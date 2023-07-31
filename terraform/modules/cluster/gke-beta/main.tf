@@ -128,7 +128,8 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
       ${self.triggers.prefix} \
-      ${self.triggers.resource_policy} 
+      ${self.triggers.resource_policy} \
+      ${path.module}/scripts/tcp-direct-setup.sh
     EOT
     on_failure  = fail
   }
@@ -148,7 +149,8 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
       ${self.triggers.prefix} \
-      ${self.triggers.resource_policy} 
+      ${self.triggers.resource_policy} \
+      ${path.module}/scripts/tcp-direct-setup.sh
     EOT
     on_failure  = fail
   }
