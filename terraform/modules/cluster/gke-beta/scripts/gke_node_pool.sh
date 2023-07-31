@@ -54,6 +54,8 @@ main () {
     local -r prefix="${11:?}"
     local -r resource_policy="${12:?}"
 
+    export CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER=https://staging-container.sandbox.googleapis.com/
+
     case "${action}" in
         'create')
             {
