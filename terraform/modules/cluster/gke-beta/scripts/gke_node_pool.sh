@@ -15,7 +15,6 @@
 # limitations under the License.
 
 gke_node_pool::create () {
-    tcpx_setup=$(cat "${tcpx_script_path}")
     gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
     || { gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --region ${region} \
       --project ${project_id} \
@@ -30,7 +29,6 @@ gke_node_pool::create () {
       --additional-node-network network=${prefix}-net-3,subnetwork=${prefix}-sub-3 \
       --additional-node-network network=${prefix}-net-4,subnetwork=${prefix}-sub-4 \
       --enable-gvnic \
-      --metadata startup-script=${tcpx_setup} \
       --placement-policy ${resource_policy} \
       --scopes "https://www.googleapis.com/auth/cloud-platform" \
       --host-maintenance-interval PERIODIC
@@ -55,7 +53,6 @@ main () {
     local -r disk_size="${10:?}"
     local -r prefix="${11:?}"
     local -r resource_policy="${12:?}"
-    local -r tcpx_script_path="${13:?}"
 
     case "${action}" in
         'create')
