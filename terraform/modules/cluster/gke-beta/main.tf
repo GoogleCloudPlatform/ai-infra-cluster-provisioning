@@ -195,7 +195,8 @@ resource "null_resource" "kubernetes-setup-command" {
       ${self.triggers.project_id} \
       ${self.triggers.gsa_name} \
       ${self.triggers.ksa_name} \
-      ${self.triggers.ksa_namespace}
+      ${self.triggers.ksa_namespace} \
+      ${path.module}/scripts/nccl-plugin.yaml
     EOT
     on_failure  = fail
   }
