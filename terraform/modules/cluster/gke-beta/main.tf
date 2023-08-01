@@ -64,6 +64,7 @@ resource "null_resource" "gke-cluster-command" {
     cluster_name = "${var.resource_prefix}-gke"
     region       = var.region
     gke_version  = local.gke_master_version
+    gke_endpoint = local.gke_endpoint_value
   }
 
   provisioner "local-exec" {
@@ -77,7 +78,7 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.gke_version} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = local.gke_endpoint_value
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_version}"
     }
     on_failure = fail
   }
@@ -93,7 +94,7 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.gke_version} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = local.gke_endpoint_value
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_version}"
     }
     on_failure = fail
   }
@@ -118,6 +119,7 @@ resource "null_resource" "gke-node-pool-command" {
     disk_type       = var.disk_type
     disk_size       = var.disk_size_gb
     resource_policy = "${var.resource_prefix}-policy-${each.key}"
+    gke_endpoint    = local.gke_endpoint_value
   }
 
   provisioner "local-exec" {
@@ -138,7 +140,7 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.resource_policy} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = local.gke_endpoint_value
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_version}"
     }
     on_failure = fail
   }
@@ -161,7 +163,7 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.resource_policy} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = local.gke_endpoint_value
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_version}"
     }
     on_failure = fail
   }
