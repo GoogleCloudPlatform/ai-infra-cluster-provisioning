@@ -16,7 +16,7 @@
 locals {
   gke_master_version   = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
   node_service_account = var.node_service_account == null ? data.google_compute_default_service_account.account.email : var.node_service_account
-  gke_endpoint_value   = var.gke_endpoint == null ? "" : var.gke_endpoint
+  gke_endpoint_value   = var.gke_endpoint == null ? "https://container.googleapis.com/" : var.gke_endpoint
   oauth_scopes = [
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/dataaccessauditlogging",
