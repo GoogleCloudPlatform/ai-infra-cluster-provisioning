@@ -21,7 +21,7 @@ tcp-direct-setup::apply_setup () {
     do
       echo "Applying TCPX setup commands for ${vm}." >&2
       {
-        gcloud compute ssh --zone ${zone} ${vm} --command 'sudo iptables -I INPUT -p tcp -m tcp -j ACCEPT && sudo mount --bind /var/lib/tcpx /var/lib/tcpx && sudo mount -o remount,exec /var/lib/tcpx'
+        gcloud compute ssh --zone ${zone} ${vm} --command 'sudo iptables -I INPUT -p tcp -m tcp -j ACCEPT && sudo mount --bind /var/lib/tcpx /var/lib/tcpx && sudo mount -o remount,exec /var/lib/tcpx' \
         && echo "Successfully ran commands for ${vm}...." >&2
       } || {
         echo "Failed to run commands for ${vm}...." >&2
