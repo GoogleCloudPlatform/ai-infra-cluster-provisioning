@@ -15,6 +15,8 @@
 # limitations under the License.
 
 gke_node_pool::create () {
+    export CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER=https://staging-container.sandbox.googleapis.com/
+    
     gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --zone 'us-east4-a' \
     || { gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --zone 'us-east4-a' \
       --project ${project_id} \
@@ -53,8 +55,6 @@ main () {
     local -r disk_size="${10:?}"
     local -r prefix="${11:?}"
     local -r resource_policy="${12:?}"
-
-    export CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER=https://staging-container.sandbox.googleapis.com/
 
     case "${action}" in
         'create')

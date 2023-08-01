@@ -15,6 +15,8 @@
 # limitations under the License.
 
 gke_cluster::create () {
+    export CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER=https://staging-container.sandbox.googleapis.com/
+
     gcloud container clusters describe ${cluster_name} --zone 'us-east4-a' \
     || { gcloud beta container clusters create ${cluster_name} --zone 'us-east4-a' \
       --project ${project_id} \
@@ -39,8 +41,6 @@ main () {
     local -r cluster_name="${3:?}"
     local -r region="${4:?}"
     local -r version="${5:?}"
-
-    export CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER=https://staging-container.sandbox.googleapis.com/
 
     case "${action}" in
         'create')
