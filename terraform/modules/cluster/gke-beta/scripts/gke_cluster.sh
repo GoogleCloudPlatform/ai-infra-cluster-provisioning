@@ -15,8 +15,8 @@
 # limitations under the License.
 
 gke_cluster::create () {
-    gcloud container clusters describe ${cluster_name} --region ${region} \
-    || { gcloud beta container clusters create ${cluster_name} --region ${region} \
+    gcloud container clusters describe ${cluster_name} --zone 'us-east4-a' \
+    || { gcloud beta container clusters create ${cluster_name} --zone 'us-east4-a' \
       --project ${project_id} \
       --cluster-version ${version} \
       --enable-ip-alias \
@@ -24,13 +24,13 @@ gke_cluster::create () {
       --enable-dataplane-v2 \
       --workload-pool=${project_id}.svc.id.goog \
       --num-nodes 1 \
-      && gcloud container node-pools delete default-pool --cluster ${cluster_name} --region ${region} --quiet
+      && gcloud container node-pools delete default-pool --cluster ${cluster_name} --zone 'us-east4-a' --quiet
     }
 }
 
 gke_cluster::destroy () {
-    gcloud container clusters describe ${cluster_name} --region ${region} \
-    && gcloud container clusters delete ${cluster_name} --region ${region} --project ${project_id} --quiet
+    gcloud container clusters describe ${cluster_name} --zone 'us-east4-a' \
+    && gcloud container clusters delete ${cluster_name} --zone 'us-east4-a' --project ${project_id} --quiet
 }
 
 main () {

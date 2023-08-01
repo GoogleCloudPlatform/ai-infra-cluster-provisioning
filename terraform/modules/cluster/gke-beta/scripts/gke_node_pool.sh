@@ -15,8 +15,8 @@
 # limitations under the License.
 
 gke_node_pool::create () {
-    gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-    || { gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --region ${region} \
+    gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --zone 'us-east4-a' \
+    || { gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --zone 'us-east4-a' \
       --project ${project_id} \
       --node-locations ${zone} \
       --machine-type ${machine_type} \
@@ -36,8 +36,8 @@ gke_node_pool::create () {
 }
 
 gke_node_pool::destroy () {
-    gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-    && gcloud container node-pools delete ${node_pool_name} --cluster ${cluster_name} --region ${region} --quiet
+    gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --zone 'us-east4-a' \
+    && gcloud container node-pools delete ${node_pool_name} --cluster ${cluster_name} --zone 'us-east4-a' --quiet
 }
 
 main () {
