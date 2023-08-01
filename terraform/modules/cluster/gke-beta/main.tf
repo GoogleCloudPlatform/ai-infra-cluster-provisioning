@@ -75,7 +75,10 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.region} \
       ${self.triggers.gke_version} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+    }
+    on_failure = fail
   }
 
   provisioner "local-exec" {
@@ -88,7 +91,10 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.region} \
       ${self.triggers.gke_version} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+    }
+    on_failure = fail
   }
 
   depends_on = [module.resource_policy]
@@ -130,7 +136,10 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.prefix} \
       ${self.triggers.resource_policy} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+    }
+    on_failure = fail
   }
 
   provisioner "local-exec" {
@@ -150,7 +159,10 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.prefix} \
       ${self.triggers.resource_policy} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+    }
+    on_failure = fail
   }
 
   depends_on = [null_resource.gke-cluster-command, module.network]
@@ -222,7 +234,10 @@ resource "null_resource" "tcpx-setup-command" {
       ${self.triggers.node_pool_name} \
       ${self.triggers.zone} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+    }
+    on_failure = fail
   }
 
   depends_on = [null_resource.gke-node-pool-command]
