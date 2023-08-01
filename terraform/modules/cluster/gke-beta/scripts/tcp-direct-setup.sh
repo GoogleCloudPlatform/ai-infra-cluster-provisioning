@@ -35,3 +35,5 @@ main () {
 
     tcp-direct-setup::apply_setup
 }
+
+main "${@}"

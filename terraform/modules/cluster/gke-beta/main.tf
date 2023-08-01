@@ -216,6 +216,7 @@ resource "null_resource" "kubernetes-setup-command" {
   depends_on = [null_resource.gke-cluster-command]
 }
 
+/* Not installing over ssh.
 resource "null_resource" "tcpx-setup-command" {
   for_each = {
     for idx, node_pool in var.node_pools : idx => node_pool
@@ -242,3 +243,4 @@ resource "null_resource" "tcpx-setup-command" {
 
   depends_on = [null_resource.gke-node-pool-command]
 }
+*/
