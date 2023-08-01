@@ -78,7 +78,7 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.gke_version} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_version}"
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
     }
     on_failure = fail
   }
@@ -94,7 +94,7 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.gke_version} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_version}"
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
     }
     on_failure = fail
   }
@@ -140,7 +140,7 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.resource_policy} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_version}"
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
     }
     on_failure = fail
   }
@@ -163,7 +163,7 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.resource_policy} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_version}"
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
     }
     on_failure = fail
   }
