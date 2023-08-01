@@ -16,6 +16,7 @@
 locals {
   gke_master_version   = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
   node_service_account = var.node_service_account == null ? data.google_compute_default_service_account.account.email : var.node_service_account
+  gke_endpoint_value   = var.gke_endpoint == null ? "" : var.gke_endpoint
   oauth_scopes = [
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/dataaccessauditlogging",
@@ -76,7 +77,7 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.gke_version} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = local.gke_endpoint_value
     }
     on_failure = fail
   }
@@ -92,7 +93,7 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.gke_version} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = local.gke_endpoint_value
     }
     on_failure = fail
   }
@@ -137,7 +138,7 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.resource_policy} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = local.gke_endpoint_value
     }
     on_failure = fail
   }
@@ -160,7 +161,7 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.resource_policy} 
     EOT
     environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = local.gke_endpoint_value
     }
     on_failure = fail
   }
