@@ -22,7 +22,7 @@ kubernetes-setup::install_drivers () {
     kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml
 
     #Install nccl plugin installer
-    kubectl apply -f ${nccl_plugin_yaml_path}
+    kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml
 }
 
 kubernetes-setup::setup_ksa () {
@@ -42,7 +42,6 @@ main () {
     local -r gsa_name="${2:?}"
     local -r ksa_name="${3:?}"
     local -r ksa_namespace="${4:?}"
-    local -r nccl_plugin_yaml_path="${5:?}"
 
     kubernetes-setup::install_drivers
     kubernetes-setup::setup_ksa

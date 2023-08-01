@@ -210,40 +210,10 @@ resource "null_resource" "kubernetes-setup-command" {
       ${self.triggers.project_id} \
       ${self.triggers.gsa_name} \
       ${self.triggers.ksa_name} \
-      ${self.triggers.ksa_namespace} \
-      ${path.module}/scripts/nccl-plugin.yaml
+      ${self.triggers.ksa_namespace} 
     EOT
     on_failure  = fail
   }
 
   depends_on = [null_resource.gke-cluster-command]
 }
-
-/* Not installing over ssh.
-resource "null_resource" "tcpx-setup-command" {
-  for_each = {
-    for idx, node_pool in var.node_pools : idx => node_pool
-  }
-
-  triggers = {
-    node_pool_name = "${var.resource_prefix}-nodepool-${each.key}"
-    zone           = each.value.zone
-  }
-
-  provisioner "local-exec" {
-    when        = create
-    interpreter = ["/bin/bash", "-c"]
-    command     = <<-EOT
-      ${path.module}/scripts/tcp-direct-setup.sh \
-      ${self.triggers.node_pool_name} \
-      ${self.triggers.zone} 
-    EOT
-    environment = {
-      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "https://staging-container.sandbox.googleapis.com/"
-    }
-    on_failure = fail
-  }
-
-  depends_on = [null_resource.gke-node-pool-command]
-}
-*/
