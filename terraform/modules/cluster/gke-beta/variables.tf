@@ -73,7 +73,7 @@ variable "node_service_account" {
 }
 
 variable "gke_endpoint" {
-  description = "The GKE endpoint to use"
+  description = "The GKE control plane endpoint to use"
   type        = string
   default     = null
 }
