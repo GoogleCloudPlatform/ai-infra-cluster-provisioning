@@ -72,6 +72,12 @@ variable "node_service_account" {
   default     = null
 }
 
+variable "gke_endpoint" {
+  description = "The GKE control plane endpoint to use"
+  type        = string
+  default     = null
+}
+
 variable "enable_gke_dashboard" {
   description = <<-EOT
     Flag to enable GPU usage dashboards for the GKE cluster.
