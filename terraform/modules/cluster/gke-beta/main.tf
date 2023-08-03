@@ -111,7 +111,7 @@ resource "null_resource" "gke-node-pool-command" {
     project_id      = var.project_id
     prefix          = var.resource_prefix
     cluster_name    = "${var.resource_prefix}-gke"
-    node_pool_name  = "${var.resource_prefix}-nodepool-${each.key}"
+    node_pool_name  = "nodepool-${each.key}"
     zone            = each.value.zone
     region          = var.region
     machine_type    = each.value.machine_type

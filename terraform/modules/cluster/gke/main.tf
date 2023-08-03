@@ -164,7 +164,7 @@ resource "google_container_node_pool" "gke-node-pools" {
   }
 
   project        = var.project_id
-  name           = "${var.resource_prefix}-nodepool-${each.key}"
+  name           = "nodepool-${each.key}"
   cluster        = google_container_cluster.gke-cluster.id
   node_locations = [each.value.zone]
   node_count     = each.value.node_count
