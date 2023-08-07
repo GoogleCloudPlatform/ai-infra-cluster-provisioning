@@ -16,6 +16,7 @@
 locals {
   gke_master_version   = var.gke_version != null ? var.gke_version : data.google_container_engine_versions.gkeversion.latest_master_version
   node_service_account = var.node_service_account == null ? data.google_compute_default_service_account.account.email : var.node_service_account
+  gke_endpoint_value   = var.gke_endpoint == null ? "https://container.googleapis.com/" : var.gke_endpoint
   oauth_scopes = [
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/dataaccessauditlogging",
@@ -53,7 +54,7 @@ module "resource_policy" {
     for idx, node_pool in var.node_pools : idx => node_pool
   }
   project_id           = var.project_id
-  resource_policy_name = each.value.resource_policy
+  resource_policy_name = "${var.resource_prefix}-policy-${each.key}"
   region               = var.region
 }
 
@@ -63,6 +64,7 @@ resource "null_resource" "gke-cluster-command" {
     cluster_name = "${var.resource_prefix}-gke"
     region       = var.region
     gke_version  = local.gke_master_version
+    gke_endpoint = local.gke_endpoint_value
   }
 
   provisioner "local-exec" {
@@ -75,7 +77,10 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.region} \
       ${self.triggers.gke_version} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
+    }
+    on_failure = fail
   }
 
   provisioner "local-exec" {
@@ -88,8 +93,13 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.region} \
       ${self.triggers.gke_version} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
+    }
+    on_failure = fail
   }
+
+  depends_on = [module.resource_policy]
 }
 
 resource "null_resource" "gke-node-pool-command" {
@@ -98,17 +108,18 @@ resource "null_resource" "gke-node-pool-command" {
   }
 
   triggers = {
-    project_id               = var.project_id
-    prefix                   = var.resource_prefix
-    cluster_name             = "${var.resource_prefix}-gke"
-    node_pool_name           = "${var.resource_prefix}-nodepool-${each.key}"
-    zone                     = each.value.zone
-    region                   = var.region
-    machine_type             = each.value.machine_type
-    node_count               = each.value.node_count
-    disk_type                = var.disk_type
-    disk_size                = var.disk_size_gb
-    enable_compact_placement = each.value.enable_compact_placement
+    project_id      = var.project_id
+    prefix          = var.resource_prefix
+    cluster_name    = "${var.resource_prefix}-gke"
+    node_pool_name  = "nodepool-${each.key}"
+    zone            = each.value.zone
+    region          = var.region
+    machine_type    = each.value.machine_type
+    node_count      = each.value.node_count
+    disk_type       = var.disk_type
+    disk_size       = var.disk_size_gb
+    resource_policy = "${var.resource_prefix}-policy-${each.key}"
+    gke_endpoint    = local.gke_endpoint_value
   }
 
   provisioner "local-exec" {
@@ -125,10 +136,13 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.node_count} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
-      ${self.triggers.enable_compact_placement} \
-      ${self.triggers.prefix} 
+      ${self.triggers.prefix} \
+      ${self.triggers.resource_policy} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
+    }
+    on_failure = fail
   }
 
   provisioner "local-exec" {
@@ -145,13 +159,16 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.node_count} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
-      ${self.triggers.enable_compact_placement} \
-      ${self.triggers.prefix} 
+      ${self.triggers.prefix} \
+      ${self.triggers.resource_policy} 
     EOT
-    on_failure  = fail
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
+    }
+    on_failure = fail
   }
 
-  depends_on = [null_resource.gke-cluster-command, module.resource_policy, module.network]
+  depends_on = [null_resource.gke-cluster-command, module.network]
 }
 
 output "gke-cluster-name" {
@@ -193,10 +210,10 @@ resource "null_resource" "kubernetes-setup-command" {
       ${self.triggers.project_id} \
       ${self.triggers.gsa_name} \
       ${self.triggers.ksa_name} \
-      ${self.triggers.ksa_namespace}
+      ${self.triggers.ksa_namespace} 
     EOT
     on_failure  = fail
   }
 
-  depends_on = [null_resource.gke-node-pool-command]
+  depends_on = [null_resource.gke-cluster-command]
 }

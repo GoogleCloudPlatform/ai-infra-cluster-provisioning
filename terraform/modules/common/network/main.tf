@@ -43,7 +43,7 @@ resource "google_compute_subnetwork" "subnets" {
   count         = local.vpc_count
   name          = "${var.resource_prefix}-sub-${count.index}"
   project       = var.project_id
-  ip_cidr_range = "192.168.${count.index}.0/24"
+  ip_cidr_range = "10.${count.index}.0.0/19"
   region        = var.region
   network       = google_compute_network.networks[count.index].self_link
 }
@@ -55,7 +55,7 @@ resource "google_compute_firewall" "firewall-allow-tcp-udp-icmp" {
   description   = "allow traffic between nodes of this VPC"
   direction     = "INGRESS"
   network       = google_compute_network.networks[count.index].self_link
-  source_ranges = ["192.168.0.0/16"]
+  source_ranges = ["10.0.0.0/8"]
   allow {
     protocol = "icmp"
   }
