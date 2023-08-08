@@ -251,11 +251,11 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
 }
 
 module "kubernetes-operations" {
-  source             = "./kubernetes-operations"
-  project_id         = var.project_id
-  cluster_id         = resource.google_container_cluster.gke-cluster.id
-  gke_cluster_exists = local.kubernetes_setup_config.enable_kubernetes_setup
-
+  source                = "./kubernetes-operations"
+  project_id            = var.project_id
+  cluster_id            = resource.google_container_cluster.gke-cluster.id
+  gke_cluster_exists    = local.kubernetes_setup_config.enable_kubernetes_setup
+  install_nvidia_driver = true
   setup_kubernetes_service_account = (
     local.kubernetes_setup_config.enable_kubernetes_setup ?
     {
