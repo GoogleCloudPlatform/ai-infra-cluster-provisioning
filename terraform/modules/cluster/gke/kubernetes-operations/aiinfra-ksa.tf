@@ -70,6 +70,7 @@ data "http" "nvidia_driver_installer_manifest" {
 }
 
 resource "kubectl_manifest" "nvidia_driver_installer" {
-  count     = var.install_nvidia_driver && var.gke_cluster_exists ? 1 : 0
-  yaml_body = data.http.nvidia_driver_installer_manifest.response_body
+  count            = var.install_nvidia_driver && var.gke_cluster_exists ? 1 : 0
+  yaml_body        = data.http.nvidia_driver_installer_manifest.response_body
+  wait_for_rollout = false
 }
