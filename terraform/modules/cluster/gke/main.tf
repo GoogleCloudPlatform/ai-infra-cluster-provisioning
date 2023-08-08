@@ -192,14 +192,6 @@ resource "google_container_node_pool" "gke-node-pools" {
       enable_integrity_monitoring = true
     }
 
-    dynamic "guest_accelerator" {
-      for_each = each.value.guest_accelerator != null ? [1] : []
-      content {
-        count = each.value.guest_accelerator.count
-        type  = each.value.guest_accelerator.type
-      }
-    }
-
     gvnic {
       enabled = true
     }
@@ -263,10 +255,6 @@ module "kubernetes-operations" {
   project_id         = var.project_id
   cluster_id         = resource.google_container_cluster.gke-cluster.id
   gke_cluster_exists = local.kubernetes_setup_config.enable_kubernetes_setup
-
-  install_nvidia_driver = anytrue([
-    for np in var.node_pools : np.guest_accelerator != null
-  ])
 
   setup_kubernetes_service_account = (
     local.kubernetes_setup_config.enable_kubernetes_setup ?
