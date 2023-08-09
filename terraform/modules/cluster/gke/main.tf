@@ -122,7 +122,7 @@ resource "google_container_cluster" "gke-cluster" {
     security_group = "gke-security-groups@google.com"
   }
 
-  datapath_provider = "DATAPATH_PROVIDER_UNSPECIFIED"
+  datapath_provider = "ADVANCED_DATAPATH"
 
   release_channel {
     channel = "UNSPECIFIED"
