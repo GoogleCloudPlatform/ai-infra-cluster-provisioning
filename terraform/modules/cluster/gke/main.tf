@@ -137,6 +137,9 @@ resource "google_container_cluster" "gke-cluster" {
     }
   }
 
+  # enable multi-NIC network
+  enable_multi_networking = true
+
   lifecycle {
     # Ignore all changes to the default node pool. It's being removed
     # after creation anyway.
@@ -207,6 +210,17 @@ resource "google_container_node_pool" "gke-node-pools" {
     }
 
     oauth_scopes = local.oauth_scopes
+  }
+
+  network_config {
+    dynamic "additional_node_network_configs" {
+      for_each = range(1, length(module.network.network_self_links))
+      iterator = id
+      content {
+        network    = module.network.network_self_links[id]
+        subnetwork = module.network.subnetwork_self_links[id]
+      }
+    }
   }
 
   dynamic "placement_policy" {
