@@ -1,33 +1,57 @@
-# Table of Contents
-
-- [Table of Contents](#table-of-contents)
-- [Overview](#overview)
-  - [Purpose](#purpose)
-  - [Description](#description)
-- [Types of clusters](#types-of-clusters)
-  - [A3 Clusters](#a3-clusters)
-  - [Other Clusters](#other-clusters)
-- [Quick Start](#quick-start)
-- [How to create a cluster](#how-to-create-a-cluster)
-  - [Run the docker image](#run-the-docker-image)
-  - [Integrate into an existing terraform project](#integrate-into-an-existing-terraform-project)
-  - [Integrate into an existing HPC Toolkit Blueprint](#integrate-into-an-existing-hpc-toolkit-blueprint)
-- [Samples for use cases](#samples-for-use-cases)
-- [Feature Supports](#feature-supports)
-
 # Overview
 
 ## Purpose
 
 The purpose of this tool is to provide a very quick and simple way to provision
-a compute cluster on Google Cloud Platform (GCP).
+a Google Cloud Platform (GCP) A3 compute cluster.
 
-## Description
+## What is an A3 cluster?
+
+An A3 cluster provides the following resources:
+
+- one or many `a3-highgpu-8g` VM instances (documentation not available yet,
+  description
+  [here](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus))
+- five virtual network interface cards (vNIC) -- two Nvidia H100 GPUs connected to each vNIC
+- TCPX (documentation not available yet)
+
+## Control plane options
+
+A3 clusters may be created through either [GKE](https://cloud.google.com/kubernetes-engine) or a [MIG](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups) via the modules found [here](./terraform/modules/cluster). Due to the recency of A3's release, features are limited in each control plane, and those limitations are listed below.
+
+| Feature \ Module | `gke` | `mig` | `mig-with-container` |
+| --- | --- | --- | --- |
+| [VM Image](https://cloud.google.com/compute/docs/images) | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) | Any | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) |
+| TCPX | Yes | Support limited to [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) [VM Images](https://cloud.google.com/compute/docs/images) | Yes |
+| [Kubernetes](https://kubernetes.io/) support | Yes | No | No |
+| [Ray](https://www.ray.io/) support | No | Yes | No |
+| GPU Metrics Dashboard | No | Yes | No |
+
+## Quickstart with `mig-with-container`
+
+An A3 cluster of eight nodes booting with a COS-Cloud image can be created via a managed instance group by running the following two commands:
+
+```bash
+cat >./terraform.tfvars <<EOF
+project_id = "my-project"
+resource_prefix = "my-cluster"
+target_size = 8
+zone = "us-central1-c"
+EOF
+
+docker run --rm -v "${PWD}:/root/aiinfra/input" \
+  us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
+  create mig-with-container
+```
+
+A deeper dive into how to use this tool can be found [below](#how-to-create-a-cluster).
+
+## Repository content summary
 
 This repository contains:
 
 - a set of terraform modules that creates GCP resources geared toward running
-  AI/ML workloads on [A3 VMs](#a3-clusters).
+  AI/ML workloads on [A3 VMs](#what-is-an-a3-cluster).
 - an [entrypoint script](./scripts/entrypoint.sh) that will find or create a
   terraform backend in a Google Cloud Storage (GCS) bucket, call the
   appropriate terraform commands using the terraform modules and a user
@@ -37,56 +61,6 @@ This repository contains:
   `us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image`
   -- that has all necessary tools installed which calls the entrypoint script
   and creates a cluster for you.
-
-# Types of clusters
-
-## A3 Clusters
-
-An A3 cluster provides the following resources:
-
-- one or many a3-highgpu-8g VM instances (full documentation not available yet,
-  description
-  [here](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus)).
-- five virtual network interface cards (vNIC) -- two H100 GPUs connected to each vNIC.
-- [Nvidia GPUDirect](https://developer.nvidia.com/gpudirect).
-
-In the future, any of the [other clusters](#other-clusters) may be an A3 cluster by setting these two variables in the `tfvars` file:
-
-```terraform
-machine_type = "a3-highgpu-8g"
-network_config = "new_multi_nic"
-```
-
-However, due to their recency, A3 clusters are supported by only:
-
-- [`mig-with-container`](./terraform/modules/cluster/mig-with-container): a
-  [Managed Instance Group (MIG)](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups)
-  of instances booting with a
-  [COS-Cloud image](https://cloud.google.com/container-optimized-os/docs).
-
-## Other Clusters
-
-Clusters of non-A3 machines may be created just as easy as those with A3
-machines though it is recommended to use A3 machines in order to acheive
-maximum performance. These cluster types are:
-
-- [`gke`](./terraform/modules/cluster/gke):
-  [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine)
-  cluster of instances booting with a
-  [COS-Cloud image](https://cloud.google.com/container-optimized-os/docs).
-- [`mig`](./terraform/modules/cluster/mig):
-  [Managed Instance Group (MIG)](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups)
-  instances booting with a user-decided
-  [VM image](https://cloud.google.com/compute/docs/images)
-- [`slurm`](./terraform/modules/cluster/slurm):
-  [Slurm](https://slurm.schedmd.com/documentation.html) cluster of instances
-  booting with a
-  [SchedMD Slurm VM
-  image](https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#published-image-family).
-
-# Quick Start
-
-Please find the [instructions here](./Quickstart.md) to start GPU cluster creation.
 
 # How to create a cluster
 
@@ -144,8 +118,7 @@ Quick explanation of the `docker run` flags (in same order as above):
 - `create/destroy` tells the tool whether it should create or destroy the whole
   cluster.
 - `mig-with-container` tells the tool to create a Managed Instance Group and
-  start a container at boot. Descriptions of clusters may be found
-  [above](#types-of-clusters).
+  start a container at boot.
 
 ## Integrate into an existing terraform project
 
@@ -183,40 +156,3 @@ provisioning then happens the same as any blueprint:
 # destroy the cluster
 ./ghpc create -w ./blueprint.yaml && ./ghpc destroy a3-mig-with-container
 ```
-
-# **Samples for use cases**
-
-| MIG Scenarios | Docker | Terraform | HPC Toolkit |
-|---------------|--------|-----------|-------------|
-| Simple no GPU | [terraform.tfvars](./samples/mig/simple/terraform.tfvars) | [main.tf](./samples/mig/simple/main.tf) | [blueprint](./samples/mig/simple/simple.yaml) |
-| Full featured | [terraform.tfvars](./samples/mig/complex_default_network/terraform.tfvars) | [main.tf](./samples/mig/complex_default_network/main.tf) | [blueprint](./samples/mig/complex_default_network/complex_default_network.yaml) |
-| Full featured with new VPC | [terraform.tfvars](./samples/mig/complex_new_network/terraform.tfvars) | [main.tf](./samples/mig/complex_new_network/main.tf) | [blueprint](./samples/mig/complex_new_network/complex_new_network.yaml) |
-| Full featured with multi-NIC VPC | [terraform.tfvars](./samples/mig/complex_multi_nic_network/terraform.tfvars) | [main.tf](./samples/mig/complex_multi_nic_network/main.tf) | [blueprint](./samples/mig/complex_multi_nic_network/complex_multi_nic_network.yaml) |
-| a3 VM type full featured with multi-NIC VPC | [terraform.tfvars](./samples/mig/a3_multi_nic_network/terraform.tfvars) | [main.tf](./samples/mig/a3_multi_nic_network/main.tf) | [blueprint](./samples/mig/a3_multi_nic_network/a3_multi_nic_network.yaml) |
-
-| MIG-with-Container Scenarios | Docker | Terraform | HPC Toolkit |
-|---------------|--------|-----------|-------------|
-| Full featured | [terraform.tfvars](./samples/mig-with-container/simple/terraform.tfvars) | [main.tf](./samples/mig-with-container/simple/main.tf) | [blueprint](./samples/mig-with-container/simple/blueprint.yaml) |
-
-| GKE Scenarios | Docker | Terraform | HPC Toolkit |
-|---------------|--------|-----------|-------------|
-| Simple with no GPU | [terraform.tfvars](./samples/gke/simple/terraform.tfvars) | [main.tf](./samples/gke/simple/main.tf) | [blueprint](./samples/gke/simple/simple.yaml) |
-| Full featured with default network | [terraform.tfvars](./samples/gke/complex_gpu_default_network/terraform.tfvars) | [main.tf](./samples/gke/complex_gpu_default_network/main.tf) | [blueprint](./samples/gke/complex_gpu_default_network/complex_gpu_default_network.yaml) |
-| Full featured with new network | [terraform.tfvars](./samples/gke/complex_gpu_new_network/terraform.tfvars) | [main.tf](./samples/gke/complex_gpu_new_network/main.tf) | [blueprint](./samples/gke/complex_gpu_new_network/complex_gpu_new_network.yaml) |
-
-| GKE-beta Scenarios | Docker | Terraform | HPC Toolkit |
-|--------------------|--------|-----------|-------------|
-| Full featured with a3 machines and multi-NIC network | [terraform.tfvars](./samples/gke-beta/a3_multiNIC_network/terraform.tfvars) | Not Supported | Not Supported |
-
-| Slurm Scenarios | Docker | Terraform | HPC Toolkit |
-|-----------------|--------|-----------|-------------|
-| Simple with no GPU | [terraform.tfvars](./samples/slurm/minimal/terraform.tfvars) | [main.tf](./samples/slurm/minimal/main.tf) | [blueprint](./samples/slurm/minimal/blueprint.yaml) |
-| Full featured with multi-NIC network | [terraform.tfvars](./samples/slurm/complex_multi_nic/terraform.tfvars) | [main.tf](./samples/slurm/complex_multi_nic/main.tf) | [blueprint](./samples/slurm/complex_multi_nic/blueprint.yaml) |
-
-# **Feature Supports**
-
-| Features | MIG | MIG-WITH-CONTAINER | GKE | SLURM |
-|----------|-----|--------------------|-----|-------|
-| RAY Job orchestrator| Supported | Not Supported in COS | Not Supported | Not Supported |
-|TCPDirect| Not Supported | Supported | Coming Soon | Not Supported |
-|Compact Resource Policy| Supported | Supported | Supported | Supported |
