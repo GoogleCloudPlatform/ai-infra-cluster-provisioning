@@ -214,11 +214,11 @@ resource "google_container_node_pool" "gke-node-pools" {
 
   network_config {
     dynamic "additional_node_network_configs" {
-      for_each = range(1, length(module.network.network_self_links))
+      for_each = toset(range(1, length(module.network.network_self_links)))
       iterator = id
       content {
-        network    = module.network.network_self_links[id]
-        subnetwork = module.network.subnetwork_self_links[id]
+        network    = module.network.network_self_links[id.value]
+        subnetwork = module.network.subnetwork_self_links[id.value]
       }
     }
   }
