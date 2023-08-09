@@ -123,6 +123,12 @@ resource "google_container_cluster" "gke-cluster" {
   }
 
   datapath_provider = "ADVANCED_DATAPATH"
+  networking_mode   = "VPC_NATIVE"
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block  = "/14"
+    services_ipv4_cidr_block = "/20"
+  }
+
 
   release_channel {
     channel = "UNSPECIFIED"
