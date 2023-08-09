@@ -223,8 +223,8 @@ resource "google_container_node_pool" "gke-node-pools" {
     ]
   }
   timeouts {
-    create = "60m"
-    update = "60m"
+    create = "10m"
+    update = "10m"
   }
 }
 
