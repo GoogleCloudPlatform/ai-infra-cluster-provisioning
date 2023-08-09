@@ -23,17 +23,33 @@ output "network_id" {
 }
 
 output "network_self_links" {
-  description = "Primary subnet self-links of all the VPCs"
+  description = "Network self-links of all the VPCs"
   value = flatten([
     module.default_vpc[*].network_self_link,
     resource.google_compute_network.networks[*].self_link,
   ])
 }
 
+output "network_names" {
+  description = "Network names of all the VPCs"
+  value = flatten([
+    module.default_vpc[*].network_name,
+    resource.google_compute_network.networks[*].name,
+  ])
+}
+
 output "subnetwork_self_links" {
-  description = "Primary subnet self-links of all the VPCs"
+  description = "Subnet self-links of all the VPCs"
   value = flatten([
     module.default_vpc[*].subnetwork_self_link,
     resource.google_compute_subnetwork.subnets[*].self_link,
+  ])
+}
+
+output "subnetwork_names" {
+  description = "Subnet names of all the VPCs"
+  value = flatten([
+    module.default_vpc[*].subnetwork_name,
+    resource.google_compute_subnetwork.subnets[*].name,
   ])
 }

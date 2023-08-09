@@ -57,6 +57,8 @@ limitations under the License.
 | Name | Description |
 |------|-------------|
 | <a name="output_network_id"></a> [network\_id](#output\_network\_id) | ID of the network |
-| <a name="output_network_self_links"></a> [network\_self\_links](#output\_network\_self\_links) | Primary subnet self-links of all the VPCs |
-| <a name="output_subnetwork_self_links"></a> [subnetwork\_self\_links](#output\_subnetwork\_self\_links) | Primary subnet self-links of all the VPCs |
+| <a name="output_network_names"></a> [network\_names](#output\_network\_names) | Network names of all the VPCs |
+| <a name="output_network_self_links"></a> [network\_self\_links](#output\_network\_self\_links) | Network self-links of all the VPCs |
+| <a name="output_subnetwork_names"></a> [subnetwork\_names](#output\_subnetwork\_names) | Subnet names of all the VPCs |
+| <a name="output_subnetwork_self_links"></a> [subnetwork\_self\_links](#output\_subnetwork\_self\_links) | Subnet self-links of all the VPCs |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
