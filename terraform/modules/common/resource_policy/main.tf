@@ -23,5 +23,6 @@ resource "google_compute_resource_policy" "placement_policy" {
   group_placement_policy {
     collocation  = "COLLOCATED"
     max_distance = 2
+    vm_count     = var.vm_count
   }
 }
