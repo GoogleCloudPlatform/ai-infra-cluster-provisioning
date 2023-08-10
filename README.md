@@ -19,13 +19,44 @@ An A3 cluster provides the following resources:
 
 A3 clusters may be created through either [GKE](https://cloud.google.com/kubernetes-engine) or a [MIG](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups) via the modules found [here](./terraform/modules/cluster). Due to the recency of A3's release, features are limited in each control plane, and those limitations are listed below.
 
-| Feature \ Module | `gke` | `mig` | `mig-with-container` |
-| --- | --- | --- | --- |
-| [VM Image](https://cloud.google.com/compute/docs/images) | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) | Any | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) |
-| TCPX | Yes | Support limited to [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) [VM Images](https://cloud.google.com/compute/docs/images) | Yes |
-| [Kubernetes](https://kubernetes.io/) support | Yes | No | No |
-| [Ray](https://www.ray.io/) support | No | Yes | No |
-| GPU Metrics Dashboard | No | Yes | No |
+| Feature \ Module | `gke` | `mig-with-container` |
+| --- | --- | --- |
+| [VM Image](https://cloud.google.com/compute/docs/images) | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) |
+| TCPX | Yes | Yes |
+| [Kubernetes](https://kubernetes.io/) support | Yes | No |
+
+## Quickstart with `gke`
+
+An A3 cluster of eight nodes (two node pools with four nodes per node pool) booting with a COS-Cloud image can be created via GKE by running the following two commands:
+
+```bash
+cat >./terraform.tfvars <<EOF
+project_id = "my-project"
+resource_prefix = "my-cluster"
+region = "us-central1"
+
+node_pools = [
+  {
+    zone                     = "us-central1-c"
+    node_count               = 4
+    machine_type             = "a3-highgpu-8g"
+    enable_compact_placement = true
+  },
+  {
+    zone                     = "us-central1-c"
+    node_count               = 4
+    machine_type             = "a3-highgpu-8g"
+    enable_compact_placement = true
+  },
+]
+EOF
+
+docker run --rm -v "${PWD}:/root/aiinfra/input" \
+  us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
+  create gke
+```
+
+A deeper dive into how to use this tool can be found [below](#how-to-provision-a-cluster).
 
 ## Quickstart with `mig-with-container`
 
