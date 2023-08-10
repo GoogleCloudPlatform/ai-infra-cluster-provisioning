@@ -81,3 +81,23 @@ test::terraform::network::multi_nic_network_plans_multiple_new_vpcs () {
         "$(helpers::plan_output "${tfshow}" 'subnetwork_self_links')" \
         'null'
 }
+
+test::terraform::network::default_multi_nic_network_plans_multiple_new_vpcs () {
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(network::input_dir)/default_multi_nic.tfvars" mig >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
+    EXPECT_SUCCEED helpers::terraform_plan \
+        "$(network::src_dir)" \
+        "${tfvars}" \
+        "${tfplan}"
+
+    local -r tfshow=$(mktemp)
+    helpers::terraform_show "$(network::src_dir)" "${tfplan}" >"${tfshow}"
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(network::output_dir)/default_multi_nic.json" \
+        "${tfshow}"
+    EXPECT_STREQ \
+        "$(helpers::plan_output "${tfshow}" 'network_id')" \
+        "projects/${runner_arg_project_id}/global/networks/default"
+}

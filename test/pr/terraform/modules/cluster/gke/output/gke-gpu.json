@@ -16,6 +16,18 @@
         {
           "address": "google_container_cluster.gke-cluster",
           "values": {
+            "addons_config": [
+              {
+                "gcs_fuse_csi_driver_config": [
+                  {
+                    "enabled": true
+                  }
+                ]
+              }
+            ],
+            "datapath_provider": "ADVANCED_DATAPATH",
+            "enable_multi_networking": true,
+            "networking_mode": "VPC_NATIVE",
             "release_channel": [
               {
                 "channel": "UNSPECIFIED"
@@ -31,18 +43,17 @@
             "node_locations": [
               "us-central1-f"
             ],
+            "network_config": [
+              {
+                "additional_node_network_configs": [],
+                "additional_pod_network_configs": [],
+                "create_pod_range": null
+              }
+            ],
             "node_config": [
               {
                 "disk_size_gb": 200,
                 "disk_type": "pd-standard",
-                "guest_accelerator": [
-                  {
-                    "count": 1,
-                    "gpu_partition_size": null,
-                    "gpu_sharing_config": null,
-                    "type": "nvidia-tesla-a100"
-                  }
-                ],
                 "gvnic": [
                   {
                     "enabled": true
