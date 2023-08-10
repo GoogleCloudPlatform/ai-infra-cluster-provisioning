@@ -96,6 +96,7 @@ This repository contains:
 # Prerequisites
 
 In order to provision a cluster, the following are required:
+
 - a GCP project with GCE API enabled.
 - a GCP account with IAM role
   [`roles/editor`](https://cloud.google.com/iam/docs/understanding-roles#basic).
@@ -104,11 +105,13 @@ In order to provision a cluster, the following are required:
 ## Google Cloud Authentication
 
 The command to authorize tools to create resources on your behalf is:
+
 ```bash
 gcloud auth application-default login
 ```
 
 The above command is:
+
 - recommended when using the docker image along with exposing your credentials
   to the container with the
   `-v "${HOME}/.config/gcloud:/root/.config/gcloud"`
@@ -120,7 +123,8 @@ The above command is:
 
 # How to provision a cluster
 
-There are a few ways to provision a cluster:
+After running through the [prerequisites above](#prerequisites), there are a
+few ways to provision a cluster:
 
 1. Run the docker image: do this if you don't have any existing infrastructure
   as code.
