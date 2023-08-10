@@ -44,18 +44,10 @@ variable "network_config" {
   description = <<-EOT
     The network configuration to specify the type of VPC to be used.
 
-    Possible values: `["default", "new_multi_nic", "new_single_nic"]`
+    Possible values: `["default", "new_multi_nic", "default_multi_nic", "new_single_nic"]`
     EOT
   type        = string
   default     = "default"
-
-  validation {
-    condition = contains(
-      ["default", "new_multi_nic", "new_single_nic"],
-      var.network_config
-    )
-    error_message = "network_config must be one of ['default', 'new_multi_nic', 'new_single_nic']."
-  }
 }
 
 variable "disk_size_gb" {
@@ -110,21 +102,13 @@ variable "node_pools" {
     zone: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
     node_count: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
     machine_type: The name of a Google Compute Engine machine type. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
-    guest_accelerator: This block is to provide information about GPUs. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#nested_guest_accelerator)
-    This must be `null` when `machine_type` is of an [accelerator-optimized machine family](https://cloud.google.com/compute/docs/accelerator-optimized-machines)
-        guest_accelerator.type: The accelerator type resource to expose to this instance.
-        guest_accelerator.count: The number of the guest accelerator cards exposed to this instance.
     enable_compact_placement: Specifies a custom placement policy for the nodes. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#placement_policy)
     ```
     EOT
   type = list(object({
-    zone         = string,
-    node_count   = number,
-    machine_type = string,
-    guest_accelerator = object({
-      type  = string,
-      count = number
-    })
+    zone                     = string,
+    node_count               = number,
+    machine_type             = string,
     enable_compact_placement = bool
   }))
 }

@@ -16,16 +16,17 @@
 
 locals {
   vpc_count_map = {
-    "default"        = 0
-    "new_multi_nic"  = 5
-    "new_single_nic" = 1
+    "default"           = 0
+    "new_multi_nic"     = 5
+    "default_multi_nic" = 4
+    "new_single_nic"    = 1
   }
   vpc_count = lookup(local.vpc_count_map, var.network_config, 0)
 }
 
 module "default_vpc" {
   source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=v1.17.0"
-  count  = var.network_config == "default" ? 1 : 0
+  count  = var.network_config == "default" || var.network_config == "default_multi_nic" ? 1 : 0
 
   project_id = var.project_id
   region     = var.region

@@ -18,16 +18,16 @@ variable "network_config" {
   description = <<-EOT
     The network configuration to specify the type of VPC to be used.
 
-    Possible values: `["default", "new_multi_nic", "new_single_nic"]`
+    Possible values: `["default", "new_multi_nic", "default_multi_nic", "new_single_nic"]`
     EOT
   type        = string
 
   validation {
     condition = contains(
-      ["default", "new_multi_nic", "new_single_nic"],
+      ["default", "new_multi_nic", "default_multi_nic", "new_single_nic"],
       var.network_config
     )
-    error_message = "network_config must be one of ['default', 'new_multi_nic', 'new_single_nic']."
+    error_message = "network_config must be one of ['default', 'new_multi_nic', 'default_multi_nic', 'new_single_nic']."
   }
 }
 

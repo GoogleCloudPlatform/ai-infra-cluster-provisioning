@@ -122,7 +122,13 @@ resource "google_container_cluster" "gke-cluster" {
     security_group = "gke-security-groups@google.com"
   }
 
-  datapath_provider = "DATAPATH_PROVIDER_UNSPECIFIED"
+  datapath_provider = "ADVANCED_DATAPATH"
+  networking_mode   = "VPC_NATIVE"
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block  = "/14"
+    services_ipv4_cidr_block = "/20"
+  }
+
 
   release_channel {
     channel = "UNSPECIFIED"
@@ -136,6 +142,9 @@ resource "google_container_cluster" "gke-cluster" {
       enabled = true
     }
   }
+
+  # enable multi-NIC network
+  enable_multi_networking = true
 
   lifecycle {
     # Ignore all changes to the default node pool. It's being removed
@@ -192,14 +201,6 @@ resource "google_container_node_pool" "gke-node-pools" {
       enable_integrity_monitoring = true
     }
 
-    dynamic "guest_accelerator" {
-      for_each = each.value.guest_accelerator != null ? [1] : []
-      content {
-        count = each.value.guest_accelerator.count
-        type  = each.value.guest_accelerator.type
-      }
-    }
-
     gvnic {
       enabled = true
     }
@@ -217,6 +218,17 @@ resource "google_container_node_pool" "gke-node-pools" {
     oauth_scopes = local.oauth_scopes
   }
 
+  network_config {
+    dynamic "additional_node_network_configs" {
+      for_each = toset(range(1, length(module.network.network_names)))
+      iterator = id
+      content {
+        network    = module.network.network_names[id.value]
+        subnetwork = module.network.subnetwork_names[id.value]
+      }
+    }
+  }
+
   dynamic "placement_policy" {
     for_each = each.value.enable_compact_placement ? [1] : []
     content {
@@ -231,8 +243,8 @@ resource "google_container_node_pool" "gke-node-pools" {
     ]
   }
   timeouts {
-    create = "60m"
-    update = "60m"
+    create = "10m"
+    update = "10m"
   }
 }
 
@@ -259,15 +271,11 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
 }
 
 module "kubernetes-operations" {
-  source             = "./kubernetes-operations"
-  project_id         = var.project_id
-  cluster_id         = resource.google_container_cluster.gke-cluster.id
-  gke_cluster_exists = local.kubernetes_setup_config.enable_kubernetes_setup
-
-  install_nvidia_driver = anytrue([
-    for np in var.node_pools : np.guest_accelerator != null
-  ])
-
+  source                = "./kubernetes-operations"
+  project_id            = var.project_id
+  cluster_id            = resource.google_container_cluster.gke-cluster.id
+  gke_cluster_exists    = local.kubernetes_setup_config.enable_kubernetes_setup
+  install_nvidia_driver = true
   setup_kubernetes_service_account = (
     local.kubernetes_setup_config.enable_kubernetes_setup ?
     {
