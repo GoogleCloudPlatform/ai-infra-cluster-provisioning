@@ -22,7 +22,7 @@ A3 clusters may be created through either [GKE](https://cloud.google.com/kuberne
 | Feature \ Module | `gke` | `mig-with-container` |
 | --- | --- | --- |
 | [VM Image](https://cloud.google.com/compute/docs/images) | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) |
-| TCPX | Yes | Yes |
+| [Compact placement policy](https://cloud.google.com/compute/docs/instances/define-instance-placement) | Yes | Yes |
 | [Kubernetes](https://kubernetes.io/) support | Yes | No |
 
 ## Quickstart with `gke`
@@ -31,29 +31,30 @@ An A3 cluster of eight nodes (two node pools with four nodes per node pool) boot
 
 ```bash
 cat >./terraform.tfvars <<EOF
-project_id = "my-project"
+project_id      = "my-project"
 resource_prefix = "my-cluster"
-region = "us-central1"
+region          = "us-central1"
+
+gke_version = "1.27.4-gke.900"
+disk_type   = "pd-ssd"
 
 node_pools = [
   {
     zone                     = "us-central1-c"
     node_count               = 4
     machine_type             = "a3-highgpu-8g"
-    enable_compact_placement = true
   },
   {
     zone                     = "us-central1-c"
     node_count               = 4
     machine_type             = "a3-highgpu-8g"
-    enable_compact_placement = true
   },
 ]
 EOF
 
 docker run --rm -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create gke
+  create gke-beta
 ```
 
 A deeper dive into how to use this tool can be found [below](#how-to-provision-a-cluster).
