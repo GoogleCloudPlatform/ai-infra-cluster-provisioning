@@ -2,9 +2,7 @@ project_id      = "project-id"
 resource_prefix = "simple-gke"
 region          = "us-central1"
 node_pools = [{
-  zone                     = "us-central1-a"
-  node_count               = 1
-  machine_type             = "n1-standard-1"
-  guest_accelerator        = null
-  enable_compact_placement = false
+  zone         = "us-central1-a"
+  node_count   = 1
+  machine_type = "n1-standard-1"
 }]

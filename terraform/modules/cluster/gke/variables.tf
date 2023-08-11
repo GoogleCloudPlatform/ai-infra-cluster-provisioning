@@ -102,15 +102,21 @@ variable "node_pools" {
     zone: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
     node_count: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
     machine_type: The name of a Google Compute Engine machine type. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
-    enable_compact_placement: Specifies a custom placement policy for the nodes. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#placement_policy)
+    enable_compact_placement: (Optional)Flag to enable compact placement policy to use for the node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
+                              The default value is `false`.
     ```
     EOT
   type = list(object({
     zone                     = string,
     node_count               = number,
     machine_type             = string,
-    enable_compact_placement = bool
+    enable_compact_placement = optional(bool, false)
   }))
+  default = []
+  validation {
+    condition     = var.node_pools != null
+    error_message = "Cannot be null."
+  }
 }
 
 variable "kubernetes_setup_config" {
