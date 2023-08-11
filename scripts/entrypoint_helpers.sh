@@ -161,7 +161,7 @@ entrypoint_helpers::expect_contains () {
 entrypoint_helpers::validate_args () {
     local valid=true
 
-    declare -ar expected_machine_types=('a3' 'a3')
+    declare -ar expected_machine_types=('a2' 'a3')
     entrypoint_helpers::expect_contains expected_machine_types arg_machine_type \
     || valid=false
 

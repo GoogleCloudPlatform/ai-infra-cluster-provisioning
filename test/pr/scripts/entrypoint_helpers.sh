@@ -21,17 +21,19 @@ test::entrypoint_helpers::expect_contains::succeeds_on_element_present () {
 }
 
 test::entrypoint_helpers::parse_args::parses_no_args () {
-    local arg_action arg_cluster arg_var_file
+    local arg_action arg_cluster arg_machine_type arg_var_file
     EXPECT_SUCCEED entrypoint_helpers::parse_args
     EXPECT_STR_EMPTY "${arg_action}"
     EXPECT_STR_EMPTY "${arg_cluster}"
+    EXPECT_STR_EMPTY "${arg_machine_type}"
     EXPECT_STR_EMPTY "${arg_var_file}"
     EXPECT_STR_EMPTY "${opt_backend_bucket}"
 }
 
 test::entrypoint_helpers::parse_args::parses_all_args () {
-    local arg_action arg_cluster arg_var_file opt_backend_bucket
-    EXPECT_SUCCEED entrypoint_helpers::parse_args create mig ./custom.tfvars --backend-bucket 'gs://custom'
+    local arg_action arg_cluster arg_machine_type arg_var_file opt_backend_bucket
+    EXPECT_SUCCEED entrypoint_helpers::parse_args a3 create mig ./custom.tfvars --backend-bucket 'gs://custom'
+    EXPECT_STREQ "${arg_machine_type}" a3
     EXPECT_STREQ "${arg_action}" create
     EXPECT_STREQ "${arg_cluster}" mig
     EXPECT_STREQ "${arg_var_file}" ./custom.tfvars
@@ -39,35 +41,45 @@ test::entrypoint_helpers::parse_args::parses_all_args () {
 }
 
 test::entrypoint_helpers::parse_args::succeeds_on_help () {
-    local arg_action arg_cluster arg_var_file
     (entrypoint_helpers::parse_args --help) || EXPECT_SUCCEED false
 }
 
+test::entrypoint_helpers::validate_args::fails_on_invalid_machine_type () {
+    local arg_machine_type="invalid"
+    local arg_action="create"
+    local arg_cluster="mig"
+    local arg_var_file="./test/scripts/entrypoint_helpers.sh"
+    EXPECT_FAIL entrypoint_helpers::validate_args
+}
+
 test::entrypoint_helpers::validate_args::fails_on_invalid_action () {
+    local arg_machine_type="a3"
     local arg_action="invalid"
     local arg_cluster="mig"
     local arg_var_file="./test/scripts/entrypoint_helpers.sh"
-    EXPECT_FAIL entrypoint_helpers::validate_args invalid mig ./custom.tfvars
+    EXPECT_FAIL entrypoint_helpers::validate_args
 }
 
 test::entrypoint_helpers::validate_args::fails_on_invalid_cluster () {
+    local arg_machine_type="a3"
     local arg_action="create"
     local arg_cluster="invalid"
     local arg_var_file="./test/scripts/entrypoint_helpers.sh"
-    EXPECT_FAIL entrypoint_helpers::validate_args invalid mig ./custom.tfvars
+    EXPECT_FAIL entrypoint_helpers::validate_args
 }
 
 test::entrypoint_helpers::validate_args::fails_on_invalid_var_file () {
+    local arg_machine_type="a3"
     local arg_action="create"
     local arg_cluster="mig"
     local arg_var_file="invalid"
-    EXPECT_FAIL entrypoint_helpers::validate_args invalid mig ./custom.tfvars
+    EXPECT_FAIL entrypoint_helpers::validate_args
 }
 
 test::entrypoint_helpers::module_path::gets_path_to_cluster () {
     EXPECT_STREQ \
-        "$(entrypoint_helpers::module_path mig)" \
-        './terraform/modules/cluster/mig'
+        "$(entrypoint_helpers::module_path a3 mig)" \
+        './a3/terraform/modules/cluster/mig'
 }
 
 test::entrypoint_helpers::get_tfvar::gets_valid_param () {
