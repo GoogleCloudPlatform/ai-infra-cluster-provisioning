@@ -19,7 +19,10 @@
 # Exit status: 0
 entrypoint_helpers::get_usage () {
     cat <<EOT
-Usage: ./scripts/entrypoint.sh [options] action cluster [var_file]
+Usage:
+    ./scripts/entrypoint.sh [options] \
+        machine_type action cluster \
+        [var_file]
 
 Options:
     -b|--backend-bucket
@@ -42,6 +45,11 @@ Parameters:
                 - mig-with-container: MIG with docker container --
                     terraform/modules/cluster/mig-with-container
                 - slurm: Slurm Workload Manager -- terraform/modules/cluster/slurm
+    machine_type   
+                Type of machine of which the cluster will be made. Options are:
+                - a2 [docs](https://cloud.google.com/compute/docs/accelerator-optimized-machines#a2-vms)
+                - a3 [blog post](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus)
+                 (docs not available yet)
     var_file    Terraform variables file. Defaults to:
                 '${PWD}/input/terraform.tfvars'
 EOT
@@ -82,12 +90,15 @@ entrypoint_helpers::parse_args () {
         else
             case "${parameter_index}" in
                 1)
-                    arg_action="${1}"
+                    arg_machine_type="${1}"
                     ;;
                 2)
-                    arg_cluster="${1}"
+                    arg_action="${1}"
                     ;;
                 3)
+                    arg_cluster="${1}"
+                    ;;
+                4)
                     arg_var_file="${1}"
                     ;;
                 *)
@@ -150,6 +161,10 @@ entrypoint_helpers::expect_contains () {
 entrypoint_helpers::validate_args () {
     local valid=true
 
+    declare -ar expected_machine_types=('a3' 'a3')
+    entrypoint_helpers::expect_contains expected_machine_types arg_machine_type \
+    || valid=false
+
     declare -ar expected_actions=('create' 'destroy')
     entrypoint_helpers::expect_contains expected_actions arg_action || valid=false
 
@@ -178,8 +193,9 @@ entrypoint_helpers::validate_args () {
 # Output: path to the terraform module
 # Exit status: 0
 entrypoint_helpers::module_path () {
-    local -r cluster="${1:?}"
-    echo "./terraform/modules/cluster/${cluster}"
+    local -r machine_type="${1:?}"
+    local -r cluster="${2:?}"
+    echo "./${machine_type}/terraform/modules/cluster/${cluster}"
 }
 
 # Provision a cluster
