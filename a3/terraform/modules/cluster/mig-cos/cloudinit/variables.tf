@@ -34,15 +34,6 @@ variable "container" {
   }
 }
 
-variable "custom_gpu_drivers" {
-  type = bool
-
-  validation {
-    condition     = var.custom_gpu_drivers != null
-    error_message = "must not be null"
-  }
-}
-
 variable "filestores" {
   type = list(object({
     local_mount  = string
@@ -92,15 +83,6 @@ variable "gcsfuses" {
   }
 }
 
-variable "machine_has_gpu" {
-  type = bool
-
-  validation {
-    condition     = var.machine_has_gpu != null
-    error_message = "must not be null"
-  }
-}
-
 variable "enable_auto_config_apply" {
   description = <<-EOT
     Whenever you update a MIG's instance_template, Compute Engine automatically applies your updated configuration to new VMs that are added to the group.
@@ -110,6 +92,15 @@ variable "enable_auto_config_apply" {
     EOT
   type        = bool
   default     = true
+}
+
+variable "enable_install_gpu" {
+  type = bool
+
+  validation {
+    condition     = var.enable_install_gpu != null
+    error_message = "must not be null"
+  }
 }
 
 variable "startup_script" {

@@ -14,12 +14,12 @@
 
 ---
 
-blueprint_name: mig-with-container
+blueprint_name: mig-cos
 
 vars:
   project_id      : project-id
-  resource_prefix : mig-with-container
-  deployment_name : mig-with-container-dpl
+  resource_prefix : mig-cos
+  deployment_name : mig-cos-dpl
   zone            : us-central1-c
   network_config  : default
   machine_type    : a2-highgpu-1g
@@ -48,5 +48,5 @@ vars:
 deployment_groups:
 - group: primary
   modules:
-  - id: mig-with-container
-    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-with-container"
+  - id: mig-cos
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-cos"

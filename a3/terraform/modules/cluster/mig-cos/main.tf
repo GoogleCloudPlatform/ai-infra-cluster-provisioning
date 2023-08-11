@@ -62,7 +62,7 @@ module "cloudinit" {
   source = "./cloudinit"
 
   container          = var.container
-  custom_gpu_drivers = var.custom_gpu_drivers
+  enable_install_gpu = var.enable_install_gpu
   filestores = [
     for n in module.filestore[*].network_storage
     : {
@@ -70,11 +70,7 @@ module "cloudinit" {
       remote_mount = "${n.server_ip}:${n.remote_mount}"
     }
   ]
-  gcsfuses = var.gcsfuse_existing != null ? var.gcsfuse_existing : []
-  machine_has_gpu = var.guest_accelerator != null || contains(
-    ["a2", "a3", "g2"],
-    split("-", var.machine_type)[0],
-  )
+  gcsfuses       = var.gcsfuse_existing != null ? var.gcsfuse_existing : []
   startup_script = var.startup_script
 }
 
@@ -83,9 +79,8 @@ module "compute_instance_template" {
 
   disk_size_gb                 = var.disk_size_gb
   disk_type                    = var.disk_type
-  guest_accelerator            = var.guest_accelerator
   machine_image                = local.machine_image
-  machine_type                 = var.machine_type
+  machine_type                 = "a3-highgpu-8g"
   maintenance_interval         = var.maintenance_interval
   metadata                     = local.metadata
   project_id                   = var.project_id

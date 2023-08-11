@@ -12,11 +12,11 @@ dashboard::output_dir () {
     echo "${PWD}/test/pr/a3/terraform/modules/common/dashboard/output"
 }
 
-test::terraform::dashboard () {
+test::terraform::a3::dashboard () {
     EXPECT_SUCCEED helpers::terraform_init "$(dashboard::src_dir)"
 }
 
-test::terraform::dashboard::disable_all_widgets () {
+test::terraform::a3::dashboard::disable_all_widgets () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(dashboard::input_dir)/disable.tfvars" mig >"${tfvars}"
 
@@ -36,7 +36,7 @@ test::terraform::dashboard::disable_all_widgets () {
         "${tfshow}"
 }
 
-test::terraform::dashboard::enable_all_widgets () {
+test::terraform::a3::dashboard::enable_all_widgets () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(dashboard::input_dir)/enable.tfvars" mig >"${tfvars}"
 

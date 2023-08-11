@@ -6,13 +6,11 @@
           {
             "disk_size_gb": 128,
             "disk_type": "pd-standard",
-            "guest_accelerator": null,
             "machine_image": {
               "project": "schedmd-slurm-public",
               "family": "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts",
               "name": null
             },
-            "machine_type": "a2-highgpu-2g",
             "node_count_static": 1,
             "partition_name": "compute",
             "region": "us-central1",

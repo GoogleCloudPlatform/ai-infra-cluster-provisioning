@@ -101,14 +101,6 @@ resource "google_compute_instance_template" "template" {
     auto_delete  = true
   }
 
-  dynamic "guest_accelerator" {
-    for_each = var.guest_accelerator != null ? [var.guest_accelerator] : []
-    content {
-      type  = guest_accelerator.value.type
-      count = guest_accelerator.value.count
-    }
-  }
-
   dynamic "network_interface" {
     for_each = toset(range(length(var.subnetwork_self_links)))
     content {

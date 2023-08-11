@@ -24,16 +24,14 @@ locals {
       partition_name    = partition.partition_name
       zone              = partition.zone
 
-      disk_size_gb      = coalesce(try(partition.disk_size_gb, null), 128)
-      disk_type         = coalesce(try(partition.disk_type, null), "pd-standard")
-      guest_accelerator = partition.guest_accelerator
+      disk_size_gb = coalesce(try(partition.disk_size_gb, null), 128)
+      disk_type    = coalesce(try(partition.disk_type, null), "pd-standard")
       machine_image = coalesce(try(partition.machine_image, null), {
         project = "schedmd-slurm-public"
         family  = "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts"
         name    = null
       })
-      machine_type = coalesce(try(partition.machine_type, null), "a2-highgpu-2g")
-      region       = join("-", slice(split("-", partition.zone), 0, 2))
+      region = join("-", slice(split("-", partition.zone), 0, 2))
       startup_runners = concat(
         alltrue([for e in [null, ""] : partition.startup_script != e]) ? [{
           type        = "shell"
@@ -243,10 +241,9 @@ module "compute_instance_templates" {
 
   disk_size_gb          = local.compute_partitions[each.key].disk_size_gb
   disk_type             = local.compute_partitions[each.key].disk_type
-  guest_accelerator     = local.compute_partitions[each.key].guest_accelerator
   labels                = var.labels
   machine_image         = local.compute_partitions[each.key].machine_image
-  machine_type          = local.compute_partitions[each.key].machine_type
+  machine_type          = "a3-highgpu-8g"
   maintenance_interval  = null
   metadata              = null
   project_id            = var.project_id
@@ -268,7 +265,6 @@ module "controller_instance_template" {
 
   disk_size_gb          = local.controller_var.disk_size_gb
   disk_type             = local.controller_var.disk_type
-  guest_accelerator     = null
   labels                = var.labels
   machine_image         = local.controller_var.machine_image
   machine_type          = local.controller_var.machine_type
@@ -293,7 +289,6 @@ module "login_instance_template" {
 
   disk_size_gb          = local.login_var.disk_size_gb
   disk_type             = local.login_var.disk_type
-  guest_accelerator     = null
   labels                = var.labels
   machine_image         = local.login_var.machine_image
   machine_type          = local.login_var.machine_type

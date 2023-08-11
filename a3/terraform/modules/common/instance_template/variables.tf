@@ -34,30 +34,6 @@ variable "disk_type" {
   type        = string
 }
 
-variable "guest_accelerator" {
-  description = <<-EOT
-    List of the type and count of accelerator cards attached to each instance. This must be `null` when `machine_type` is of an [accelerator-optimized machine family](https://cloud.google.com/compute/docs/accelerator-optimized-machines) such as A2 or G2.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#guest_accelerator), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--accelerator).
-
-    ------------
-    `guest_accelerator.count`
-
-    The number of the guest accelerator cards exposed to each instance.
-
-    ------------
-    `guest_accelerator.type`
-
-    The accelerator type resource to expose to each instance.
-
-    [Possible values](https://cloud.google.com/compute/docs/gpus#nvidia_gpus_for_compute_workloads): `["nvidia-tesla-k80", "nvidia-tesla-p100", "nvidia-tesla-p4", "nvidia-tesla-t4", "nvidia-tesla-v100"]`
-    EOT
-  type = object({
-    count = number
-    type  = string
-  })
-}
-
 variable "machine_image" {
   description = <<-EOT
     The image with which this disk will initialize.

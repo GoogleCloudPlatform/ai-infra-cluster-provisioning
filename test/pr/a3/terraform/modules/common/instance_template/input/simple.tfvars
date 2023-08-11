@@ -3,11 +3,7 @@ zone        = "us-central1-a"
 
 disk_size_gb = 50
 disk_type    = "pd-standard"
-guest_accelerator = {
-  type  = "nvidia-tesla-v100"
-  count = 1
-}
-labels = {}
+labels       = {}
 machine_image = {
   project = "ubuntu-os-cloud"
   family  = "ubuntu-2204-lts"

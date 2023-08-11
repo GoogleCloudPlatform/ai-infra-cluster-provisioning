@@ -10,8 +10,8 @@ variable "gcsfuse_existing" {}
 variable "labels" {}
 variable "machine_type" {}
 
-module "mig-with-container" {
-  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-with-container"
+module "mig-cos" {
+  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-cos"
 
   project_id      = var.project_id
   resource_prefix = var.resource_prefix

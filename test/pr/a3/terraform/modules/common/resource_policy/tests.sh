@@ -12,11 +12,11 @@ resource_policy::output_dir () {
     echo "${PWD}/test/pr/a3/terraform/modules/common/resource_policy/output"
 }
 
-test::terraform::resource_policy () {
+test::terraform::a3::resource_policy () {
     EXPECT_SUCCEED helpers::terraform_init "$(resource_policy::src_dir)"
 }
 
-test::terraform::resource_policy::simple_create_resource () {
+test::terraform::a3::resource_policy::simple_create_resource () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(resource_policy::input_dir)/simple.tfvars" mig >"${tfvars}"
 

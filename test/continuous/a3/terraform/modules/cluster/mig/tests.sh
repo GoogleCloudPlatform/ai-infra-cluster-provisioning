@@ -8,11 +8,11 @@ mig::input_dir () {
     echo "${PWD}/test/continuous/a3/terraform/modules/cluster/mig/input"
 }
 
-test::terraform::mig () {
+test::terraform::a3::mig () {
     helpers::terraform_init "$(mig::src_dir)"
 }
 
-test::terraform::mig::simple () {
+test::terraform::a3::mig::simple () {
     local -r tfvars=$(mktemp)
     local success=true
     helpers::append_tfvars "$(mig::input_dir)/simple.tfvars" mig >"${tfvars}"

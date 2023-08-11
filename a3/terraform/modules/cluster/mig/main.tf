@@ -27,7 +27,7 @@ locals {
       type        = "shell"
       destination = "/tmp/enable_ray.sh"
       source      = "${path.module}/../../../../../scripts/enable_ray.sh"
-      args        = "1.12.1 26379 ${try(var.guest_accelerator.count, 0)}"
+      args        = "1.12.1 26379 8"
     }] : [],
     var.startup_script != null && var.startup_script != "" ? [{
       type        = "shell"
@@ -110,7 +110,6 @@ module "compute_instance_template" {
 
   disk_size_gb                 = var.disk_size_gb
   disk_type                    = var.disk_type
-  guest_accelerator            = var.guest_accelerator
   machine_image                = var.machine_image
   machine_type                 = var.machine_type
   maintenance_interval         = null

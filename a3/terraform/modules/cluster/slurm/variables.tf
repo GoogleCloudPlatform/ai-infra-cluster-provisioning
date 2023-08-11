@@ -26,7 +26,7 @@ variable "resource_prefix" {
 
 variable "compute_partitions" {
   description = <<-EOT
-    List of partition configurations for the Slurm cluster. Each object in this list describes a separate partition in the cluster. Slurm organizes nodes into node groups and node groups into partitions. To make this simple, each partition will consist of exactly one node group; subsequently, each partition configuration will also configure the underlying node group.
+    List of A3 partition configurations for the Slurm cluster. Each object in this list describes a separate partition in the cluster. Slurm organizes nodes into node groups and node groups into partitions. To make this simple, each partition will consist of exactly one node group; subsequently, each partition configuration will also configure the underlying node group.
 
     Related docs: [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/community/modules/scheduler/schedmd-slurm-gcp-v5-controller#input_partition), [slurm-gcp](https://github.com/SchedMD/slurm-gcp/blob/master/terraform/slurm_cluster/modules/slurm_controller_instance/README_TF.md#input_partitions), [schedmd](https://slurm.schedmd.com/slurm.conf.html#SECTION_PARTITION-CONFIGURATION).
 
@@ -73,25 +73,6 @@ variable "compute_partitions" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#disk_type).
 
     ------------
-    `compute_partitions[*].guest_accelerator`
-
-    List of the type and count of accelerator cards attached to each instance. This must be `null` when `machine_type` is of an [accelerator-optimized machine family](https://cloud.google.com/compute/docs/accelerator-optimized-machines) such as A2 or G2. Defaults to `null`.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#guest_accelerator), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--accelerator).
-
-    ------
-    `compute_partitions[*].guest_accelerator.count`
-
-    The number of the guest accelerator cards exposed to each instance.
-
-    ------
-    `compute_partitions[*].guest_accelerator.type`
-
-    The accelerator type resource to expose to each instance.
-
-    [Possible values](https://cloud.google.com/compute/docs/gpus#nvidia_gpus_for_compute_workloads): `["nvidia-tesla-k80", "nvidia-tesla-p100", "nvidia-tesla-p4", "nvidia-tesla-t4", "nvidia-tesla-v100"]`.
-    
-    ------------
     `compute_partitions[*].machine_image`
 
     The image with which this disk will initialize.
@@ -120,13 +101,6 @@ variable "compute_partitions" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image#project), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--image-project).
 
     ------------
-    `compute_partitions[*].machine_type`
-
-    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource). Defaults to `"a2-highgpu-2g"`.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
-
-    ------------
     `compute_partitions[*].startup_script`
 
     Shell script -- the actual script (not the filename) -- to run at boot. Defaults to `null`.
@@ -144,16 +118,11 @@ variable "compute_partitions" {
 
     disk_size_gb = number
     disk_type    = string
-    guest_accelerator = object({
-      count = number
-      type  = string
-    })
     machine_image = object({
       project = string
       family  = string
       name    = string
     })
-    machine_type        = string
     startup_script      = string
     startup_script_file = string
   }))

@@ -12,11 +12,11 @@ instance_group_manager::output_dir () {
     echo "${PWD}/test/pr/a3/terraform/modules/common/instance_group_manager/output"
 }
 
-test::terraform::instance_group_manager () {
+test::terraform::a3::instance_group_manager () {
     EXPECT_SUCCEED helpers::terraform_init "$(instance_group_manager::src_dir)"
 }
 
-test::terraform::instance_group_manager::simple_create_resource () {
+test::terraform::a3::instance_group_manager::simple_create_resource () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(instance_group_manager::input_dir)/simple.tfvars" mig >"${tfvars}"
 

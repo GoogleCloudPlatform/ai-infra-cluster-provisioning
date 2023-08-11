@@ -19,7 +19,7 @@ locals {
   _gcsfuse_host_mount   = "/tmp/cloud/gcsfuse_mnt"
 
   _startup_scripts_template_variables = {
-    install_gpu = tostring(var.machine_has_gpu && !var.custom_gpu_drivers)
+    install_gpu = var.enable_install_gpu
     script      = var.startup_script != null ? replace(var.startup_script, "\n", "\n    ") : ""
   }
 
@@ -125,13 +125,13 @@ locals {
     )
     docker_device_flags = join(
       " ",
-      var.machine_has_gpu ? [
+      [
         "--volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64",
         "--volume /var/lib/nvidia/bin:/usr/local/nvidia/bin",
         "--device /dev/nvidia-uvm:/dev/nvidia-uvm",
         "--device /dev/nvidiactl:/dev/nvidiactl",
         "$${device_flags}",
-      ] : [""],
+      ],
     )
     requirements = join(
       " ",

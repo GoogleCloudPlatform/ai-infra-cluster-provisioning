@@ -14,10 +14,10 @@
 
 ---
 
-blueprint_name: a3-mig-with-container
+blueprint_name: a3-mig-cos
 
 vars:
-  deployment_name: a3-mig-with-container
+  deployment_name: a3-mig-cos
 
   project_id: my-project-id
   resource_prefix: my-cluster-name
@@ -27,5 +27,5 @@ vars:
 deployment_groups:
 - group: primary
   modules:
-  - id: a3-mig-with-container
-    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-with-container"
+  - id: a3-mig-cos
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-cos"

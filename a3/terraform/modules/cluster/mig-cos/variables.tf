@@ -69,9 +69,9 @@ variable "container" {
   default = null
 }
 
-variable "custom_gpu_drivers" {
+variable "enable_install_gpu" {
   description = <<-EOT
-    Setting this to true will disable the startup script which:
+    Setting this to false will disable a built-in startup script which:
     - installs GPU drivers
     - configures docker auth
     - installs iptable rules
@@ -80,7 +80,7 @@ variable "custom_gpu_drivers" {
     Any installation replacements should be in the startup_script variable
     EOT
   type        = bool
-  default     = false
+  default     = true
   nullable    = false
 }
 
@@ -170,31 +170,6 @@ variable "gcsfuse_existing" {
   default = []
 }
 
-variable "guest_accelerator" {
-  description = <<-EOT
-    List of the type and count of accelerator cards attached to each instance. This must be `null` when `machine_type` is of an [accelerator-optimized machine family](https://cloud.google.com/compute/docs/accelerator-optimized-machines) such as A2 or G2.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#guest_accelerator), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--accelerator).
-
-    ------------
-    `guest_accelerator.count`
-
-    The number of the guest accelerator cards exposed to each instance.
-
-    ------------
-    `guest_accelerator.type`
-
-    The accelerator type resource to expose to each instance.
-
-    [Possible values](https://cloud.google.com/compute/docs/gpus#nvidia_gpus_for_compute_workloads): `["nvidia-tesla-k80", "nvidia-tesla-p100", "nvidia-tesla-p4", "nvidia-tesla-t4", "nvidia-tesla-v100"]`.
-    EOT
-  type = object({
-    count = number
-    type  = string
-  })
-  default = null
-}
-
 variable "labels" {
   description = <<-EOT
     The resource labels (a map of key/value pairs) to be applied to the GPU cluster.
@@ -242,16 +217,6 @@ variable "machine_image" {
     name    = null
     project = "cos-cloud"
   }
-}
-
-variable "machine_type" {
-  description = <<-EOT
-    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource).
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
-    EOT
-  type        = string
-  default     = "a3-highgpu-8g"
 }
 
 variable "maintenance_interval" {

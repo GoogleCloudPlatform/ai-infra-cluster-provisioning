@@ -4,7 +4,7 @@ variable "target_size" {}
 variable "zone" {}
 
 module "a3-mig-cos" {
-  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-with-container"
+  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-cos"
 
   project_id      = var.project_id
   resource_prefix = var.resource_prefix

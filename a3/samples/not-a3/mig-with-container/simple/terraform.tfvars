@@ -1,5 +1,5 @@
 project_id      = "project-id"
-resource_prefix = "mig-with-container"
+resource_prefix = "mig-cos"
 zone            = "us-central1-a"
 target_size     = 1
 

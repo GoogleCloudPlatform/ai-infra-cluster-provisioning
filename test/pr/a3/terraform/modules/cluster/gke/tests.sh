@@ -12,11 +12,11 @@ gke::output_dir () {
     echo "${PWD}/test/pr/a3/terraform/modules/cluster/gke/output"
 }
 
-test::terraform::gke () {
+test::terraform::a3::gke () {
     EXPECT_SUCCEED helpers::terraform_init "$(gke::src_dir)"
 }
 
-test::terraform::gke::gpu_create_modules () {
+test::terraform::a3::gke::gpu_create_modules () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(gke::input_dir)/gke-gpu.tfvars" gke >"${tfvars}"
 

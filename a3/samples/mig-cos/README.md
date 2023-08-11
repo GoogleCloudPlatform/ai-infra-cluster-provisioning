@@ -14,7 +14,7 @@ VM instances. Each instance has:
 
 The `terraform.tfvars` file is what configures the cluster. Detailed
 descriptions of each variable can be found in
-[this `README`](../../../terraform/modules/cluster/mig-with-container/README.md).
+[this `README`](../../../terraform/modules/cluster/mig-cos/README.md).
 All optional variables may be omitted to use their default values.
 
 Required variables:

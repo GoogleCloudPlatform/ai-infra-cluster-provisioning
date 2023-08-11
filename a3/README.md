@@ -19,7 +19,7 @@ An A3 cluster provides the following resources:
 
 A3 clusters may be created through either [GKE](https://cloud.google.com/kubernetes-engine) or a [MIG](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups) via the modules found [here](./terraform/modules/cluster). Due to the recency of A3's release, features are limited in each control plane, and those limitations are listed below.
 
-| Feature \ Module | `gke` | `mig-with-container` |
+| Feature \ Module | `gke` | `mig-cos` |
 | --- | --- | --- |
 | [VM Image](https://cloud.google.com/compute/docs/images) | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) | [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) |
 | [Compact placement policy](https://cloud.google.com/compute/docs/instances/define-instance-placement) | Yes | Yes |
@@ -59,7 +59,7 @@ docker run --rm -v "${PWD}:/root/aiinfra/input" \
 
 A deeper dive into how to use this tool can be found [below](#how-to-provision-a-cluster).
 
-## Quickstart with `mig-with-container`
+## Quickstart with `mig-cos`
 
 An A3 cluster of eight nodes booting with a COS-Cloud image can be created via a managed instance group by running the following two commands:
 
@@ -73,7 +73,7 @@ EOF
 
 docker run --rm -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create mig-with-container
+  create mig-cos
 ```
 
 A deeper dive into how to use this tool can be found [below](#how-to-provision-a-cluster).
@@ -151,7 +151,7 @@ docker run \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create mig-with-container
+  create mig-cos
 
 # destroy the cluster
 docker run \
@@ -159,7 +159,7 @@ docker run \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  destroy mig-with-container
+  destroy mig-cos
 ```
 
 Quick explanation of the `docker run` flags (in same order as above):
@@ -170,7 +170,7 @@ Quick explanation of the `docker run` flags (in same order as above):
   the container so the tool can read the `terraform.tfvars` file.
 - `create/destroy` tells the tool whether it should create or destroy the whole
   cluster.
-- `mig-with-container` tells the tool to create a Managed Instance Group and
+- `mig-cos` tells the tool to create a Managed Instance Group and
   start a container at boot.
 
 ## Integrate into an existing terraform project
@@ -195,8 +195,8 @@ terraform init && terraform validate && terraform apply -destroy
 
 For this method, you need to
 [build ghpc](https://github.com/GoogleCloudPlatform/hpc-toolkit#quickstart).
-The `a3-mig-with-container` deployment group in the `blueprint.yaml` shows how
-to use the `mig-with-container` module in your HPC Toolkit Blueprint. Cluster
+The `a3-mig-cos` deployment group in the `blueprint.yaml` shows how
+to use the `mig-cos` module in your HPC Toolkit Blueprint. Cluster
 provisioning then happens the same as any blueprint:
 
 ```bash
@@ -204,8 +204,8 @@ provisioning then happens the same as any blueprint:
 # the current working directory
 
 # create/update the cluster
-./ghpc create -w ./blueprint.yaml && ./ghpc deploy a3-mig-with-container
+./ghpc create -w ./blueprint.yaml && ./ghpc deploy a3-mig-cos
 
 # destroy the cluster
-./ghpc create -w ./blueprint.yaml && ./ghpc destroy a3-mig-with-container
+./ghpc create -w ./blueprint.yaml && ./ghpc destroy a3-mig-cos
 ```

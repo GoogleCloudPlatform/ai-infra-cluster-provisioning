@@ -3,7 +3,7 @@
 . ./test/runner.sh
 
 . ./test/pr/a3/terraform/modules/cluster/mig/tests.sh
-. ./test/pr/a3/terraform/modules/cluster/mig-with-container/tests.sh
+. ./test/pr/a3/terraform/modules/cluster/mig-cos/tests.sh
 . ./test/pr/a3/terraform/modules/cluster/slurm/tests.sh
 . ./test/pr/a3/terraform/modules/cluster/gke/tests.sh
 . ./test/pr/a3/terraform/modules/common/dashboard/tests.sh

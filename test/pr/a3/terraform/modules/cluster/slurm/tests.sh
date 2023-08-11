@@ -12,11 +12,11 @@ slurm::output_dir () {
     echo "${PWD}/test/pr/a3/terraform/modules/cluster/slurm/output"
 }
 
-test::terraform::slurm () {
+test::terraform::a3::slurm () {
     EXPECT_SUCCEED helpers::terraform_init "$(slurm::src_dir)"
 }
 
-test::terraform::slurm::defaults () {
+test::terraform::a3::slurm::defaults () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" slurm >"${tfvars}"
 
@@ -33,7 +33,7 @@ test::terraform::slurm::defaults () {
         "${tfshow}"
 }
 
-test::terraform::slurm::simple_create_modules () {
+test::terraform::a3::slurm::simple_create_modules () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(slurm::input_dir)/simple.tfvars" slurm >"${tfvars}"
 
@@ -50,7 +50,7 @@ test::terraform::slurm::simple_create_modules () {
         "${tfshow}"
 }
 
-test::terraform::slurm::multiple_partitions () {
+test::terraform::a3::slurm::multiple_partitions () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(slurm::input_dir)/multiple_partitions.tfvars" slurm >"${tfvars}"
 

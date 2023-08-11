@@ -12,11 +12,11 @@ mig::output_dir () {
     echo "${PWD}/test/pr/a3/terraform/modules/cluster/mig/output"
 }
 
-test::terraform::mig () {
+test::terraform::a3::mig () {
     EXPECT_SUCCEED helpers::terraform_init "$(mig::src_dir)"
 }
 
-test::terraform::mig::simple_create_modules () {
+test::terraform::a3::mig::simple_create_modules () {
     local -r tfvars=$(mktemp)
     helpers::append_tfvars "$(mig::input_dir)/simple.tfvars" mig >"${tfvars}"
 

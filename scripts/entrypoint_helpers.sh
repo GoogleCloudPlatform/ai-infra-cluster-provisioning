@@ -41,10 +41,14 @@ Parameters:
                 - destroy: destroys the cluster created on Google Cloud
     cluster     Type of cluster to act on. Options are:
                 - gke: Google Kubernetes Engine -- terraform/modules/cluster/gke
+                - gke-beta: Google Kubernetes Engine with gcloud features not yet
+                  supported by terraform -- terraform/modules/cluster/gke-beta
                 - mig: Managed Instance Group -- terraform/modules/cluster/mig
-                - mig-with-container: MIG with docker container --
-                    terraform/modules/cluster/mig-with-container
-                - slurm: Slurm Workload Manager -- terraform/modules/cluster/slurm
+                - mig-cos: MIG booting with COS-Cloud image and cloudinit
+                  script to install gpu drivers --
+                  terraform/modules/cluster/mig-cos
+                - slurm: Slurm Workload Manager --
+                  terraform/modules/cluster/slurm
     machine_type   
                 Type of machine of which the cluster will be made. Options are:
                 - a2 [docs](https://cloud.google.com/compute/docs/accelerator-optimized-machines#a2-vms)
@@ -53,8 +57,6 @@ Parameters:
     var_file    Terraform variables file. Defaults to:
                 '${PWD}/input/terraform.tfvars'
 EOT
-#                - gke-beta: Google Kubernetes Engine with beta features not yet
-#                    supported by terraform -- terraform/modules/cluster/gke-beta
 }
 
 # Parse the arguments/flags/options of the entrypoint.
@@ -172,7 +174,7 @@ entrypoint_helpers::validate_args () {
         'gke'
         'gke-beta'
         'mig'
-        'mig-with-container'
+        'mig-cos'
         'slurm'
     )
     entrypoint_helpers::expect_contains expected_clusters arg_cluster || valid=false
