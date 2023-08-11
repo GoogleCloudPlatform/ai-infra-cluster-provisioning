@@ -82,7 +82,6 @@
             ],
             "placement_policy": [
               {
-                "policy_name": "ci-gke-policy-0",
                 "tpu_topology": null,
                 "type": "COMPACT"
               }
