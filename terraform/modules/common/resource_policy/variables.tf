@@ -45,13 +45,3 @@ variable "region" {
     EOT
   type        = string
 }
-
-variable "vm_count" {
-  description = <<-EOT
-    Number of VMs in this placement group. Google does not recommend that you use this field unless you use a compact policy and you want your policy to work only if it contains this exact number of VMs..
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#vm_count).
-    EOT
-  type        = number
-  default     = 1
-}

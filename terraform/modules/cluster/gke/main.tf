@@ -64,12 +64,11 @@ module "resource_policy" {
   source = "../../common/resource_policy"
   for_each = {
     for idx, node_pool in var.node_pools : idx => node_pool
-    if node_pool.compact_placement_type != "none"
+    if node_pool.enable_compact_placement
   }
   project_id           = var.project_id
   resource_policy_name = "${var.resource_prefix}-policy-${each.key}"
   region               = var.region
-  vm_count             = each.value.compact_placement_type == "strict" ? each.value.node_count : 1
 }
 
 # Definition of the private GKE cluster.
@@ -242,7 +241,7 @@ resource "google_container_node_pool" "gke-node-pools" {
   }
 
   dynamic "placement_policy" {
-    for_each = each.value.compact_placement_type != "none" ? [1] : []
+    for_each = each.value.enable_compact_placement ? [1] : []
     content {
       type        = "COMPACT"
       policy_name = "${var.resource_prefix}-policy-${each.key}"

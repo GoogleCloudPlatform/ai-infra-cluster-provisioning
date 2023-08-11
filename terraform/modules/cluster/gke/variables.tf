@@ -102,21 +102,20 @@ variable "node_pools" {
     zone: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
     node_count: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
     machine_type: The name of a Google Compute Engine machine type. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
-    compact_placement_type: (Optional)The type of compact placement policy to use for the node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name) [placement policy](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#nested_group_placement_policy)
-                            Possible values: `["none", "strict", "incremental"]`
+    enable_compact_placement: (Optional)Flag to enable compact placement policy to use for the node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
+                              The default value is `false`.
     ```
     EOT
   type = list(object({
-    zone                   = string,
-    node_count             = number,
-    machine_type           = string,
-    compact_placement_type = optional(string, "none")
+    zone                     = string,
+    node_count               = number,
+    machine_type             = string,
+    enable_compact_placement = optional(bool, false)
   }))
+  default = []
   validation {
-    condition = var.node_pools != null && alltrue(
-      [for np in var.node_pools : contains(["none", "strict", "incremental"], np.compact_placement_type)]
-    )
-    error_message = "must have non-empty image"
+    condition     = var.node_pools != null
+    error_message = "Cannot be null."
   }
 }
 

@@ -20,7 +20,7 @@
                     "availability_domain_count": null,
                     "collocation": "COLLOCATED",
                     "max_distance": 2,
-                    "vm_count": 15
+                    "vm_count": null
                   }
                 ]
               }
@@ -56,7 +56,7 @@
         {
           "address": "google_container_node_pool.gke-node-pools[\"0\"]",
           "values": {
-            "node_count": 15,
+            "node_count": 17,
             "node_locations": [
               "us-central1-f"
             ],
