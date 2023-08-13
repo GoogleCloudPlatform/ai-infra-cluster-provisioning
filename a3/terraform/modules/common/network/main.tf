@@ -18,26 +18,26 @@ locals {
   nic0 = {
     network = {
       id = one(concat(
-        data.google_compute_network.nic0_existing[*].id,
-        resource.google_compute_network.nic0_new[*].id,
+        data.google_compute_network.nic0[*].id,
+        resource.google_compute_network.nic0[*].id,
       ))
       name = one(concat(
-        data.google_compute_network.nic0_existing[*].name,
-        resource.google_compute_network.nic0_new[*].name,
+        data.google_compute_network.nic0[*].name,
+        resource.google_compute_network.nic0[*].name,
       ))
       self_link = one(concat(
-        data.google_compute_network.nic0_existing[*].self_link,
-        resource.google_compute_network.nic0_new[*].self_link,
+        data.google_compute_network.nic0[*].self_link,
+        resource.google_compute_network.nic0[*].self_link,
       ))
     }
     subnetwork = {
       name = one(concat(
-        data.google_compute_subnetwork.nic0_existing[*].name,
-        resource.google_compute_subnetwork.nic0_new[*].name,
+        data.google_compute_subnetwork.nic0[*].name,
+        resource.google_compute_subnetwork.nic0[*].name,
       ))
       self_link = one(concat(
-        data.google_compute_subnetwork.nic0_existing[*].self_link,
-        resource.google_compute_subnetwork.nic0_new[*].self_link,
+        data.google_compute_subnetwork.nic0[*].self_link,
+        resource.google_compute_subnetwork.nic0[*].self_link,
       ))
     }
   }
@@ -45,14 +45,14 @@ locals {
 
 // CPU NIC
 
-data "google_compute_network" "nic0_existing" {
+data "google_compute_network" "nic0" {
   count = var.nic0_existing != null ? 1 : 0
 
   name    = var.nic0_existing.network_name
   project = var.project_id
 }
 
-data "google_compute_subnetwork" "nic0_existing" {
+data "google_compute_subnetwork" "nic0" {
   count = var.nic0_existing != null ? 1 : 0
 
   name    = var.nic0_existing.subnetwork_name
@@ -60,7 +60,7 @@ data "google_compute_subnetwork" "nic0_existing" {
   region  = var.region
 }
 
-resource "google_compute_network" "nic0_new" {
+resource "google_compute_network" "nic0" {
   count = var.nic0_existing != null ? 0 : 1
 
   auto_create_subnetworks = false
@@ -69,12 +69,12 @@ resource "google_compute_network" "nic0_new" {
   project                 = var.project_id
 }
 
-resource "google_compute_subnetwork" "nic0_new" {
+resource "google_compute_subnetwork" "nic0" {
   count = var.nic0_existing != null ? 0 : 1
 
   ip_cidr_range = "10.0.0.0/19"
   name          = var.resource_prefix
-  network       = google_compute_network.nic0_new[0].self_link
+  network       = google_compute_network.nic0[0].self_link
   project       = var.project_id
   region        = var.region
 }
@@ -85,7 +85,7 @@ resource "google_compute_firewall" "internal-ingress" {
   description   = "internal ingress traffic (icmp/tcp/udp) to machine on nic0"
   direction     = "INGRESS"
   name          = "${var.resource_prefix}-internal-ingress"
-  network       = google_compute_network.nic0_new[0].self_link
+  network       = google_compute_network.nic0[0].self_link
   project       = var.project_id
   source_ranges = ["10.0.0.0/8"]
 
@@ -108,7 +108,7 @@ resource "google_compute_firewall" "external-ingress" {
   description   = "external ingress traffic (icmp) to machine on nic0"
   direction     = "INGRESS"
   name          = "${var.resource_prefix}-external-ingress"
-  network       = google_compute_network.nic0_new[0].self_link
+  network       = google_compute_network.nic0[0].self_link
   project       = var.project_id
   source_ranges = ["0.0.0.0/0"]
 
@@ -123,7 +123,7 @@ resource "google_compute_firewall" "iap-ssh" {
   description   = "identity-aware proxy ssh traffic to machine on nic0"
   direction     = "INGRESS"
   name          = "${var.resource_prefix}-iap-ssh"
-  network       = google_compute_network.nic0_new[0].self_link
+  network       = google_compute_network.nic0[0].self_link
   project       = var.project_id
   source_ranges = ["35.235.240.0/20"]
 
@@ -154,12 +154,12 @@ resource "google_compute_subnetwork" "gpus" {
   region        = var.region
 }
 
-resource "google_compute_firewall" "allow-internal-gpus" {
+resource "google_compute_firewall" "internal-ingress-gpus" {
   count = 4
 
   description   = "allow internal ingress traffic to gpus on nic${count.index + 1}"
   direction     = "INGRESS"
-  name          = "${var.resource_prefix}-gpu-${count.index}"
+  name          = "${var.resource_prefix}-internal-ingress-gpu-${count.index}"
   network       = resource.google_compute_network.gpus[count.index].self_link
   project       = var.project_id
   source_ranges = ["10.0.0.0/8"]

@@ -35,16 +35,16 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [google_compute_firewall.allow-internal-gpus](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.external-ingress](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.iap-ssh](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.internal-ingress](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.internal-ingress-gpus](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_network.gpus](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network) | resource |
-| [google_compute_network.nic0_new](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network) | resource |
+| [google_compute_network.nic0](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network) | resource |
 | [google_compute_subnetwork.gpus](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork) | resource |
-| [google_compute_subnetwork.nic0_new](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork) | resource |
-| [google_compute_network.nic0_existing](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) | data source |
-| [google_compute_subnetwork.nic0_existing](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
+| [google_compute_subnetwork.nic0](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork) | resource |
+| [google_compute_network.nic0](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) | data source |
+| [google_compute_subnetwork.nic0](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 
 ## Inputs
 
