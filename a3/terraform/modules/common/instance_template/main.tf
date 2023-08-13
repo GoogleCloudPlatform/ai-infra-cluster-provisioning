@@ -72,58 +72,61 @@ data "google_compute_image" "image" {
 }
 
 module "resource_policy" {
-  source               = "../resource_policy"
-  count                = var.use_compact_placement_policy ? 1 : 0
+  source = "../resource_policy"
+  count  = var.use_compact_placement_policy ? 1 : 0
+
   project_id           = var.project_id
-  resource_policy_name = "${var.resource_prefix}-placement-policy"
   region               = var.region
+  resource_policy_name = var.resource_prefix
 }
 
 resource "google_compute_instance_template" "template" {
   provider = google-beta
 
-  project           = var.project_id
-  region            = var.region
-  labels            = var.labels
-  name              = var.use_static_naming ? var.resource_prefix : null
-  name_prefix       = var.use_static_naming ? null : var.resource_prefix
-  machine_type      = var.machine_type
-  metadata          = local.metadata
-  resource_policies = var.use_compact_placement_policy ? [module.resource_policy[0].resource_self_link] : []
+  labels       = var.labels
+  machine_type = var.machine_type
+  metadata     = local.metadata
+  name         = var.use_static_naming ? var.resource_prefix : null
+  name_prefix  = var.use_static_naming ? null : var.resource_prefix
+  project      = var.project_id
+  region       = var.region
+  resource_policies = var.use_compact_placement_policy ? [
+    module.resource_policy[0].resource_self_link
+  ] : []
 
   disk {
+    auto_delete  = true
     boot         = true
-    source_image = data.google_compute_image.image.self_link
     disk_size_gb = var.disk_size_gb
     disk_type    = var.disk_type
-    auto_delete  = true
+    source_image = data.google_compute_image.image.self_link
   }
 
   dynamic "network_interface" {
     for_each = toset(range(length(var.subnetwork_self_links)))
     content {
       network            = var.network_self_links[network_interface.value]
+      nic_type           = local.nic_type
       subnetwork         = var.subnetwork_self_links[network_interface.value]
       subnetwork_project = var.project_id
-      nic_type           = local.nic_type
 
       dynamic "access_config" {
         for_each = network_interface.value == 0 ? [1] : []
         content {
           nat_ip                 = null
-          public_ptr_domain_name = null
           network_tier           = null
+          public_ptr_domain_name = null
         }
       }
     }
   }
 
   scheduling {
-    on_host_maintenance  = "TERMINATE"
     automatic_restart    = true
+    maintenance_interval = var.maintenance_interval
+    on_host_maintenance  = "TERMINATE"
     preemptible          = false
     provisioning_model   = null
-    maintenance_interval = var.maintenance_interval
   }
 
   service_account {

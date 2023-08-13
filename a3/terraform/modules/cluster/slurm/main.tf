@@ -248,7 +248,7 @@ module "compute_instance_templates" {
   metadata              = null
   project_id            = var.project_id
   region                = local.compute_partitions[each.key].region
-  resource_prefix       = "${var.resource_prefix}-${each.key}"
+  resource_prefix       = "${var.resource_prefix}-compute-${each.key}"
   use_static_naming     = true
   service_account       = var.service_account
   startup_script        = module.compute_startups[each.key].startup_script
