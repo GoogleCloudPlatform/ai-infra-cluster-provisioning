@@ -15,22 +15,41 @@
 # limitations under the License.
 
 gke_cluster::create () {
-    gcloud container clusters describe ${cluster_name} --region ${region} \
-    || { gcloud beta container clusters create ${cluster_name} --region ${region} \
-      --project ${project_id} \
-      --cluster-version ${version} \
-      --enable-ip-alias \
-      --enable-multi-networking \
-      --enable-dataplane-v2 \
-      --workload-pool=${project_id}.svc.id.goog \
-      --num-nodes 1 \
-      && gcloud container node-pools delete default-pool --cluster ${cluster_name} --region ${region} --quiet
-    }
+    ! gcloud container clusters describe "${cluster_name}" \
+        --project="${project_id}" \
+        --region="${region}" || {
+        echo "cluster '${cluster_name}' already exists"
+        return 1
+    } >&2
+
+    gcloud beta container clusters create "${cluster_name}" \
+        --cluster-version="${version}" \
+        --enable-ip-alias \
+        --enable-dataplane-v2 \
+        --enable-multi-networking \
+        --num-nodes='1' \
+        --project="${project_id}" \
+        --region="${region}" \
+        --workload-pool="${project_id}.svc.id.goog" \
+    && gcloud container node-pools delete 'default-pool' \
+        --cluster="${cluster_name}" \
+        --project="${project_id}" \
+        --quiet \
+        --region="${region}"
 }
 
 gke_cluster::destroy () {
-    gcloud container clusters describe ${cluster_name} --region ${region} \
-    && gcloud container clusters delete ${cluster_name} --region ${region} --project ${project_id} --quiet
+    gcloud container clusters describe "${cluster_name}" \
+        --project="${project_id}" \
+        --region="${region}" || {
+        echo "cluster '${cluster_name}' not found"
+        return 0
+    } >&2
+
+    gcloud container clusters delete "${cluster_name}" \
+        --project="${project_id}" \
+        --quiet \
+        --region="${region}"
 }
 
 main () {
@@ -42,22 +61,18 @@ main () {
 
     case "${action}" in
         'create')
-            {
-                gke_cluster::create \
-                && echo "Successfully created GKE Cluster ${cluster_name}...." >&2
-            } || {
-                echo "Failed to create GKE cluster ${cluster_name}...." >&2
+            gke_cluster::create || {
+                echo "Failed to create GKE cluster ${cluster_name}."
                 return 1
-            }
+            } >&2
+            echo "Successfully created GKE Cluster ${cluster_name}." >&2
             ;;
         'destroy')
-            {
-                gke_cluster::destroy \
-                && echo "Successfully destroyed GKE Cluster ${cluster_name}...." >&2
-            } || {
-                echo "Failed to destroy GKE cluster ${cluster_name}...." >&2
+            gke_cluster::destroy || {
+                echo "Failed to destroy GKE cluster ${cluster_name}."
                 return 1
-            }
+            } >&2
+            echo "Successfully destroyed GKE Cluster ${cluster_name}." >&2
             ;;
     esac
 }

@@ -54,14 +54,14 @@ module "resource_policy" {
     for idx, node_pool in var.node_pools : idx => node_pool
   }
   project_id           = var.project_id
-  resource_policy_name = "${var.resource_prefix}-policy-${each.key}"
+  resource_policy_name = "${var.resource_prefix}-${each.key}"
   region               = var.region
 }
 
 resource "null_resource" "gke-cluster-command" {
   triggers = {
     project_id   = var.project_id
-    cluster_name = "${var.resource_prefix}-gke"
+    cluster_name = var.resource_prefix
     region       = var.region
     gke_version  = local.gke_master_version
     gke_endpoint = local.gke_endpoint_value
@@ -110,15 +110,14 @@ resource "null_resource" "gke-node-pool-command" {
   triggers = {
     project_id      = var.project_id
     prefix          = var.resource_prefix
-    cluster_name    = "${var.resource_prefix}-gke"
+    cluster_name    = var.resource_prefix
     node_pool_name  = "nodepool-${each.key}"
     zone            = each.value.zone
     region          = var.region
-    machine_type    = each.value.machine_type
     node_count      = each.value.node_count
     disk_type       = var.disk_type
     disk_size       = var.disk_size_gb
-    resource_policy = "${var.resource_prefix}-policy-${each.key}"
+    resource_policy = "${var.resource_prefix}-${each.key}"
     gke_endpoint    = local.gke_endpoint_value
   }
 
@@ -132,7 +131,6 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.node_pool_name} \
       ${self.triggers.zone} \
       ${self.triggers.region} \
-      ${self.triggers.machine_type} \
       ${self.triggers.node_count} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
@@ -155,7 +153,6 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.node_pool_name} \
       ${self.triggers.zone} \
       ${self.triggers.region} \
-      ${self.triggers.machine_type} \
       ${self.triggers.node_count} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \

@@ -15,29 +15,48 @@
 # limitations under the License.
 
 gke_node_pool::create () {
-    gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-    || { gcloud beta container node-pools create ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-      --project ${project_id} \
-      --node-locations ${zone} \
-      --machine-type ${machine_type} \
-      --num-nodes ${node_count} \
-      --disk-type ${disk_type} \
-      --disk-size ${disk_size} \
-      --workload-metadata=GKE_METADATA \
-      --additional-node-network network=${prefix}-net-1,subnetwork=${prefix}-sub-1 \
-      --additional-node-network network=${prefix}-net-2,subnetwork=${prefix}-sub-2 \
-      --additional-node-network network=${prefix}-net-3,subnetwork=${prefix}-sub-3 \
-      --additional-node-network network=${prefix}-net-4,subnetwork=${prefix}-sub-4 \
-      --enable-gvnic \
-      --placement-policy ${resource_policy} \
-      --scopes "https://www.googleapis.com/auth/cloud-platform" \
-      --host-maintenance-interval PERIODIC
-    }
+    ! gcloud container node-pools describe "${node_pool_name}" \
+        --cluster="${cluster_name}" \
+        --project="${project_id}" \
+        --region="${region}" || {
+        echo "node-pool '${node_pool_name}' already exists in cluster '${cluster_name}'"
+        return 1
+    } >&2
+
+    gcloud beta container node-pools create "${node_pool_name}" \
+        --cluster="${cluster_name}" \
+        --region="${region}" \
+        --additional-node-network="network=${prefix}-gpu-0,subnetwork=${prefix}-gpu-0" \
+        --additional-node-network="network=${prefix}-gpu-1,subnetwork=${prefix}-gpu-1" \
+        --additional-node-network="network=${prefix}-gpu-2,subnetwork=${prefix}-gpu-2" \
+        --additional-node-network="network=${prefix}-gpu-3,subnetwork=${prefix}-gpu-3" \
+        --disk-type="${disk_type}" \
+        --disk-size="${disk_size}" \
+        --enable-gvnic \
+        --host-maintenance-interval='PERIODIC' \
+        --machine-type='a3-highgpu-8g' \
+        --node-locations="${zone}" \
+        --num-nodes="${node_count}" \
+        --placement-policy ${resource_policy} \
+        --project="${project_id}" \
+        --scopes "https://www.googleapis.com/auth/cloud-platform" \
+        --workload-metadata='GKE_METADATA'
 }
 
 gke_node_pool::destroy () {
-    gcloud container node-pools describe ${node_pool_name} --cluster ${cluster_name} --region ${region} \
-    && gcloud container node-pools delete ${node_pool_name} --cluster ${cluster_name} --region ${region} --quiet
+    gcloud container node-pools describe "${node_pool_name}" \
+        --cluster="${cluster_name}" \
+        --project="${project_id}" \
+        --region="${region}" || {
+        echo "node-pool '${node_pool_name}' not found in cluster '${cluster_name}'"
+        return 0
+    } >&2
+
+    gcloud container node-pools delete "${node_pool_name}" \
+        --cluster="${cluster_name}" \
+        --project="${project_id}" \
+        --quiet \
+        --region="${region}"
 }
 
 main () {
@@ -47,31 +66,26 @@ main () {
     local -r node_pool_name="${4:?}"
     local -r zone="${5:?}"
     local -r region="${6:?}"
-    local -r machine_type="${7:?}"
-    local -r node_count="${8:?}"
-    local -r disk_type="${9:?}"
-    local -r disk_size="${10:?}"
-    local -r prefix="${11:?}"
-    local -r resource_policy="${12:?}"
+    local -r node_count="${7:?}"
+    local -r disk_type="${8:?}"
+    local -r disk_size="${9:?}"
+    local -r prefix="${10:?}"
+    local -r resource_policy="${11:?}"
 
     case "${action}" in
         'create')
-            {
-                gke_node_pool::create \
-                && echo "Successfully created GKE node pool ${node_pool_name}...." >&2
-            } || {
-                echo "Failed to create GKE node pool ${node_pool_name}...." >&2
+            gke_node_pool::create || {
+                echo "Failed to create GKE node pool ${node_pool_name}."
                 return 1
-            }
+            } >&2
+            echo "Successfully created GKE node pool ${node_pool_name}." >&2
             ;;
         'destroy')
-            {
-                gke_node_pool::destroy \
-                && echo "Successfully destroyed GKE node pool ${node_pool_name}...." >&2
-            } || {
-                echo "Failed to destroy GKE node pool ${node_pool_name}...." >&2
+            gke_node_pool::destroy || {
+                echo "Failed to destroy GKE node pool ${node_pool_name}."
                 return 1
-            }
+            } >&2
+            echo "Successfully destroyed GKE node pool ${node_pool_name}." >&2
             ;;
     esac
 }
