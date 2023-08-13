@@ -1,0 +1,49 @@
+{
+  "output_changes": {
+    "network_ids": {
+      "after": [
+        "projects/borisko-test/global/networks/default",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "network_names": {
+      "after": [
+        "default",
+        "ci-null-gpu-0",
+        "ci-null-gpu-1",
+        "ci-null-gpu-2",
+        "ci-null-gpu-3"
+      ]
+    },
+    "network_self_links": {
+      "after": [
+        "https://www.googleapis.com/compute/v1/projects/borisko-test/global/networks/default",
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "subnetwork_names": {
+      "after": [
+        "default",
+        "ci-null-gpu-0",
+        "ci-null-gpu-1",
+        "ci-null-gpu-2",
+        "ci-null-gpu-3"
+      ]
+    },
+    "subnetwork_self_links": {
+      "after": [
+        "https://www.googleapis.com/compute/v1/projects/borisko-test/regions/us-central1/subnetworks/default",
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  }
+}

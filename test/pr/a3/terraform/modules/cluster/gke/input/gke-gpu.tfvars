@@ -1,5 +1,8 @@
-region         = "us-central1"
-network_config = "default_multi_nic"
+region = "us-central1"
+network_existing = {
+  network_name    = "default"
+  subnetwork_name = "default"
+}
 node_pools = [{
   zone         = "us-central1-f"
   node_count   = 1

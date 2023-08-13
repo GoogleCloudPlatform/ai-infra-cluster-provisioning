@@ -15,48 +15,80 @@
 */
 
 locals {
-  vpc_count_map = {
-    "default"           = 0
-    "new_multi_nic"     = 5
-    "default_multi_nic" = 4
-    "new_single_nic"    = 1
+  nic0 = {
+    network = {
+      id = one(concat(
+        data.google_compute_network.nic0_existing[*].id,
+        resource.google_compute_network.nic0_new[*].id,
+      ))
+      name = one(concat(
+        data.google_compute_network.nic0_existing[*].name,
+        resource.google_compute_network.nic0_new[*].name,
+      ))
+      self_link = one(concat(
+        data.google_compute_network.nic0_existing[*].self_link,
+        resource.google_compute_network.nic0_new[*].self_link,
+      ))
+    }
+    subnetwork = {
+      name = one(concat(
+        data.google_compute_subnetwork.nic0_existing[*].name,
+        resource.google_compute_subnetwork.nic0_new[*].name,
+      ))
+      self_link = one(concat(
+        data.google_compute_subnetwork.nic0_existing[*].self_link,
+        resource.google_compute_subnetwork.nic0_new[*].self_link,
+      ))
+    }
   }
-  vpc_count = lookup(local.vpc_count_map, var.network_config, 0)
 }
 
-module "default_vpc" {
-  source = "github.com/GoogleCloudPlatform/hpc-toolkit//modules/network/pre-existing-vpc//?ref=v1.17.0"
-  count  = var.network_config == "default" || var.network_config == "default_multi_nic" ? 1 : 0
+// CPU NIC
 
-  project_id = var.project_id
-  region     = var.region
+data "google_compute_network" "nic0_existing" {
+  count = var.nic0_existing != null ? 1 : 0
+
+  name    = var.nic0_existing.network_name
+  project = var.project_id
 }
 
-resource "google_compute_network" "networks" {
-  count                   = local.vpc_count
-  name                    = "${var.resource_prefix}-net-${count.index}"
-  project                 = var.project_id
+data "google_compute_subnetwork" "nic0_existing" {
+  count = var.nic0_existing != null ? 1 : 0
+
+  name    = var.nic0_existing.subnetwork_name
+  project = var.project_id
+  region  = var.region
+}
+
+resource "google_compute_network" "nic0_new" {
+  count = var.nic0_existing != null ? 0 : 1
+
   auto_create_subnetworks = false
   mtu                     = 8228
+  name                    = var.resource_prefix
+  project                 = var.project_id
 }
 
-resource "google_compute_subnetwork" "subnets" {
-  count         = local.vpc_count
-  name          = "${var.resource_prefix}-sub-${count.index}"
+resource "google_compute_subnetwork" "nic0_new" {
+  count = var.nic0_existing != null ? 0 : 1
+
+  ip_cidr_range = "10.0.0.0/19"
+  name          = var.resource_prefix
+  network       = google_compute_network.nic0_new[0].self_link
   project       = var.project_id
-  ip_cidr_range = "10.${count.index}.0.0/19"
   region        = var.region
-  network       = google_compute_network.networks[count.index].self_link
 }
 
-resource "google_compute_firewall" "firewall-allow-tcp-udp-icmp" {
-  count         = local.vpc_count
-  name          = "${var.resource_prefix}-internal-${count.index}"
-  project       = var.project_id
-  description   = "allow traffic between nodes of this VPC"
+resource "google_compute_firewall" "internal-ingress" {
+  count = var.nic0_existing != null ? 0 : 1
+
+  description   = "internal ingress traffic (icmp/tcp/udp) to machine on nic0"
   direction     = "INGRESS"
-  network       = google_compute_network.networks[count.index].self_link
+  name          = "${var.resource_prefix}-internal-ingress"
+  network       = google_compute_network.nic0_new[0].self_link
+  project       = var.project_id
   source_ranges = ["10.0.0.0/8"]
+
   allow {
     protocol = "icmp"
   }
@@ -70,30 +102,77 @@ resource "google_compute_firewall" "firewall-allow-tcp-udp-icmp" {
   }
 }
 
-// Assumes that an external IP is only created for vNIC 0
-resource "google_compute_firewall" "firewall-allow-icmp" {
-  count         = local.vpc_count > 0 ? 1 : 0
-  name          = "${var.resource_prefix}-allow-ping-net-0"
-  project       = var.project_id
-  description   = "allow icmp ping access"
+resource "google_compute_firewall" "external-ingress" {
+  count = var.nic0_existing != null ? 0 : 1
+
+  description   = "external ingress traffic (icmp) to machine on nic0"
   direction     = "INGRESS"
-  network       = google_compute_network.networks[0].self_link
+  name          = "${var.resource_prefix}-external-ingress"
+  network       = google_compute_network.nic0_new[0].self_link
+  project       = var.project_id
   source_ranges = ["0.0.0.0/0"]
+
   allow {
     protocol = "icmp"
   }
 }
 
-resource "google_compute_firewall" "firewall-allow-iap-ssh" {
-  count       = local.vpc_count > 0 ? 1 : 0
-  name        = "${var.resource_prefix}-allow-iap-ssh-net-0"
-  project     = var.project_id
-  description = "allow SSH access via Identity-Aware Proxy"
-  direction   = "INGRESS"
-  network     = google_compute_network.networks[0].self_link
+resource "google_compute_firewall" "iap-ssh" {
+  count = var.nic0_existing != null ? 0 : 1
+
+  description   = "identity-aware proxy ssh traffic to machine on nic0"
+  direction     = "INGRESS"
+  name          = "${var.resource_prefix}-iap-ssh"
+  network       = google_compute_network.nic0_new[0].self_link
+  project       = var.project_id
+  source_ranges = ["35.235.240.0/20"]
+
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
-  source_ranges = ["35.235.240.0/20"]
+}
+
+// GPU NICs
+
+resource "google_compute_network" "gpus" {
+  count = 4
+
+  auto_create_subnetworks = false
+  mtu                     = 8228
+  name                    = "${var.resource_prefix}-gpu-${count.index}"
+  project                 = var.project_id
+}
+
+resource "google_compute_subnetwork" "gpus" {
+  count = 4
+
+  ip_cidr_range = "10.${count.index + 1}.0.0/19"
+  name          = "${var.resource_prefix}-gpu-${count.index}"
+  network       = google_compute_network.gpus[count.index].self_link
+  project       = var.project_id
+  region        = var.region
+}
+
+resource "google_compute_firewall" "allow-internal-gpus" {
+  count = 4
+
+  description   = "allow internal ingress traffic to gpus on nic${count.index + 1}"
+  direction     = "INGRESS"
+  name          = "${var.resource_prefix}-gpu-${count.index}"
+  network       = resource.google_compute_network.gpus[count.index].self_link
+  project       = var.project_id
+  source_ranges = ["10.0.0.0/8"]
+
+  allow {
+    protocol = "icmp"
+  }
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
 }

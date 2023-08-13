@@ -42,7 +42,7 @@ data "google_container_engine_versions" "gkeversion" {
 module "network" {
   source = "../../common/network"
 
-  network_config  = "new_multi_nic"
+  nic0_existing   = null
   project_id      = var.project_id
   region          = var.region
   resource_prefix = var.resource_prefix

@@ -16,9 +16,9 @@ test::terraform::a3::network () {
     EXPECT_SUCCEED helpers::terraform_init "$(network::src_dir)"
 }
 
-test::terraform::a3::network::default_network_produces_subnet () {
+test::terraform::a3::network::existing_network () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(network::input_dir)/default.tfvars" mig >"${tfvars}"
+    helpers::append_tfvars "$(network::input_dir)/existing_network.tfvars" null >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
@@ -28,17 +28,15 @@ test::terraform::a3::network::default_network_produces_subnet () {
 
     local -r tfshow=$(mktemp)
     helpers::terraform_show "$(network::src_dir)" "${tfplan}" >"${tfshow}"
-    EXPECT_STREQ \
-        "$(helpers::plan_output "${tfshow}" 'network_id')" \
-        "projects/${runner_arg_project_id}/global/networks/default"
-    EXPECT_STREQ \
-        "$(helpers::plan_output "${tfshow}" 'subnetwork_self_links')" \
-        "[\"https://www.googleapis.com/compute/v1/projects/${runner_arg_project_id}/regions/us-central1/subnetworks/default\"]"
+
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(network::output_dir)/existing_network.json" \
+        "${tfshow}"
 }
 
-test::terraform::a3::network::new_network_plans_single_new_vpc () {
+test::terraform::a3::network::new_network () {
     local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(network::input_dir)/new_single_nic.tfvars" mig >"${tfvars}"
+    helpers::append_tfvars "$(network::input_dir)/new_network.tfvars" null >"${tfvars}"
 
     local -r tfplan=$(mktemp)
     EXPECT_SUCCEED helpers::terraform_plan \
@@ -48,56 +46,8 @@ test::terraform::a3::network::new_network_plans_single_new_vpc () {
 
     local -r tfshow=$(mktemp)
     helpers::terraform_show "$(network::src_dir)" "${tfplan}" >"${tfshow}"
+
     EXPECT_SUCCEED helpers::json_contains \
-        "$(network::output_dir)/new_single_nic.json" \
+        "$(network::output_dir)/new_network.json" \
         "${tfshow}"
-    EXPECT_STREQ \
-        "$(helpers::plan_output "${tfshow}" 'network_id')" \
-        'null'
-    EXPECT_STREQ \
-        "$(helpers::plan_output "${tfshow}" 'subnetwork_self_links')" \
-        'null'
-}
-
-test::terraform::a3::network::multi_nic_network_plans_multiple_new_vpcs () {
-    local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(network::input_dir)/new_multi_nic.tfvars" mig >"${tfvars}"
-
-    local -r tfplan=$(mktemp)
-    EXPECT_SUCCEED helpers::terraform_plan \
-        "$(network::src_dir)" \
-        "${tfvars}" \
-        "${tfplan}"
-
-    local -r tfshow=$(mktemp)
-    helpers::terraform_show "$(network::src_dir)" "${tfplan}" >"${tfshow}"
-    EXPECT_SUCCEED helpers::json_contains \
-        "$(network::output_dir)/new_multi_nic.json" \
-        "${tfshow}"
-    EXPECT_STREQ \
-        "$(helpers::plan_output "${tfshow}" 'network_id')" \
-        'null'
-    EXPECT_STREQ \
-        "$(helpers::plan_output "${tfshow}" 'subnetwork_self_links')" \
-        'null'
-}
-
-test::terraform::a3::network::default_multi_nic_network_plans_multiple_new_vpcs () {
-    local -r tfvars=$(mktemp)
-    helpers::append_tfvars "$(network::input_dir)/default_multi_nic.tfvars" mig >"${tfvars}"
-
-    local -r tfplan=$(mktemp)
-    EXPECT_SUCCEED helpers::terraform_plan \
-        "$(network::src_dir)" \
-        "${tfvars}" \
-        "${tfplan}"
-
-    local -r tfshow=$(mktemp)
-    helpers::terraform_show "$(network::src_dir)" "${tfplan}" >"${tfshow}"
-    EXPECT_SUCCEED helpers::json_contains \
-        "$(network::output_dir)/default_multi_nic.json" \
-        "${tfshow}"
-    EXPECT_STREQ \
-        "$(helpers::plan_output "${tfshow}" 'network_id')" \
-        "projects/${runner_arg_project_id}/global/networks/default"
 }

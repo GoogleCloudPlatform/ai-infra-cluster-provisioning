@@ -14,42 +14,42 @@
  * limitations under the License.
  */
 
-output "network_id" {
-  description = "ID of the network"
-  value = flatten([
-    module.default_vpc[*].network_id,
-    resource.google_compute_network.networks[*].id,
-  ])[0]
+output "network_ids" {
+  description = "Network ids of all the VPCs"
+  value = concat(
+    [local.nic0.network.id],
+    resource.google_compute_network.gpus[*].id,
+  )
 }
 
 output "network_self_links" {
   description = "Network self-links of all the VPCs"
-  value = flatten([
-    module.default_vpc[*].network_self_link,
-    resource.google_compute_network.networks[*].self_link,
-  ])
+  value = concat(
+    [local.nic0.network.self_link],
+    resource.google_compute_network.gpus[*].self_link,
+  )
 }
 
 output "network_names" {
   description = "Network names of all the VPCs"
-  value = flatten([
-    module.default_vpc[*].network_name,
-    resource.google_compute_network.networks[*].name,
-  ])
+  value = concat(
+    [local.nic0.network.name],
+    resource.google_compute_network.gpus[*].name,
+  )
 }
 
 output "subnetwork_self_links" {
   description = "Subnet self-links of all the VPCs"
-  value = flatten([
-    module.default_vpc[*].subnetwork_self_link,
-    resource.google_compute_subnetwork.subnets[*].self_link,
-  ])
+  value = concat(
+    [local.nic0.subnetwork.self_link],
+    resource.google_compute_subnetwork.gpus[*].self_link,
+  )
 }
 
 output "subnetwork_names" {
   description = "Subnet names of all the VPCs"
-  value = flatten([
-    module.default_vpc[*].subnetwork_name,
-    resource.google_compute_subnetwork.subnets[*].name,
-  ])
+  value = concat(
+    [local.nic0.subnetwork.name],
+    resource.google_compute_subnetwork.gpus[*].name,
+  )
 }

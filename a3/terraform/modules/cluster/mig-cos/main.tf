@@ -17,12 +17,6 @@
 locals {
   region = join("-", slice(split("-", var.zone), 0, 2))
 
-  machine_image = {
-    project = var.machine_image.project
-    family  = var.machine_image.family
-    name    = var.machine_image.name
-  }
-
   metadata = merge(
     {
       user-data                    = module.cloudinit.user-data
@@ -36,7 +30,7 @@ locals {
 module "network" {
   source = "../../common/network"
 
-  network_config  = var.network_config
+  nic0_existing   = var.network_existing
   project_id      = var.project_id
   region          = local.region
   resource_prefix = var.resource_prefix
@@ -50,7 +44,7 @@ module "filestore" {
   filestore_share_name = "nfsshare_${count.index}"
   filestore_tier       = var.filestore_new[count.index].filestore_tier
   local_mount          = var.filestore_new[count.index].local_mount
-  network_id           = module.network.network_id
+  network_id           = module.network.network_ids[0]
   project_id           = var.project_id
   region               = local.region
   size_gb              = var.filestore_new[count.index].size_gb
@@ -79,7 +73,7 @@ module "compute_instance_template" {
 
   disk_size_gb                 = var.disk_size_gb
   disk_type                    = var.disk_type
-  machine_image                = local.machine_image
+  machine_image                = var.machine_image
   machine_type                 = "a3-highgpu-8g"
   maintenance_interval         = var.maintenance_interval
   metadata                     = local.metadata

@@ -54,7 +54,7 @@ EOF
 
 docker run --rm -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create gke-beta
+  create a3 gke-beta
 ```
 
 A deeper dive into how to use this tool can be found [below](#how-to-provision-a-cluster).
@@ -73,7 +73,7 @@ EOF
 
 docker run --rm -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create mig-cos
+  create a3 mig-cos
 ```
 
 A deeper dive into how to use this tool can be found [below](#how-to-provision-a-cluster).
@@ -84,7 +84,7 @@ This repository contains:
 
 - a set of terraform modules that creates GCP resources geared toward running
   AI/ML workloads on [A3 VMs](#what-is-an-a3-cluster).
-- an [entrypoint script](./scripts/entrypoint.sh) that will find or create a
+- an [entrypoint script](../scripts/entrypoint.sh) that will find or create a
   terraform backend in a Google Cloud Storage (GCS) bucket, call the
   appropriate terraform commands using the terraform modules and a user
   provided terraform variables (`tfvars`) file, and upload all logs to the GCS
@@ -151,7 +151,7 @@ docker run \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create mig-cos
+  create a3 mig-cos
 
 # destroy the cluster
 docker run \
@@ -159,7 +159,7 @@ docker run \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  destroy mig-cos
+  destroy a3 mig-cos
 ```
 
 Quick explanation of the `docker run` flags (in same order as above):

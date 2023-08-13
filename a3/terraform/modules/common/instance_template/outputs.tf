@@ -21,7 +21,7 @@ output "id" {
 
 output "name" {
   description = "`name` output of the google_compute_instance_template resource created."
-  value       = var.use_static_naming ? local.name : resource.google_compute_instance_template.template.name
+  value       = var.use_static_naming ? var.resource_prefix : resource.google_compute_instance_template.template.name
 }
 
 output "self_link" {

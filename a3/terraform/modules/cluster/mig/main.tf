@@ -56,7 +56,7 @@ module "dashboard" {
 module "network" {
   source = "../../common/network"
 
-  network_config  = var.network_config
+  nic0_existing   = var.network_existing
   project_id      = var.project_id
   region          = local.region
   resource_prefix = var.resource_prefix
@@ -80,7 +80,7 @@ module "filestore" {
   filestore_share_name = "nfsshare_${count.index}"
   filestore_tier       = var.filestore_new[count.index].filestore_tier
   local_mount          = var.filestore_new[count.index].local_mount
-  network_id           = module.network.network_id
+  network_id           = module.network.network_ids[0]
   project_id           = var.project_id
   region               = local.region
   size_gb              = var.filestore_new[count.index].size_gb

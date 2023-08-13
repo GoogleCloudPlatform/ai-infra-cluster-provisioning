@@ -43,7 +43,7 @@ data "google_container_engine_versions" "gkeversion" {
 module "network" {
   source = "../../common/network"
 
-  network_config  = var.network_config
+  nic0_existing   = var.network_existing
   project_id      = var.project_id
   region          = var.region
   resource_prefix = var.resource_prefix

@@ -59,8 +59,6 @@ locals {
     email  = data.google_compute_default_service_account.account.email
     scopes = ["cloud-platform"]
   }
-
-  name = "${var.resource_prefix}-tpl"
 }
 
 data "google_compute_default_service_account" "account" {
@@ -87,8 +85,8 @@ resource "google_compute_instance_template" "template" {
   project           = var.project_id
   region            = var.region
   labels            = var.labels
-  name              = var.use_static_naming ? local.name : null
-  name_prefix       = var.use_static_naming ? null : local.name
+  name              = var.use_static_naming ? var.resource_prefix : null
+  name_prefix       = var.use_static_naming ? null : var.resource_prefix
   machine_type      = var.machine_type
   metadata          = local.metadata
   resource_policies = var.use_compact_placement_policy ? [module.resource_policy[0].resource_self_link] : []
@@ -140,4 +138,3 @@ resource "google_compute_instance_template" "template" {
     ]
   }
 }
-

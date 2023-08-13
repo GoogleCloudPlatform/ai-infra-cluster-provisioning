@@ -40,14 +40,13 @@ variable "gke_version" {
   default     = null
 }
 
-variable "network_config" {
-  description = <<-EOT
-    The network configuration to specify the type of VPC to be used.
-
-    Possible values: `["default", "new_multi_nic", "default_multi_nic", "new_single_nic"]`
-    EOT
-  type        = string
-  default     = "default"
+variable "network_existing" {
+  description = "Existing network to attach to nic0. Setting to null will create a new network for it."
+  type = object({
+    network_name    = string
+    subnetwork_name = string
+  })
+  default = null
 }
 
 variable "disk_size_gb" {
