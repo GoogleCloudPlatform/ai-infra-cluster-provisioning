@@ -5,7 +5,7 @@
         "value": [
           {
             "disk_size_gb": 128,
-            "disk_type": "pd-standard",
+            "disk_type": "pd-ssd",
             "machine_image": {
               "project": "schedmd-slurm-public",
               "family": "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts",

@@ -20,12 +20,13 @@ locals {
     for partition in var.compute_partitions
     : partition.partition_name
     => {
-      node_count_static = partition.node_count_static
-      partition_name    = partition.partition_name
-      zone              = partition.zone
+      node_count_dynamic_max = partition.node_count_dynamic_max
+      node_count_static      = partition.node_count_static
+      partition_name         = partition.partition_name
+      zone                   = partition.zone
 
       disk_size_gb = coalesce(try(partition.disk_size_gb, null), 128)
-      disk_type    = coalesce(try(partition.disk_type, null), "pd-standard")
+      disk_type    = coalesce(try(partition.disk_type, null), "pd-ssd")
       machine_image = coalesce(try(partition.machine_image, null), {
         project = "schedmd-slurm-public"
         family  = "schedmd-v5-slurm-22-05-8-ubuntu-2004-lts"
@@ -315,7 +316,7 @@ module "compute_node_groups" {
   instance_template      = local.compute_instance_templates[each.key]
   labels                 = merge(var.labels, { ghpc_role = "compute" })
   node_count_static      = local.compute_partitions[each.key].node_count_static
-  node_count_dynamic_max = 0
+  node_count_dynamic_max = local.compute_partitions[each.key].node_count_dynamic_max
   project_id             = var.project_id
   service_account        = module.compute_instance_templates[each.key].service_account
 }

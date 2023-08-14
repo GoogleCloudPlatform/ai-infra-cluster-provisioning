@@ -1,13 +1,12 @@
 compute_partitions = [{
-  node_count_static = 2
-  partition_name    = "compute"
-  zone              = "us-central1-f"
+  node_count_dynamic_max = 1
+  node_count_static      = 0
+  partition_name         = "compute"
+  zone                   = "us-east4-a"
 
   disk_size_gb        = null
   disk_type           = null
-  guest_accelerator   = null
   machine_image       = null
-  machine_type        = "n2-standard-2"
   startup_script      = null
   startup_script_file = null
 }]

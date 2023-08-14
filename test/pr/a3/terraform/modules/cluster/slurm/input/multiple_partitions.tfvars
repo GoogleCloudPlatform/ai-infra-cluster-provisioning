@@ -1,8 +1,9 @@
 compute_partitions = [
   {
-    node_count_static = 1
-    partition_name    = "comp0"
-    zone              = "us-central1-a"
+    node_count_dynamic_max = 0
+    node_count_static      = 1
+    partition_name         = "comp0"
+    zone                   = "us-central1-a"
 
     disk_size_gb        = null
     disk_type           = null
@@ -11,9 +12,10 @@ compute_partitions = [
     startup_script_file = null
   },
   {
-    node_count_static = 1
-    partition_name    = "comp1"
-    zone              = "us-central1-a"
+    node_count_dynamic_max = 0
+    node_count_static      = 1
+    partition_name         = "comp1"
+    zone                   = "us-central1-a"
 
     disk_size_gb        = null
     disk_type           = null

@@ -34,9 +34,16 @@ variable "compute_partitions" {
     Required Fields
 
     ------------
+    `compute_partitions[*].node_count_dynamic_max`
+
+    Maximum number of dynamic nodes allowed in this partition.
+
+    Related docs: [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/community/modules/compute/schedmd-slurm-gcp-v5-node-group#input_node_count_dynamic_max).
+
+    ------------
     `compute_partitions[*].node_count_static`
 
-    Number of nodes within this partition.
+    Number of nodes to be statically created.
 
     Related docs: [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/community/modules/compute/schedmd-slurm-gcp-v5-node-group#input_node_count_static).
 
@@ -112,9 +119,10 @@ variable "compute_partitions" {
     EOT
 
   type = list(object({
-    node_count_static = number
-    partition_name    = string
-    zone              = string
+    node_count_dynamic_max = number
+    node_count_static      = number
+    partition_name         = string
+    zone                   = string
 
     disk_size_gb = number
     disk_type    = string
