@@ -15,23 +15,28 @@
 # limitations under the License.
 
 gke_node_pool::create () {
-    echo "checking if node pool '${node_pool_name}' already exists in cluster '${cluster_name}'" >&2
-    ! gcloud container node-pools describe "${node_pool_name}" \
-        --cluster="${cluster_name}" \
-        --project="${project_id}" \
-        --region="${region}" || {
-        echo "node-pool '${node_pool_name}' already exists in cluster '${cluster_name}'"
+    echo "Checking if node pool '${node_pool_name}' already exists in cluster '${cluster_name}'..." >&2
+    local -r matching_clusters=$(
+        gcloud container node-pools list \
+            --cluster="${cluster_name}" \
+            --filter="name<=${cluster_name} AND name>=${cluster_name}" \
+            --format='value(name)' \
+            --project="${project_id}" \
+            --region="${region}" \
+        | wc -l)
+    [ "${matching_clusters}" -eq 0 ] || {
+        echo "Node pool '${node_pool_name}' already exists in cluster '${cluster_name}'."
         return 1
     } >&2
 
-    echo "creating node pool '${node_pool_name}' in cluster '${cluster_name}'" >&2
+    echo "Creating node pool '${node_pool_name}' in cluster '${cluster_name}'..." >&2
     gcloud beta container node-pools create "${node_pool_name}" \
         --cluster="${cluster_name}" \
         --region="${region}" \
-        --additional-node-network="network=${prefix}-gpu-0,subnetwork=${prefix}-gpu-0" \
-        --additional-node-network="network=${prefix}-gpu-1,subnetwork=${prefix}-gpu-1" \
-        --additional-node-network="network=${prefix}-gpu-2,subnetwork=${prefix}-gpu-2" \
-        --additional-node-network="network=${prefix}-gpu-3,subnetwork=${prefix}-gpu-3" \
+        --additional-node-network="${network_1}" \
+        --additional-node-network="${network_2}" \
+        --additional-node-network="${network_3}" \
+        --additional-node-network="${network_4}" \
         --disk-type="${disk_type}" \
         --disk-size="${disk_size}" \
         --enable-gvnic \
@@ -39,32 +44,32 @@ gke_node_pool::create () {
         --machine-type='a3-highgpu-8g' \
         --node-locations="${zone}" \
         --num-nodes="${node_count}" \
-        --placement-policy ${resource_policy} \
+        --placement-policy="${resource_policy}" \
         --project="${project_id}" \
         --scopes "https://www.googleapis.com/auth/cloud-platform" \
         --workload-metadata='GKE_METADATA' || {
-        echo "failed to create node pool '${node_pool_name}' in cluster '${cluster_name}'"
+        echo "Failed to create node pool '${node_pool_name}' in cluster '${cluster_name}'."
         return 1
     } >&2
 }
 
 gke_node_pool::destroy () {
-    echo "checking if node pool '${cluster_name}' still exists in cluster '${cluster_name}'" >&2
+    echo "Checking if node pool '${cluster_name}' still exists in cluster '${cluster_name}'..." >&2
     gcloud container node-pools describe "${node_pool_name}" \
         --cluster="${cluster_name}" \
         --project="${project_id}" \
         --region="${region}" || {
-        echo "node-pool '${node_pool_name}' not found in cluster '${cluster_name}'"
+        echo "Node pool '${node_pool_name}' not found in cluster '${cluster_name}'."
         return 0
     } >&2
 
-    echo "deleting node pool '${node_pool_name}' from cluster '${cluster_name}'" >&2
+    echo "Deleting node pool '${node_pool_name}' from cluster '${cluster_name}'..." >&2
     gcloud container node-pools delete "${node_pool_name}" \
         --cluster="${cluster_name}" \
         --project="${project_id}" \
         --quiet \
         --region="${region}" || {
-        echo "failed to delete node pool '${node_pool_name}' from cluster '${cluster_name}'"
+        echo "Failed to delete node pool '${node_pool_name}' from cluster '${cluster_name}'."
         return 1
     } >&2
 }
@@ -81,21 +86,20 @@ main () {
     local -r disk_size="${9:?}"
     local -r prefix="${10:?}"
     local -r resource_policy="${11:?}"
+    local -r network_1="${12:?}"
+    local -r network_2="${13:?}"
+    local -r network_3="${14:?}"
+    local -r network_4="${15:?}"
 
     case "${action}" in
         'create')
-            gke_node_pool::create || {
-                echo "Failed to create GKE node pool ${node_pool_name}."
-                return 1
-            } >&2
-            echo "Successfully created GKE node pool ${node_pool_name}." >&2
+            gke_node_pool::create
             ;;
         'destroy')
-            gke_node_pool::destroy || {
-                echo "Failed to destroy GKE node pool ${node_pool_name}."
-                return 1
-            } >&2
-            echo "Successfully destroyed GKE node pool ${node_pool_name}." >&2
+            gke_node_pool::destroy
+            ;;
+        *)
+            echo "invalid action '${action}'" >&2
             ;;
     esac
 }

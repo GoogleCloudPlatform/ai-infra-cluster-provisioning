@@ -60,11 +60,13 @@ module "resource_policy" {
 
 resource "null_resource" "gke-cluster-command" {
   triggers = {
-    project_id   = var.project_id
-    cluster_name = var.resource_prefix
-    region       = var.region
-    gke_version  = local.gke_master_version
-    gke_endpoint = local.gke_endpoint_value
+    project_id      = var.project_id
+    cluster_name    = var.resource_prefix
+    region          = var.region
+    gke_version     = local.gke_master_version
+    gke_endpoint    = local.gke_endpoint_value
+    network_name    = module.network.network_names[0]
+    subnetwork_name = module.network.subnetwork_names[0]
   }
 
   provisioner "local-exec" {
@@ -75,7 +77,9 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.project_id} \
       ${self.triggers.cluster_name} \
       ${self.triggers.region} \
-      ${self.triggers.gke_version} 
+      ${self.triggers.gke_version} \
+      ${self.triggers.network_name} \
+      ${self.triggers.subnetwork_name}
     EOT
     environment = {
       CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
@@ -91,7 +95,9 @@ resource "null_resource" "gke-cluster-command" {
       ${self.triggers.project_id} \
       ${self.triggers.cluster_name} \
       ${self.triggers.region} \
-      ${self.triggers.gke_version} 
+      ${self.triggers.gke_version} \
+      ${self.triggers.network_name} \
+      ${self.triggers.subnetwork_name}
     EOT
     environment = {
       CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
@@ -111,7 +117,7 @@ resource "null_resource" "gke-node-pool-command" {
     project_id      = var.project_id
     prefix          = var.resource_prefix
     cluster_name    = var.resource_prefix
-    node_pool_name  = "nodepool-${each.key}"
+    node_pool_name  = "np-${each.key}"
     zone            = each.value.zone
     region          = var.region
     node_count      = each.value.node_count
@@ -119,6 +125,10 @@ resource "null_resource" "gke-node-pool-command" {
     disk_size       = var.disk_size_gb
     resource_policy = "${var.resource_prefix}-${each.key}"
     gke_endpoint    = local.gke_endpoint_value
+    network_1       = "network=${module.network.network_names[1]},subnetwork=${module.network.subnetwork_names[1]}"
+    network_2       = "network=${module.network.network_names[2]},subnetwork=${module.network.subnetwork_names[2]}"
+    network_3       = "network=${module.network.network_names[3]},subnetwork=${module.network.subnetwork_names[3]}"
+    network_4       = "network=${module.network.network_names[4]},subnetwork=${module.network.subnetwork_names[4]}"
   }
 
   provisioner "local-exec" {
@@ -135,7 +145,11 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
       ${self.triggers.prefix} \
-      ${self.triggers.resource_policy} 
+      ${self.triggers.resource_policy} \
+      ${self.triggers.network_1} \
+      ${self.triggers.network_2} \
+      ${self.triggers.network_3} \
+      ${self.triggers.network_4}
     EOT
     environment = {
       CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
@@ -157,7 +171,11 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
       ${self.triggers.prefix} \
-      ${self.triggers.resource_policy} 
+      ${self.triggers.resource_policy} \
+      ${self.triggers.network_1} \
+      ${self.triggers.network_2} \
+      ${self.triggers.network_3} \
+      ${self.triggers.network_4}
     EOT
     environment = {
       CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
