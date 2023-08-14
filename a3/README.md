@@ -1,20 +1,5 @@
 # Overview
 
-## Purpose
-
-The purpose of this tool is to provide a very quick and simple way to provision
-a Google Cloud Platform (GCP) A3 compute cluster.
-
-## What is an A3 cluster?
-
-An A3 cluster provides the following resources:
-
-- one or many `a3-highgpu-8g` VM instances (documentation not available yet,
-  description
-  [here](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus))
-- five virtual network interface cards (vNIC) -- two Nvidia H100 GPUs connected to each vNIC
-- TCPX (documentation not available yet)
-
 ## Control plane options
 
 A3 clusters may be created through either [GKE](https://cloud.google.com/kubernetes-engine) or a [MIG](https://cloud.google.com/compute/docs/instance-groups#managed_instance_groups) via the modules found [here](./terraform/modules/cluster). Due to the recency of A3's release, features are limited in each control plane, and those limitations are listed below.
@@ -34,20 +19,14 @@ cat >./terraform.tfvars <<EOF
 project_id      = "my-project"
 resource_prefix = "my-cluster"
 region          = "us-central1"
-
-gke_version = "1.27.4-gke.900"
-disk_type   = "pd-ssd"
-
 node_pools = [
   {
     zone                     = "us-central1-c"
     node_count               = 4
-    machine_type             = "a3-highgpu-8g"
   },
   {
     zone                     = "us-central1-c"
     node_count               = 4
-    machine_type             = "a3-highgpu-8g"
   },
 ]
 EOF
