@@ -14,7 +14,7 @@ RUN curl -s "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terra
     && unzip -uq ./terraform.zip \
     && rm -f ./terraform.zip \
     && mv ./terraform /root/.local/bin/terraform
-COPY terraform ./terraform
+COPY ./a3/terraform ./a3/terraform
 
 
 FROM base as test
@@ -32,6 +32,6 @@ ENTRYPOINT ["./test/continuous/run.sh"]
 
 FROM base as deploy
 RUN for cluster in gke gke-beta mig mig-cos slurm; do \
-    terraform -chdir="./terraform/modules/cluster/${cluster}" init; done
+    terraform -chdir="./a3/terraform/modules/cluster/${cluster}" init; done
 COPY scripts ./scripts
 ENTRYPOINT ["./scripts/entrypoint.sh"]
