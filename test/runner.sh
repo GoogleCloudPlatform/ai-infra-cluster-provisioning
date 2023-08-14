@@ -101,9 +101,9 @@ runner::validate_args () {
     } >&2
 
     [ "${#runner_arg_resource_prefix}" -gt 11 ] && {
-        echo "Splitting resource_prefix".
-        runner_arg_resource_prefix=${runner_arg_resource_prefix:0:11}
-        echo "New resource_prefix is ${runner_arg_resource_prefix}."
+        echo "resource_prefix='${runner_arg_resource_prefix}'".
+        echo " - Must be length 11 or less -- '${runner_arg_resource_prefix:0:11}'"
+        valid=false
     } >&2
 
     [ -n "${runner_opt_filter}" ] || {

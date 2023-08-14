@@ -15,11 +15,11 @@
   */
 
 output "name" {
-  value       = resource.google_container_cluster.gke-cluster.name
+  value       = resource.google_container_cluster.cluster.name
   description = "Google Kubernetes cluster name"
 }
 
 output "id" {
-  value       = resource.google_container_cluster.gke-cluster.id
+  value       = resource.google_container_cluster.cluster.id
   description = "Google Kubernetes cluster id"
 }

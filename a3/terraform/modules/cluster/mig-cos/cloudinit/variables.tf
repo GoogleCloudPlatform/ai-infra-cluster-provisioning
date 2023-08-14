@@ -34,6 +34,15 @@ variable "container" {
   }
 }
 
+variable "enable_install_gpu" {
+  type = bool
+
+  validation {
+    condition     = var.enable_install_gpu != null
+    error_message = "must not be null"
+  }
+}
+
 variable "filestores" {
   type = list(object({
     local_mount  = string
@@ -80,26 +89,6 @@ variable "gcsfuses" {
       true
     )
     error_message = "local_mount and remote_mount must not be null"
-  }
-}
-
-variable "enable_auto_config_apply" {
-  description = <<-EOT
-    Whenever you update a MIG's instance_template, Compute Engine automatically applies your updated configuration to new VMs that are added to the group.
-    This flag enables automatic application of an updated configuration to existing VMs.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#nested_update_policy), [doc](https://cloud.google.com/compute/docs/instance-groups/rolling-out-updates-to-managed-instance-groups) 
-    EOT
-  type        = bool
-  default     = true
-}
-
-variable "enable_install_gpu" {
-  type = bool
-
-  validation {
-    condition     = var.enable_install_gpu != null
-    error_message = "must not be null"
   }
 }
 

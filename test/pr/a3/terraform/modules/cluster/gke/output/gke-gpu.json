@@ -14,7 +14,7 @@
       ],
       "resources": [
         {
-          "address": "google_container_cluster.gke-cluster",
+          "address": "google_container_cluster.cluster",
           "values": {
             "addons_config": [
               {
@@ -33,15 +33,15 @@
                 "channel": "UNSPECIFIED"
               }
             ],
-            "location": "us-central1"
+            "location": "us-east4"
           }
         },
         {
-          "address": "google_container_node_pool.gke-node-pools[\"0\"]",
+          "address": "google_container_node_pool.node-pools[\"0\"]",
           "values": {
             "node_count": 1,
             "node_locations": [
-              "us-central1-f"
+              "us-east4-a"
             ],
             "network_config": [
               {
@@ -53,14 +53,14 @@
             "node_config": [
               {
                 "disk_size_gb": 200,
-                "disk_type": "pd-standard",
+                "disk_type": "pd-ssd",
                 "gvnic": [
                   {
                     "enabled": true
                   }
                 ],
                 "image_type": "COS_CONTAINERD",
-                "machine_type": "a2-highgpu-1g"
+                "machine_type": "a3-highgpu-8g"
               }
             ]
           }

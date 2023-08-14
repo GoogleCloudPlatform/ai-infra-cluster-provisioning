@@ -67,16 +67,16 @@ module "resource_policy" {
     if node_pool.enable_compact_placement
   }
   project_id           = var.project_id
-  resource_policy_name = "${var.resource_prefix}-policy-${each.key}"
+  resource_policy_name = "${var.resource_prefix}-${each.key}"
   region               = var.region
 }
 
 # Definition of the private GKE cluster.
-resource "google_container_cluster" "gke-cluster" {
+resource "google_container_cluster" "cluster" {
   provider = google-beta
 
   project  = var.project_id
-  name     = "${var.resource_prefix}-gke"
+  name     = var.resource_prefix
   location = var.region
 
   # We need to explicitly manage the node pool to enable features such as
@@ -176,7 +176,7 @@ resource "google_container_cluster" "gke-cluster" {
 
 # We define explicit node pools, so that it can be modified without
 # having to destroy the entire cluster.
-resource "google_container_node_pool" "gke-node-pools" {
+resource "google_container_node_pool" "node-pools" {
   provider = google-beta
 
   for_each = {
@@ -185,7 +185,7 @@ resource "google_container_node_pool" "gke-node-pools" {
 
   project        = var.project_id
   name           = "nodepool-${each.key}"
-  cluster        = google_container_cluster.gke-cluster.id
+  cluster        = google_container_cluster.cluster.id
   node_locations = [each.value.zone]
   node_count     = each.value.node_count
 
@@ -202,7 +202,7 @@ resource "google_container_node_pool" "gke-node-pools" {
 
   node_config {
     service_account = local.node_service_account
-    machine_type    = each.value.machine_type
+    machine_type    = "a3-highgpu-8g"
     image_type      = "COS_CONTAINERD"
     disk_size_gb    = var.disk_size_gb
     disk_type       = var.disk_type
@@ -244,7 +244,7 @@ resource "google_container_node_pool" "gke-node-pools" {
     for_each = each.value.enable_compact_placement ? [1] : []
     content {
       type        = "COMPACT"
-      policy_name = "${var.resource_prefix}-policy-${each.key}"
+      policy_name = "${var.resource_prefix}-${each.key}"
     }
   }
 
@@ -285,7 +285,7 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
 module "kubernetes-operations" {
   source                = "./kubernetes-operations"
   project_id            = var.project_id
-  cluster_id            = resource.google_container_cluster.gke-cluster.id
+  cluster_id            = resource.google_container_cluster.cluster.id
   gke_cluster_exists    = local.kubernetes_setup_config.enable_kubernetes_setup
   install_nvidia_driver = true
   setup_kubernetes_service_account = (

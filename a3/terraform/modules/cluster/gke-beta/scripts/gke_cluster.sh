@@ -15,6 +15,7 @@
 # limitations under the License.
 
 gke_cluster::create () {
+    echo "checking if cluster '${cluster_name}' already exists" >&2
     ! gcloud container clusters describe "${cluster_name}" \
         --project="${project_id}" \
         --region="${region}" || {
@@ -22,6 +23,7 @@ gke_cluster::create () {
         return 1
     } >&2
 
+    echo "creating cluster '${cluster_name}'" >&2
     gcloud beta container clusters create "${cluster_name}" \
         --cluster-version="${version}" \
         --enable-ip-alias \
@@ -30,15 +32,24 @@ gke_cluster::create () {
         --num-nodes='1' \
         --project="${project_id}" \
         --region="${region}" \
-        --workload-pool="${project_id}.svc.id.goog" \
-    && gcloud container node-pools delete 'default-pool' \
+        --workload-pool="${project_id}.svc.id.goog" || {
+        echo "failed to create cluster '${cluster_name}'"
+        return 1
+    } >&2
+
+    echo "deleting node pool 'default-pool' in cluster '${cluster_name}'" >&2
+    gcloud container node-pools delete 'default-pool' \
         --cluster="${cluster_name}" \
         --project="${project_id}" \
         --quiet \
-        --region="${region}"
+        --region="${region}" || {
+        echo "failed to delete node pool 'default-pool' from cluster '${cluster_name}'"
+        return 1
+    } >&2
 }
 
 gke_cluster::destroy () {
+    echo "checking if cluster '${cluster_name}' still exists" >&2
     gcloud container clusters describe "${cluster_name}" \
         --project="${project_id}" \
         --region="${region}" || {
@@ -46,10 +57,14 @@ gke_cluster::destroy () {
         return 0
     } >&2
 
+    echo "deleting cluster '${cluster_name}'" >&2
     gcloud container clusters delete "${cluster_name}" \
         --project="${project_id}" \
         --quiet \
-        --region="${region}"
+        --region="${region}" || {
+        echo "failed to delete cluster '${cluster_name}'"
+        return 1
+    } >&2
 }
 
 main () {

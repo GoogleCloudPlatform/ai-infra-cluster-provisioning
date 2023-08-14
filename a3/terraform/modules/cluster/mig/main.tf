@@ -111,7 +111,7 @@ module "compute_instance_template" {
   disk_size_gb                 = var.disk_size_gb
   disk_type                    = var.disk_type
   machine_image                = var.machine_image
-  machine_type                 = var.machine_type
+  machine_type                 = "a3-highgpu-8g"
   maintenance_interval         = null
   metadata                     = var.metadata
   project_id                   = var.project_id

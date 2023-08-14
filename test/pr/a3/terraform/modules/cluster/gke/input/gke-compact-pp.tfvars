@@ -1,8 +1,6 @@
-region         = "us-central1"
-network_config = "default_multi_nic"
+region = "us-east4"
 node_pools = [{
-  zone                     = "us-central1-f"
+  zone                     = "us-east4-a"
   node_count               = 17
-  machine_type             = "a2-highgpu-1g"
   enable_compact_placement = true
 }]

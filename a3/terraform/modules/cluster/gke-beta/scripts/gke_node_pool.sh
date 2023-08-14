@@ -15,6 +15,7 @@
 # limitations under the License.
 
 gke_node_pool::create () {
+    echo "checking if node pool '${node_pool_name}' already exists in cluster '${cluster_name}'" >&2
     ! gcloud container node-pools describe "${node_pool_name}" \
         --cluster="${cluster_name}" \
         --project="${project_id}" \
@@ -23,6 +24,7 @@ gke_node_pool::create () {
         return 1
     } >&2
 
+    echo "creating node pool '${node_pool_name}' in cluster '${cluster_name}'" >&2
     gcloud beta container node-pools create "${node_pool_name}" \
         --cluster="${cluster_name}" \
         --region="${region}" \
@@ -40,10 +42,14 @@ gke_node_pool::create () {
         --placement-policy ${resource_policy} \
         --project="${project_id}" \
         --scopes "https://www.googleapis.com/auth/cloud-platform" \
-        --workload-metadata='GKE_METADATA'
+        --workload-metadata='GKE_METADATA' || {
+        echo "failed to create node pool '${node_pool_name}' in cluster '${cluster_name}'"
+        return 1
+    } >&2
 }
 
 gke_node_pool::destroy () {
+    echo "checking if node pool '${cluster_name}' still exists in cluster '${cluster_name}'" >&2
     gcloud container node-pools describe "${node_pool_name}" \
         --cluster="${cluster_name}" \
         --project="${project_id}" \
@@ -52,11 +58,15 @@ gke_node_pool::destroy () {
         return 0
     } >&2
 
+    echo "deleting node pool '${node_pool_name}' from cluster '${cluster_name}'" >&2
     gcloud container node-pools delete "${node_pool_name}" \
         --cluster="${cluster_name}" \
         --project="${project_id}" \
         --quiet \
-        --region="${region}"
+        --region="${region}" || {
+        echo "failed to delete node pool '${node_pool_name}' from cluster '${cluster_name}'"
+        return 1
+    } >&2
 }
 
 main () {

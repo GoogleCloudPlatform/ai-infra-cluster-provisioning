@@ -59,7 +59,7 @@ variable "disk_type" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#disk_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--disk-type).
     EOT
   type        = string
-  default     = "pd-standard"
+  default     = "pd-ssd"
 }
 
 variable "node_service_account" {
@@ -97,13 +97,11 @@ variable "node_pools" {
     ```
     zone: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
     node_count: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
-    machine_type: The name of a Google Compute Engine machine type. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
     ```
     EOT
   type = list(object({
-    zone         = string,
-    node_count   = number,
-    machine_type = string
+    zone       = string,
+    node_count = number,
   }))
 }
 

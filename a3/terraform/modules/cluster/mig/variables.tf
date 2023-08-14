@@ -61,7 +61,7 @@ variable "disk_type" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#disk_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--boot-disk-type).
     EOT
   type        = string
-  default     = "pd-standard"
+  default     = "pd-ssd"
 }
 
 variable "filestore_new" {
@@ -201,16 +201,6 @@ variable "machine_image" {
   }
 }
 
-variable "machine_type" {
-  description = <<-EOT
-    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource).
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
-    EOT
-  type        = string
-  default     = "a2-highgpu-2g"
-}
-
 variable "metadata" {
   description = <<-EOT
     GCE metadata to attach to each instance.
@@ -281,6 +271,12 @@ variable "startup_script_gcs_bucket_path" {
   default     = null
 }
 
+variable "use_compact_placement_policy" {
+  description = "The flag to create and use a superblock level compact placement policy for the instances. Currently GCE supports using only 1 placement policy."
+  type        = bool
+  default     = false
+}
+
 variable "wait_for_instance" {
   description = <<-EOT
     Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.
@@ -289,21 +285,4 @@ variable "wait_for_instance" {
     EOT
   type        = bool
   default     = true
-}
-
-variable "enable_auto_config_apply" {
-  description = <<-EOT
-    Whenever you update a MIG's instance_template, Compute Engine automatically applies your updated configuration to new VMs that are added to the group.
-    This flag enables automatic application of an updated configuration to existing VMs.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#nested_update_policy), [doc](https://cloud.google.com/compute/docs/instance-groups/rolling-out-updates-to-managed-instance-groups) 
-    EOT
-  type        = bool
-  default     = true
-}
-
-variable "use_compact_placement_policy" {
-  description = "The flag to create and use a superblock level compact placement policy for the instances. Currently GCE supports using only 1 placement policy."
-  type        = bool
-  default     = false
 }

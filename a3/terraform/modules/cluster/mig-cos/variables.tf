@@ -281,6 +281,12 @@ variable "startup_script" {
   default     = null
 }
 
+variable "use_compact_placement_policy" {
+  description = "The flag to create and use a superblock level compact placement policy for the instances. Currently GCE supports using only 1 placement policy."
+  type        = bool
+  default     = false
+}
+
 variable "wait_for_instance" {
   description = <<-EOT
     Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.
@@ -289,10 +295,4 @@ variable "wait_for_instance" {
     EOT
   type        = bool
   default     = true
-}
-
-variable "use_compact_placement_policy" {
-  description = "The flag to create and use a superblock level compact placement policy for the instances. Currently GCE supports using only 1 placement policy."
-  type        = bool
-  default     = false
 }
