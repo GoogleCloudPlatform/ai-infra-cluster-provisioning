@@ -16,15 +16,15 @@
 
 gke_node_pool::create () {
     echo "Checking if node pool '${node_pool_name}' already exists in cluster '${cluster_name}'..." >&2
-    local -r matching_clusters=$(
+    local -r matching_node_pools=$(
         gcloud container node-pools list \
             --cluster="${cluster_name}" \
-            --filter="name<=${cluster_name} AND name>=${cluster_name}" \
+            --filter="name<=${node_pool_name} AND name>=${node_pool_name}" \
             --format='value(name)' \
             --project="${project_id}" \
             --region="${region}" \
         | wc -l)
-    [ "${matching_clusters}" -eq 0 ] || {
+    [ "${matching_node_pools}" -eq 0 ] || {
         echo "Node pool '${node_pool_name}' already exists in cluster '${cluster_name}'."
         return 1
     } >&2
@@ -54,11 +54,16 @@ gke_node_pool::create () {
 }
 
 gke_node_pool::destroy () {
-    echo "Checking if node pool '${cluster_name}' still exists in cluster '${cluster_name}'..." >&2
-    gcloud container node-pools describe "${node_pool_name}" \
-        --cluster="${cluster_name}" \
-        --project="${project_id}" \
-        --region="${region}" || {
+    echo "Checking if node pool '${node_pool_name}' still exists in cluster '${cluster_name}'..." >&2
+    local -r matching_node_pools=$(
+        gcloud container node-pools list \
+            --cluster="${cluster_name}" \
+            --filter="name<=${node_pool_name} AND name>=${node_pool_name}" \
+            --format='value(name)' \
+            --project="${project_id}" \
+            --region="${region}" \
+        | wc -l)
+    [ "${matching_node_pools}" -ne 0 ] || {
         echo "Node pool '${node_pool_name}' not found in cluster '${cluster_name}'."
         return 0
     } >&2
