@@ -20,7 +20,8 @@ main () {
 
     # Environment/arguments setup
 
-    local arg_action arg_cluster opt_backend_bucket opt_quiet
+    local arg_action arg_cluster arg_machine_type
+    local opt_backend_bucket opt_quiet
     local arg_var_file="${PWD}/input/terraform.tfvars"
     {
         entrypoint_helpers::parse_args "${@}" \
@@ -28,7 +29,10 @@ main () {
     } \
     || { echo; entrypoint_helpers::get_usage; return 1; } >&2
 
-    local -r module_path="$(entrypoint_helpers::module_path "${arg_cluster}")"
+    local -r module_path="$(
+        entrypoint_helpers::module_path \
+            "${arg_machine_type}" \
+            "${arg_cluster}")"
     local -r tmp_var_file=$(mktemp)
     cp "${arg_var_file}" "${tmp_var_file}"
 
