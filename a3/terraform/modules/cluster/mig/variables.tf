@@ -14,31 +14,44 @@
  * limitations under the License.
 */
 
+variable "instance_groups" {
+  description = <<-EOT
+    Required Fields:
+    - `target_size`: The number of running instances for this managed instance group. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#target_size), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--size).
+    - `zone`: The zone that instances in this group should be created in. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone).
+    EOT
+  type = list(object({
+    zone        = string
+    target_size = number
+  }))
+  nullable = false
+
+  validation {
+    condition     = length(var.instance_groups) != 0
+    error_message = "must have at least one instance group"
+  }
+
+  validation {
+    condition = alltrue([
+      for g in var.instance_groups : g.zone != null && g.target_size != null
+    ])
+    error_message = "zone and target_size must not be null"
+  }
+}
+
 variable "project_id" {
   description = "GCP Project ID to which the cluster will be deployed."
   type        = string
 }
 
+variable "region" {
+  description = "The region in which all instances will reside."
+  type        = string
+  nullable    = false
+}
+
 variable "resource_prefix" {
   description = "Arbitrary string with which all names of newly created resources will be prefixed."
-  type        = string
-}
-
-variable "target_size" {
-  description = <<-EOT
-    The number of running instances for this managed instance group.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#target_size), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--size).
-    EOT
-  type        = number
-}
-
-variable "zone" {
-  description = <<-EOT
-    The zone that instances in this group should be created in.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone).
-    EOT
   type        = string
 }
 
@@ -92,11 +105,18 @@ variable "filestore_new" {
     Storage size of the filestore instance in GB.
 
     Related docs: [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/filestore#input_local_mount), [gcloud](https://cloud.google.com/sdk/gcloud/reference/filestore/instances/create#--file-share).
+-
+    `filestore_new.zone`
+
+    Location for filestore instance.
+
+    Related docs: [hpc-toolkit](https://github.com/GoogleCloudPlatform/hpc-toolkit/tree/main/modules/file-system/f
     EOT
   type = list(object({
     filestore_tier = string
     local_mount    = string
     size_gb        = number
+    zone           = string
   }))
   default = []
 }

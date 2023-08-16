@@ -15,8 +15,6 @@
 */
 
 locals {
-  region = join("-", slice(split("-", var.zone), 0, 2))
-
   startup_runners = concat(
     var.enable_ops_agent ? [{
       type        = "shell"
@@ -58,7 +56,7 @@ module "network" {
 
   nic0_existing   = var.network_existing
   project_id      = var.project_id
-  region          = local.region
+  region          = var.region
   resource_prefix = var.resource_prefix
 }
 
@@ -82,9 +80,9 @@ module "filestore" {
   local_mount          = var.filestore_new[count.index].local_mount
   network_id           = module.network.network_ids[0]
   project_id           = var.project_id
-  region               = local.region
+  region               = var.region
   size_gb              = var.filestore_new[count.index].size_gb
-  zone                 = var.zone
+  zone                 = var.filestore_new[count.index].zone
   labels               = merge(var.labels, { ghpc_role = "file-system" })
 }
 
@@ -94,7 +92,7 @@ module "startup" {
   deployment_name = var.resource_prefix
   labels          = merge(var.labels, { ghpc_role = "scripts" })
   project_id      = var.project_id
-  region          = local.region
+  region          = var.region
   gcs_bucket_path = var.startup_script_gcs_bucket_path
   runners = concat(
     module.gcsfuse[*].client_install_runner,
@@ -115,7 +113,7 @@ module "compute_instance_template" {
   maintenance_interval         = null
   metadata                     = var.metadata
   project_id                   = var.project_id
-  region                       = local.region
+  region                       = var.region
   resource_prefix              = var.resource_prefix
   service_account              = var.service_account
   use_compact_placement_policy = var.use_compact_placement_policy
@@ -127,11 +125,12 @@ module "compute_instance_template" {
 
 module "compute_instance_group_manager" {
   source = "../../common/instance_group_manager"
+  count  = length(var.instance_groups)
 
   project_id           = var.project_id
-  resource_prefix      = var.resource_prefix
-  zone                 = var.zone
+  resource_prefix      = "${var.resource_prefix}-${count.index}"
+  zone                 = var.instance_groups[count.index].zone
   instance_template_id = module.compute_instance_template.id
-  target_size          = var.target_size
+  target_size          = var.instance_groups[count.index].target_size
   wait_for_instances   = var.wait_for_instances
 }
