@@ -17,8 +17,8 @@ test::a3::terraform::mig-cos::simple () {
     local success=true
     helpers::append_tfvars "$(a3::terraform::mig-cos::input_dir)/simple.tfvars" mig-cos >"${tfvars}"
 
-    ./scripts/entrypoint.sh a3 create mig-cos "${tfvars}" || success=false
-    ./scripts/entrypoint.sh a3 destroy mig-cos "${tfvars}" || success=false
+    ./scripts/entrypoint.sh create a3 mig-cos "${tfvars}" || success=false
+    ./scripts/entrypoint.sh destroy a3 mig-cos "${tfvars}" || success=false
 
     [ "${success}" = true ]
 }

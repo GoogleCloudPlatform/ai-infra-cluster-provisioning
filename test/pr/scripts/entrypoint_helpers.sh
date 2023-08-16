@@ -32,7 +32,7 @@ test::entrypoint_helpers::parse_args::parses_no_args () {
 
 test::entrypoint_helpers::parse_args::parses_all_args () {
     local arg_action arg_cluster arg_machine_type arg_var_file opt_backend_bucket
-    EXPECT_SUCCEED entrypoint_helpers::parse_args a3 create mig ./custom.tfvars --backend-bucket 'gs://custom'
+    EXPECT_SUCCEED entrypoint_helpers::parse_args create a3 mig ./custom.tfvars --backend-bucket 'gs://custom'
     EXPECT_STREQ "${arg_machine_type}" a3
     EXPECT_STREQ "${arg_action}" create
     EXPECT_STREQ "${arg_cluster}" mig

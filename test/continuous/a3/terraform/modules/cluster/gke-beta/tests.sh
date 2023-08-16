@@ -17,8 +17,8 @@ test::a3::terraform::gke-beta::simple () {
     local success=true
     helpers::append_tfvars "$(a3::terraform::gke-beta::input_dir)/simple.tfvars" gke-beta >"${tfvars}"
 
-    ./scripts/entrypoint.sh a3 create gke-beta "${tfvars}" || success=false
-    ./scripts/entrypoint.sh a3 destroy gke-beta "${tfvars}" || success=false
+    ./scripts/entrypoint.sh create a3 gke-beta "${tfvars}" || success=false
+    ./scripts/entrypoint.sh destroy a3 gke-beta "${tfvars}" || success=false
 
     [ "${success}" = true ]
 }

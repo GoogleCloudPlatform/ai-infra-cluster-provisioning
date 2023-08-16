@@ -21,7 +21,7 @@ entrypoint_helpers::get_usage () {
     cat <<EOT
 Usage:
     ./scripts/entrypoint.sh [options] \
-        machine_type action cluster \
+        action machine_type cluster \
         [var_file]
 
 Options:
@@ -92,10 +92,10 @@ entrypoint_helpers::parse_args () {
         else
             case "${parameter_index}" in
                 1)
-                    arg_machine_type="${1}"
+                    arg_action="${1}"
                     ;;
                 2)
-                    arg_action="${1}"
+                    arg_machine_type="${1}"
                     ;;
                 3)
                     arg_cluster="${1}"
