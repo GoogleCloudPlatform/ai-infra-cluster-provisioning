@@ -12,21 +12,21 @@ A3 clusters may be created through either [GKE](https://cloud.google.com/kuberne
 
 ## Quickstart with `gke`
 
-An A3 cluster of eight nodes (two node pools with four nodes per node pool) booting with a COS-Cloud image can be created via GKE by running the following two commands:
+An A3 cluster of eight nodes (two node pools with four nodes each) booting with a COS-Cloud image can be created via GKE by running the following two commands:
 
 ```bash
 cat >./terraform.tfvars <<EOF
 project_id      = "my-project"
-resource_prefix = "my-cluster"
 region          = "us-central1"
+resource_prefix = "my-cluster"
 node_pools = [
   {
-    zone                     = "us-central1-c"
-    node_count               = 4
+    zone       = "us-central1-c"
+    node_count = 4
   },
   {
-    zone                     = "us-central1-c"
-    node_count               = 4
+    zone       = "us-central1-c"
+    node_count = 4
   },
 ]
 EOF
@@ -40,14 +40,23 @@ A deeper dive into how to use this tool can be found [below](#how-to-provision-a
 
 ## Quickstart with `mig-cos`
 
-An A3 cluster of eight nodes booting with a COS-Cloud image can be created via a managed instance group by running the following two commands:
+An A3 cluster of eight nodes (two instance groups with four instances each) booting with a COS-Cloud image can be created via a managed instance group by running the following two commands:
 
 ```bash
 cat >./terraform.tfvars <<EOF
-project_id = "my-project"
+instance_groups = [
+  {
+    target_size = 4
+    zone        = "us-central1-c"
+  },
+  {
+    target_size = 4
+    zone        = "us-central1-c"
+  },
+]
+project_id      = "my-project"
+region          = "us-central1"
 resource_prefix = "my-cluster"
-target_size = 8
-zone = "us-central1-c"
 EOF
 
 docker run --rm -v "${PWD}:/root/aiinfra/input" \
