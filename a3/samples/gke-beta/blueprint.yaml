@@ -14,21 +14,22 @@
 
 ---
 
-blueprint_name: a3-mig-cos
+blueprint_name: a3-gke-beta
 
 vars:
-  deployment_name: a3-mig-cos
+  deployment_name: a3-gke-beta
 
-  instance_groups:
-  - target_size: 4
+  node_pools:
+  - node_count: 4
     zone: us-east4-a
-  - target_size: 4
+  - node_count: 4
     zone: us-east4-a
   project_id: my-project-id
+  region: us-east4
   resource_prefix: my-cluster-name
 
 deployment_groups:
 - group: primary
   modules:
-  - id: a3-mig-cos
-    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/mig-cos"
+  - id: a3-gke-beta
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/gke-beta"

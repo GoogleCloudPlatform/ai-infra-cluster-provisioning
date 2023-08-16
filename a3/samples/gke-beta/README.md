@@ -1,41 +1,35 @@
-GKE-beta is experimental. Please use `gke` cluster type to create GKE
-clusters. Please refrain from using the `gke-beta` cluster unless it is necessary.
+# Note about this cluster type
 
-The `gke-beta` cluster type uses gcloud commands to create GKE clusters so many of
-the terraform cluster management capabilities are reduced or absent in this option.
-This is only an experimental workaround for creation of GKE clusters with A3 machines
-with multi-NIC network.
+`gke-beta` uses local-exec provisioners that call `gcloud` commands in order to
+test features that are not yet in terraform. This is a bit experimental and
+shouldn't be expected to work exactly like `gke`.
 
-This provides a sample for creating a ML cluster using
-[GKE](https://cloud.google.com/kubernetes-engine) with A3 machines and multi-NIC network. This cluster uses:
-1. Single GKE cluster with provided
-   [version](https://cloud.google.com/kubernetes-engine/versioning#specifying_cluster_version)
-   and 1
-   [nodepool](https://cloud.google.com/kubernetes-engine/docs/concepts/node-pools)
-   with 1 instance of
-   [a3-highgpu-8g](https://cloud.google.com/compute/docs/machine-resource) VM.
-2. Single GPU of type [nvidia-h100-80g](https://cloud.google.com/compute/docs/gpus).
-3. Multi-NIC VPCs in the project.
-4. [COS-Containerd image](https://cloud.google.com/kubernetes-engine/docs/concepts/using-containerd).
-5. Nvidia GPU driver installed using [daemonset](https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml).
-6. [Kubernetes Service
-   Account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts)
-   setup in the GKE cluster.
+# The cluster
 
-## Usage via Docker Image
-Please find detailed set up instruction for docker image
-[here](../../../README.md#usage-via-docker-image)
+This configuration creates a kubernetes service account which then creates two
+GKE node pools of four
+[`a3-highgpu-8g`](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus)
+VM instances each (eight instances in total). Each instance has:
+- eight [NVidia H100 GPUs](https://www.nvidia.com/en-us/data-center/h100/),
+- five [NICs](https://cloud.google.com/vpc/docs/multiple-interfaces-concepts)
+  (one VPC for the host network and four dedicated to the GPUs),
+- a [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) machine
+  image,
+- TCPX, Nvidia GPU drivers, and NCCL plugin installed
 
-Please copy the [terraform.tfvars](./terraform.tfvars) file to your current working
-directory of your local machine. Then follow the below instructions to create the cluster.
+# The tfvars file
 
-```docker
-docker run \
-  -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
-  -v "${PWD}:/root/aiinfra/input" \
-  --it us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create gke-beta
-```
+The `terraform.tfvars` file is what configures the cluster. Detailed
+descriptions of each variable can be found in
+[this `README`](../../terraform/modules/cluster/gke-beta/README.md).
+All optional variables may be omitted to use their default values.
 
-## Usage via Terraform
-Direct terraform usage is not supported for `gke-beta` clusters.
+Required variables:
+- `project_id`
+- `resource_prefix`
+- `region`
+- `node_pools`
+
+# How to create this cluster
+
+Refer to [this section](../../README.md#how-to-provision-a-cluster).
