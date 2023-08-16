@@ -20,7 +20,7 @@ resource "google_compute_instance_group_manager" "mig" {
   name               = var.resource_prefix
   project            = var.project_id
   target_size        = var.target_size
-  wait_for_instances = var.wait_for_instance
+  wait_for_instances = var.wait_for_instances
   zone               = var.zone
 
   update_policy {

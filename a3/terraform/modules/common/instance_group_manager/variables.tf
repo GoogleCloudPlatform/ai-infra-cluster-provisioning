@@ -14,6 +14,31 @@
  * limitations under the License.
 */
 
+variable "enable_auto_config_apply" {
+  description = <<-EOT
+    Whenever you update a MIG's instance_template, Compute Engine automatically applies your updated configuration to new VMs that are added to the group.
+    This flag enables automatic application of an updated configuration to existing VMs.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#nested_update_policy), [doc](https://cloud.google.com/compute/docs/instance-groups/rolling-out-updates-to-managed-instance-groups) 
+    EOT
+  type        = bool
+  default     = true
+
+  validation {
+    condition     = var.enable_auto_config_apply != null
+    error_message = "must not be null"
+  }
+}
+
+variable "instance_template_id" {
+  description = <<-EOT
+    The full URL to an instance template from which all new instances of this version will be created.
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_group_manager#instance_template).
+    EOT
+  type        = string
+}
+
 variable "project_id" {
   description = <<-EOT
     The ID of the project in which the resource belongs.
@@ -38,24 +63,6 @@ variable "resource_prefix" {
   }
 }
 
-variable "zone" {
-  description = <<-EOT
-    The zone that instances in this group should be created in.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone).
-    EOT
-  type        = string
-}
-
-variable "instance_template_id" {
-  description = <<-EOT
-    The full URL to an instance template from which all new instances of this version will be created.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_group_manager#instance_template).
-    EOT
-  type        = string
-}
-
 variable "target_size" {
   description = <<-EOT
     The number of running instances for this managed instance group.
@@ -70,7 +77,7 @@ variable "target_size" {
   }
 }
 
-variable "wait_for_instance" {
+variable "wait_for_instances" {
   description = <<-EOT
     Whether to wait for all instances to be created/updated before returning. Note that if this is set to true and the operation does not succeed, Terraform will continue trying until it times out.
 
@@ -80,23 +87,16 @@ variable "wait_for_instance" {
   default     = true
 
   validation {
-    condition     = var.wait_for_instance != null
+    condition     = var.wait_for_instances != null
     error_message = "must not be null"
   }
 }
 
-variable "enable_auto_config_apply" {
+variable "zone" {
   description = <<-EOT
-    Whenever you update a MIG's instance_template, Compute Engine automatically applies your updated configuration to new VMs that are added to the group.
-    This flag enables automatic application of an updated configuration to existing VMs.
+    The zone that instances in this group should be created in.
 
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#nested_update_policy), [doc](https://cloud.google.com/compute/docs/instance-groups/rolling-out-updates-to-managed-instance-groups) 
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone).
     EOT
-  type        = bool
-  default     = true
-
-  validation {
-    condition     = var.enable_auto_config_apply != null
-    error_message = "must not be null"
-  }
+  type        = string
 }

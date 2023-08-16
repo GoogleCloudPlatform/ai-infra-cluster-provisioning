@@ -133,5 +133,5 @@ module "compute_instance_group_manager" {
   zone                 = var.zone
   instance_template_id = module.compute_instance_template.id
   target_size          = var.target_size
-  wait_for_instance    = var.wait_for_instance
+  wait_for_instances   = var.wait_for_instances
 }

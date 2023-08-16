@@ -1,5 +1,11 @@
-target_size                  = 1
-zone                         = "us-central1-a"
+instance_groups = [
+  {
+    target_size = 4
+    zone        = "us-east4-a"
+  },
+]
+region = "us-east4-a"
+
 use_compact_placement_policy = true
 container = {
   image       = "debian"
