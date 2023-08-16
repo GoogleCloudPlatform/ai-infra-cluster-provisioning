@@ -4,3 +4,5 @@ instance_groups = [
     zone        = "us-central1-a"
   },
 ]
+region                       = "us-central1"
+use_compact_placement_policy = true

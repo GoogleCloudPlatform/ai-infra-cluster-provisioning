@@ -11,7 +11,7 @@
           ]
         },
         {
-          "address": "module.compute_instance_group_manager"
+          "address": "module.compute_instance_group_manager[0]"
         }
       ]
     }

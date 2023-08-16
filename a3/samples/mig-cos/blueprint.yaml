@@ -25,6 +25,7 @@ vars:
   - target_size: 4
     zone: us-east4-a
   project_id: my-project-id
+  region: us-east4
   resource_prefix: my-cluster-name
 
 deployment_groups:

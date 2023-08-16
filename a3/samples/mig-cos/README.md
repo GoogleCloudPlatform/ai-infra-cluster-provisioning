@@ -20,6 +20,7 @@ All optional variables may be omitted to use their default values.
 Required variables:
 - `instance_groups`
 - `project_id`
+- `region`
 - `resource_prefix`
 
 # How to create this cluster
