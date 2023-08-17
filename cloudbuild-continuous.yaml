@@ -32,11 +32,12 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '--tag=test', '--target=test-continuous', '.' ]
-- name: 'gcr.io/cloud-builders/docker'
-  args: [
-    'run', '--network=cloudbuild',
-    'test', "${PROJECT_ID}", "ci-${SHORT_SHA}",
-    ]
+# Removing this until we `a3-highgpu-8g` becomes available to gce-ai-infra
+#- name: 'gcr.io/cloud-builders/docker'
+#  args: [
+#    'run', '--network=cloudbuild',
+#    'test', "${PROJECT_ID}", "ci-${SHORT_SHA}",
+#    ]
 
 
 images:
