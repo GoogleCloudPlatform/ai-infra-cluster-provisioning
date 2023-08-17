@@ -26,7 +26,7 @@
               }
             }
           ],
-          "address": "module.resource_policy[\"0\"]"
+          "address": "module.resource_policy[\"np-0\"]"
         }
       ],
       "resources": [
@@ -54,7 +54,7 @@
           }
         },
         {
-          "address": "google_container_node_pool.node-pools[\"0\"]",
+          "address": "google_container_node_pool.node-pools[0]",
           "values": {
             "node_count": 17,
             "node_locations": [

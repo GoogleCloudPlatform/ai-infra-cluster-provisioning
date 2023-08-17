@@ -16,6 +16,12 @@
 
 locals {
   split_cluster_id = var.gke_cluster_exists ? split("/", var.cluster_id) : null
+
+  installer_daemonsets = var.gke_cluster_exists ? {
+    device_plugin = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml"
+    nvidia_driver = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml"
+    nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml"
+  } : {}
 }
 
 data "google_container_cluster" "gke_cluster" {
@@ -63,14 +69,16 @@ resource "kubernetes_service_account" "gke-sa" {
   }
 }
 
-// Installing NVIDIA GPU driver daemonset.
 // ref: https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers
-data "http" "nvidia_driver_installer_manifest" {
-  url = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml"
+data "http" "installer_daemonsets" {
+  for_each = local.installer_daemonsets
+
+  url = each.value
 }
 
-resource "kubectl_manifest" "nvidia_driver_installer" {
-  count            = var.install_nvidia_driver && var.gke_cluster_exists ? 1 : 0
-  yaml_body        = data.http.nvidia_driver_installer_manifest.response_body
+resource "kubectl_manifest" "installer_daemonsets" {
+  for_each = local.installer_daemonsets
+
+  yaml_body        = data.http.installer_daemonsets[each.key].response_body
   wait_for_rollout = false
 }

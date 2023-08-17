@@ -37,7 +37,7 @@
           }
         },
         {
-          "address": "google_container_node_pool.node-pools[\"0\"]",
+          "address": "google_container_node_pool.node-pools[0]",
           "values": {
             "node_count": 1,
             "node_locations": [

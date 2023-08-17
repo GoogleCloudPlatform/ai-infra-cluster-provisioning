@@ -63,7 +63,7 @@ module "dashboard" {
 module "resource_policy" {
   source = "../../common/resource_policy"
   for_each = {
-    for idx, node_pool in var.node_pools : idx => node_pool
+    for idx, node_pool in var.node_pools : "np-${idx}" => node_pool
     if node_pool.enable_compact_placement
   }
   project_id           = var.project_id
@@ -178,16 +178,13 @@ resource "google_container_cluster" "cluster" {
 # having to destroy the entire cluster.
 resource "google_container_node_pool" "node-pools" {
   provider = google-beta
-
-  for_each = {
-    for idx, node_pool in var.node_pools : idx => node_pool
-  }
+  count    = length(var.node_pools)
 
   project        = var.project_id
-  name           = "nodepool-${each.key}"
+  name           = "np-${count.index}"
   cluster        = google_container_cluster.cluster.id
-  node_locations = [each.value.zone]
-  node_count     = each.value.node_count
+  node_locations = [var.node_pools[count.index].zone]
+  node_count     = var.node_pools[count.index].node_count
 
   upgrade_settings {
     max_surge       = 0
@@ -241,10 +238,10 @@ resource "google_container_node_pool" "node-pools" {
   }
 
   dynamic "placement_policy" {
-    for_each = each.value.enable_compact_placement ? [1] : []
+    for_each = var.node_pools[count.index].enable_compact_placement ? [1] : []
     content {
       type        = "COMPACT"
-      policy_name = "${var.resource_prefix}-${each.key}"
+      policy_name = "${var.resource_prefix}-np-${count.index}"
     }
   }
 
@@ -286,13 +283,13 @@ module "kubernetes-operations" {
   source                = "./kubernetes-operations"
   project_id            = var.project_id
   cluster_id            = resource.google_container_cluster.cluster.id
-  gke_cluster_exists    = local.kubernetes_setup_config.enable_kubernetes_setup
+  gke_cluster_exists    = var.kubernetes_setup_config.enable_kubernetes_setup
   install_nvidia_driver = true
   setup_kubernetes_service_account = (
-    local.kubernetes_setup_config.enable_kubernetes_setup ?
+    var.kubernetes_setup_config.enable_kubernetes_setup ?
     {
-      kubernetes_service_account_name      = local.kubernetes_setup_config.kubernetes_service_account_name
-      kubernetes_service_account_namespace = local.kubernetes_setup_config.kubernetes_service_account_namespace
+      kubernetes_service_account_name      = var.kubernetes_setup_config.kubernetes_service_account_name
+      kubernetes_service_account_namespace = var.kubernetes_setup_config.kubernetes_service_account_namespace
       google_service_account_name          = local.node_service_account
     } :
     null
