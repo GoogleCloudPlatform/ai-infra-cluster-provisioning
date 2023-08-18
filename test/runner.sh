@@ -101,9 +101,9 @@ runner::validate_args () {
     } >&2
 
     [ "${#runner_arg_resource_prefix}" -gt 11 ] && {
-        echo "Splitting resource_prefix".
-        runner_arg_resource_prefix=${runner_arg_resource_prefix:0:11}
-        echo "New resource_prefix is ${runner_arg_resource_prefix}."
+        echo "resource_prefix='${runner_arg_resource_prefix}'".
+        echo " - Must be length 11 or less -- '${runner_arg_resource_prefix:0:11}'"
+        valid=false
     } >&2
 
     [ -n "${runner_opt_filter}" ] || {
@@ -151,7 +151,6 @@ runner::run () {
         }; then
             skipped_test_command="${test_command#skip::}"
             tests_skipped+=("${skipped_test_command}")
-            print_test "${skipped_test_command}" 'skipped'
             continue
         fi
 
@@ -176,9 +175,6 @@ runner::run () {
 
     if [ "${#tests_skipped[@]}" -ne 0 ]; then
         echo -e "${#tests_skipped[@]} of ${test_count} tests skipped"
-        for skipped_test in "${tests_skipped[@]}"; do
-            print_test "${skipped_test}" skipped
-        done
     fi
 
     if [ "${#tests_failed[@]}" -ne 0 ]; then
