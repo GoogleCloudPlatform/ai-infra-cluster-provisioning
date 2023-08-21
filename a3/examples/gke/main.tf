@@ -3,7 +3,7 @@ variable "project_id" {}
 variable "resource_prefix" {}
 
 module "a3-gke" {
-  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/gke"
+  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3/terraform/modules/cluster/gke"
 
   node_pools      = var.node_pools
   project_id      = var.project_id

@@ -8,3 +8,4 @@ instance_groups = [
     zone        = "us-east4-a"
   },
 ]
+region = "us-east4"
