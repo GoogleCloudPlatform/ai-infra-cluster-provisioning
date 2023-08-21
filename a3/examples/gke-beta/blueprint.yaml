@@ -32,4 +32,4 @@ deployment_groups:
 - group: primary
   modules:
   - id: a3-gke-beta
-    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/gke-beta"
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3/terraform/modules/cluster/gke-beta"
