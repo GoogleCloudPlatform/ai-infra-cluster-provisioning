@@ -32,7 +32,7 @@ Required variables:
 
 # How to create this cluster
 
-Refer to [this section](../../README.md#how-to-provision-a-cluster).
+Refer to [this section](../../../README.md#how-to-provision-a-cluster).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -47,7 +47,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_a3-gke-beta"></a> [a3-gke-beta](#module\_a3-gke-beta) | github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//terraform/modules/cluster/gke-beta | n/a |
+| <a name="module_a3-gke-beta"></a> [a3-gke-beta](#module\_a3-gke-beta) | github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3/terraform/modules/cluster/gke-beta | n/a |
 
 ## Resources
 
