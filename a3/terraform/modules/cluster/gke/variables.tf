@@ -95,10 +95,14 @@ variable "node_service_account" {
   default     = null
 }
 
-variable "use_stable_fleet" {
-  description = "Flag to use stable fleet VM by specifying maintenance interval."
-  type        = bool
-  default     = true
+variable "host_maintenance_interval" {
+  description = "Specifies the frequency of planned maintenance events. 'PERIODIC' is th only supported value for host_maintenance_interval. This enables using stable fleet VM."
+  type        = string
+  default     = "PERIODIC"
+  validation {
+    condition     = contains(["PERIODIC"], var.host_maintenance_interval)
+    error_message = "'PERIODIC' is th only supported value for host_maintenance_interval."
+  }
 }
 
 variable "node_pools" {

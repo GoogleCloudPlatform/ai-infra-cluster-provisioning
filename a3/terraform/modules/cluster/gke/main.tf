@@ -224,9 +224,9 @@ resource "google_container_node_pool" "node-pools" {
     }
 
     dynamic "host_maintenance_policy" {
-      for_each = var.use_stable_fleet ? [1] : []
+      for_each = var.host_maintenance_interval != null ? [1] : []
       content {
-        maintenance_interval = "PERIODIC"
+        maintenance_interval = var.host_maintenance_interval
       }
     }
 

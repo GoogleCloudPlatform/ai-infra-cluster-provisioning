@@ -244,12 +244,16 @@ variable "machine_image" {
 
 variable "maintenance_interval" {
   description = <<-EOT
-  Specifies the frequency of planned maintenance events.
+  Specifies the frequency of planned maintenance events. 'PERIODIC' is th only supported value for maintenance_interval.
 
   Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#maintenance_interval).
     EOT
   type        = string
   default     = null
+  validation {
+    condition     = contains(["PERIODIC"], var.maintenance_interval)
+    error_message = "'PERIODIC' is th only supported value for maintenance_interval."
+  }
 }
 
 variable "metadata" {
