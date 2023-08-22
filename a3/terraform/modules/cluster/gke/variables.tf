@@ -100,12 +100,12 @@ variable "node_pools" {
     The list of node pools for the GKE cluster.
     - `zone`: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
     - `node_count`: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
-    - `enable_compact_placement`: (Optional)Flag to enable compact placement policy to use for the node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
+    - `use_compact_placement_policy`: (Optional)The flag to create and use a superblock level compact placement policy for the instances. Currently only 1 resource policy is supported. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
     EOT
   type = list(object({
-    zone                     = string,
-    node_count               = number,
-    enable_compact_placement = optional(bool, false)
+    zone                         = string,
+    node_count                   = number,
+    use_compact_placement_policy = optional(bool, false)
   }))
   default  = []
   nullable = false

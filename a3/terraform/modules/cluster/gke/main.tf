@@ -64,7 +64,7 @@ module "resource_policy" {
   source = "../../common/resource_policy"
   for_each = {
     for idx, node_pool in var.node_pools : "np-${idx}" => node_pool
-    if node_pool.enable_compact_placement
+    if node_pool.use_compact_placement_policy
   }
   project_id           = var.project_id
   resource_policy_name = "${var.resource_prefix}-${each.key}"
@@ -238,7 +238,7 @@ resource "google_container_node_pool" "node-pools" {
   }
 
   dynamic "placement_policy" {
-    for_each = var.node_pools[count.index].enable_compact_placement ? [1] : []
+    for_each = var.node_pools[count.index].use_compact_placement_policy ? [1] : []
     content {
       type        = "COMPACT"
       policy_name = "${var.resource_prefix}-np-${count.index}"
