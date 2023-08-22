@@ -61,6 +61,7 @@ No requirements.
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | GCP Project ID to which the cluster will be deployed. | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The region in which the cluster master will be created. The cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well. | `string` | n/a | yes |
 | <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | Arbitrary string with which all names of newly created resources will be prefixed. | `string` | n/a | yes |
+| <a name="input_use_stable_fleet"></a> [use\_stable\_fleet](#input\_use\_stable\_fleet) | Flag to use stable fleet VM by specifying maintenance interval. | `bool` | `true` | no |
 
 ## Outputs
 

@@ -223,6 +223,13 @@ resource "google_container_node_pool" "node-pools" {
       "disable-legacy-endpoints" = "true"
     }
 
+    dynamic "host_maintenance_policy" {
+      for_each = var.use_stable_fleet ? [1] : []
+      content {
+        maintenance_interval = "PERIODIC"
+      }
+    }
+
     oauth_scopes = local.oauth_scopes
   }
 

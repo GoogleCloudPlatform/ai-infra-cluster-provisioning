@@ -95,6 +95,12 @@ variable "node_service_account" {
   default     = null
 }
 
+variable "use_stable_fleet" {
+  description = "Flag to use stable fleet VM by specifying maintenance interval."
+  type        = bool
+  default     = true
+}
+
 variable "node_pools" {
   description = <<-EOT
     The list of node pools for the GKE cluster.
