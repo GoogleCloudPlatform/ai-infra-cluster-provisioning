@@ -223,6 +223,10 @@ resource "google_container_node_pool" "node-pools" {
       "disable-legacy-endpoints" = "true"
     }
 
+    labels = {
+      "cloud.google.com/gke-kdump-enabled" = "true"
+    }
+
     dynamic "host_maintenance_policy" {
       for_each = var.host_maintenance_interval != null ? [1] : []
       content {
