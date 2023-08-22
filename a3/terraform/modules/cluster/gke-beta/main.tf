@@ -186,6 +186,39 @@ resource "null_resource" "gke-node-pool-command" {
   depends_on = [null_resource.gke-cluster-command, module.network]
 }
 
+resource "null_resource" "gke-node-pool-resize-command" {
+  for_each = {
+    for idx, rnc in var.resize_node_counts : idx => rnc
+  }
+
+  triggers = {
+    project_id     = var.project_id
+    cluster_name   = var.resource_prefix
+    node_pool_name = "np-${each.key}"
+    region         = var.region
+    node_count     = each.value
+  }
+
+  provisioner "local-exec" {
+    when        = create
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
+      ${path.module}/scripts/gke_node_pool_resize.sh \
+      ${self.triggers.project_id} \
+      ${self.triggers.cluster_name} \
+      ${self.triggers.node_pool_name} \
+      ${self.triggers.region} \
+      ${self.triggers.node_count}
+    EOT
+    environment = {
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_CONTAINER = "${self.triggers.gke_endpoint}"
+    }
+    on_failure = fail
+  }
+
+  depends_on = [null_resource.gke-node-pool-command]
+}
+
 output "gke-cluster-name" {
   value = null_resource.gke-cluster-command.triggers.cluster_name
 }

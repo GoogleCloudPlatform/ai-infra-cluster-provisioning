@@ -44,6 +44,7 @@ gke_node_pool::create () {
         --machine-type='a3-highgpu-8g' \
         --node-locations="${zone}" \
         --num-nodes="${node_count}" \
+        --node-labels="cloud.google.com/gke-kdump-enabled=true" \
         --placement-policy="${resource_policy}" \
         --project="${project_id}" \
         --scopes "https://www.googleapis.com/auth/cloud-platform" \

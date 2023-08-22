@@ -40,6 +40,7 @@ No requirements.
 | [google_project_iam_member.node_service_account_monitoringViewer](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [null_resource.gke-cluster-command](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.gke-node-pool-command](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [null_resource.gke-node-pool-resize-command](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.kubernetes-setup-command](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [google_client_config.current](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/client_config) | data source |
 | [google_compute_default_service_account.account](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_default_service_account) | data source |
@@ -59,6 +60,7 @@ No requirements.
 | <a name="input_node_service_account"></a> [node\_service\_account](#input\_node\_service\_account) | The service account to be used by the Node VMs. If not specified, the "default" service account is used.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#nested_node_config), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--service-account). | `string` | `null` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | GCP Project ID to which the cluster will be deployed. | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The region in which the cluster master will be created. The cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well. | `string` | n/a | yes |
+| <a name="input_resize_node_counts"></a> [resize\_node\_counts](#input\_resize\_node\_counts) | The list of resized node counts for node pools of the GKE cluster.<br>The resize node count is used in the same order as the node pool, i.e: the first resize node count will be applied for the first node pool and so on. | `list(number)` | `[]` | no |
 | <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | Arbitrary string with which all names of newly created resources will be prefixed. | `string` | n/a | yes |
 
 ## Outputs
