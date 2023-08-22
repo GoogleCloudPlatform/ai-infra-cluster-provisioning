@@ -100,7 +100,10 @@ variable "host_maintenance_interval" {
   type        = string
   default     = "PERIODIC"
   validation {
-    condition     = var.host_maintenance_interval == null || contains(["PERIODIC"], coalesce(var.host_maintenance_interval, "PERIODIC"))
+    condition = var.host_maintenance_interval != null ? contains(
+      ["PERIODIC"],
+      var.host_maintenance_interval,
+    ) : true
     error_message = "'PERIODIC' is th only supported value for host_maintenance_interval."
   }
 }

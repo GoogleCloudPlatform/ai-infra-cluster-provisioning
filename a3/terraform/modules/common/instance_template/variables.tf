@@ -112,7 +112,10 @@ variable "maintenance_interval" {
     EOT
   type        = string
   validation {
-    condition     = var.maintenance_interval == null || contains(["PERIODIC"], coalesce(var.maintenance_interval, "PERIODIC"))
+    condition = var.maintenance_interval != null ? contains(
+      ["PERIODIC"],
+      var.maintenance_interval,
+    ) : true
     error_message = "'PERIODIC' is th only supported value for maintenance_interval."
   }
 }
