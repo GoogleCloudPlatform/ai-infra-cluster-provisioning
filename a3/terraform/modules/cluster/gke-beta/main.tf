@@ -123,7 +123,7 @@ resource "null_resource" "gke-node-pool-command" {
     node_count      = each.value.node_count
     disk_type       = var.disk_type
     disk_size       = var.disk_size_gb
-    resource_policy = module.resource_policy[each.value].resource_name
+    resource_policy = module.resource_policy[tonumber(each.key)].resource_name
     gke_endpoint    = local.gke_endpoint_value
     network_1       = "network=${module.network.network_names[1]},subnetwork=${module.network.subnetwork_names[1]}"
     network_2       = "network=${module.network.network_names[2]},subnetwork=${module.network.subnetwork_names[2]}"
