@@ -49,8 +49,10 @@ module "network" {
 }
 
 module "resource_policy" {
-  source               = "../../common/resource_policy"
-  for_each             = toset(var.node_pools)
+  source = "../../common/resource_policy"
+  for_each = {
+    for idx, node_pool in var.node_pools : idx => node_pool
+  }
   project_id           = var.project_id
   resource_policy_name = "${var.resource_prefix}-${each.key}"
   region               = var.region
@@ -107,7 +109,9 @@ resource "null_resource" "gke-cluster-command" {
 }
 
 resource "null_resource" "gke-node-pool-command" {
-  for_each = toset(var.node_pools)
+  for_each = {
+    for idx, node_pool in var.node_pools : idx => node_pool
+  }
 
   triggers = {
     project_id      = var.project_id
