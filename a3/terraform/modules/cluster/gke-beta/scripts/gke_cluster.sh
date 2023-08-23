@@ -31,11 +31,6 @@ gke_cluster::create () {
 
     echo "Creating cluster '${cluster_name}'..." >&2
     gcloud beta container clusters create "${cluster_name}" \
-        --image-type=CUSTOM_CONTAINERD \
-        --image=cos-105-tcpd-2023082201 \
-        --image-project=cos-gke-experimental \
-        --no-enable-autoupgrade \
-        --no-enable-shielded-nodes \
         --cluster-version="${version}" \
         --enable-ip-alias \
         --enable-dataplane-v2 \
