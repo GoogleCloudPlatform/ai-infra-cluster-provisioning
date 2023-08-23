@@ -63,7 +63,7 @@ module "dashboard" {
 module "resource_policy" {
   source = "../../common/resource_policy"
   for_each = {
-    for idx, node_pool in var.node_pools : "np-${idx}" => node_pool
+    for idx, node_pool in var.node_pools : idx => node_pool
     if node_pool.use_compact_placement_policy
   }
   project_id           = var.project_id
