@@ -45,5 +45,6 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_resource_name"></a> [resource\_name](#output\_resource\_name) | The self\_link of the resource policy created. |
 | <a name="output_resource_self_link"></a> [resource\_self\_link](#output\_resource\_self\_link) | The self\_link of the resource policy created. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

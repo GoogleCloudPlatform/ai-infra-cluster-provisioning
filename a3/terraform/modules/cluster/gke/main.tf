@@ -252,7 +252,7 @@ resource "google_container_node_pool" "node-pools" {
     for_each = var.node_pools[count.index].use_compact_placement_policy ? [1] : []
     content {
       type        = "COMPACT"
-      policy_name = "${var.resource_prefix}-np-${count.index}"
+      policy_name = module.resource_policy["np-${count.index}"].resource_name
     }
   }
 
