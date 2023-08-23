@@ -33,7 +33,8 @@ gke_node_pool_resize::resize () {
     gcloud beta container clusters resize "${cluster_name}" \
         --region="${region}" \
         --num-nodes="${node_count}" \
-        --node-pool="${node_pool_name}" || {
+        --node-pool="${node_pool_name}" \
+        --quiet || {
         echo "Failed to create node pool '${node_pool_name}' in cluster '${cluster_name}'."
         return 1
     } >&2
