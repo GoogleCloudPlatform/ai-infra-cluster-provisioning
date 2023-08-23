@@ -49,10 +49,8 @@ module "network" {
 }
 
 module "resource_policy" {
-  source = "../../common/resource_policy"
-  for_each = {
-    for idx, node_pool in var.node_pools : idx => node_pool
-  }
+  source               = "../../common/resource_policy"
+  for_each             = toset(var.node_pools)
   project_id           = var.project_id
   resource_policy_name = "${var.resource_prefix}-${each.key}"
   region               = var.region
@@ -109,9 +107,7 @@ resource "null_resource" "gke-cluster-command" {
 }
 
 resource "null_resource" "gke-node-pool-command" {
-  for_each = {
-    for idx, node_pool in var.node_pools : idx => node_pool
-  }
+  for_each = toset(var.node_pools)
 
   triggers = {
     project_id      = var.project_id
@@ -123,7 +119,7 @@ resource "null_resource" "gke-node-pool-command" {
     node_count      = each.value.node_count
     disk_type       = var.disk_type
     disk_size       = var.disk_size_gb
-    resource_policy = module.resource_policy[idx].resource_name
+    resource_policy = module.resource_policy[each.value].resource_name
     gke_endpoint    = local.gke_endpoint_value
     network_1       = "network=${module.network.network_names[1]},subnetwork=${module.network.subnetwork_names[1]}"
     network_2       = "network=${module.network.network_names[2]},subnetwork=${module.network.subnetwork_names[2]}"
