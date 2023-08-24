@@ -105,6 +105,15 @@ variable "node_pools" {
   }))
 }
 
+variable "resize_node_counts" {
+  description = <<-EOT
+    The list of resized node counts for node pools of the GKE cluster.
+    The resize node count is used in the same order as the node pool, i.e: the first resize node count will be applied for the first node pool and so on.
+    EOT
+  type        = list(number)
+  default     = []
+}
+
 variable "kubernetes_setup_config" {
   description = <<-EOT
     The configuration for setting up Kubernetes after GKE cluster is created.

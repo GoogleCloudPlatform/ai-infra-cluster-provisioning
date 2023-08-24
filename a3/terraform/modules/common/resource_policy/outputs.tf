@@ -18,3 +18,8 @@ output "resource_self_link" {
   description = "The self_link of the resource policy created."
   value       = resource.google_compute_resource_policy.placement_policy.self_link
 }
+
+output "resource_name" {
+  description = "The self_link of the resource policy created."
+  value       = resource.google_compute_resource_policy.placement_policy.name
+}

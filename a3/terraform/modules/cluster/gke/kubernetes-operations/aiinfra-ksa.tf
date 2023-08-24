@@ -69,7 +69,6 @@ resource "kubernetes_service_account" "gke-sa" {
   }
 }
 
-// ref: https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers
 data "http" "installer_daemonsets" {
   for_each = local.installer_daemonsets
 
