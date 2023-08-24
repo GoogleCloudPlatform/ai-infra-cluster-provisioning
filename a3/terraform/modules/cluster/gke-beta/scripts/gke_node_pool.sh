@@ -41,7 +41,7 @@ gke_node_pool::create () {
         --disk-size="${disk_size}" \
         --enable-gvnic \
         --host-maintenance-interval='PERIODIC' \
-        --machine-type='a3-highgpu-8g' \
+        --machine-type="${machine_type}" \
         --node-locations="${zone}" \
         --num-nodes="${node_count}" \
         --node-labels="cloud.google.com/gke-kdump-enabled=true" \
@@ -88,14 +88,15 @@ main () {
     local -r zone="${5:?}"
     local -r region="${6:?}"
     local -r node_count="${7:?}"
-    local -r disk_type="${8:?}"
-    local -r disk_size="${9:?}"
-    local -r prefix="${10:?}"
-    local -r resource_policy="${11:?}"
-    local -r network_1="${12:?}"
-    local -r network_2="${13:?}"
-    local -r network_3="${14:?}"
-    local -r network_4="${15:?}"
+    local -r machine_type="${8:?}"
+    local -r disk_type="${9:?}"
+    local -r disk_size="${10:?}"
+    local -r prefix="${11:?}"
+    local -r resource_policy="${12:?}"
+    local -r network_1="${13:?}"
+    local -r network_2="${14:?}"
+    local -r network_3="${15:?}"
+    local -r network_4="${16:?}"
 
     case "${action}" in
         'create')

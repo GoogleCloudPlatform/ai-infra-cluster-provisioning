@@ -113,12 +113,14 @@ variable "node_pools" {
     The list of node pools for the GKE cluster.
     - `zone`: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
     - `node_count`: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
-    - `use_compact_placement_policy`: (Optional)The flag to create and use a superblock level compact placement policy for the instances. Currently only 1 resource policy is supported. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
+    - `use_compact_placement_policy`: (Optional) The flag to create and use a superblock level compact placement policy for the instances. Currently only 1 resource policy is supported. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
+    - `machine_type`: (Optional) The machine type for the node pool. Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'. [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
     EOT
   type = list(object({
     zone                         = string,
     node_count                   = number,
-    use_compact_placement_policy = optional(bool, false)
+    use_compact_placement_policy = optional(bool, false),
+    machine_type                 = optional(string, "a3-highgpu-8g")
   }))
   default  = []
   nullable = false
@@ -126,6 +128,14 @@ variable "node_pools" {
   validation {
     condition     = length(var.node_pools) != 0
     error_message = "must be non-empty list"
+  }
+
+  validation {
+    condition = alltrue([
+      for np in var.node_pools
+      : contains(["a3-highgpu-8g", "a2-highgpu-1g"], np.machine_type)
+    ])
+    error_message = "Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'."
   }
 }
 

@@ -55,6 +55,22 @@ variable "resource_prefix" {
   type        = string
 }
 
+variable "machine_type" {
+  description = <<-EOT
+    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource).
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
+    EOT
+  type        = string
+  default     = "a3-highgpu-8g"
+  nullable    = false
+
+  validation {
+    condition     = contains(["a3-highgpu-8g", "a2-highgpu-1g"], var.machine_type)
+    error_message = "Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'."
+  }
+}
+
 variable "disk_size_gb" {
   description = <<-EOT
     The size of the image in gigabytes for the boot disk of each instance.
