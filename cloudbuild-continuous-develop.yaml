@@ -34,6 +34,6 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'run', '--network=cloudbuild',
-    'test', "${PROJECT_ID}", "ci-${BUILD_ID}" ]
+    'test', "${PROJECT_ID}", "ci-${SHORT_SHA}" ]
 
 timeout: 5400s
