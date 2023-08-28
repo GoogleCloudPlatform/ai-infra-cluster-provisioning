@@ -121,6 +121,7 @@ resource "null_resource" "gke-node-pool-command" {
     zone            = each.value.zone
     region          = var.region
     node_count      = each.value.node_count
+    machine_type    = each.value.machine_type
     disk_type       = var.disk_type
     disk_size       = var.disk_size_gb
     resource_policy = module.resource_policy[tonumber(each.key)].resource_name
@@ -142,6 +143,7 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.zone} \
       ${self.triggers.region} \
       ${self.triggers.node_count} \
+      ${self.triggers.machine_type} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
       ${self.triggers.prefix} \
@@ -168,6 +170,7 @@ resource "null_resource" "gke-node-pool-command" {
       ${self.triggers.zone} \
       ${self.triggers.region} \
       ${self.triggers.node_count} \
+      ${self.triggers.machine_type} \
       ${self.triggers.disk_type} \
       ${self.triggers.disk_size} \
       ${self.triggers.prefix} \

@@ -97,12 +97,16 @@ variable "node_pools" {
     ```
     zone: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
     node_count: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
+    machine_type: (Optional) The machine type for the node pool. Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'. [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
     ```
     EOT
   type = list(object({
-    zone       = string,
-    node_count = number,
+    zone         = string,
+    node_count   = number,
+    machine_type = optional(string, "a3-highgpu-8g")
   }))
+  default  = []
+  nullable = false
 }
 
 variable "resize_node_counts" {

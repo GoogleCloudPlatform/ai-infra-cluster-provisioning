@@ -199,7 +199,7 @@ resource "google_container_node_pool" "node-pools" {
 
   node_config {
     service_account = local.node_service_account
-    machine_type    = "a3-highgpu-8g"
+    machine_type    = var.node_pools[count.index].machine_type
     image_type      = "COS_CONTAINERD"
     disk_size_gb    = var.disk_size_gb
     disk_type       = var.disk_type

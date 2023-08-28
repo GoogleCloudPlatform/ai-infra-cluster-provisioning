@@ -105,11 +105,12 @@ module "startup" {
 
 module "compute_instance_template" {
   source = "../../common/instance_template"
+  count  = length(var.instance_groups)
 
   disk_size_gb                 = var.disk_size_gb
   disk_type                    = var.disk_type
   machine_image                = var.machine_image
-  machine_type                 = "a3-highgpu-8g"
+  machine_type                 = var.instance_groups[count.index].machine_type
   maintenance_interval         = null
   metadata                     = var.metadata
   project_id                   = var.project_id
@@ -130,7 +131,7 @@ module "compute_instance_group_manager" {
   project_id           = var.project_id
   resource_prefix      = "${var.resource_prefix}-${count.index}"
   zone                 = var.instance_groups[count.index].zone
-  instance_template_id = module.compute_instance_template.id
+  instance_template_id = module.compute_instance_template[count.index].id
   target_size          = var.instance_groups[count.index].target_size
   wait_for_instances   = var.wait_for_instances
 }

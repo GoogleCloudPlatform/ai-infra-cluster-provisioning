@@ -11,13 +11,18 @@
           ]
         },
         {
+          "address": "module.compute_instance_template[1]",
+          "child_modules": [
+            {
+              "address": "module.compute_instance_template[1].module.resource_policy[0]"
+            }
+          ]
+        },
+        {
           "address": "module.compute_instance_group_manager[0]"
         },
         {
-          "address": "module.dashboard"
-        },
-        {
-          "address": "module.startup"
+          "address": "module.compute_instance_group_manager[1]"
         }
       ]
     }
