@@ -107,14 +107,6 @@ variable "node_pools" {
   }))
   default  = []
   nullable = false
-
-  validation {
-    condition = alltrue([
-      for np in var.node_pools
-      : contains(["a3-highgpu-8g", "a2-highgpu-1g"], np.machine_type)
-    ])
-    error_message = "Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'."
-  }
 }
 
 variable "resize_node_counts" {

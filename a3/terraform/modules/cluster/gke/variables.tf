@@ -129,14 +129,6 @@ variable "node_pools" {
     condition     = length(var.node_pools) != 0
     error_message = "must be non-empty list"
   }
-
-  validation {
-    condition = alltrue([
-      for np in var.node_pools
-      : contains(["a3-highgpu-8g", "a2-highgpu-1g"], np.machine_type)
-    ])
-    error_message = "Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'."
-  }
 }
 
 variable "kubernetes_setup_config" {
