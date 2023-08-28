@@ -19,10 +19,12 @@ variable "instance_groups" {
     Required Fields:
     - `target_size`: The number of running instances for this managed instance group. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#target_size), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--size).
     - `zone`: The zone that instances in this group should be created in. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone).
+    - `machine_type`: (Optional)The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource). Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
     EOT
   type = list(object({
-    zone        = string
-    target_size = number
+    zone         = string
+    target_size  = number
+    machine_type = optional(string, "a3-highgpu-8g")
   }))
   nullable = false
 
@@ -55,22 +57,6 @@ variable "resource_prefix" {
   description = "Arbitrary string with which all names of newly created resources will be prefixed."
   type        = string
   nullable    = false
-}
-
-variable "machine_type" {
-  description = <<-EOT
-    The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource).
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
-    EOT
-  type        = string
-  default     = "a3-highgpu-8g"
-  nullable    = false
-
-  validation {
-    condition     = contains(["a3-highgpu-8g", "a2-highgpu-1g"], var.machine_type)
-    error_message = "Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'."
-  }
 }
 
 variable "container" {

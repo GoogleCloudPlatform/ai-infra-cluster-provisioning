@@ -3,6 +3,11 @@ instance_groups = [
     target_size = 4
     zone        = "us-east4-a"
   },
+  {
+    target_size  = 1
+    zone         = "us-east4-a"
+    machine_type = "a2-highgpu-1g"
+  },
 ]
 region = "us-east4"
 
