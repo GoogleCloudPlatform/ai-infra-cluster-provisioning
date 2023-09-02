@@ -29,29 +29,29 @@ gke_cluster::create () {
         return 1
     } >&2
 
+    echo "Updating default subnet" >&2
+    gcloud compute networks subnets update default \
+      --region "${region}" \
+      --add-secondary-ranges="${cluster_name}-pods=10.150.0.0/21,${cluster_name}-services=10.150.8.0/21"
+
     echo "Creating cluster '${cluster_name}'..." >&2
     gcloud beta container clusters create "${cluster_name}" \
-        --cluster-version="${version}" \
-        --enable-ip-alias \
+        --image-type=CUSTOM_CONTAINERD \
+        --no-enable-autoupgrade \
+        --no-enable-shielded-nodes \
         --enable-dataplane-v2 \
-        --enable-multi-networking \
-        --num-nodes='1' \
-        --network="${network_name}" \
-        --project="${project_id}" \
         --region="${region}" \
+        --enable-ip-alias \
+        --enable-multi-networking \
+        --num-nodes='15' \
+        --cluster-version="${version}" \
+        --project="${project_id}" \
+        --network="${network_name}" \
         --subnetwork="${subnetwork_name}" \
+        --cluster-secondary-range-name="${cluster_name}-pods" \
+        --services-secondary-range-name="${cluster_name}-services" \
         --workload-pool="${project_id}.svc.id.goog" || {
         echo "Failed to create cluster '${cluster_name}'."
-        return 1
-    } >&2
-
-    echo "Deleting node pool 'default-pool' in cluster '${cluster_name}'..." >&2
-    gcloud container node-pools delete 'default-pool' \
-        --cluster="${cluster_name}" \
-        --project="${project_id}" \
-        --quiet \
-        --region="${region}" || {
-        echo "Failed to delete node pool 'default-pool' from cluster '${cluster_name}'."
         return 1
     } >&2
 }

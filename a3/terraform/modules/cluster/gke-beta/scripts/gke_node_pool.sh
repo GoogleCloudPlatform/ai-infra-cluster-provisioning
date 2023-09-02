@@ -31,23 +31,29 @@ gke_node_pool::create () {
 
     echo "Creating node pool '${node_pool_name}' in cluster '${cluster_name}'..." >&2
     gcloud beta container node-pools create "${node_pool_name}" \
+        --image-type="CUSTOM_CONTAINERD" \
+        --image=cos-105-17412-156-30 \
+        --image-project=cos-cloud \
         --cluster="${cluster_name}" \
         --region="${region}" \
+        --node-locations="${zone}" \
+        --project="${project_id}" \
+        --machine-type="${machine_type}" \
+        --num-nodes="${node_count}" \
+        --disk-type="${disk_type}" \
+        --disk-size="${disk_size}" \
+        --ephemeral-storage-local-ssd count=16 \
+        --scopes "https://www.googleapis.com/auth/cloud-platform" \
         --additional-node-network="${network_1}" \
         --additional-node-network="${network_2}" \
         --additional-node-network="${network_3}" \
         --additional-node-network="${network_4}" \
-        --disk-type="${disk_type}" \
-        --disk-size="${disk_size}" \
         --enable-gvnic \
         --host-maintenance-interval='PERIODIC' \
-        --machine-type="${machine_type}" \
-        --node-locations="${zone}" \
-        --num-nodes="${node_count}" \
-        --node-labels="cloud.google.com/gke-kdump-enabled=true" \
+        --max-pods-per-node=20 \
         --placement-policy="${resource_policy}" \
-        --project="${project_id}" \
-        --scopes "https://www.googleapis.com/auth/cloud-platform" \
+        --no-enable-autoupgrade \
+        --no-enable-autorepair \
         --workload-metadata='GKE_METADATA' || {
         echo "Failed to create node pool '${node_pool_name}' in cluster '${cluster_name}'."
         return 1
@@ -97,6 +103,8 @@ main () {
     local -r network_2="${14:?}"
     local -r network_3="${15:?}"
     local -r network_4="${16:?}"
+    local -r image_name="${17:-}"
+    local -r image_project="${18:-}"
 
     case "${action}" in
         'create')
