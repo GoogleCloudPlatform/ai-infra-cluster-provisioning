@@ -80,6 +80,26 @@ gke_cluster::destroy () {
     } >&2
 }
 
+# This function:
+# - if the action is 'create' then creates a GKE cluster using gcloud commands
+#   - Checks if the cluster exists.
+#   - Creates a GKE cluster if does not exist using custom COS image.
+# - if the action is 'destroy' then deletes the GKE cluster using gcloud commands
+#   - Checks if the cluster exists.
+#   - Deletes the GKE cluster if exists.
+#
+# Params:
+#   - `action`: The action to perform. Value can be 'create' or 'delete'
+#   - `project_id`: The project ID to use to create the GKE cluster.
+#   - `cluster_name`: The GKE cluster name.
+#   - `region`: The region to create the GKE cluster in.
+#   - `version`: The GKE cluster version.
+#   - `network_name`: The GKE cluster network name.
+#   - `subnetwork_name`: The GKE cluster subnetwork name.
+# Output: none
+# Exit status:
+#   - 0: All actions succeeded
+#   - 1: One of the actions failed
 main () {
     local -r action="${1:?}"
     local -r project_id="${2:?}"
