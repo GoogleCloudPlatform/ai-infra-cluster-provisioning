@@ -31,9 +31,6 @@ gke_node_pool::create () {
 
     echo "Creating node pool '${node_pool_name}' in cluster '${cluster_name}'..." >&2
     gcloud beta container node-pools create "${node_pool_name}" \
-        --image-type="CUSTOM_CONTAINERD" \
-        --image=cos-105-17412-156-30 \
-        --image-project=cos-cloud \
         --cluster="${cluster_name}" \
         --region="${region}" \
         --node-locations="${zone}" \
@@ -50,7 +47,7 @@ gke_node_pool::create () {
         --additional-node-network="${network_4}" \
         --enable-gvnic \
         --host-maintenance-interval='PERIODIC' \
-        --max-pods-per-node=20 \
+        --max-pods-per-node=36 \
         --placement-policy="${resource_policy}" \
         --no-enable-autoupgrade \
         --no-enable-autorepair \

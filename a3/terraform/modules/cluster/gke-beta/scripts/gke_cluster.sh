@@ -36,7 +36,6 @@ gke_cluster::create () {
 
     echo "Creating cluster '${cluster_name}'..." >&2
     gcloud beta container clusters create "${cluster_name}" \
-        --image-type=CUSTOM_CONTAINERD \
         --no-enable-autoupgrade \
         --no-enable-shielded-nodes \
         --enable-dataplane-v2 \
