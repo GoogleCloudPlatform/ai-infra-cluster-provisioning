@@ -37,8 +37,6 @@ gke_node_pool::create () {
         --project="${project_id}" \
         --machine-type="${machine_type}" \
         --num-nodes="${node_count}" \
-        --disk-type="${disk_type}" \
-        --disk-size="${disk_size}" \
         --ephemeral-storage-local-ssd count=16 \
         --scopes "https://www.googleapis.com/auth/cloud-platform" \
         --additional-node-network="${network_1}" \
@@ -112,16 +110,12 @@ main () {
     local -r region="${6:?}"
     local -r node_count="${7:?}"
     local -r machine_type="${8:?}"
-    local -r disk_type="${9:?}"
-    local -r disk_size="${10:?}"
-    local -r prefix="${11:?}"
-    local -r resource_policy="${12:?}"
-    local -r network_1="${13:?}"
-    local -r network_2="${14:?}"
-    local -r network_3="${15:?}"
-    local -r network_4="${16:?}"
-    local -r image_name="${17:-}"
-    local -r image_project="${18:-}"
+    local -r prefix="${9:?}"
+    local -r resource_policy="${10:?}"
+    local -r network_1="${11:?}"
+    local -r network_2="${12:?}"
+    local -r network_3="${13:?}"
+    local -r network_4="${14:?}"
 
     case "${action}" in
         'create')
