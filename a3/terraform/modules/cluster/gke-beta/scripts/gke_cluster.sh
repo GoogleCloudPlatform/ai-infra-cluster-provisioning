@@ -29,10 +29,15 @@ gke_cluster::create () {
         return 1
     } >&2
 
-    echo "Updating default subnet" >&2
-    gcloud compute networks subnets update default \
-      --region "${region}" \
-      --add-secondary-ranges="${cluster_name}-pods=10.150.0.0/21,${cluster_name}-services=10.150.8.0/21"
+    # TODO: enable after adding variables for secondary ranges when using existing network
+    # echo "Updating default subnet" >&2
+    # gcloud compute networks subnets update default \
+    #   --region "${region}" \
+    #   --add-secondary-ranges="${cluster_name}-pods=10.150.0.0/21,${cluster_name}-services=10.150.8.0/21"
+    #
+    # Then add this to 'cluster create' command
+    #    --cluster-secondary-range-name="${cluster_name}-pods" \
+    #    --services-secondary-range-name="${cluster_name}-services" \
 
     echo "Creating cluster '${cluster_name}'..." >&2
     gcloud beta container clusters create "${cluster_name}" \
@@ -47,8 +52,6 @@ gke_cluster::create () {
         --project="${project_id}" \
         --network="${network_name}" \
         --subnetwork="${subnetwork_name}" \
-        --cluster-secondary-range-name="${cluster_name}-pods" \
-        --services-secondary-range-name="${cluster_name}-services" \
         --workload-pool="${project_id}.svc.id.goog" || {
         echo "Failed to create cluster '${cluster_name}'."
         return 1
