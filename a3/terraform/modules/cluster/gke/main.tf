@@ -227,6 +227,11 @@ resource "google_container_node_pool" "node-pools" {
       "cloud.google.com/gke-kdump-enabled" = "true"
     }
 
+    # Enables local NVMe SSDs. Should not be used for non-a3 machine types.
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count = 16
+    }
+
     dynamic "host_maintenance_policy" {
       for_each = var.host_maintenance_interval != null ? [1] : []
       content {
