@@ -199,7 +199,7 @@ resource "google_container_node_pool" "node-pools" {
 
   node_config {
     service_account = local.node_service_account
-    machine_type    = "a3-highgpu-8g"
+    machine_type    = var.node_pools[count.index].machine_type
     image_type      = "COS_CONTAINERD"
     disk_size_gb    = var.disk_size_gb
     disk_type       = var.disk_type
@@ -225,6 +225,11 @@ resource "google_container_node_pool" "node-pools" {
 
     labels = {
       "cloud.google.com/gke-kdump-enabled" = "true"
+    }
+
+    # Enables local NVMe SSDs. Should not be used for non-a3 machine types.
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count = 16
     }
 
     dynamic "host_maintenance_policy" {

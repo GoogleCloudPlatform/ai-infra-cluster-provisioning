@@ -1,11 +1,13 @@
 node_pools = [
   {
-    zone       = "us-east4-a"
-    node_count = 0
+    zone         = "us-central1-a"
+    machine_type = "a2-highgpu-1g"
+    node_count   = 0
   },
   {
-    zone       = "us-east4-a"
-    node_count = 0
+    zone         = "us-central1-a"
+    machine_type = "a2-highgpu-1g"
+    node_count   = 0
   },
 ]
-region = "us-east4"
+region = "us-central1"

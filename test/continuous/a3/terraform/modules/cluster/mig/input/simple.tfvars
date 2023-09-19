@@ -1,11 +1,13 @@
 instance_groups = [
   {
-    target_size = 0
-    zone        = "us-east4-a"
+    target_size  = 0
+    zone         = "us-central1-a"
+    machine_type = "a2-highgpu-8g"
   },
   {
-    target_size = 0
-    zone        = "us-east4-a"
+    target_size  = 0
+    zone         = "us-central1-a"
+    machine_type = "a2-highgpu-1g"
   },
 ]
-region = "us-east4"
+region = "us-central1"

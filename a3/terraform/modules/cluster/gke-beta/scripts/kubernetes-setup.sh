@@ -15,21 +15,15 @@
 # limitations under the License.
 
 kubernetes-setup::install_drivers () {
-    echo 'Applying GPU device plugin installer' >&2
-    kubectl apply -f 'https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml' || {
-        echo 'Failed to apply GPU device plugin installer'
-        return 1
-    } >&2
-    
     echo 'Applying Nvidia driver installer' >&2
     kubectl apply -f 'https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml' || {
         echo 'Failed to apply Nvidia driver installer'
         return 1
     } >&2
 
-    echo 'Applying NCCL plugin installer' >&2
-    kubectl apply -f 'https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml' || {
-        echo 'Failed to apply NCCL plugin installer'
+    echo 'Applying fixup daemonset' >&2
+    kubectl apply -f fixup_daemon_set.yaml || {
+        echo 'Failed to apply fixup daemonset'
         return 1
     } >&2
 }
