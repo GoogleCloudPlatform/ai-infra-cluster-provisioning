@@ -138,18 +138,21 @@ variable "kubernetes_setup_config" {
     - `enable_kubernetes_setup`: Flag to enable kubernetes setup
     - `kubernetes_service_account_name`: The KSA (kubernetes service account) name to be used for Pods
     - `kubernetes_service_account_namespace`: The KSA (kubernetes service account) namespace to be used for Pods
+    - `enable_ray`: Flag to install KubeRay operators on the cluster
 
     Related Docs: [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
     EOT
   type = object({
     enable_kubernetes_setup              = bool,
     kubernetes_service_account_name      = string,
-    kubernetes_service_account_namespace = string
+    kubernetes_service_account_namespace = string,
+    enable_ray                           = bool,
   })
   default = {
     enable_kubernetes_setup              = true
     kubernetes_service_account_name      = "aiinfra-gke-sa"
     kubernetes_service_account_namespace = "default"
+    enable_ray                           = false
   }
   nullable = false
 }
