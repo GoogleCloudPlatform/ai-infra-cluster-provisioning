@@ -13,20 +13,6 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-
-locals {
-  split_cluster_id = var.gke_cluster_exists ? split("/", var.cluster_id) : null
-}
-
-data "google_container_cluster" "gke_cluster" {
-  count    = var.gke_cluster_exists ? 1 : 0
-  project  = var.project_id
-  name     = local.split_cluster_id[5]
-  location = local.split_cluster_id[3]
-}
-
-data "google_client_config" "default" {}
-
 provider "helm" {
   kubernetes {
     host                   = var.gke_cluster_exists ? "https://${data.google_container_cluster.gke_cluster[0].endpoint}" : ""

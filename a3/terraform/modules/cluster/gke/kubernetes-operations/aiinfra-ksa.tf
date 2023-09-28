@@ -15,35 +15,11 @@
   */
 
 locals {
-  split_cluster_id = var.gke_cluster_exists ? split("/", var.cluster_id) : null
-
   installer_daemonsets = var.gke_cluster_exists ? {
     device_plugin = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml"
     nvidia_driver = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml"
     nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml"
   } : {}
-}
-
-data "google_container_cluster" "gke_cluster" {
-  count    = var.gke_cluster_exists ? 1 : 0
-  project  = var.project_id
-  name     = local.split_cluster_id[5]
-  location = local.split_cluster_id[3]
-}
-
-data "google_client_config" "default" {}
-
-provider "kubernetes" {
-  host                   = var.gke_cluster_exists ? "https://${data.google_container_cluster.gke_cluster[0].endpoint}" : ""
-  cluster_ca_certificate = var.gke_cluster_exists ? base64decode(data.google_container_cluster.gke_cluster[0].master_auth.0.cluster_ca_certificate) : ""
-  token                  = data.google_client_config.default.access_token
-}
-
-provider "kubectl" {
-  host                   = var.gke_cluster_exists ? "https://${data.google_container_cluster.gke_cluster[0].endpoint}" : ""
-  cluster_ca_certificate = var.gke_cluster_exists ? base64decode(data.google_container_cluster.gke_cluster[0].master_auth.0.cluster_ca_certificate) : ""
-  token                  = data.google_client_config.default.access_token
-  load_config_file       = false
 }
 
 // Binding KSA to google service account.
