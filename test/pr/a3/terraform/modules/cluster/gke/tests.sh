@@ -62,8 +62,6 @@ test::a3::terraform::gke::kuberay_install () {
 
     local -r tfshow=$(mktemp)
     helpers::terraform_show "$(a3::terraform::gke::src_dir)" "${tfplan}" >"${tfshow}"
-
-    echo "${tfshow}"
     EXPECT_SUCCEED helpers::json_contains \
         "$(a3::terraform::gke::output_dir)/gke-ray.json" \
         "${tfshow}"
