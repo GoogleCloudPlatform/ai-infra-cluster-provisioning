@@ -108,6 +108,17 @@ variable "host_maintenance_interval" {
   }
 }
 
+variable "enable_ray" {
+  description = "Install [Ray](https://docs.ray.io/en/latest/cluster/getting-started.html) operators for GKE by installing [KubeRay](https://github.com/ray-project/kuberay)."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = var.enable_ray != null
+    error_message = "must not be null"
+  }
+}
+
 variable "node_pools" {
   description = <<-EOT
     The list of node pools for the GKE cluster.
@@ -146,13 +157,11 @@ variable "kubernetes_setup_config" {
     enable_kubernetes_setup              = bool,
     kubernetes_service_account_name      = string,
     kubernetes_service_account_namespace = string,
-    enable_ray                           = bool,
   })
   default = {
     enable_kubernetes_setup              = true
     kubernetes_service_account_name      = "aiinfra-gke-sa"
     kubernetes_service_account_namespace = "default"
-    enable_ray                           = false
   }
   nullable = false
 }
