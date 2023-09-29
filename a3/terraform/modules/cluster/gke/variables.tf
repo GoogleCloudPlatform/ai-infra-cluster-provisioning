@@ -112,11 +112,7 @@ variable "enable_ray" {
   description = "Install [Ray](https://docs.ray.io/en/latest/cluster/getting-started.html) operators for GKE by installing [KubeRay](https://github.com/ray-project/kuberay)."
   type        = bool
   default     = false
-
-  validation {
-    condition     = var.enable_ray != null
-    error_message = "must not be null"
-  }
+  nullable    = false
 }
 
 variable "node_pools" {
