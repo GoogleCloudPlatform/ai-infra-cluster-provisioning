@@ -151,7 +151,7 @@ variable "kubernetes_setup_config" {
   type = object({
     enable_kubernetes_setup              = bool,
     kubernetes_service_account_name      = string,
-    kubernetes_service_account_namespace = string,
+    kubernetes_service_account_namespace = string
   })
   default = {
     enable_kubernetes_setup              = true
