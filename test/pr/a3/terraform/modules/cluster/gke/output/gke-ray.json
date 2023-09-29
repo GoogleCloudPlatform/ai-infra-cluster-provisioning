@@ -1,35 +1,28 @@
 {
   "planned_values": {
-    "root_module": {
-      "resources": [
-        {
-          "address": "helm_release.kuberay",
-          "mode": "managed",
-          "type": "helm_release",
-          "name": "kuberay",
-          "provider_config_key": "module.kubernetes-operations:helm",
-          "expressions": {
-              "chart": {
-                  "constant_value": "kuberay-operator"
-              },
-              "name": {
-                  "constant_value": "kuberay"
-              },
-              "repository": {
-                  "constant_value": "https://ray-project.github.io/kuberay-helm/"
-              },
-              "version": {
-                  "constant_value": "1.0.0-rc.0"
+      "root_module": {
+          "child_modules": [
+              {
+                  "resources": [
+                      {
+                          "address": "module.kubernetes-operations.helm_release.kuberay[0]",
+                          "mode": "managed",
+                          "type": "helm_release",
+                          "name": "kuberay",
+                          "provider_name": "registry.terraform.io/hashicorp/helm",
+                          "values": {
+                              "atomic": false,
+                              "chart": "kuberay-operator",
+                              "name": "kuberay",
+                              "namespace": "default",
+                              "repository": "https://ray-project.github.io/kuberay-helm/",
+                              "version": "1.0.0-rc.0",
+                              "wait": true
+                          }
+                      }
+                  ]
               }
-          },
-          "schema_version": 1,
-          "count_expression": {
-              "references": [
-                  "var.enable_ray"
-              ]
-          }
-        }
-      ]
-    }
+          ]
+      }
   }
 }
