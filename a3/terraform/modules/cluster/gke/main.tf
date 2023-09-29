@@ -140,7 +140,6 @@ resource "google_container_cluster" "cluster" {
     services_ipv4_cidr_block = "/20"
   }
 
-
   release_channel {
     channel = "UNSPECIFIED"
   }
