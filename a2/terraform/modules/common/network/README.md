@@ -47,7 +47,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_nic_existing"></a> [nic\_existing](#input\_nic\_existing) | Existing network to attach to the host nic. Setting to null will create a new network for it. | <pre>object({<br>    network_name    = string<br>    subnetwork_name = string<br>  })</pre> | n/a | yes |
+| <a name="input_nic_existing"></a> [nic\_existing](#input\_nic\_existing) | Existing network to attach to the host nic. Setting to null will create a new network for it. | <pre>object({<br>    network_name    = string<br>    subnetwork_name = string<br>  })</pre> | `null` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The ID of the project in which the resource belongs.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#project). | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The region in which the subnetwork has been / will be created.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork#region), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/networks/subnets/create#--region). | `string` | n/a | yes |
 | <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | Arbitrary string with which all names of newly created resources will be prefixed. | `string` | n/a | yes |

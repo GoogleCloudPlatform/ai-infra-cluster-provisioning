@@ -20,6 +20,7 @@ variable "nic_existing" {
     network_name    = string
     subnetwork_name = string
   })
+  default = null
 }
 
 variable "project_id" {

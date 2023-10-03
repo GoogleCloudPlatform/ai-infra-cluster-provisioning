@@ -246,7 +246,7 @@ variable "subnetwork_self_link" {
 
 variable "network_self_link" {
   description = "The network self-link for the host VPC."
-  type        = list(string)
+  type        = string
 
   validation {
     condition     = var.network_self_link != null
