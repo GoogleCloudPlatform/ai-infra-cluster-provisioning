@@ -14,10 +14,10 @@
 
 ---
 
-blueprint_name: a3-mig-cos
+blueprint_name: a2-mig
 
 vars:
-  deployment_name: a3-mig-cos
+  deployment_name: a2-mig
 
   instance_groups:
   - target_size: 4
@@ -31,5 +31,5 @@ vars:
 deployment_groups:
 - group: primary
   modules:
-  - id: a3-mig-cos
-    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3/terraform/modules/cluster/mig-cos"
+  - id: a2-mig
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a2/terraform/modules/cluster/mig"

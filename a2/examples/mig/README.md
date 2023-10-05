@@ -1,20 +1,19 @@
 # The cluster
 
 This configuration creates two Managed Instance Groups of four
-[`a3-highgpu-8g`](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus)
+[`a2-highgpu-1g`](https://cloud.google.com/compute/docs/gpus#a100-40gb)
 VM instances each (eight instances in total). Each instance has:
-- eight [NVidia H100 GPUs](https://www.nvidia.com/en-us/data-center/h100/),
-- five [NICs](https://cloud.google.com/vpc/docs/multiple-interfaces-concepts)
-  (one VPC for the host network and four dedicated to the GPUs),
-- a [COS-Cloud](https://cloud.google.com/container-optimized-os/docs) machine
+- eight [NVidia A100 GPUs](https://www.nvidia.com/en-us/data-center/a100/),
+- one [NIC]
+- a [DLVM](https://cloud.google.com/deep-learning-vm) machine
   image,
-- TCPX, Nvidia GPU drivers, and NCCL plugin installed
+- Nvidia GPU drivers
 
 # The tfvars file
 
 The `terraform.tfvars` file is what configures the cluster. Detailed
 descriptions of each variable can be found in
-[this `README`](../../terraform/modules/cluster/mig-cos/README.md).
+[this `README`](../../terraform/modules/cluster/mig/README.md).
 All optional variables may be omitted to use their default values.
 
 Required variables:
@@ -25,7 +24,7 @@ Required variables:
 
 # How to create this cluster
 
-Refer to [this section](../../../README.md#how-to-provision-a-cluster).
+Refer to [this section](../../../a2/README.md#quickstart-with-mig).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -40,7 +39,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_a3-mig-cos"></a> [a3-mig-cos](#module\_a3-mig-cos) | github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3/terraform/modules/cluster/mig-cos | n/a |
+| <a name="module_a2-mig"></a> [a2-mig](#module\_a2-mig) | github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a2/terraform/modules/cluster/mig | n/a |
 
 ## Resources
 

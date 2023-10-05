@@ -3,8 +3,8 @@ variable "project_id" {}
 variable "region" {}
 variable "resource_prefix" {}
 
-module "a3-mig-cos" {
-  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3/terraform/modules/cluster/mig-cos"
+module "a2-mig" {
+  source = "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a2/terraform/modules/cluster/mig"
 
   instance_groups = var.instance_groups
   project_id      = var.project_id
