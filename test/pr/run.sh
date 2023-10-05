@@ -14,7 +14,6 @@
 . ./test/pr/a2/terraform/modules/cluster/mig/tests.sh
 . ./test/pr/a2/terraform/modules/common/dashboard/tests.sh
 . ./test/pr/a2/terraform/modules/common/instance_template/tests.sh
-. ./test/pr/a2/terraform/modules/common/instance_group_manager/tests.sh
 . ./test/pr/a2/terraform/modules/common/network/tests.sh
 . ./test/pr/a2/terraform/modules/common/resource_policy/tests.sh
 . ./test/pr/scripts/enable_ops_agent.sh

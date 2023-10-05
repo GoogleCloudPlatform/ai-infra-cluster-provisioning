@@ -1,6 +1,11 @@
 {
   "planned_values": {
     "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_instance_group_manager.mig[0]"
+        }
+      ],
       "child_modules": [
         {
           "address": "module.compute_instance_template[0]",
@@ -11,13 +16,13 @@
           ]
         },
         {
-          "address": "module.compute_instance_group_manager[0]"
-        },
-        {
           "address": "module.dashboard"
         },
         {
           "address": "module.startup"
+        },
+        {
+          "address": "module.network"
         }
       ]
     }
