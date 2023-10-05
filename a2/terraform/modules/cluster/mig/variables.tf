@@ -51,6 +51,7 @@ variable "instance_groups" {
 variable "project_id" {
   description = "GCP Project ID to which the cluster will be deployed."
   type        = string
+  nullable    = false
 }
 
 variable "region" {
@@ -62,6 +63,7 @@ variable "region" {
 variable "resource_prefix" {
   description = "Arbitrary string with which all names of newly created resources will be prefixed."
   type        = string
+  nullable    = false
 }
 
 variable "disk_size_gb" {
@@ -72,6 +74,7 @@ variable "disk_size_gb" {
     EOT
   type        = number
   default     = 128
+  nullable    = false
 }
 
 variable "disk_type" {
@@ -84,6 +87,7 @@ variable "disk_type" {
     EOT
   type        = string
   default     = "pd-ssd"
+  nullable    = false
 }
 
 variable "filestore_new" {
@@ -127,7 +131,8 @@ variable "filestore_new" {
     size_gb        = number
     zone           = string
   }))
-  default = []
+  default  = []
+  nullable = false
 }
 
 variable "gcsfuse_existing" {
@@ -154,7 +159,8 @@ variable "gcsfuse_existing" {
     local_mount  = string
     remote_mount = string
   }))
-  default = []
+  default  = []
+  nullable = false
 }
 
 variable "enable_ops_agent" {
@@ -163,22 +169,14 @@ variable "enable_ops_agent" {
     EOT
   type        = bool
   default     = true
-
-  validation {
-    condition     = var.enable_ops_agent != null
-    error_message = "must not be null"
-  }
+  nullable    = false
 }
 
 variable "enable_ray" {
   description = "Install [Ray](https://docs.ray.io/en/latest/cluster/getting-started.html)."
   type        = bool
   default     = false
-
-  validation {
-    condition     = var.enable_ray != null
-    error_message = "must not be null"
-  }
+  nullable    = false
 }
 
 variable "labels" {
@@ -189,6 +187,7 @@ variable "labels" {
     EOT
   type        = map(string)
   default     = {}
+  nullable    = false
 }
 
 variable "machine_image" {
@@ -228,6 +227,7 @@ variable "machine_image" {
     family  = "pytorch-latest-gpu-debian-11-py310"
     name    = null
   }
+  nullable = false
 }
 
 variable "metadata" {
@@ -238,6 +238,7 @@ variable "metadata" {
     EOT
   type        = map(string)
   default     = {}
+  nullable    = false
 }
 
 variable "network_existing" {
@@ -304,6 +305,7 @@ variable "use_compact_placement_policy" {
   description = "The flag to create and use a superblock level compact placement policy for the instances. Currently GCE supports using only 1 placement policy."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "wait_for_instances" {
@@ -314,4 +316,5 @@ variable "wait_for_instances" {
     EOT
   type        = bool
   default     = true
+  nullable    = false
 }

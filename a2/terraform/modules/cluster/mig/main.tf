@@ -124,14 +124,31 @@ module "compute_instance_template" {
   labels                       = merge(var.labels, { ghpc_role = "compute" })
 }
 
-module "compute_instance_group_manager" {
-  source = "../../common/instance_group_manager"
-  count  = length(var.instance_groups)
+resource "google_compute_instance_group_manager" "mig" {
+  provider = google-beta
+  count    = length(var.instance_groups)
 
-  project_id           = var.project_id
-  resource_prefix      = "${var.resource_prefix}-${count.index}"
-  zone                 = var.instance_groups[count.index].zone
-  instance_template_id = module.compute_instance_template[count.index].id
-  target_size          = var.instance_groups[count.index].target_size
-  wait_for_instances   = var.wait_for_instances
+  base_instance_name = "${var.resource_prefix}-${count.index}"
+  name               = "${var.resource_prefix}-${count.index}"
+  project            = var.project_id
+  target_size        = var.instance_groups[count.index].target_size
+  wait_for_instances = var.wait_for_instances
+  zone               = var.instance_groups[count.index].zone
+
+  update_policy {
+    max_unavailable_fixed = 1
+    minimal_action        = "RESTART"
+    replacement_method    = "RECREATE" # Instance name will be preserved
+    type                  = "PROACTIVE"
+  }
+
+  version {
+    instance_template = module.compute_instance_template[count.index].id
+    name              = "default"
+  }
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+  }
 }
