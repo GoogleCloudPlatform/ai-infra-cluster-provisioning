@@ -64,7 +64,7 @@ resource "google_compute_network" "nic0" {
   count = var.nic0_existing != null ? 0 : 1
 
   auto_create_subnetworks = false
-  mtu                     = 8228
+  mtu                     = 8896
   name                    = var.resource_prefix
   project                 = var.project_id
 }
@@ -139,7 +139,7 @@ resource "google_compute_network" "gpus" {
   count = 4
 
   auto_create_subnetworks = false
-  mtu                     = 8228
+  mtu                     = 8244
   name                    = "${var.resource_prefix}-gpu-${count.index}"
   project                 = var.project_id
 }
