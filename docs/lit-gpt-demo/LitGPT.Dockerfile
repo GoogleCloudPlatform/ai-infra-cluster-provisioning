@@ -12,6 +12,6 @@ RUN apt-get update && \
 
 
 COPY scripts /workspace/scripts
-
+COPY lit-gpt/pretrain/openwebtext_trainer.py /workspace/pretrain/
 
 ENTRYPOINT ["/bin/bash", "/workspace/scripts/litgpt_container_entrypoint.sh"]
