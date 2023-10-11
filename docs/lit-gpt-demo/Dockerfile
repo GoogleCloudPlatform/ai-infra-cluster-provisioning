@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM nvcr.io/nvidia/pytorch:23.07-py3
+FROM nvcr.io/nvidia/pytorch:23.09-py3
 
 
 # Ensure apt-get won't prompt for selecting options
@@ -16,27 +16,11 @@ RUN apt-get update && \
   libavdevice-dev && \
   rm -rf /var/lib/apt/lists/*
 
-# GCSfuse components
-RUN apt-get update && apt-get install --yes --no-install-recommends \
-    ca-certificates \
-    curl \
-    gnupg \
-  && echo "deb http://packages.cloud.google.com/apt gcsfuse-focal main" \
-    | tee /etc/apt/sources.list.d/gcsfuse.list \
-  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
-  && apt-get update \
-  && apt-get install --yes gcsfuse \
-  && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && mkdir -p /gcs/training-data && mkdir -p /gcs/checkpoints
-
-# NFS components (needed if using PD-SSD for shared file-system)
-RUN apt-get -y update && apt-get install -y nfs-common
-
 WORKDIR /workspace/
 
 COPY requirements.txt requirements.txt
 
-RUN MAX_JOBS=4 pip install 'flash-attn>=2.0.0.post1' --no-build-isolation \
+RUN MAX_JOBS=4 pip install 'flash-attn' --no-build-isolation \
   && pip install -r requirements.txt tokenizers sentencepiece ujson
 
 RUN pip install nvidia-dlprof-pytorch-nvtx nvidia-pyindex nvidia-dlprof

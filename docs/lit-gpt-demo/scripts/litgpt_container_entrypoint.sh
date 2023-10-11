@@ -9,24 +9,34 @@ set -o pipefail
 : "${JOB_TIMESTAMP:?Must set JOB_TIMESTAMP}"
 : "${EXPERIMENT_ROOT_DIR:?Must set EXPERIMENT_ROOT_DIR}"
 : "${NNODES:?Must set NNODES}"
+: "${DATA_DIR:?Must set DATA_DIR}"
 
+EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
+mkdir -p $EXPERIMENT_LOCAL_DIR
 
-gcsfuse --max-conns-per-host 65535 "$GCS_BUCKET" /gcs
+echo $EXPERIMENT_ROOT_DIR
+echo $EXPERIMENT_LOCAL_DIR
+
+gsutil rsync -r gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+
+LOCAL_DATA_DIR=/data
+mkdir -p $LOCAL_DATA_DIR
+gsutil -m rsync gs://${GCS_BUCKET}/${DATA_DIR} /data
 
 export MASTER_PORT=6002
 export GPUS_PER_NODE=8
 export WORLD_SIZE=$((NNODES * GPUS_PER_NODE))
 
-PROFILING_DIR=$EXPERIMENT_ROOT_DIR/nsys_profiles
+PROFILING_DIR=$EXPERIMENT_LOCAL_DIR/nsys_profiles
 mkdir -p $PROFILING_DIR
 
-LOG_DIR=$EXPERIMENT_ROOT_DIR/training_logs
+LOG_DIR=$EXPERIMENT_LOCAL_DIR/training_logs
 mkdir -p $LOG_DIR
 
-OUT_DIR=$EXPERIMENT_ROOT_DIR/out
+OUT_DIR=$EXPERIMENT_LOCAL_DIR/out
 mkdir -p $OUT_DIR
 
-DEBUG_DIR=$EXPERIMENT_ROOT_DIR/debug
+DEBUG_DIR=$EXPERIMENT_LOCAL_DIR/debug
 mkdir -p $DEBUG_DIR
 
 export NCCL_TOPO_DUMP_FILE=$DEBUG_DIR/nccl_topo_${JOB_TIMESTAMP}_${NODE_RANK}.xml
@@ -109,6 +119,8 @@ function on_script_completion {
    # semaphore to cleanly exit hardware utilization monitor
    touch /tmp/workload_terminated
 
+   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
+   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/
 }
 
 
