@@ -65,9 +65,6 @@ set_nccl_specific_configuration() {
     export NCCL_GPUDIRECTTCPX_CTRL_DEV=eth0
     export NCCL_GPUDIRECTTCPX_PROGRAM_FLOW_STEERING_WAIT_MICROS=1000000
 
-    if [[ "$TCPX_FORCE_ACK" == "yes" ]]; then
-      export NCCL_GPUDIRECTTCPX_FORCE_ACK=1
-    fi
   else
     echo "NOT using TCPX"
   fi
@@ -153,7 +150,8 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
 
    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
      $CMD_PREFIX \
-     python /workspace/pretrain/openwebtext_trainer.py > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
+     python /workspace/pretrain/openwebtext_trainer.py \
+     --devices=$GPUS_PER_NODE > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
    PID=$!
    PIDS+=($PID)
 
