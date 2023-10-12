@@ -92,7 +92,7 @@ spec:
     - "-c"
     - |
       /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd &
-      while [ ! -e "/usr/share/nemo/workload_terminated" ]; do sleep 10; done
+      while [ ! -e "/usr/share/litgpt/workload_terminated" ]; do sleep 10; done
     securityContext:
       privileged: true
     volumeMounts:
@@ -101,7 +101,7 @@ spec:
     - name: tcpd-socket
       mountPath: /tmp
     - name: workload-terminated-volume
-      mountPath: /usr/share/nemo
+      mountPath: /usr/share/litgpt
     env:
     - name: LD_LIBRARY_PATH
       value: /usr/local/nvidia/lib64
@@ -161,7 +161,7 @@ spec:
       - name: shared-memory
         mountPath: /dev/shm
       - name: workload-terminated-volume
-        mountPath: /usr/share/nemo
+        mountPath: /usr/share/litgpt
     resources:
       limits:
         nvidia.com/gpu: !!int 8
