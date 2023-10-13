@@ -91,7 +91,7 @@ spec:
     - "bash"
     - "-c"
     - |
-      /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd &
+      /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd --disable_quickack &
       while [ ! -e "/usr/share/litgpt/workload_terminated" ]; do sleep 10; done
     securityContext:
       privileged: true
