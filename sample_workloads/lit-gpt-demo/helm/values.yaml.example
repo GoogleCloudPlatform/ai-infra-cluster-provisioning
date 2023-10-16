@@ -1,0 +1,18 @@
+cluster:
+  nNodes: <int: add number of nodes here>
+  nodePool: <str: add nodepool name here (no need to add quotes)>
+network:
+  useTcpx: <str: either "yes" or "no">
+  ncclIfnames: 'eth0'
+  ncclPlugin: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.5-v3-ns
+  rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.6
+  disablePmtu: "yes"
+
+
+workload:
+  gcsBucket: <str: your gcs bucket where data is located>
+  jobTimestamp: <int: add a timestamp here or unique identifier>
+  experimentDir: <str: root gcs directory of experiment>
+  dataDir: <str: location with gcs bucket of where train.bin and val.bin are located>
+  image: us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/litgpt-full:<ADD TAG HERE>
+  configDirInBucket: null
