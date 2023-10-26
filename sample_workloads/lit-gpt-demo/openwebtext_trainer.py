@@ -27,7 +27,7 @@ from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision
 model_name = "pythia-70m"
 name = "openwebtext"
 out_dir = Path("out") / name
-data_dir = os.Path(os.getenv("DATASET_DATA_DIR", "gcs/openwebtext_dataset"))
+data_dir = Path("/data")
 save_interval = 1000
 eval_interval = 1000
 eval_iters = 100
