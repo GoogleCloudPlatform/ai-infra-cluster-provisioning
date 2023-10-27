@@ -10,6 +10,14 @@ echo $LITGPT_PATH
 BASE_IMAGE=${BASE_IMAGE:="EITHER ADD HERE OR VIA ENV VAR"}
 FULL_IMAGE=${FULL_IMAGE:="EITHER ADD HERE OR VIA ENV VAR"}
 
+# Clone LitGPT and checkout a flash-attn enabled commit
+if [ ! -d $LITGPT_PATH ]; then
+    git clone https://github.com/Lightning-AI/lit-gpt.git
+    LITGPT_PATH=lit-gpt
+fi
+
+cp Dockerfile $LITGPT_PATH/Dockerfile
+
 cd $LITGPT_PATH
 LITGPT_SHA=$(git rev-parse --short HEAD)
 cd -
