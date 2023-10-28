@@ -13,26 +13,18 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-
-terraform {
-  required_version = ">= 0.13"
-
-  required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.10"
-    }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = ">= 1.7.0"
-    }
-    http = {
-      source  = "hashicorp/http"
-      version = ">= 3.3"
-    }
-    helm = {
-      source = "hashicorp/helm"
-      version = ">= 2.11.0"
-    }
+provider "helm" {
+  kubernetes {
+    host                   = var.gke_cluster_exists ? "https://${data.google_container_cluster.gke_cluster[0].endpoint}" : ""
+    cluster_ca_certificate = var.gke_cluster_exists ? base64decode(data.google_container_cluster.gke_cluster[0].master_auth.0.cluster_ca_certificate) : ""
+    token                  = data.google_client_config.default.access_token
   }
+}
+
+resource "helm_release" "kuberay" {
+  count      = var.enable_ray ? 1 : 0
+  name       = "kuberay"
+  repository = "https://ray-project.github.io/kuberay-helm/"
+  chart      = "kuberay-operator"
+  version    = "1.0.0-rc.0"
 }

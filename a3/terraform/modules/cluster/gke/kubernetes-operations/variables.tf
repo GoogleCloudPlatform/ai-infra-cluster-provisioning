@@ -25,13 +25,19 @@ variable "cluster_id" {
 }
 
 variable "gke_cluster_exists" {
-  description = "If set to false then the kubernetes providers will not be configured."
+  description = "If false then the kubernetes providers will not be configured."
   type        = bool
   default     = true
 }
 
 variable "install_nvidia_driver" {
   description = "If true will create a DaemonSet to install nvidia drivers."
+  type        = bool
+  default     = false
+}
+
+variable "enable_ray" {
+  description = "If true will install the KubeRay operators to create a Ray cluster."
   type        = bool
   default     = false
 }

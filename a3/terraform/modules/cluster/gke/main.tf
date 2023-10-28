@@ -141,7 +141,6 @@ resource "google_container_cluster" "cluster" {
     services_ipv4_cidr_block = "/20"
   }
 
-
   release_channel {
     channel = "UNSPECIFIED"
   }
@@ -297,6 +296,7 @@ module "kubernetes-operations" {
   cluster_id            = resource.google_container_cluster.cluster.id
   gke_cluster_exists    = var.kubernetes_setup_config.enable_kubernetes_setup
   install_nvidia_driver = true
+  enable_ray            = var.enable_ray
   setup_kubernetes_service_account = (
     var.kubernetes_setup_config.enable_kubernetes_setup ?
     {

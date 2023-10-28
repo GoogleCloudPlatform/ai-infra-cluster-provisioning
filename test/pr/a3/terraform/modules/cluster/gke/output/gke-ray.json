@@ -1,0 +1,28 @@
+{
+  "planned_values": {
+      "root_module": {
+          "child_modules": [
+              {
+                  "resources": [
+                      {
+                          "address": "module.kubernetes-operations.helm_release.kuberay[0]",
+                          "mode": "managed",
+                          "type": "helm_release",
+                          "name": "kuberay",
+                          "provider_name": "registry.terraform.io/hashicorp/helm",
+                          "values": {
+                              "atomic": false,
+                              "chart": "kuberay-operator",
+                              "name": "kuberay",
+                              "namespace": "default",
+                              "repository": "https://ray-project.github.io/kuberay-helm/",
+                              "version": "1.0.0-rc.0",
+                              "wait": true
+                          }
+                      }
+                  ]
+              }
+          ]
+      }
+  }
+}
