@@ -115,12 +115,14 @@ variable "node_pools" {
     - `node_count`: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
     - `use_compact_placement_policy`: (Optional) The flag to create and use a superblock level compact placement policy for the instances. Currently only 1 resource policy is supported. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
     - `machine_type`: (Optional) The machine type for the node pool. Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'. [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
+    - `existing_resource_policy_name`: (Optional) The existing resource policy for gSC.
     EOT
   type = list(object({
-    zone                         = string,
-    node_count                   = number,
-    use_compact_placement_policy = optional(bool, false),
-    machine_type                 = optional(string, "a3-highgpu-8g")
+    zone                          = string,
+    node_count                    = number,
+    use_compact_placement_policy  = optional(bool, false),
+    machine_type                  = optional(string, "a3-highgpu-8g"),
+    existing_resource_policy_name = optional(string, null)
   }))
   default  = []
   nullable = false

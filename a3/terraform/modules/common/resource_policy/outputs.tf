@@ -16,10 +16,16 @@
 
 output "resource_self_link" {
   description = "The self_link of the resource policy created."
-  value       = resource.google_compute_resource_policy.placement_policy.self_link
+  value = one(concat(
+    resource.google_compute_resource_policy.new_placement_policy[*].self_link,
+    data.google_compute_resource_policy.existing_placement_policy[*].self_link,
+  ))
 }
 
 output "resource_name" {
   description = "The self_link of the resource policy created."
-  value       = resource.google_compute_resource_policy.placement_policy.name
+  value = one(concat(
+    resource.google_compute_resource_policy.new_placement_policy[*].name,
+    data.google_compute_resource_policy.existing_placement_policy[*].name,
+  ))
 }

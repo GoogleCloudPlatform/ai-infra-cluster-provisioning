@@ -56,9 +56,11 @@ module "resource_policy" {
   for_each = {
     for idx, node_pool in var.node_pools : idx => node_pool
   }
-  project_id           = var.project_id
-  resource_policy_name = "${var.resource_prefix}-${each.key}"
-  region               = var.region
+  project_id                    = var.project_id
+  new_resource_policy_name      = each.value.existing_resource_policy_name == null ? "${var.resource_prefix}-${each.key}" : null
+  existing_resource_policy_name = each.value.existing_resource_policy_name == null ? null : each.value.existing_resource_policy_name
+
+  region = var.region
 }
 
 resource "null_resource" "gke-cluster-command" {

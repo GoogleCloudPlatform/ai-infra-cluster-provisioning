@@ -107,21 +107,22 @@ module "compute_instance_template" {
   source = "../../common/instance_template"
   count  = length(var.instance_groups)
 
-  disk_size_gb                 = var.disk_size_gb
-  disk_type                    = var.disk_type
-  machine_image                = var.machine_image
-  machine_type                 = var.instance_groups[count.index].machine_type
-  maintenance_interval         = null
-  metadata                     = var.metadata
-  project_id                   = var.project_id
-  region                       = var.region
-  resource_prefix              = var.resource_prefix
-  service_account              = var.service_account
-  use_compact_placement_policy = var.use_compact_placement_policy
-  startup_script               = module.startup.startup_script
-  subnetwork_self_links        = module.network.subnetwork_self_links
-  network_self_links           = module.network.network_self_links
-  labels                       = merge(var.labels, { ghpc_role = "compute" })
+  disk_size_gb                  = var.disk_size_gb
+  disk_type                     = var.disk_type
+  machine_image                 = var.machine_image
+  machine_type                  = var.instance_groups[count.index].machine_type
+  maintenance_interval          = null
+  metadata                      = var.metadata
+  project_id                    = var.project_id
+  region                        = var.region
+  resource_prefix               = var.resource_prefix
+  service_account               = var.service_account
+  use_compact_placement_policy  = var.use_compact_placement_policy
+  existing_resource_policy_name = var.instance_groups[count.index].existing_resource_policy_name
+  startup_script                = module.startup.startup_script
+  subnetwork_self_links         = module.network.subnetwork_self_links
+  network_self_links            = module.network.network_self_links
+  labels                        = merge(var.labels, { ghpc_role = "compute" })
 }
 
 module "compute_instance_group_manager" {

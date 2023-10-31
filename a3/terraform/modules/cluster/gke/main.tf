@@ -66,9 +66,10 @@ module "resource_policy" {
     for idx, node_pool in var.node_pools : "np-${idx}" => node_pool
     if node_pool.use_compact_placement_policy
   }
-  project_id           = var.project_id
-  resource_policy_name = "${var.resource_prefix}-${each.key}"
-  region               = var.region
+  project_id                    = var.project_id
+  new_resource_policy_name      = each.value.existing_resource_policy_name == null ? "${var.resource_prefix}-${each.key}" : null
+  existing_resource_policy_name = each.value.existing_resource_policy_name == null ? null : each.value.existing_resource_policy_name
+  region                        = var.region
 }
 
 # Definition of the private GKE cluster.

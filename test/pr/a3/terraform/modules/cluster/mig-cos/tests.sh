@@ -49,3 +49,20 @@ test::a3::terraform::mig-cos::multiple_create_modules () {
         "$(a3::terraform::mig-cos::output_dir)/multimodules.json" \
         "${tfshow}"
 }
+
+test::a3::terraform::mig-cos::gsc_create_modules () {
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(a3::terraform::mig-cos::input_dir)/gsc.tfvars" mig-cos >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
+    EXPECT_SUCCEED helpers::terraform_plan \
+        "$(a3::terraform::mig-cos::src_dir)" \
+        "${tfvars}" \
+        "${tfplan}"
+
+    local -r tfshow=$(mktemp)
+    helpers::terraform_show "$(a3::terraform::mig-cos::src_dir)" "${tfplan}" >"${tfshow}"
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(a3::terraform::mig-cos::output_dir)/gsc.json" \
+        "${tfshow}"
+}
