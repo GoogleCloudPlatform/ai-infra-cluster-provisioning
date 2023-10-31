@@ -1,0 +1,12 @@
+{
+  "planned_values": {
+    "outputs": {
+      "network_name": {
+        "value": "default"
+      },
+      "subnetwork_name": {
+        "value": "default"
+      }
+    }
+  }
+}

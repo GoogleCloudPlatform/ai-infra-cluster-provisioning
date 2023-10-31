@@ -1,0 +1,41 @@
+{
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_compute_instance_group_manager.mig[0]"
+        },
+        {
+          "address": "google_compute_instance_group_manager.mig[1]"
+        }
+      ],
+      "child_modules": [
+        {
+          "address": "module.compute_instance_template[0]",
+          "child_modules": [
+            {
+              "address": "module.compute_instance_template[0].module.resource_policy[0]"
+            }
+          ]
+        },
+        {
+          "address": "module.compute_instance_template[1]",
+          "child_modules": [
+            {
+              "address": "module.compute_instance_template[1].module.resource_policy[0]"
+            }
+          ]
+        },
+        {
+          "address": "module.dashboard"
+        },
+        {
+          "address": "module.startup"
+        },
+        {
+          "address": "module.network"
+        }
+      ]
+    }
+  }
+}
