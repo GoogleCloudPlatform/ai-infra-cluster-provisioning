@@ -15,7 +15,7 @@
             {
               "values": {
                 "resource_policies": [
-                  "https://www.googleapis.com/compute/v1/projects/soumyapani-testing/regions/us-east4/resourcePolicies/test-rp"
+                  "resourcePolicies/test-rp"
                 ]
               }
             }
@@ -27,7 +27,7 @@
             {
               "values": {
                 "resource_policies": [
-                  "https://www.googleapis.com/compute/v1/projects/soumyapani-testing/regions/us-east4/resourcePolicies/test-rp"
+                  "resourcePolicies/test-rp"
                 ]
               }
             }
