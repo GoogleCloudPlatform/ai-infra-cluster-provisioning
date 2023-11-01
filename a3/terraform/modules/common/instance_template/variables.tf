@@ -132,7 +132,7 @@ variable "use_compact_placement_policy" {
 
 variable "existing_resource_policy_name" {
   description = <<-EOT
-    The name of the existing resource policy for gSC. 
+    The name of the existing resource policy. 
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name).
     EOT

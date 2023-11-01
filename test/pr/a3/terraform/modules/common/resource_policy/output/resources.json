@@ -3,7 +3,7 @@
     "root_module": {
       "resources": [
         {
-          "address": "google_compute_resource_policy.placement_policy",
+          "address": "google_compute_resource_policy.new_placement_policy[0]",
           "values": {
             "group_placement_policy": [
               {
