@@ -53,7 +53,7 @@
         {
           "resources": [
             {
-              "address": "module.resource_policy[0].google_compute_resource_policy.placement_policy",
+              "address": "module.resource_policy[0].google_compute_resource_policy.new_placement_policy[0]",
               "values": {
                 "group_placement_policy": [
                   {

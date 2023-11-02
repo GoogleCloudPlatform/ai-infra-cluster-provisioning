@@ -113,14 +113,19 @@ variable "node_pools" {
     The list of node pools for the GKE cluster.
     - `zone`: The zone in which the node pool's nodes should be located. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_locations)
     - `node_count`: The number of nodes per node pool. This field can be used to update the number of nodes per node pool. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#node_count)
-    - `use_compact_placement_policy`: (Optional) The flag to create and use a superblock level compact placement policy for the instances. Currently only 1 resource policy is supported. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
     - `machine_type`: (Optional) The machine type for the node pool. Only supported machine types are 'a3-highgpu-8g' and 'a2-highgpu-1g'. [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#machine_type)
+    - `compact_placement_policy`:(Optional) The object for superblock level compact placement policy for the instances. Currently only 1 resource policy is supported. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool.html#policy_name)
+        - `new_policy`: (Optional) Flag for creating a new resource policy.
+        - `existing_policy_name`: (Optional) The existing resource policy.
     EOT
   type = list(object({
-    zone                         = string,
-    node_count                   = number,
-    use_compact_placement_policy = optional(bool, false),
-    machine_type                 = optional(string, "a3-highgpu-8g")
+    zone         = string,
+    node_count   = number,
+    machine_type = optional(string, "a3-highgpu-8g"),
+    compact_placement_policy = optional(object({
+      new_policy           = optional(bool, false)
+      existing_policy_name = optional(string, null)
+    }), null)
   }))
   default  = []
   nullable = false
@@ -128,6 +133,13 @@ variable "node_pools" {
   validation {
     condition     = length(var.node_pools) != 0
     error_message = "must be non-empty list"
+  }
+
+  validation {
+    condition = alltrue([
+      for rp in var.node_pools[*].compact_placement_policy : rp != null ? (rp.new_policy != (rp.existing_policy_name != null)) : true
+    ])
+    error_message = "must specify exactly one of `new_compact` or `existing_name`"
   }
 }
 

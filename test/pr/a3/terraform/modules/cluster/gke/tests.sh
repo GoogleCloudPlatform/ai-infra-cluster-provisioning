@@ -49,3 +49,20 @@ test::a3::terraform::gke::compact_pp_create_modules () {
         "$(a3::terraform::gke::output_dir)/gke-compact-pp.json" \
         "${tfshow}"
 }
+
+test::a3::terraform::gke::existing_rp_create_modules () {
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(a3::terraform::gke::input_dir)/gke-existing-rp.tfvars" gke >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
+    EXPECT_SUCCEED helpers::terraform_plan \
+        "$(a3::terraform::gke::src_dir)" \
+        "${tfvars}" \
+        "${tfplan}"
+
+    local -r tfshow=$(mktemp)
+    helpers::terraform_show "$(a3::terraform::gke::src_dir)" "${tfplan}" >"${tfshow}"
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(a3::terraform::gke::output_dir)/gke-existing-rp.json" \
+        "${tfshow}"
+}

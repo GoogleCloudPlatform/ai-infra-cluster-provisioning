@@ -21,20 +21,26 @@ variable "project_id" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#project).
     EOT
   type        = string
+  nullable    = false
 }
 
-variable "resource_policy_name" {
+variable "new_resource_policy_name" {
   description = <<-EOT
-    The name of the resource policy to be created. 
+    The name of the new resource policy to be created. 
 
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name).
     EOT
   type        = string
+}
 
-  validation {
-    condition     = var.resource_policy_name != null
-    error_message = "must not be null"
-  }
+variable "existing_resource_policy_name" {
+  description = <<-EOT
+    The name of the existing resource policy. 
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name).
+    EOT
+  type        = string
+  default     = null
 }
 
 variable "region" {
@@ -44,4 +50,5 @@ variable "region" {
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#region).
     EOT
   type        = string
+  nullable    = false
 }
