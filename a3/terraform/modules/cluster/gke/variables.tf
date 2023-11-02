@@ -124,8 +124,9 @@ variable "node_pools" {
     machine_type = optional(string, "a3-highgpu-8g"),
     compact_placement_policy = optional(object({
       new_policy           = optional(bool, false)
-      existing_policy_name = optional(string, null)
-    }), null)
+      existing_policy_name = optional(string)
+      specific_reservation = optional(string)
+    }))
   }))
   default  = []
   nullable = false
@@ -137,7 +138,10 @@ variable "node_pools" {
 
   validation {
     condition = alltrue([
-      for rp in var.node_pools[*].compact_placement_policy : rp != null ? (rp.new_policy != (rp.existing_policy_name != null)) : true
+      for rp in var.node_pools[*].compact_placement_policy
+      : rp != null ? (
+        rp.new_policy != (rp.existing_policy_name != null || rp.specific_reservation != null)
+      ) : true
     ])
     error_message = "must specify exactly one of `new_compact` or `existing_name`"
   }

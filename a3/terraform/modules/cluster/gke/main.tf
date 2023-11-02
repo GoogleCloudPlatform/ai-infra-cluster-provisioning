@@ -236,6 +236,20 @@ resource "google_container_node_pool" "node-pools" {
       }
     }
 
+    dynamic "reservation_affinity" {
+      for_each = try(
+        var.node_pools[count.index].compact_placement_policy.specific_reservation,
+        null
+      ) != null ? [
+        var.node_pools[count.index].compact_placement_policy.specific_reservation
+      ] : []
+      content {
+        consume_reservation_type = "SPECIFIC_RESERVATION"
+        key = "compute.googleapis.com/reservation-name"
+        values = [reservation_affinity.value]
+      }
+    }
+
     oauth_scopes = local.oauth_scopes
   }
 
@@ -307,4 +321,5 @@ module "kubernetes-operations" {
     } :
     null
   )
+  node_pool_ids = resource.google_container_node_pool.node-pools[*].id
 }

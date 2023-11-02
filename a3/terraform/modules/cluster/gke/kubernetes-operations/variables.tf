@@ -52,3 +52,9 @@ variable "setup_kubernetes_service_account" {
   })
   default = null
 }
+
+variable "node_pool_ids" {
+  description = "dummy"
+  type = list(string)
+  default = []
+}
