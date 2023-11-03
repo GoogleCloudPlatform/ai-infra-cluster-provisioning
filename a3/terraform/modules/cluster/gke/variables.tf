@@ -14,24 +14,6 @@
  * limitations under the License.
 */
 
-variable "project_id" {
-  description = "GCP Project ID to which the cluster will be deployed."
-  type        = string
-  nullable    = false
-}
-
-variable "resource_prefix" {
-  description = "Arbitrary string with which all names of newly created resources will be prefixed."
-  type        = string
-  nullable    = false
-}
-
-variable "region" {
-  description = "The region in which the cluster master will be created. The cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well."
-  type        = string
-  nullable    = false
-}
-
 variable "disk_size_gb" {
   description = <<-EOT
     Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB. Defaults to 200GB.
@@ -76,25 +58,6 @@ variable "gke_version" {
   default     = null
 }
 
-variable "network_existing" {
-  description = "Existing network to attach to nic0. Setting to null will create a new network for it."
-  type = object({
-    network_name    = string
-    subnetwork_name = string
-  })
-  default = null
-}
-
-variable "node_service_account" {
-  description = <<-EOT
-    The service account to be used by the Node VMs. If not specified, the "default" service account is used.
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#nested_node_config), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--service-account).
-    EOT
-  type        = string
-  default     = null
-}
-
 variable "host_maintenance_interval" {
   description = "Specifies the frequency of planned maintenance events. 'PERIODIC' is th only supported value for host_maintenance_interval. This enables using stable fleet VM."
   type        = string
@@ -106,6 +69,35 @@ variable "host_maintenance_interval" {
     ) : true
     error_message = "'PERIODIC' is th only supported value for host_maintenance_interval."
   }
+}
+
+variable "ksa" {
+  description = <<-EOT
+    The configuration for setting up Kubernetes Service Account (KSA) after GKE
+    cluster is created. Disable by setting to null.
+
+    - `name`: The KSA name to be used for Pods
+    - `namespace`: The KSA namespace to be used for Pods
+
+    Related Docs: [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+    EOT
+  type = object({
+    name      = string
+    namespace = string
+  })
+  default = {
+    name      = "aiinfra-gke-sa"
+    namespace = "default"
+  }
+}
+
+variable "network_existing" {
+  description = "Existing network to attach to nic0. Setting to null will create a new network for it."
+  type = object({
+    network_name    = string
+    subnetwork_name = string
+  })
+  default = null
 }
 
 variable "node_pools" {
@@ -124,8 +116,9 @@ variable "node_pools" {
     machine_type = optional(string, "a3-highgpu-8g"),
     compact_placement_policy = optional(object({
       new_policy           = optional(bool, false)
-      existing_policy_name = optional(string, null)
-    }), null)
+      existing_policy_name = optional(string)
+      specific_reservation = optional(string)
+    }))
   }))
   default  = []
   nullable = false
@@ -137,31 +130,39 @@ variable "node_pools" {
 
   validation {
     condition = alltrue([
-      for rp in var.node_pools[*].compact_placement_policy : rp != null ? (rp.new_policy != (rp.existing_policy_name != null)) : true
+      for rp in var.node_pools[*].compact_placement_policy
+      : rp != null ? (
+        rp.new_policy != (rp.existing_policy_name != null || rp.specific_reservation != null)
+      ) : true
     ])
     error_message = "must specify exactly one of `new_compact` or `existing_name`"
   }
 }
 
-variable "kubernetes_setup_config" {
+variable "node_service_account" {
   description = <<-EOT
-    The configuration for setting up Kubernetes after GKE cluster is created.
+    The service account to be used by the Node VMs. If not specified, the "default" service account is used.
 
-    - `enable_kubernetes_setup`: Flag to enable kubernetes setup
-    - `kubernetes_service_account_name`: The KSA (kubernetes service account) name to be used for Pods
-    - `kubernetes_service_account_namespace`: The KSA (kubernetes service account) namespace to be used for Pods
-
-    Related Docs: [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#nested_node_config), [gcloud](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--service-account).
     EOT
-  type = object({
-    enable_kubernetes_setup              = bool,
-    kubernetes_service_account_name      = string,
-    kubernetes_service_account_namespace = string
-  })
-  default = {
-    enable_kubernetes_setup              = true
-    kubernetes_service_account_name      = "aiinfra-gke-sa"
-    kubernetes_service_account_namespace = "default"
-  }
-  nullable = false
+  type        = string
+  default     = null
+}
+
+variable "project_id" {
+  description = "GCP Project ID to which the cluster will be deployed."
+  type        = string
+  nullable    = false
+}
+
+variable "region" {
+  description = "The region in which the cluster master will be created. The cluster will be a regional cluster with multiple masters spread across zones in the region, and with default node locations in those zones as well."
+  type        = string
+  nullable    = false
+}
+
+variable "resource_prefix" {
+  description = "Arbitrary string with which all names of newly created resources will be prefixed."
+  type        = string
+  nullable    = false
 }
