@@ -21,12 +21,6 @@ locals {
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/dataaccessauditlogging",
   ]
-
-  kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
-    enable_kubernetes_setup              = true
-    kubernetes_service_account_name      = "aiinfra-gke-sa"
-    kubernetes_service_account_namespace = "default"
-  }
 }
 
 data "google_compute_default_service_account" "account" {
@@ -206,6 +200,10 @@ resource "google_container_node_pool" "node-pools" {
     disk_size_gb    = var.disk_size_gb
     disk_type       = var.disk_type
 
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count = 16
+    }
+
     shielded_instance_config {
       enable_secure_boot          = true
       enable_integrity_monitoring = true
@@ -306,20 +304,17 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
   member  = "serviceAccount:${local.node_service_account}"
 }
 
-module "kubernetes-operations" {
-  source                = "./kubernetes-operations"
-  project_id            = var.project_id
-  cluster_id            = resource.google_container_cluster.cluster.id
-  gke_cluster_exists    = var.kubernetes_setup_config.enable_kubernetes_setup
-  install_nvidia_driver = true
-  setup_kubernetes_service_account = (
-    var.kubernetes_setup_config.enable_kubernetes_setup ?
-    {
-      kubernetes_service_account_name      = var.kubernetes_setup_config.kubernetes_service_account_name
-      kubernetes_service_account_namespace = var.kubernetes_setup_config.kubernetes_service_account_namespace
-      google_service_account_name          = local.node_service_account
-    } :
-    null
-  )
-  node_pool_ids = resource.google_container_node_pool.node-pools[*].id
+module "kubectl-apply" {
+  source                = "./kubectl-apply"
+
+  cluster_id = resource.google_container_cluster.cluster.id
+  daemonsets = {
+    device_plugin = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml"
+    nvidia_driver = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml"
+    nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml"
+  }
+  enable = var.ksa != null 
+  ksa = var.ksa
+  gcp_sa = local.node_service_account
+  project_id = var.project_id
 }
