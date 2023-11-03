@@ -238,13 +238,13 @@ resource "google_container_node_pool" "node-pools" {
       for_each = try(
         var.node_pools[count.index].compact_placement_policy.specific_reservation,
         null
-      ) != null ? [
+        ) != null ? [
         var.node_pools[count.index].compact_placement_policy.specific_reservation
       ] : []
       content {
         consume_reservation_type = "SPECIFIC_RESERVATION"
-        key = "compute.googleapis.com/reservation-name"
-        values = [reservation_affinity.value]
+        key                      = "compute.googleapis.com/reservation-name"
+        values                   = [reservation_affinity.value]
       }
     }
 
@@ -305,7 +305,7 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
 }
 
 module "kubectl-apply" {
-  source                = "./kubectl-apply"
+  source = "./kubectl-apply"
 
   cluster_id = resource.google_container_cluster.cluster.id
   daemonsets = {
@@ -313,8 +313,8 @@ module "kubectl-apply" {
     nvidia_driver = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml"
     nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml"
   }
-  enable = var.ksa != null 
-  ksa = var.ksa
-  gcp_sa = local.node_service_account
+  enable     = var.ksa != null
+  ksa        = var.ksa
+  gcp_sa     = local.node_service_account
   project_id = var.project_id
 }
