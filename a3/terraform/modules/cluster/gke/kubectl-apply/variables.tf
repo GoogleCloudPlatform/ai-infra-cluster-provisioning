@@ -14,6 +14,23 @@
  * limitations under the License.
 */
 
+variable "cluster_id" {
+  description = "An identifier for the resource with format projects/<project_id>/locations/<region>/clusters/<name>."
+  type        = string
+  nullable    = false
+}
+
+variable "daemonsets" {
+  description = "Daemonsets to install with kubectl apply -f <daemonset>"
+  type        = map(string)
+  nullable    = false
+
+  validation {
+    condition     = length(var.daemonsets) != 0
+    error_message = "must specify at least one daemonset"
+  }
+}
+
 variable "enable" {
   description = <<-EOT
     This module cannot have for_each, count, or depends_on attributes because
@@ -21,27 +38,6 @@ variable "enable" {
     this variable.
     EOT
   type        = bool
-  nullable    = false
-}
-
-variable "project_id" {
-  description = "Name of the project to use for instantiating clusters."
-  type        = string
-  nullable    = false
-}
-
-variable "cluster_id" {
-  description = "An identifier for the resource with format projects/<project_id>/locations/<region>/clusters/<name>."
-  type        = string
-  nullable    = false
-}
-
-variable "gcp_sa" {
-  description = <<-EOT
-    Google Cloud Platform service account email to which the
-    Kubernetes Service Account (KSA) will be bound.
-    EOT
-  type        = string
   nullable    = false
 }
 
@@ -61,13 +57,17 @@ variable "ksa" {
   })
 }
 
-variable "daemonsets" {
-  description = "Daemonsets to install with kubectl apply -f <daemonset>"
-  type        = map(string)
+variable "gcp_sa" {
+  description = <<-EOT
+    Google Cloud Platform service account email to which the
+    Kubernetes Service Account (KSA) will be bound.
+    EOT
+  type        = string
   nullable    = false
+}
 
-  validation {
-    condition     = length(var.daemonsets) != 0
-    error_message = "must specify at least one daemonset"
-  }
+variable "project_id" {
+  description = "Name of the project to use for instantiating clusters."
+  type        = string
+  nullable    = false
 }
