@@ -3,13 +3,10 @@
     "root_module": {
       "child_modules": [
         {
-          "address": "module.kubernetes-operations"
+          "address": "module.kubectl-apply"
         },
         {
           "address": "module.dashboard"
-        },
-        {
-          "address": "module.kubernetes-operations"
         },
         {
           "resources": [
