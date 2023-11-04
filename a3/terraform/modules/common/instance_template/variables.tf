@@ -130,6 +130,16 @@ variable "use_compact_placement_policy" {
   default     = false
 }
 
+variable "existing_resource_policy_name" {
+  description = <<-EOT
+    The name of the existing resource policy. 
+
+    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name).
+    EOT
+  type        = string
+  default     = null
+}
+
 variable "metadata" {
   description = <<-EOT
     Metadata key/value pairs to make available from within instances created from this template.

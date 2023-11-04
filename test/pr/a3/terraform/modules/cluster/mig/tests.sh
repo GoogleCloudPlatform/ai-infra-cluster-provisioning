@@ -49,3 +49,20 @@ test::a3::terraform::mig::multiple_create_modules () {
         "$(a3::terraform::mig::output_dir)/multimodules.json" \
         "${tfshow}"
 }
+
+test::a3::terraform::mig::existing_rp_create_modules () {
+    local -r tfvars=$(mktemp)
+    helpers::append_tfvars "$(a3::terraform::mig::input_dir)/existing-rp.tfvars" mig >"${tfvars}"
+
+    local -r tfplan=$(mktemp)
+    EXPECT_SUCCEED helpers::terraform_plan \
+        "$(a3::terraform::mig::src_dir)" \
+        "${tfvars}" \
+        "${tfplan}"
+
+    local -r tfshow=$(mktemp)
+    helpers::terraform_show "$(a3::terraform::mig::src_dir)" "${tfplan}" >"${tfshow}"
+    EXPECT_SUCCEED helpers::json_contains \
+        "$(a3::terraform::mig::output_dir)/existing-rp.json" \
+        "${tfshow}"
+}

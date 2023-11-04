@@ -9,21 +9,7 @@
           "address": "module.dashboard"
         },
         {
-          "resources": [
-            {
-              "values": {
-                "group_placement_policy": [
-                  {
-                    "availability_domain_count": null,
-                    "collocation": "COLLOCATED",
-                    "max_distance": 2,
-                    "vm_count": null
-                  }
-                ]
-              }
-            }
-          ],
-          "address": "module.resource_policy[\"np-0\"]"
+          "address": "module.network"
         }
       ],
       "resources": [
@@ -79,6 +65,7 @@
             ],
             "placement_policy": [
               {
+                "policy_name": "test-rp",
                 "tpu_topology": null,
                 "type": "COMPACT"
               }

@@ -31,15 +31,17 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [google-beta_google_compute_resource_policy.placement_policy](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_compute_resource_policy) | resource |
+| [google-beta_google_compute_resource_policy.new_placement_policy](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_compute_resource_policy) | resource |
+| [google-beta_google_compute_resource_policy.existing_placement_policy](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/data-sources/google_compute_resource_policy) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_existing_resource_policy_name"></a> [existing\_resource\_policy\_name](#input\_existing\_resource\_policy\_name) | The name of the existing resource policy. <br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name). | `string` | `null` | no |
+| <a name="input_new_resource_policy_name"></a> [new\_resource\_policy\_name](#input\_new\_resource\_policy\_name) | The name of the new resource policy to be created. <br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name). | `string` | n/a | yes |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The ID of the project in which the resource belongs.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#project). | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The region in which the resource policy(s) has been / will be created.<br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#region). | `string` | n/a | yes |
-| <a name="input_resource_policy_name"></a> [resource\_policy\_name](#input\_resource\_policy\_name) | The name of the resource policy to be created. <br><br>Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name). | `string` | n/a | yes |
 
 ## Outputs
 

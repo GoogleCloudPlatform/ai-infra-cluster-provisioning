@@ -75,9 +75,10 @@ module "resource_policy" {
   source = "../resource_policy"
   count  = var.use_compact_placement_policy ? 1 : 0
 
-  project_id           = var.project_id
-  region               = var.region
-  resource_policy_name = var.resource_prefix
+  project_id                    = var.project_id
+  region                        = var.region
+  new_resource_policy_name      = var.existing_resource_policy_name == null ? var.resource_prefix : null
+  existing_resource_policy_name = var.existing_resource_policy_name == null ? null : var.existing_resource_policy_name
 }
 
 resource "google_compute_instance_template" "template" {

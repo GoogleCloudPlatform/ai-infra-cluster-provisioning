@@ -21,12 +21,6 @@ locals {
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/dataaccessauditlogging",
   ]
-
-  kubernetes_setup_config = var.kubernetes_setup_config != null ? var.kubernetes_setup_config : {
-    enable_kubernetes_setup              = true
-    kubernetes_service_account_name      = "aiinfra-gke-sa"
-    kubernetes_service_account_namespace = "default"
-  }
 }
 
 data "google_compute_default_service_account" "account" {
@@ -64,11 +58,12 @@ module "resource_policy" {
   source = "../../common/resource_policy"
   for_each = {
     for idx, node_pool in var.node_pools : "np-${idx}" => node_pool
-    if node_pool.use_compact_placement_policy
+    if node_pool.compact_placement_policy != null
   }
-  project_id           = var.project_id
-  resource_policy_name = "${var.resource_prefix}-${each.key}"
-  region               = var.region
+  project_id                    = var.project_id
+  new_resource_policy_name      = each.value.compact_placement_policy.new_policy ? "${var.resource_prefix}-${each.key}" : null
+  existing_resource_policy_name = each.value.compact_placement_policy.existing_policy_name
+  region                        = var.region
 }
 
 # Definition of the private GKE cluster.
@@ -205,6 +200,10 @@ resource "google_container_node_pool" "node-pools" {
     disk_size_gb    = var.disk_size_gb
     disk_type       = var.disk_type
 
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count = 16
+    }
+
     shielded_instance_config {
       enable_secure_boot          = true
       enable_integrity_monitoring = true
@@ -235,6 +234,20 @@ resource "google_container_node_pool" "node-pools" {
       }
     }
 
+    dynamic "reservation_affinity" {
+      for_each = try(
+        var.node_pools[count.index].compact_placement_policy.specific_reservation,
+        null
+        ) != null ? [
+        var.node_pools[count.index].compact_placement_policy.specific_reservation
+      ] : []
+      content {
+        consume_reservation_type = "SPECIFIC_RESERVATION"
+        key                      = "compute.googleapis.com/reservation-name"
+        values                   = [reservation_affinity.value]
+      }
+    }
+
     oauth_scopes = local.oauth_scopes
   }
 
@@ -250,7 +263,7 @@ resource "google_container_node_pool" "node-pools" {
   }
 
   dynamic "placement_policy" {
-    for_each = var.node_pools[count.index].use_compact_placement_policy ? [1] : []
+    for_each = var.node_pools[count.index].compact_placement_policy != null ? [1] : []
     content {
       type        = "COMPACT"
       policy_name = module.resource_policy["np-${count.index}"].resource_name
@@ -291,19 +304,17 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
   member  = "serviceAccount:${local.node_service_account}"
 }
 
-module "kubernetes-operations" {
-  source                = "./kubernetes-operations"
-  project_id            = var.project_id
-  cluster_id            = resource.google_container_cluster.cluster.id
-  gke_cluster_exists    = var.kubernetes_setup_config.enable_kubernetes_setup
-  install_nvidia_driver = true
-  setup_kubernetes_service_account = (
-    var.kubernetes_setup_config.enable_kubernetes_setup ?
-    {
-      kubernetes_service_account_name      = var.kubernetes_setup_config.kubernetes_service_account_name
-      kubernetes_service_account_namespace = var.kubernetes_setup_config.kubernetes_service_account_namespace
-      google_service_account_name          = local.node_service_account
-    } :
-    null
-  )
+module "kubectl-apply" {
+  source = "./kubectl-apply"
+
+  cluster_id = resource.google_container_cluster.cluster.id
+  daemonsets = {
+    device_plugin = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml"
+    nvidia_driver = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml"
+    nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml"
+  }
+  enable     = var.ksa != null
+  ksa        = var.ksa
+  gcp_sa     = local.node_service_account
+  project_id = var.project_id
 }

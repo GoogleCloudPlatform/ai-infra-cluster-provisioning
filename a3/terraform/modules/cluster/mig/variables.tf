@@ -20,11 +20,13 @@ variable "instance_groups" {
     - `target_size`: The number of running instances for this managed instance group. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#target_size), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--size).
     - `zone`: The zone that instances in this group should be created in. Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_group_manager#zone), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/create#--zone).
     - `machine_type`: (Optional)The name of a Google Compute Engine machine type. There are [many possible values](https://cloud.google.com/compute/docs/machine-resource). Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#machine_type), [gcloud](https://cloud.google.com/sdk/gcloud/reference/compute/instance-templates/create#--machine-type).
+    - `existing_resource_policy_name`: (Optional) The existing resource policy.
     EOT
   type = list(object({
-    zone         = string
-    target_size  = number
-    machine_type = optional(string, "a3-highgpu-8g")
+    zone                          = string
+    target_size                   = number
+    machine_type                  = optional(string, "a3-highgpu-8g")
+    existing_resource_policy_name = optional(string, null)
   }))
   nullable = false
 
