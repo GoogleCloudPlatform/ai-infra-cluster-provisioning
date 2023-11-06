@@ -30,6 +30,7 @@
     docker run --pull=always --rm \
       --name receive-datapath-manager \
       --detach \
+      --privileged \
       --cap-add=NET_ADMIN --network=host \
       --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64 \
       $${device_flags} \
@@ -38,7 +39,7 @@
       --env LD_LIBRARY_PATH=/usr/local/nvidia/lib64 \
       --volume /run/tcpx:/run/tcpx \
       --entrypoint /tcpgpudmarxd/build/app/tcpgpudmarxd \
-      us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd \
+      us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.7 \
       --gpu_nic_preset a3vm --gpu_shmem_type fd --uds_path "/run/tcpx"
 
     echo 'Installing iptable rules...'
@@ -47,7 +48,7 @@
     echo 'Configuring NCCL and GPUDirectTCPX plugin...'
     docker run --rm \
       --volume /var/lib:/var/lib \
-      us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx \
+      us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.6_2023_10_06 \
       install --install-nccl
     mount --bind /var/lib/tcpx /var/lib/tcpx
     mount -o remount,exec /var/lib/tcpx
