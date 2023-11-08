@@ -1,0 +1,18 @@
+cluster:
+  nNodes: 5
+  nodePool: np-1
+network:
+  useTcpx: 'yes'
+  ncclIfnames: eth0
+  ncclPlugin: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.5-v3-ns
+  rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.6
+  disablePmtu: "yes"
+
+
+workload:
+  gcsBucket: redrock-fdsp-evaluation
+  jobTimestamp: 1
+  experimentDir: pir-pythia-6.9b/
+  dataDir: openwebtext_dataset
+  image: us-central1-docker.pkg.dev/supercomputer-testing/gersonkroiz-litgpt-testing/litgpt-full:6e313c8-30406826-f530-4d7e-b776-3d1b333f429e
+  configDirInBucket: null
