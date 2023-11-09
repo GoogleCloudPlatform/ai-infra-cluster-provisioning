@@ -161,9 +161,9 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
    PID=$!
    PIDS+=($PID)
 
-   echo "Launched pretrain_gpt.py for rank $RANK with PID $PID"
+   echo "Launched openwebtext_trainer.py for rank $RANK with PID $PID"
 done
 
 wait_all_success_or_exit "${PIDS[@]}"
 
-csvcut -c throughput/device/mfu metrics.csv | grep 0. | sort
+csvcut -c throughput/device/mfu metrics.csv | grep 0. | sort | head
