@@ -23,7 +23,7 @@ from lit_gpt.model import GPT, Block
 from lit_gpt.speed_monitor import SpeedMonitorCallback, estimate_flops, measure_flops
 from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, step_csv_logger
 
-model_name = "pythia-70m"
+model_name = "Llama-2-70b-hf"
 name = "openwebtext"
 out_dir = Path("out") / name
 data_dir = Path("/data")
@@ -35,8 +35,8 @@ num_nodes = int(os.getenv("NNODES", "1"))
 
 # Hyperparameters
 learning_rate = 6e-4
-batch_size = int(os.getenv("BATCH_SIZE", "125"))
-micro_batch_size = int(os.getenv("MICRO_BATCH_SIZE", "5"))
+batch_size = int(os.getenv("BATCH_SIZE", "6"))
+micro_batch_size = int(os.getenv("MICRO_BATCH_SIZE", "6"))
 gradient_accumulation_steps = batch_size // micro_batch_size
 assert gradient_accumulation_steps > 0
 max_iters = 600000  # num_epochs * (epoch_size // micro_batch_size) // devices
