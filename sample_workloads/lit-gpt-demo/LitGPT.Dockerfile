@@ -8,7 +8,7 @@ RUN apt-get update && \
   iproute2 && \
   rm -rf /var/lib/apt/lists/*
 
-RUN pip install ujson
+RUN pip install ujson csvkit
 
 # Prerequisite for removing GCSFuse dependency
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | \

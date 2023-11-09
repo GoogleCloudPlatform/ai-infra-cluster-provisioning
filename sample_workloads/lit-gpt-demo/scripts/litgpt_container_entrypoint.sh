@@ -165,3 +165,5 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
 done
 
 wait_all_success_or_exit "${PIDS[@]}"
+
+csvcut -c throughput/device/mfu metrics.csv | grep 0. | sort
