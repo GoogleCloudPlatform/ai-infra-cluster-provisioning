@@ -157,7 +157,7 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
      $CMD_PREFIX \
      python /workspace/pretrain/openwebtext_trainer.py \
-     --devices=$GPUS_PER_NODE > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
+     --devices=$GPUS_PER_NODE --precision="bf16-true" > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
    PID=$!
    PIDS+=($PID)
 
