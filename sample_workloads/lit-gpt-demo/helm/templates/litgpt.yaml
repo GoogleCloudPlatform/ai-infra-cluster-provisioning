@@ -91,7 +91,7 @@ spec:
     - "bash"
     - "-c"
     - |
-      /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd --setup_param "--verbose 128 5 0" --uds_path "/run/tcpx" &
+      /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd --setup_param "--verbose 128 5 0" &
       while [ ! -e "/usr/share/litgpt/workload_terminated" ]; do sleep 10; done
     securityContext:
       privileged: true
@@ -150,7 +150,7 @@ spec:
       - name: EXPERIMENT_ROOT_DIR
         value: "{{$root.Values.workload.experimentDir}}"
       - name: DATA_DIR
-        value: "{{$root.Values.workload.experimentDir}}"
+        value: "{{$root.Values.workload.dataDir}}"
       - name: BATCH_SIZE
         value: "{{$root.Values.workload.batchSize}}"
       - name: MICRO_BATCH_SIZE
