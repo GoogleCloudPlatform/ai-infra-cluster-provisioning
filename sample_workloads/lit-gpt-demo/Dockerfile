@@ -20,7 +20,7 @@ WORKDIR /workspace/
 
 COPY requirements.txt requirements.txt
 
-RUN MAX_JOBS=4 FLASH_ATTENTION_FORCE_BUILD=TRUE pip install 'flash-attn==2.0.0post1' --no-build-isolation \
+RUN MAX_JOBS=4 pip install 'flash-attn==2.0.4' --no-build-isolation \
   && pip install -r requirements.txt tokenizers sentencepiece ujson
 
 RUN pip install nvidia-dlprof-pytorch-nvtx nvidia-pyindex nvidia-dlprof
