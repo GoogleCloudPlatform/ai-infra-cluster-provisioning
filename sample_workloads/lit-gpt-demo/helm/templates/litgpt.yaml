@@ -155,6 +155,8 @@ spec:
         value: "{{$root.Values.workload.batchSize}}"
       - name: MICRO_BATCH_SIZE
         value: "{{$root.Values.workload.microBatchSize}}"
+      - name: MODEL_NAME
+        value: "{{$root.Values.workload.modelName}}"
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
