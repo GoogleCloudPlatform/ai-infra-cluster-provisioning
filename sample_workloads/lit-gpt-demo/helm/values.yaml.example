@@ -16,3 +16,6 @@ workload:
   dataDir: <str: location with gcs bucket of where train.bin and val.bin are located>
   image: us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/litgpt-full:<ADD TAG HERE>
   configDirInBucket: null
+  batchSize: 6
+  microBatchSize: 6
+  modelName: Llama-2-70b-hf
