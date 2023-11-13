@@ -7,8 +7,8 @@ SOME_UUID=$(uuidgen)
 LITGPT_PATH=${LITGPT_PATH:="lit-gpt"}
 echo $LITGPT_PATH
 
-BASE_IMAGE="${ARTIFACT_REGISTRY}/litgpt-base"
-FULL_IMAGE="${ARTIFACT_REGISTRY}/litgpt-full"
+BASE_IMAGE=${BASE_IMAGE:="${ARTIFACT_REGISTRY}/litgpt-base"}
+FULL_IMAGE=${FULL_IMAGE:="${ARTIFACT_REGISTRY}/litgpt-full"}
 
 # Clone LitGPT and checkout a flash-attn enabled commit
 if [ ! -d $LITGPT_PATH ]; then
