@@ -16,7 +16,7 @@ This guide assumes that you already have created a GKE cluster according to this
 TCPx currently supports a specific NCCL version, which limits the supported versions of Pytorch. The released TCPx binary officially supports NCCL version `2.18.1`, and an unreleased version `2.18.5unpack_memsyncapifix `based on [this commit.](https://github.com/NVIDIA/nccl/commit/321549b7d5e6039a86c0431d0c85e996f9f5fe12) This NCCL version will be installed on the host VM by the nccl-installer daemonset (v3.1.6_2023_10_06). \
 
 
-To use an official nccl release, we recommend using this base image for your workloads: [nvcr.io/nvidia/pytorch:23.05-py3](nvcr.io/nvidia/pytorch:23.05-py3) .
+To use an official nccl release, we recommend using this base image for your workloads: [nvcr.io/nvidia/pytorch:23.09-py3](nvcr.io/nvidia/pytorch:23.09-py3) .
 
 If you are comfortable with using the unofficial nccl version then you can use another base image, but the pytorch version must still be compatible with 2.18. See the [Nvidia Pytorch support matrix](https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html#framework-matrix-2023) for more supported versions.
 
