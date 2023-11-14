@@ -13,7 +13,7 @@ This guide assumes that you already have created a GKE cluster according to this
 
 ### TCPx Limitations with Pytorch versions 
 
-TCPx currently supports a specific NCCL version, which limits the supported versions of Pytorch. The released TCPx binary officially supports NCCL version `2.18.1`, and an unreleased version `2.18.5unpack_memsyncapifix `based on [this commit.](https://github.com/NVIDIA/nccl/commit/321549b7d5e6039a86c0431d0c85e996f9f5fe12) This NCCL version will be installed on the host VM by the nccl-installer daemonset (v3.1.6). \
+TCPx currently supports a specific NCCL version, which limits the supported versions of Pytorch. The released TCPx binary officially supports NCCL version `2.18.1`, and an unreleased version `2.18.5unpack_memsyncapifix `based on [this commit.](https://github.com/NVIDIA/nccl/commit/321549b7d5e6039a86c0431d0c85e996f9f5fe12) This NCCL version will be installed on the host VM by the nccl-installer daemonset (v3.1.6_2023_10_06). \
 
 
 To use an official nccl release, we recommend using this base image for your workloads: [nvcr.io/nvidia/pytorch:23.05-py3](nvcr.io/nvidia/pytorch:23.05-py3) .
@@ -84,7 +84,7 @@ Several additional parameters are available in the helm values.yaml file when us
    </td>
    <td>Llama-2-70b-hf
    </td>
-   <td>LitGPT format of a model to run. Available models <a href="https://github.com/Lightning-AI/lit-gpt/blob/main/lit_gpt/config.py">here.</a>
+   <td>LitGPT format of a model to run. Available models <a href="https://github.com/Lightning-AI/lit-gpt/tree/main#-lit-gpt-1">here.</a>
    </td>
   </tr>
   <tr>
@@ -180,10 +180,6 @@ Alternatively, you can find pre-copied versions of this data at:
 `gs://litgpt-public-bucket/openwebtext_dataset` (after lit-gpt specific processing)
 
 **Note:** If you use the `litgpt-public-bucket` to load the dataset then you will not be able to upload your training run data to a GCS bucket. If you want GCS logs for your training run then copy those blobs to a bucket that you have write permissions to.
-
-Once you have openwebtext dataset in a GCS bucket, you will also need to update [https://github.com/Lightning-AI/lit-gpt/blob/main/pretrain/openwebtext_trainer.py#L27](https://github.com/Lightning-AI/lit-gpt/blob/main/pretrain/openwebtext_trainer.py#L27).
-
-Please change `data_dir = Path("data") / name` to `data_dir = Path("/data")`
 
 
 ### Setup for distributed training 
@@ -300,6 +296,14 @@ Step times are presented in the csv as aggregate times in the column `time/train
  
 
 MFU for this sample workload can be calculated using the formula: 
+
+```
+estimated_flops = ops_per_step * trainable_flops * batch_size
+flops_per_sec = estimated_flops / time
+mfu = flops_per_sec / gpu_available_flops
+```
+
+For example, running Llama2-70b on 40 VMs would have you calculate this as:
 
 ` ( 6 * (6 * 8 * 40 ) * 4096 * 7e10) / (steptime * 8 * 40 * 1.979e15 / 2 ) = MFU  `
 
