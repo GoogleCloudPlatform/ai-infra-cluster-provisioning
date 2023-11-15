@@ -75,6 +75,8 @@ class DDPTraininer():
             os.environ["MASTER_PORT"] = os.environ.get("MASTER_PORT", "0")
 
             print (f"Initialized DDP with Rank: {os.environ.get('RANK')}, MASTER_ADDR: {os.environ.get('MASTER_ADDR')}")
+            
+            self.rank = args.rank
             dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
                                     world_size=args.world_size, rank=args.rank)
 
@@ -124,15 +126,24 @@ class DDPTraininer():
             self.train_one_epoch(train_loader, model, criterion, optimizer, epoch, args)
         
         dist.destroy_process_group()
+    
+    def log_line(self, line):
+        with open(f"logs_{self.rank}.txt", "a") as f:
+            f.write(line + "\n")
 
 
     def train_one_epoch(self, train_loader, model, criterion, optimizer, epoch, args):
         optimizer.zero_grad()
         print (f"Starting Epoch {epoch}")
-        for input, labels in train_loader:
+        self.log_line(f"Starting epoch {epoch}")
+        for step, (input, labels) in enumerate(train_loader):
+            input, labels = input.cuda(), labels.cuda()
             output = model(input)
-            criterion(output, labels).backward()
+            loss = criterion(output, labels)
+            loss.backward()
             optimizer.step()
+            self.log_line(f"rank:{self.rank}, epoch: {epoch}, step: {step}, loss: {loss.sum().item()}")
+            exit()
 
 if __name__ == '__main__':
     args = parse_args()
