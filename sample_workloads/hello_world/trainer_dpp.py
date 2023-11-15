@@ -42,7 +42,7 @@ class ToyModel(nn.Module):
         return self.net2(self.relu(self.net1(x)))
 
 class RandomDataset(torch.utils.data.Dataset):
-    def __init__(self, num_samples):
+    def __init__(self, num_samples=64):
         super().__init__()
         self.num_samples = num_samples
 
@@ -70,6 +70,11 @@ class DDPTraininer():
                 args.rank = int(os.environ['SLURM_PROCID'])
                 args.gpu = args.rank % torch.cuda.device_count()
 
+            os.environ["RANK"] = str(args.rank)
+            os.environ["MASTER_ADDR"] = os.environ.get("MASTER_ADDR", "dummy")
+            os.environ["MASTER_PORT"] = os.environ.get("MASTER_PORT", "0")
+
+            print (f"Initialized DDP with Rank: {os.environ.get('RANK')}, MASTER_ADDR: {os.environ.get('MASTER_ADDR')}")
             dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
                                     world_size=args.world_size, rank=args.rank)
 
@@ -88,8 +93,6 @@ class DDPTraininer():
             else:
                 model.cuda()
                 model = torch.nn.parallel.DistributedDataParallel(model)
-        else:
-            raise NotImplementedError("Only DistributedDataParallel is supported. Failed to initialize model")
         
         ### optimizer ###
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
@@ -105,9 +108,10 @@ class DDPTraininer():
         torch.backends.cudnn.benchmark = True
         return model, optimizer, train_loader
     
-    def train(self, train_loader, model, criterion, optimizer, args):
+    def train(self, args):
         print ("Starting to train")
         model, optimizer, train_loader = self.setup(args)
+        criterion = nn.MSELoss()
 
         ### main loop ###
         for epoch in range(args.start_epoch, args.epochs):
@@ -124,6 +128,7 @@ class DDPTraininer():
 
     def train_one_epoch(self, train_loader, model, criterion, optimizer, epoch, args):
         optimizer.zero_grad()
+        print (f"Starting Epoch {epoch}")
         for input, labels in train_loader:
             output = model(input)
             criterion(output, labels).backward()

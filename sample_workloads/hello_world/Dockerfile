@@ -24,6 +24,4 @@ COPY trainer_dpp.py trainer_dpp.py
 RUN pip install nvidia-dlprof-pytorch-nvtx nvidia-pyindex nvidia-dlprof
 
 # Check install
-RUN python trainer_dpp.py
-
-
+ENTRYPOINT ["python", "trainer_dpp.py"]
