@@ -42,13 +42,21 @@ srun --ntasks-per-node=1 \
 
 sleep 5s
 
-gcloud auth configure-docker us-docker.pkg.dev --quiet
+########################################
+######### Application Specific #########
+DIR=`pwd`
+mkdir -p $DIR/logs
+
 srun --ntasks-per-node=1 \
-        --container-name="litgpt" \
+        --container-name="ddp" \
         --container-image="dockerd://nvcr.io/nvidia/pytorch:23.09-py3" \
         --container-mounts="/home:/home,/var/lib/tcpx/lib64:/var/lib/tcpx/lib64,${UDS_PATH}:${UDS_PATH}" \
         --container-workdir=$PWD \
         --container-writable \
+        --output=$DIR/logs/%x_%j_$DATETIME.log \
         bash ddp.sh
+
+########################################
+########################################
 
 srun --ntasks-per-node=1 docker container stop receive-datapath-manager-${SLURM_JOB_ID}

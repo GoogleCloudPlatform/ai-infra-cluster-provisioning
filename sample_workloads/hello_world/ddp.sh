@@ -25,21 +25,23 @@ export NCCL_GPUDIRECTTCPX_UNIX_CLIENT_PREFIX=/run/tcpx-${SLURM_JOB_ID}
 export NCCL_GPUDIRECTTCPX_PROGRAM_FLOW_STEERING_WAIT_MICROS=1000000
 export NCCL_GPUDIRECTTCPX_FORCE_ACK=0
 export NCCL_GPUDIRECTTCPX_TX_COMPLETION_NANOSLEEP=1000
+
 # Below seems to work even when no smt is enabled
 export NCCL_GPUDIRECTTCPX_TX_BINDINGS="enp6s0:8-21,112-125;enp12s0:8-21,112-125;enp134s0:60-73,164-177;enp140s0:60-73,164-177"
 export NCCL_GPUDIRECTTCPX_RX_BINDINGS="enp6s0:22-35,124-139;enp12s0:22-35,124-139;enp134s0:74-87,178-191;enp140s0:74-87,178-191"
-# extra
+
+# App specific
 export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/var/lib/tcpx/lib64:/usr/lib/lib32:/usr/lib/x86_64-linux-gnu/ \
-export GCS_BUCKET=litgpt-public-bucket
-export EXPERIMENT_ROOT_DIR="pir-pythia-6.9b/training_logs/"
-export DATA_DIR="openwebtext_dataset"
+
 export JOB_TIMESTAMP=1
 export MASTER_ADDR=$SLURM_LAUNCH_NODE_IPADDR
 export NNODES=$SLURM_NNODES
 export NODE_RANK=$SLURM_PROCID
+export WORLD_SIZE=$SLURM_NTASKS
+export MASTER_PORT=6000
 
 # yes sets wrong NCCL variables for Compute Engine VM!
 # https://github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning/blob/d02347ab80ed327cb43ed82fd28acfacbf4e43cb/sample_workloads/lit-gpt-demo/scripts/litgpt_container_entrypoint.sh#L47
 export USE_TCPX=no
 
-python trainer_dpp.py
+python trainer_dpp.py --world-size 2
