@@ -5,11 +5,13 @@ set -o pipefail
 
 : "${MASTER_ADDR:?Must set MASTER_ADDR}"
 : "${NODE_RANK:?Must set NODE_RANK}"
-: "${GCS_BUCKET:?Must set GCS_BUCKET}"
 : "${JOB_TIMESTAMP:?Must set JOB_TIMESTAMP}"
-: "${EXPERIMENT_ROOT_DIR:?Must set EXPERIMENT_ROOT_DIR}"
 : "${NNODES:?Must set NNODES}"
+: "${GCS_EXPERIMENT_BUCKET:?Must set GCS_EXPERIMENT_BUCKET}"
+: "${EXPERIMENT_ROOT_DIR:?Must set EXPERIMENT_ROOT_DIR}"
+: "${GCS_DATA_BUCKET:?Must set GCS_DATA_BUCKET}"
 : "${DATA_DIR:?Must set DATA_DIR}"
+
 
 EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
 mkdir -p $EXPERIMENT_LOCAL_DIR
@@ -17,11 +19,11 @@ mkdir -p $EXPERIMENT_LOCAL_DIR
 echo $EXPERIMENT_ROOT_DIR
 echo $EXPERIMENT_LOCAL_DIR
 
-gsutil rsync -r gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+gsutil rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
 
 LOCAL_DATA_DIR=/data
 mkdir -p $LOCAL_DATA_DIR
-gsutil -m rsync gs://${GCS_BUCKET}/${DATA_DIR} /data
+gsutil -m rsync gs://${GCS_DATA_BUCKET}/${DATA_DIR} /data
 
 export MASTER_PORT=6002
 export GPUS_PER_NODE=8
@@ -117,8 +119,8 @@ function on_script_completion {
    # semaphore to cleanly exit hardware utilization monitor
    touch /tmp/workload_terminated
 
-   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
-   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
+   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
 }
 
 

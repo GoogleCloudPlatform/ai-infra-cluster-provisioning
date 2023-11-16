@@ -10,9 +10,10 @@ network:
 
 
 workload:
-  gcsBucket: <str: your gcs bucket where data is located>
   jobTimestamp: <int: add a timestamp here or unique identifier>
+  gcsExperimentBucket: <str: your gcs bucket where experiment logs should go>
   experimentDir: <str: root gcs directory of experiment>
+  gcsDataBucket: <str: your gcs bucket where data is located>
   dataDir: <str: location with gcs bucket of where train.bin and val.bin are located>
   image: us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/litgpt-full:<ADD TAG HERE>
   configDirInBucket: null
