@@ -9,5 +9,9 @@ network:
   disablePmtu: "yes"
 
 workload:
-  image: us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/litgpt-full:<ADD TAG HERE>
-  modelName: Llama-2-70b-hf
+  image: us-central1-docker.pkg.dev/supercomputer-testing/pirillo-gcr/llm-foundry-flash-attn2
+  modelName: mpt-125m
+  gcsBucket: pirillo-sct-bucket
+  jobTimestamp: 1
+  experimentDi: '/' 
+  dataDir: '/'
