@@ -28,7 +28,7 @@ metadata:
   name: llmfoundry-{{$.Release.Name}}-pod{{$node_index}}
   {{if eq $node_index 0}}
   labels:
-    name: pytorch-leader-{{$.Release.Name}}
+    name: llmfoundry-leader-{{$.Release.Name}}
   {{end}}
 spec:
   hostNetwork: true
@@ -109,8 +109,8 @@ spec:
   - name: llmfoundry
     image: {{$root.Values.workload.image}}
     imagePullPolicy: Always
-    command: [ "/bin/bash", "-c", "--" ]
-    args: [ "composer", "train/train.py", "train/yamls/pretrain/{{$root.Values.workload.modelName}}.yaml", "data_local=my-copy-c4", "train_loader.dataset.split=train_small", "eval_loader.dataset.split=val_small", "max_duration=10ba", "eval_interval=0", "save_folder={{$root.Values.workload.modelName}}"]
+    command: [ "composer" ]
+    args: [ "train/train.py", "train/yamls/pretrain/{{$root.Values.workload.modelName}}.yaml", "data_local=my-copy-c4", "train_loader.dataset.split=train_small", "eval_loader.dataset.split=val_small", "max_duration=10ba", "eval_interval=0", "save_folder={{$root.Values.workload.modelName}}"]
     securityContext:
       privileged: true
       capabilities:
@@ -131,10 +131,14 @@ spec:
         value: "/usr/local/nvidia/lib64"
       - name: MASTER_ADDR
         value: "llmfoundry-leader-{{$.Release.Name}}"
+      - name: MASTER_PORT
+        value: 6002
       - name: NCCL_SOCKET_IFNAME
         value: "{{$root.Values.network.ncclIfnames}}"
       - name: NNODES
         value: "{{$node_count}}"
+      - name: WORLD_SIZE
+        value: "{{mul $node_count 8}}"
       - name: NODE_RANK
         value: "{{ $node_index }}"
       - name: USE_TCPX
