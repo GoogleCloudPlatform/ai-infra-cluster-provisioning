@@ -11,6 +11,7 @@ set -o pipefail
 
 export EXPERIMENT_LOCAL_DIR=/experiment
 export EXPERIMENT_ROOT_DIR=${MODEL_NAME}
+export GPUS_PER_NODE=8
 
 PROFILING_DIR=$EXPERIMENT_LOCAL_DIR/nsys_profiles
 mkdir -p $PROFILING_DIR
