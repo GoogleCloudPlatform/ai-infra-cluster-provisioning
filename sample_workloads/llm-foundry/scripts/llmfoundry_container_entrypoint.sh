@@ -9,10 +9,11 @@ set -o pipefail
 : "${MASTER_PORT:?Must set MASTER_PORT}"
 : "${WORLD_SIZE:?Must set WORLD_SIZE}"
 
-export EXPERIMENT_LOCAL_DIR=/experiment
+export EXPERIMENT_LOCAL_DIR="/experiment"
 export EXPERIMENT_ROOT_DIR=${MODEL_NAME}_${NNODES}nodes
 export GPUS_PER_NODE=8
 
+mkdir $EXPERIMENT_LOCAL_DIR
 gsutil rsync -r gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
 
 PROFILING_DIR=$EXPERIMENT_LOCAL_DIR/nsys_profiles
