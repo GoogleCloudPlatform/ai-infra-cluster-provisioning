@@ -2,11 +2,11 @@ cluster:
   nNodes: 2
   nodePool: np-1
 network:
-  useTcpx: yes
+  useTcpx: 'yes'
   ncclIfnames: 'eth0'
   ncclPlugin: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.6_2023_10_06
   rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.9
-  disablePmtu: "yes"
+  disablePmtu: 'yes'
 
 workload:
   image: us-central1-docker.pkg.dev/supercomputer-testing/pirillo-gcr/llm-foundry-flash-attn2
@@ -14,5 +14,13 @@ workload:
   gcsBucket: pirillo-sct-bucket
   collectNsysProfile: "yes"
   jobTimestamp: 1
-  experimentDi: '/' 
+  experimentDir: '/' 
   dataDir: '/'
+  actCkpt: true
+  nLayers: 32
+  maxSeqLen: 128 
+  dtms: 64
+  fsdpShardingStrategy: FULL_SHARD
+  fsdpLimitAllGathers: true
+  fsdpForwardPrefetch: false
+  fsdpBackwardPrefetch: BackwardPrefetch.BACKWARD_PRE
