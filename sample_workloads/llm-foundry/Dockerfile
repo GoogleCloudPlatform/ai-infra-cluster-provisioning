@@ -19,5 +19,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   && apt-get update -y && apt-get install google-cloud-cli -y
 
 ADD scripts/llmfoundry_container_entrypoint.sh .
+ADD scripts/train.py .
+
 RUN chmod +x llmfoundry_container_entrypoint.sh
 ENTRYPOINT ["/bin/bash", "/llm-foundry/scripts/llmfoundry_container_entrypoint.sh"]
