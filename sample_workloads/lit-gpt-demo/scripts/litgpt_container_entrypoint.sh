@@ -12,7 +12,8 @@ set -o pipefail
 : "${GCS_DATA_BUCKET:?Must set GCS_DATA_BUCKET}"
 : "${DATA_DIR:?Must set DATA_DIR}"
 
-EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
+export EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
+
 mkdir -p $EXPERIMENT_LOCAL_DIR
 
 echo $EXPERIMENT_ROOT_DIR
