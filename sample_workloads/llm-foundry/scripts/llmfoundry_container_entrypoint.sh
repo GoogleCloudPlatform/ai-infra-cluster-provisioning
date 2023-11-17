@@ -131,7 +131,7 @@ CPU_SETS=( "0-7,104-111" "8-15,112-119" "16-23,120-127" "24-31,128-135" "52-59,1
 
 if [[ "${COLLECT_NSYS_PROFILE:="yes"}" == "yes" ]]; then
   echo "Collecting nsys profile"
-  CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
+  CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
 fi
 
 $CMD_PREFIX composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \

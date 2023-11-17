@@ -10,7 +10,7 @@ RUN python data_prep/convert_dataset_hf.py \
 
 RUN apt-get update && apt-get install numactl -y
 
-RUN pip install nvidia-pyindex nvidia-dlprof-pytorch-nvtx nvidia-dlprof
+RUN pip install nvidia-pyindex && pip install nvidia-dlprof-pytorch-nvtx nvidia-dlprof
 
 ADD scripts/llmfoundry_container_entrypoint.sh .
 RUN chmod +x llmfoundry_container_entrypoint.sh
