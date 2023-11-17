@@ -127,29 +127,36 @@ PIDS=()
 
 CPU_SETS=( "0-7,104-111" "8-15,112-119" "16-23,120-127" "24-31,128-135" "52-59,156-163" "60-67,164-171" "68-75,172-179" "76-83,180-187" )
 
-for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
-   RANK=$(($GPUS_PER_NODE*$NODE_RANK + $LOCAL_RANK))
-
-   CPUS=${CPU_SETS[$LOCAL_RANK]}
-   echo "Using CPUs $CPUS for local rank $LOCAL_RANK"
-
-   if (( LOCAL_RANK < 4 )); then
-     MEMBIND_NUMA_NODE=0
-   else
-     MEMBIND_NUMA_NODE=1
-   fi
-   CMD_PREFIX="numactl --membind=$MEMBIND_NUMA_NODE --physcpubind $CPUS"
-
-   RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
-     $CMD_PREFIX \
-     composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
+composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
      data_local=my-copy-c4 train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=10ba eval_interval=0 \
-     save_folder=${MODEL_NAME} > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
-   PID=$!
-   PIDS+=($PID)
+     save_folder=${MODEL_NAME}
+PID=$!
+echo "Launched train.py for rank $RANK with PID $PID"
 
-   echo "Launched train.py for rank $RANK with PID $PID"
-done
+# for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
+#    RANK=$(($GPUS_PER_NODE*$NODE_RANK + $LOCAL_RANK))
 
-wait_all_success_or_exit "${PIDS[@]}"
+#    CPUS=${CPU_SETS[$LOCAL_RANK]}
+#    echo "Using CPUs $CPUS for local rank $LOCAL_RANK"
+
+#    if (( LOCAL_RANK < 4 )); then
+#      MEMBIND_NUMA_NODE=0
+#    else
+#      MEMBIND_NUMA_NODE=1
+#    fi
+#    CMD_PREFIX="numactl --membind=$MEMBIND_NUMA_NODE --physcpubind $CPUS"
+
+#    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
+#      $CMD_PREFIX \
+#      composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
+#      data_local=my-copy-c4 train_loader.dataset.split=train_small \
+#      eval_loader.dataset.split=val_small max_duration=10ba eval_interval=0 \
+#      save_folder=${MODEL_NAME} > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
+#    PID=$!
+#    PIDS+=($PID)
+
+#    echo "Launched train.py for rank $RANK with PID $PID"
+# done
+
+wait_all_success_or_exit "${PID}"
