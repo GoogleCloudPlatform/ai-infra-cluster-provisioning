@@ -132,7 +132,7 @@ spec:
       - name: MASTER_ADDR
         value: "llmfoundry-leader-{{$.Release.Name}}"
       - name: MASTER_PORT
-        value: 6002
+        value: "6002"
       - name: NCCL_SOCKET_IFNAME
         value: "{{$root.Values.network.ncclIfnames}}"
       - name: NNODES
