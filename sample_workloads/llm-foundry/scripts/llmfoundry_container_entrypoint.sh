@@ -137,35 +137,16 @@ if [[ "${COLLECT_NSYS_PROFILE:="yes"}" == "yes" ]]; then
   CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
 fi
 
+if [[ "${COLLECT_COMPOSER_PROFILE:="yes"}" == "yes" ]]; then
+  export USE_CUSTOM_PROFILER='yes'
+fi
+
 $CMD_PREFIX composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
      data_local=my-copy-c4 train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=10ba eval_interval=0 \
      save_folder=${MODEL_NAME} activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
-     max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} \
-     fsdp_config.sharding_strategy=${FSDP_SHARDING_STRATEGY} fsdp_config.limit_all_gathers=${FSDP_LIMIT_ALL_GATHERS} \
-     fsdp_config.forward_prefetch=${FSDP_FORWARD_PREFETCH} fsdp_config.backward_prefetch=${FSDP_BACKWARD_PREFETCH}
-
-# for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
-#    RANK=$(($GPUS_PER_NODE*$NODE_RANK + $LOCAL_RANK))
-
-#    CPUS=${CPU_SETS[$LOCAL_RANK]}
-#    echo "Using CPUs $CPUS for local rank $LOCAL_RANK"
-
-#    if (( LOCAL_RANK < 4 )); then
-#      MEMBIND_NUMA_NODE=0
-#    else
-#      MEMBIND_NUMA_NODE=1
-#    fi
-#    CMD_PREFIX="numactl --membind=$MEMBIND_NUMA_NODE --physcpubind $CPUS"
-
-#    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
-#      $CMD_PREFIX \
-#      composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
-#      data_local=my-copy-c4 train_loader.dataset.split=train_small \
-#      eval_loader.dataset.split=val_small max_duration=10ba eval_interval=0 \
-#      save_folder=${MODEL_NAME} > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
-#    PID=$!
-#    PIDS+=($PID)
-
-#    echo "Launched train.py for rank $RANK with PID $PID"
-# done
+     max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} 
+     
+     # Disabling FSDP config for now, defaults are sufficient.
+     # fsdp_config.sharding_strategy=${FSDP_SHARDING_STRATEGY} fsdp_config.limit_all_gathers=${FSDP_LIMIT_ALL_GATHERS} \
+     # fsdp_config.forward_prefetch=${FSDP_FORWARD_PREFETCH} fsdp_config.backward_prefetch=${FSDP_BACKWARD_PREFETCH}

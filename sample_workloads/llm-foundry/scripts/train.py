@@ -589,21 +589,22 @@ def main(cfg: DictConfig) -> Trainer:
 
     # Build the Trainer
     print('Building trainer...')
-    print('Constructing custom profiler')
-    composer_trace_dir = '/experiment/composer_profiler'
-    torch_trace_dir = '/experiment/torch_profiler'
+    if (os.getenv('USE_CUSTOM_PROFILER')):
+        print('Constructing custom profiler')
+        composer_trace_dir = '/experiment/composer_profiler'
+        torch_trace_dir = '/experiment/torch_profiler'
 
-    profiler=Profiler(
-        trace_handlers=[JSONTraceHandler(folder=composer_trace_dir, overwrite=True)],
-        schedule=cyclic_schedule(
-            wait=0,
-            warmup=1,
-            active=4,
-            repeat=1,
-        ),
-        torch_prof_folder=torch_trace_dir,
-        torch_prof_overwrite=True,
-    )
+        profiler=Profiler(
+            trace_handlers=[JSONTraceHandler(folder=composer_trace_dir, overwrite=True)],
+            schedule=cyclic_schedule(
+                wait=0,
+                warmup=1,
+                active=4,
+                repeat=1,
+            ),
+            torch_prof_folder=torch_trace_dir,
+            torch_prof_overwrite=True,
+        )
 
     trainer = Trainer(
         run_name=run_name,
