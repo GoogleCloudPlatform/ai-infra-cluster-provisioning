@@ -161,6 +161,22 @@ spec:
         value: "{{$root.Values.workload.modelName}}"
       - name: COLLECT_NSYS_PROFILE
         value: "{{$root.Values.workload.collectNsysProfile}}"
+      - name: ACT_CKPT
+        value: "{{$root.Values.workload.actCkpt}}"
+      - name: N_LAYERS
+        value: "{{$root.Values.workload.nLayers}}"
+      - name: MAX_SEQ_LEN
+        value: "{{$root.Values.workload.maxSeqLen}}"     
+      - name: DTMS
+        value: "{{$root.Values.workload.dtms}}"     
+      - name: FSDP_SHARDING_STRATEGY
+        value: "{{$root.Values.workload.fsdpShardingStrategy}}"
+      - name: FSDP_LIMIT_ALL_GATHERS
+        value: "{{$root.Values.workload.fsdpLimitAllGathers}}"
+      - name: FSDP_FORWARD_PREFETCH
+        value: "{{$root.Values.workload.fsdpForwardPrefetch}}"
+      - name: FSDP_BACKWARD_PREFETCH
+        value: "{{$root.Values.workload.fsdpBackwardPrefetch}}"
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
