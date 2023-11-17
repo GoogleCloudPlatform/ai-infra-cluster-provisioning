@@ -10,6 +10,7 @@ set -o pipefail
 : "${WORLD_SIZE:?Must set WORLD_SIZE}"
 
 export EXPERIMENT_LOCAL_DIR=/experiment
+export EXPERIMENT_ROOT_DIR=${MODEL_NAME}
 
 PROFILING_DIR=$EXPERIMENT_LOCAL_DIR/nsys_profiles
 mkdir -p $PROFILING_DIR
@@ -23,8 +24,8 @@ mkdir -p $OUT_DIR
 DEBUG_DIR=$EXPERIMENT_LOCAL_DIR/debug
 mkdir -p $DEBUG_DIR
 
-export NCCL_TOPO_DUMP_FILE=$DEBUG_DIR/nccl_topo_${JOB_TIMESTAMP}_${NODE_RANK}.xml
-export NCCL_GRAPH_DUMP_FILE="$DEBUG_DIR/nccl_graph_${JOB_TIMESTAMP}_${NODE_RANK}.graph"
+export NCCL_TOPO_DUMP_FILE=$DEBUG_DIR/nccl_topo_${NODE_RANK}.xml
+export NCCL_GRAPH_DUMP_FILE="$DEBUG_DIR/nccl_graph_${NODE_RANK}.graph"
 
 export OMP_NUM_THREADS=12
 
