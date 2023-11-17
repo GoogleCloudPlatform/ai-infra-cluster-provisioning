@@ -140,7 +140,7 @@ fi
 $CMD_PREFIX composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
      data_local=my-copy-c4 train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=10ba eval_interval=0 \
-     save_folder=${MODEL_NAME} activation_checkpointing=${ACT_CKPT} n_layers=${N_LAYERS} \
+     save_folder=${MODEL_NAME} activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
      max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} \
      fsdp_config.sharding_strategy=${FSDP_SHARDING_STRATEGY} fsdp_config.limit_all_gathers=${FSDP_LIMIT_ALL_GATHERS} \
      fsdp_config.forward_prefetch=${FSDP_FORWARD_PREFETCH} fsdp_config.backward_prefetch=${FSDP_BACKWARD_PREFETCH}
