@@ -10,8 +10,10 @@ set -o pipefail
 : "${WORLD_SIZE:?Must set WORLD_SIZE}"
 
 export EXPERIMENT_LOCAL_DIR=/experiment
-export EXPERIMENT_ROOT_DIR=${MODEL_NAME}
+export EXPERIMENT_ROOT_DIR=${MODEL_NAME}_${NNODES}nodes
 export GPUS_PER_NODE=8
+
+gsutil rsync -r gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
 
 PROFILING_DIR=$EXPERIMENT_LOCAL_DIR/nsys_profiles
 mkdir -p $PROFILING_DIR
@@ -106,8 +108,8 @@ function on_script_completion {
    touch /tmp/workload_terminated
 
    echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
-   echo "SKIPPING UPLOAD, STORAGE NOT CONFIGURED"
-   # gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+   # echo "SKIPPING UPLOAD, STORAGE NOT CONFIGURED"
+   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/
 }
 
 
