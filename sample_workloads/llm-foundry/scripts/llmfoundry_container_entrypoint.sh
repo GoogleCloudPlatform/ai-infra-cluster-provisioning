@@ -25,6 +25,8 @@ mkdir -p $OUT_DIR
 DEBUG_DIR=$EXPERIMENT_LOCAL_DIR/debug
 mkdir -p $DEBUG_DIR
 
+CMD_PREFIX=""
+
 export NCCL_TOPO_DUMP_FILE=$DEBUG_DIR/nccl_topo_${NODE_RANK}.xml
 export NCCL_GRAPH_DUMP_FILE="$DEBUG_DIR/nccl_graph_${NODE_RANK}.graph"
 
@@ -127,7 +129,12 @@ PIDS=()
 
 CPU_SETS=( "0-7,104-111" "8-15,112-119" "16-23,120-127" "24-31,128-135" "52-59,156-163" "60-67,164-171" "68-75,172-179" "76-83,180-187" )
 
-composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
+if [[ "${COLLECT_NSYS_PROFILE:="yes"}" == "yes" ]]; then
+  echo "Collecting nsys profile"
+  CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
+fi
+
+$CMD_PREFIX composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
      data_local=my-copy-c4 train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=10ba eval_interval=0 \
      save_folder=${MODEL_NAME}

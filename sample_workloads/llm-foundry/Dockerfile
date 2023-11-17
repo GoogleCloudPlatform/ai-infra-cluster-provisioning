@@ -9,6 +9,9 @@ RUN python data_prep/convert_dataset_hf.py \
   --concat_tokens 2048 --tokenizer EleutherAI/gpt-neox-20b --eos_text '<|endoftext|>'
 
 RUN apt-get update && apt-get install numactl -y
+
+RUN pip install nvidia-pyindex nvidia-dlprof-pytorch-nvtx nvidia-dlprof
+
 ADD scripts/llmfoundry_container_entrypoint.sh .
 RUN chmod +x llmfoundry_container_entrypoint.sh
 ENTRYPOINT ["/bin/bash", "/llm-foundry/scripts/llmfoundry_container_entrypoint.sh"]
