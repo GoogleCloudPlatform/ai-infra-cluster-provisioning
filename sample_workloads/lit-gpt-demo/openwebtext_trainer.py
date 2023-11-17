@@ -25,7 +25,7 @@ from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision
 
 model_name = os.getenv("MODEL_NAME", "Llama-2-70b-hf")
 name = "openwebtext"
-out_dir = Path("out") / name
+out_dir = Path(os.getenv("EXPERIMENT_LOCAL_DIR", "")) / "out"
 data_dir = Path("/data")
 save_interval = 1000
 eval_interval = 1000
@@ -123,7 +123,7 @@ def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -
     else:
         strategy = "auto"
 
-    logger = step_csv_logger("out", name, cls=CSVLogger, flush_logs_every_n_steps=log_interval)
+    logger = step_csv_logger(out_dir, name, cls=CSVLogger, flush_logs_every_n_steps=log_interval)
     speed_monitor = SpeedMonitorCallback(
         length_fn=lambda batch: batch[0].size(1), batch_size=micro_batch_size, window_size=50, time_unit="seconds"
     )

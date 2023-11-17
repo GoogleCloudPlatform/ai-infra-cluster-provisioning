@@ -1,9 +1,10 @@
 {{- $requiredVar := .Values.cluster.nNodes | required ".Values.cluster.nNodes is required" -}}
 {{- $requiredVar := .Values.cluster.nodePool | required ".Values.cluster.nodePool is required" -}}
 {{- $requiredVar := .Values.network.ncclIfnames | required ".Values.ncclIfnames is required" -}}
-{{- $requiredVar := .Values.workload.gcsBucket | required ".Values.gcsBucket is required" -}}
 {{- $requiredVar := .Values.workload.jobTimestamp | required ".Values.jobTimestamp is required" -}}
+{{- $requiredVar := .Values.workload.gcsExperimentBucket | required ".Values.gcsExperimentBucket is required" -}}
 {{- $requiredVar := .Values.workload.experimentDir | required ".Values.experimentDir is required" -}}
+{{- $requiredVar := .Values.workload.gcsDataBucket | required ".Values.gcsDataBucket is required" -}}
 {{- $requiredVar := .Values.workload.dataDir| required ".Values.dataDir is required" -}}
 {{- $requiredVar := .Values.workload.image | required ".Values.image is required" -}}
 apiVersion: v1
@@ -145,10 +146,12 @@ spec:
         value: "{{$root.Values.network.disablePmtu}}"
       - name: CPU_PINNING_MODE
         value: "{{$root.Values.network.cpuPinningMode}}"
-      - name: GCS_BUCKET
-        value: "{{$root.Values.workload.gcsBucket}}"
+      - name: GCS_EXPERIMENT_BUCKET
+        value: "{{$root.Values.workload.gcsExperimentBucket}}"
       - name: EXPERIMENT_ROOT_DIR
         value: "{{$root.Values.workload.experimentDir}}"
+      - name: GCS_DATA_BUCKET
+        value: "{{$root.Values.workload.gcsDataBucket}}"
       - name: DATA_DIR
         value: "{{$root.Values.workload.dataDir}}"
       - name: BATCH_SIZE
