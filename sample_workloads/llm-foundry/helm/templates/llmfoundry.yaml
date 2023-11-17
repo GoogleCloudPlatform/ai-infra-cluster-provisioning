@@ -109,8 +109,6 @@ spec:
   - name: llmfoundry
     image: {{$root.Values.workload.image}}
     imagePullPolicy: Always
-    command: [ "composer" ]
-    args: [ "train/train.py", "train/yamls/pretrain/{{$root.Values.workload.modelName}}.yaml", "data_local=my-copy-c4", "train_loader.dataset.split=train_small", "eval_loader.dataset.split=val_small", "max_duration=10ba", "eval_interval=0", "save_folder={{$root.Values.workload.modelName}}"]
     securityContext:
       privileged: true
       capabilities:
