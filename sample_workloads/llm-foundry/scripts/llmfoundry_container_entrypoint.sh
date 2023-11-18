@@ -137,7 +137,7 @@ if [[ "${COLLECT_NSYS_PROFILE:="yes"}" == "yes" ]]; then
   CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
 fi
 
-if [[ "${COLLECT_COMPOSER_PROFILE:="yes"}" == "yes" ]]; then
+if [[ "${COLLECT_COMPOSER_PROFILE:="no"}" == "yes" ]]; then
   export USE_CUSTOM_PROFILER='yes'
 fi
 

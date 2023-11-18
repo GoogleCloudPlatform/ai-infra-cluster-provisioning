@@ -161,6 +161,8 @@ spec:
         value: "{{$root.Values.workload.modelName}}"
       - name: COLLECT_NSYS_PROFILE
         value: "{{$root.Values.workload.collectNsysProfile}}"
+      - name: COLLECT_COMPOSER_PROFILE
+        value: "{{$root.Values.workload.collectComposerProfile}}"
       - name: ACT_CKPT
         value: "{{$root.Values.workload.actCkpt}}"
       - name: N_LAYERS

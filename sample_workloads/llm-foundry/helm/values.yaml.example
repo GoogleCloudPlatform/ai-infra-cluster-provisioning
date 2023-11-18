@@ -13,6 +13,7 @@ workload:
   modelName: mpt-125m
   gcsBucket: pirillo-sct-bucket
   collectNsysProfile: "no" # Currently does not work
+  collectComposerProfile: "no" # set to "yes" to enable
   jobTimestamp: 1
   experimentDir: '/' 
   dataDir: '/'
