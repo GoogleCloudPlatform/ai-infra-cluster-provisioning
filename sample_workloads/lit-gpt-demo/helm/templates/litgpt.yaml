@@ -50,6 +50,12 @@ spec:
   tolerations:
   - operator: "Exists"
     key: nvidia.com/gpu
+  - operator: "Exists"
+    key: cloud.google.com/impending-node-termination
+  - opterator: "Exists"
+    key: cloud.google.com/maintenance-window-started 
+  - operator: "Exists"
+    key: aiinfra/neper-healthcheck
   volumes:
   - name: nvidia-install-dir-host
     hostPath:
