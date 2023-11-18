@@ -52,7 +52,7 @@ spec:
     key: nvidia.com/gpu
   - operator: "Exists"
     key: cloud.google.com/impending-node-termination
-  - opterator: "Exists"
+  - operator: "Exists"
     key: cloud.google.com/maintenance-window-started 
   - operator: "Exists"
     key: aiinfra/neper-healthcheck
