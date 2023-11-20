@@ -187,6 +187,8 @@ spec:
         value: "{{$root.Values.workload.fsdpBackwardPrefetch}}"
       - name: JOB_TIMESTAMP
         value: "{{$root.Values.workload.jobTimestamp}}"
+      - name: NUM_BATCHES
+        value: "{{$root.Values.workload.numBatches}}"
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64

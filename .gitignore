@@ -4,3 +4,4 @@
 !**/samples/**/terraform.tfvars
 **/tfplan
 **/backend.tf
+**/.DS_Store

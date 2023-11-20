@@ -8,13 +8,14 @@ set -o pipefail
 : "${NNODES:?Must set NNODES}"
 : "${MASTER_PORT:?Must set MASTER_PORT}"
 : "${WORLD_SIZE:?Must set WORLD_SIZE}"
+: "${NUM_BATCHES:=10}"
 
 export EXPERIMENT_LOCAL_DIR="/experiment"
 export EXPERIMENT_ROOT_DIR=${MODEL_NAME}_${NNODES}nodes
 export GPUS_PER_NODE=8
 
 mkdir $EXPERIMENT_LOCAL_DIR
-gsutil rsync -r gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/${JOB_TIMESTAMP} ${EXPERIMENT_LOCAL_DIR}/
+gsutil rsync -r -C gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/${JOB_TIMESTAMP}/ ${EXPERIMENT_LOCAL_DIR}/
 
 PROFILING_DIR=$EXPERIMENT_LOCAL_DIR/nsys_profiles
 mkdir -p $PROFILING_DIR
@@ -143,7 +144,7 @@ fi
 
 $CMD_PREFIX composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
      data_local=my-copy-c4 train_loader.dataset.split=train_small \
-     eval_loader.dataset.split=val_small max_duration=10ba eval_interval=0 \
+     eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
      save_folder=${MODEL_NAME} activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
      max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} 
      

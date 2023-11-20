@@ -25,3 +25,4 @@ workload:
   fsdpLimitAllGathers: true
   fsdpForwardPrefetch: false
   fsdpBackwardPrefetch: BackwardPrefetch.BACKWARD_PRE
+  numBatches: 30

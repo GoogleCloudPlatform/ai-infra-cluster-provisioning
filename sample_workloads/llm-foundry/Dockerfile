@@ -20,6 +20,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
 
 ADD scripts/llmfoundry_container_entrypoint.sh .
 ADD scripts/train.py train/train.py
+ADD scripts/yamls/ train/yamls/
 
 RUN chmod +x llmfoundry_container_entrypoint.sh
 ENTRYPOINT ["/bin/bash", "/llm-foundry/scripts/llmfoundry_container_entrypoint.sh"]
