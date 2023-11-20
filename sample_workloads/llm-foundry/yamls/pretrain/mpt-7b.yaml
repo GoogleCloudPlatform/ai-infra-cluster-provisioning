@@ -101,6 +101,8 @@ console_log_interval: 1ba
 callbacks:
   speed_monitor:
     window_size: 10
+    time_unit: seconds # Does not seem to be reflected?
+    gpu_flops_available: 989500000000000
   lr_monitor: {}
   memory_monitor: {}
   runtime_estimator: {}
