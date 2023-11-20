@@ -26,3 +26,4 @@ workload:
   fsdpForwardPrefetch: false
   fsdpBackwardPrefetch: BackwardPrefetch.BACKWARD_PRE
   numBatches: 30
+  batchSize: 2048

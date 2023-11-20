@@ -161,8 +161,6 @@ spec:
         value: "{{$root.Values.workload.dataDir}}"
       - name: BATCH_SIZE
         value: "{{$root.Values.workload.batchSize}}"
-      - name: MICRO_BATCH_SIZE
-        value: "{{$root.Values.workload.microBatchSize}}"
       - name: MODEL_NAME
         value: "{{$root.Values.workload.modelName}}"
       - name: COLLECT_NSYS_PROFILE
