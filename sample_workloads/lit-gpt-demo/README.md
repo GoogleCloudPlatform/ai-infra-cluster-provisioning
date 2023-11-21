@@ -305,10 +305,21 @@ Step times are presented in the csv as aggregate times in the column `time/train
 MFU for this sample workload can be calculated using the formula:
 
 ```
-estimated_flops = ops_per_step * trainable_flops * batch_size
-flops_per_sec = estimated_flops / time
-mfu = flops_per_sec / gpu_available_flops
+mfu = flops_achieved_per_second  /flops_promised_per_second
 ```
+```
+flops_achieved_per_second = node_size * number_of_gpus * TFLOPS
+```
+```
+flops achieved in step_time seconds = 
+( 6 * batch_size * model_size * context_length ) node_size * number_gpu
+
+flops_achieved_per_second =
+(( 6 * batch_size * model_size * context_length ) node_size * number_gpu) / step_time
+```
+```
+mfu =  ( ( 6 * batch_size * model_size * context_length ) node_size * number_gpu ) / ( node_size * number_gpu * TFLOPS * step_time )
+``` 
 
 For example, running Llama2-70b on 40 VMs would have you calculate this as:
 
