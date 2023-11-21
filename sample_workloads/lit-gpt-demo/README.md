@@ -314,7 +314,7 @@ flops_achieved_per_second = node_size * number_of_gpus * TFLOPS
 flops achieved in step_time seconds = 
 ( 6 * batch_size * model_size * context_length ) node_size * number_gpu
 
-flops_achieved_per_second 
+flops_achieved_per_second =
 (( 6 * batch_size * model_size * context_length ) node_size * number_gpu) / step_time
 ```
 ```
