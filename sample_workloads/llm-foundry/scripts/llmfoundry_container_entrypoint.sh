@@ -110,9 +110,8 @@ function on_script_completion {
    # semaphore to cleanly exit hardware utilization monitor
    touch /tmp/workload_terminated
 
-   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/${JOB_TIMESTAMP}/"
-   # echo "SKIPPING UPLOAD, STORAGE NOT CONFIGURED"
-   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/${JOB_TIMESTAMP}/
+   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
+   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/
 }
 
 
@@ -134,22 +133,48 @@ PIDS=()
 
 CPU_SETS=( "0-7,104-111" "8-15,112-119" "16-23,120-127" "24-31,128-135" "52-59,156-163" "60-67,164-171" "68-75,172-179" "76-83,180-187" )
 
-if [[ "${COLLECT_NSYS_PROFILE:="yes"}" == "yes" ]]; then
-  echo "Collecting nsys profile"
-  CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
-fi
+YAML_FILE=/llm-foundry/scripts/train/yamls/pretrain/${MODEL_NAME}.yaml
 
-if [[ "${COLLECT_COMPOSER_PROFILE:="no"}" == "yes" ]]; then
-  export USE_CUSTOM_PROFILER='yes'
-fi
+cat $YAML_FILE
+printenv
 
-$CMD_PREFIX composer train/train.py train/yamls/pretrain/${MODEL_NAME}.yaml \
-     data_local=my-copy-c4 train_loader.dataset.split=train_small \
+for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
+   RANK=$(($GPUS_PER_NODE*$NODE_RANK + $LOCAL_RANK))
+
+   CPUS=${CPU_SETS[$LOCAL_RANK]}
+   echo "Using CPUs $CPUS for local rank $LOCAL_RANK"
+
+   if (( LOCAL_RANK < 4 )); then
+     MEMBIND_NUMA_NODE=0
+   else
+     MEMBIND_NUMA_NODE=1
+   fi
+   CMD_PREFIX="numactl --membind=$MEMBIND_NUMA_NODE --physcpubind $CPUS"
+
+   if [[ "${COLLECT_NSYS_PROFILE:="no"}" == "yes" ]]; then
+     echo "Collecting nsys profile"
+     CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK}  --export sqlite "
+  elif [[ "${COLLECT_COMPOSER_PROFILE:="no"}" == "yes" ]]; then
+    export USE_CUSTOM_PROFILER='yes'
+  fi
+
+
+   RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
+     $CMD_PREFIX \
+     python train.py $YAML_FILE \
+     data_local=my-copy-c4 \
+     train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
-     save_folder=${MODEL_NAME} activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
-     max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} \
-     global_train_batch_size=${BATCH_SIZE}
-     
-     # Disabling FSDP config for now, defaults are sufficient.
-     # fsdp_config.sharding_strategy=${FSDP_SHARDING_STRATEGY} fsdp_config.limit_all_gathers=${FSDP_LIMIT_ALL_GATHERS} \
-     # fsdp_config.forward_prefetch=${FSDP_FORWARD_PREFETCH} fsdp_config.backward_prefetch=${FSDP_BACKWARD_PREFETCH}
+     save_folder=${MODEL_NAME} > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1 &
+     # device_train_microbatch_size=${DTMS}   global_train_batch_size=${BATCH_SIZE} \
+     # activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
+     # max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} \
+     # global_train_batch_size=${BATCH_SIZE}
+
+   PID=$!
+   PIDS+=($PID)
+
+   echo "Launched pretrain_gpt.py for rank $RANK with PID $PID"
+done
+
+wait_all_success_or_exit "${PIDS[@]}"
