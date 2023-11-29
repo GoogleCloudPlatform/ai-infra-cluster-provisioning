@@ -9,7 +9,8 @@ set -o pipefail
 : "${MASTER_PORT:?Must set MASTER_PORT}"
 : "${WORLD_SIZE:?Must set WORLD_SIZE}"
 : "${NUM_BATCHES:=12}"
-# : "${BATCH_SIZE:?Must set BATCH_SIZE}"
+: "${BATCH_SIZE:?Must set BATCH_SIZE}"
+: "${GRAD_ACCUM:?Must set GRAD_ACCUM}"
 
 export EXPERIMENT_LOCAL_DIR="/experiment"
 export EXPERIMENT_ROOT_DIR=${MODEL_NAME}_${NNODES}nodes
@@ -175,11 +176,12 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
      data_local=my-copy-c4 \
      train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
+     fsdp_config.activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
+     model.max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} \
+     global_train_batch_size=${BATCH_SIZE} \
+     device_train_grad_accum=${GRAD_ACCUM} \
+     callbacks.speed_monitor.gpu_flops_available=989500000000000 \
      > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1 &
-     # save_folder=${MODEL_NAME} # device_train_microbatch_size=${DTMS}   global_train_batch_size=${BATCH_SIZE} \
-     # activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
-     # max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} \
-     # global_train_batch_size=${BATCH_SIZE}
 
    PID=$!
    PIDS+=($PID)
