@@ -20,11 +20,10 @@ workload:
   actCkpt: true
   nLayers: 32
   maxSeqLen: 128 
-  dtms: 64
   fsdpShardingStrategy: FULL_SHARD
   fsdpLimitAllGathers: true
   fsdpForwardPrefetch: false
   fsdpBackwardPrefetch: BackwardPrefetch.BACKWARD_PRE
   numBatches: 30
-  batchSize: 2048
-  gradAccum: 4
+  globalBatchSize: 2048
+  dtms: 64

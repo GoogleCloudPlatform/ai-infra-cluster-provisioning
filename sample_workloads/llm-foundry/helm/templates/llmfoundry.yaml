@@ -159,8 +159,8 @@ spec:
         value: "{{$root.Values.workload.experimentDir}}"
       - name: DATA_DIR
         value: "{{$root.Values.workload.dataDir}}"
-      - name: BATCH_SIZE
-        value: "{{$root.Values.workload.batchSize}}"
+      - name: GLOBAL_BATCH_SIZE
+        value: "{{$root.Values.workload.globalBatchSize}}"
       - name: MODEL_NAME
         value: "{{$root.Values.workload.modelName}}"
       - name: COLLECT_NSYS_PROFILE
@@ -187,8 +187,6 @@ spec:
         value: "{{$root.Values.workload.jobTimestamp}}"
       - name: NUM_BATCHES
         value: "{{$root.Values.workload.numBatches}}"
-      - name: GRAD_ACCUM
-        value: "{{$root.Values.workload.gradAccum}}"
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
