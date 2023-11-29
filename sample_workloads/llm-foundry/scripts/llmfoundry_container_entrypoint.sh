@@ -10,7 +10,6 @@ set -o pipefail
 : "${WORLD_SIZE:?Must set WORLD_SIZE}"
 : "${NUM_BATCHES:=12}"
 : "${BATCH_SIZE:?Must set BATCH_SIZE}"
-: "${GRAD_ACCUM:?Must set GRAD_ACCUM}"
 : "${DTMS:?Must set DTMS}"
 
 export EXPERIMENT_LOCAL_DIR="/experiment"
