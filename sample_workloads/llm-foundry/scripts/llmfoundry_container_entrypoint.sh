@@ -34,10 +34,10 @@ mkdir -p $OUT_DIR
 DEBUG_DIR=$EXPERIMENT_LOCAL_DIR/debug
 mkdir -p $DEBUG_DIR
 
-TELEMETRY_DIR=$EXPERIMENT_LOCAL_DIR/telemetry
-mkdir -p $TELEMETRY_DIR
-mpstat -P ALL 1 &> $TELEMETRY_DIR/mpstat_NODE_${NODE_RANK}.txt &
-MPSTAT_PID=$!
+# TELEMETRY_DIR=$EXPERIMENT_LOCAL_DIR/telemetry
+# mkdir -p $TELEMETRY_DIR
+# mpstat -P ALL 1 &> $TELEMETRY_DIR/mpstat_NODE_${NODE_RANK}.txt &
+# MPSTAT_PID=$!
 
 CMD_PREFIX=""
 
@@ -175,7 +175,7 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
      data_local=my-copy-c4 \
      train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
-     > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1
+     > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1 &
      # save_folder=${MODEL_NAME} # device_train_microbatch_size=${DTMS}   global_train_batch_size=${BATCH_SIZE} \
      # activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
      # max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} \
