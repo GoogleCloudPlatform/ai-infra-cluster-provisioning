@@ -9,11 +9,15 @@ set -o pipefail
 : "${MASTER_PORT:?Must set MASTER_PORT}"
 : "${WORLD_SIZE:?Must set WORLD_SIZE}"
 : "${NUM_BATCHES:=12}"
-: "${BATCH_SIZE:?Must set BATCH_SIZE}"
+# : "${BATCH_SIZE:?Must set BATCH_SIZE}"
 
 export EXPERIMENT_LOCAL_DIR="/experiment"
 export EXPERIMENT_ROOT_DIR=${MODEL_NAME}_${NNODES}nodes
 export GPUS_PER_NODE=8
+export LOCAL_WORLD_SIZE=$GPUS_PER_NODE
+
+PYTHONUNBUFFERED=1
+NCCL_ASYNC_ERROR_HANDLING=1
 
 mkdir $EXPERIMENT_LOCAL_DIR
 gsutil rsync -r -C gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/${JOB_TIMESTAMP}/ ${EXPERIMENT_LOCAL_DIR}/
@@ -30,12 +34,15 @@ mkdir -p $OUT_DIR
 DEBUG_DIR=$EXPERIMENT_LOCAL_DIR/debug
 mkdir -p $DEBUG_DIR
 
+TELEMETRY_DIR=$EXPERIMENT_LOCAL_DIR/telemetry
+mkdir -p $TELEMETRY_DIR
+mpstat -P ALL 1 &> $TELEMETRY_DIR/mpstat_NODE_${NODE_RANK}.txt &
+MPSTAT_PID=$!
+
 CMD_PREFIX=""
 
 export NCCL_TOPO_DUMP_FILE=$DEBUG_DIR/nccl_topo_${NODE_RANK}.xml
 export NCCL_GRAPH_DUMP_FILE="$DEBUG_DIR/nccl_graph_${NODE_RANK}.graph"
-
-export OMP_NUM_THREADS=12
 
 set_nccl_specific_configuration() {
   if [[ "$USE_TCPX" == "yes" ]]; then
@@ -70,6 +77,7 @@ set_nccl_specific_configuration() {
 }
 
 set_nccl_specific_configuration
+export OMP_NUM_THREADS=12
 
 wait_all_success_or_exit() {
   # https://www.baeldung.com/linux/background-process-get-exit-code
@@ -108,17 +116,19 @@ non_blocking_wait() {
 
 function on_script_completion {
    # semaphore to cleanly exit hardware utilization monitor
-   touch /tmp/workload_terminated
+   touch /usr/share/mpt/workload_terminated
+   kill -9 $MPSTAT_PID
 
-   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
-   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/${JOB_TIMESTAMP}/"
+   # echo "SKIPPING UPLOAD, STORAGE NOT CONFIGURED"
+   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/${JOB_TIMESTAMP}/
 }
 
 
+rm -f /usr/share/mpt/workload_terminated
+
 trap on_script_completion EXIT
 
-# Launch background process that samples hardware utilization
-rm -f /tmp/workload_terminated
 
 if [[ "${DISABLE_PMTU:="yes"}" == "yes" ]]; then
   echo "Disabling PMTU"
@@ -153,7 +163,7 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
 
    if [[ "${COLLECT_NSYS_PROFILE:="no"}" == "yes" ]]; then
      echo "Collecting nsys profile"
-     CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK}  --export sqlite "
+     CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
   elif [[ "${COLLECT_COMPOSER_PROFILE:="no"}" == "yes" ]]; then
     export USE_CUSTOM_PROFILER='yes'
   fi
@@ -161,12 +171,12 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
 
    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
      $CMD_PREFIX \
-     python train.py $YAML_FILE \
+     python train/train.py $YAML_FILE \
      data_local=my-copy-c4 \
      train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
-     save_folder=${MODEL_NAME} > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1 &
-     # device_train_microbatch_size=${DTMS}   global_train_batch_size=${BATCH_SIZE} \
+     > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1
+     # save_folder=${MODEL_NAME} # device_train_microbatch_size=${DTMS}   global_train_batch_size=${BATCH_SIZE} \
      # activation_checkpointing=${ACT_CKPT} model.n_layers=${N_LAYERS} \
      # max_seq_len=${MAX_SEQ_LEN} device_train_microbatch_size=${DTMS} \
      # global_train_batch_size=${BATCH_SIZE}
