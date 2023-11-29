@@ -159,7 +159,7 @@ spec:
         value: "{{$root.Values.workload.experimentDir}}"
       - name: DATA_DIR
         value: "{{$root.Values.workload.dataDir}}"
-      - name: GLOBAL_BATCH_SIZE
+      - name: BATCH_SIZE
         value: "{{$root.Values.workload.globalBatchSize}}"
       - name: MODEL_NAME
         value: "{{$root.Values.workload.modelName}}"
