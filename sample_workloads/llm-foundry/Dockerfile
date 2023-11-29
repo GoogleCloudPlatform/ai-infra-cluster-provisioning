@@ -1,4 +1,5 @@
-FROM mosaicml/llm-foundry:2.1.0_cu121_flash2-latest                                                                                                                                                                   
+FROM nvcr.io/nvidia/pytorch:23.09-py3
+WORKDIR /
 RUN git clone https://github.com/mosaicml/llm-foundry.git
 WORKDIR llm-foundry
 RUN pip install -e ".[gpu]"
