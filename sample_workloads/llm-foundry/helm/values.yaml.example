@@ -27,3 +27,4 @@ workload:
   fsdpBackwardPrefetch: BackwardPrefetch.BACKWARD_PRE
   numBatches: 30
   batchSize: 2048
+  gradAccum: 4
