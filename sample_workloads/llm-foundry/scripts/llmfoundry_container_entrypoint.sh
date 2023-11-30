@@ -11,6 +11,7 @@ set -o pipefail
 : "${NUM_BATCHES:=12}"
 : "${BATCH_SIZE:?Must set BATCH_SIZE}"
 : "${DTMS:?Must set DTMS}"
+: "${DTMS:?Must set MAX_SEQ_LEN}"
 
 export EXPERIMENT_LOCAL_DIR="/experiment"
 export EXPERIMENT_ROOT_DIR=${MODEL_NAME}_${NNODES}nodes
@@ -148,6 +149,12 @@ YAML_FILE=/llm-foundry/scripts/train/yamls/pretrain/${MODEL_NAME}.yaml
 
 cat $YAML_FILE
 printenv
+
+echo "Preparing dataset for seqLen: " $MAX_SEQ_LEN
+python data_prep/convert_dataset_hf.py \
+  --dataset c4 --data_subset en \
+  --out_root my-copy-c4 --splits train_small val_small \
+  --concat_tokens $MAX_SEQ_LEN --tokenizer EleutherAI/gpt-neox-20b --eos_text '<|endoftext|>'
 
 for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
    RANK=$(($GPUS_PER_NODE*$NODE_RANK + $LOCAL_RANK))
