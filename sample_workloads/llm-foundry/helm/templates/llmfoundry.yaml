@@ -98,7 +98,7 @@ spec:
     - "-c"
     - |
       /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd --setup_param "--verbose 128 2 0" &
-      while [ ! -e "/usr/share/llmfoundry/workload_terminated" ]; do sleep 10; done
+      while [ ! -e "/usr/share/mpt/workload_terminated" ]; do sleep 10; done
     securityContext:
       privileged: true
     volumeMounts:
@@ -107,7 +107,7 @@ spec:
     - name: tcpd-socket
       mountPath: /tmp
     - name: workload-terminated-volume
-      mountPath: /usr/share/llmfoundry
+      mountPath: /usr/share/mpt
     env:
     - name: LD_LIBRARY_PATH
       value: /usr/local/nvidia/lib64
@@ -197,7 +197,7 @@ spec:
       - name: shared-memory
         mountPath: /dev/shm
       - name: workload-terminated-volume
-        mountPath: /usr/share/llmfoundry
+        mountPath: /usr/share/mpt
     resources:
       limits:
         nvidia.com/gpu: !!int 8
