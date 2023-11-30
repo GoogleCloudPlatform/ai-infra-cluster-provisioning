@@ -156,45 +156,56 @@ python data_prep/convert_dataset_hf.py \
   --out_root my-copy-c4 --splits train_small val_small \
   --concat_tokens $MAX_SEQ_LEN --tokenizer EleutherAI/gpt-neox-20b --eos_text '<|endoftext|>'
 
-for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
-   RANK=$(($GPUS_PER_NODE*$NODE_RANK + $LOCAL_RANK))
+$CMD_PREFIX composer train/train.py $YAML_FILE \
+  data_local=my-copy-c4 train_loader.dataset.split=train_small \
+  train_loader.dataset.split=train_small \
+  eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
+  fsdp_config.activation_checkpointing=${ACT_CKPT} \
+  model.n_layers=${N_LAYERS} \
+  model.max_seq_len=${MAX_SEQ_LEN} \
+  global_train_batch_size=${BATCH_SIZE} \
+  device_train_microbatch_size=${DTMS} \
+  callbacks.speed_monitor.gpu_flops_available=989500000000000
 
-   CPUS=${CPU_SETS[$LOCAL_RANK]}
-   echo "Using CPUs $CPUS for local rank $LOCAL_RANK"
+# for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
+#    RANK=$(($GPUS_PER_NODE*$NODE_RANK + $LOCAL_RANK))
 
-   if (( LOCAL_RANK < 4 )); then
-     MEMBIND_NUMA_NODE=0
-   else
-     MEMBIND_NUMA_NODE=1
-   fi
-   CMD_PREFIX="numactl --membind=$MEMBIND_NUMA_NODE --physcpubind $CPUS"
+#    CPUS=${CPU_SETS[$LOCAL_RANK]}
+#    echo "Using CPUs $CPUS for local rank $LOCAL_RANK"
 
-   if [[ "${COLLECT_NSYS_PROFILE:="no"}" == "yes" ]]; then
-     echo "Collecting nsys profile"
-     CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
-  elif [[ "${COLLECT_COMPOSER_PROFILE:="no"}" == "yes" ]]; then
-    export USE_CUSTOM_PROFILER='yes'
-  fi
+#    if (( LOCAL_RANK < 4 )); then
+#      MEMBIND_NUMA_NODE=0
+#    else
+#      MEMBIND_NUMA_NODE=1
+#    fi
+#    CMD_PREFIX="numactl --membind=$MEMBIND_NUMA_NODE --physcpubind $CPUS"
+
+#    if [[ "${COLLECT_NSYS_PROFILE:="no"}" == "yes" ]]; then
+#      echo "Collecting nsys profile"
+#      CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
+#   elif [[ "${COLLECT_COMPOSER_PROFILE:="no"}" == "yes" ]]; then
+#     export USE_CUSTOM_PROFILER='yes'
+#   fi
 
 
-   RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
-     $CMD_PREFIX \
-     python train/train.py $YAML_FILE \
-     data_local=my-copy-c4 \
-     train_loader.dataset.split=train_small \
-     eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
-     fsdp_config.activation_checkpointing=${ACT_CKPT} \
-     model.n_layers=${N_LAYERS} \
-     model.max_seq_len=${MAX_SEQ_LEN} \
-     global_train_batch_size=${BATCH_SIZE} \
-     device_train_microbatch_size=${DTMS} \
-     callbacks.speed_monitor.gpu_flops_available=989500000000000 \
-     > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1 &
+#    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
+#      $CMD_PREFIX \
+#      python train/train.py $YAML_FILE \
+#      data_local=my-copy-c4 \
+#      train_loader.dataset.split=train_small \
+#      eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
+#      fsdp_config.activation_checkpointing=${ACT_CKPT} \
+#      model.n_layers=${N_LAYERS} \
+#      model.max_seq_len=${MAX_SEQ_LEN} \
+#      global_train_batch_size=${BATCH_SIZE} \
+#      device_train_microbatch_size=${DTMS} \
+#      callbacks.speed_monitor.gpu_flops_available=989500000000000 \
+#      > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1 &
 
-   PID=$!
-   PIDS+=($PID)
+#    PID=$!
+#    PIDS+=($PID)
 
-   echo "Launched pretrain_gpt.py for rank $RANK with PID $PID"
-done
+#    echo "Launched pretrain_gpt.py for rank $RANK with PID $PID"
+# done
 
-wait_all_success_or_exit "${PIDS[@]}"
+# wait_all_success_or_exit "${PIDS[@]}"
