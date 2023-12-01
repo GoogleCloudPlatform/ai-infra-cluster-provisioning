@@ -3,6 +3,8 @@ set -e
 set -u
 set -o pipefail
 
+patch /usr/local/lib/python3.10/dist-packages/composer/trainer/trainer.py -i patches/composer_nvtx_patches.patch
+
 : "${MASTER_ADDR:?Must set MASTER_ADDR}"
 : "${NODE_RANK:?Must set NODE_RANK}"
 : "${NNODES:?Must set NNODES}"
