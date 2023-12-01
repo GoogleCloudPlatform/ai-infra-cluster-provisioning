@@ -126,7 +126,7 @@ non_blocking_wait() {
 function on_script_completion {
    # semaphore to cleanly exit hardware utilization monitor
    touch /usr/share/mpt/workload_terminated
-   kill -9 $MPSTAT_PID
+   # kill -9 $MPSTAT_PID
 
    echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_BUCKET}/${EXPERIMENT_ROOT_DIR}/${JOB_TIMESTAMP}/"
    # echo "SKIPPING UPLOAD, STORAGE NOT CONFIGURED"
