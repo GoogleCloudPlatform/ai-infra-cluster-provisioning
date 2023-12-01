@@ -200,6 +200,7 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
      callbacks.speed_monitor.gpu_flops_available=989500000000000 \
      callbacks.speed_monitor.window_size=1 \
      callbacks.speed_monitor.time_unit='seconds' \
+     save_folder='null' \
      > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1 &
 
    PID=$!
