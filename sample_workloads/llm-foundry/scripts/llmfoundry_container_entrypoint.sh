@@ -11,7 +11,7 @@ set -o pipefail
 : "${NUM_BATCHES:=12}"
 : "${BATCH_SIZE:?Must set BATCH_SIZE}"
 : "${DTMS:?Must set DTMS}"
-: "${DTMS:?Must set MAX_SEQ_LEN}"
+: "${MAX_SEQ_LEN:?Must set MAX_SEQ_LEN}"
 
 export EXPERIMENT_LOCAL_DIR="/experiment"
 export EXPERIMENT_ROOT_DIR=${MODEL_NAME}_${NNODES}nodes
@@ -184,7 +184,6 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
      train_loader.dataset.split=train_small \
      eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
      fsdp_config.activation_checkpointing=${ACT_CKPT} \
-     model.n_layers=${N_LAYERS} \
      max_seq_len=${MAX_SEQ_LEN} \
      global_train_batch_size=${BATCH_SIZE} \
      device_train_microbatch_size=${DTMS} \

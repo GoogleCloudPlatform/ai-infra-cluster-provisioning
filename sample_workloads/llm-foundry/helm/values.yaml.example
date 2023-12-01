@@ -18,7 +18,6 @@ workload:
   experimentDir: '/' 
   dataDir: '/'
   actCkpt: true
-  nLayers: 32
   maxSeqLen: 128 
   fsdpShardingStrategy: FULL_SHARD
   fsdpLimitAllGathers: true
