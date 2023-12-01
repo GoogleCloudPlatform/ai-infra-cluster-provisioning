@@ -49,6 +49,7 @@ export NCCL_GRAPH_DUMP_FILE="$DEBUG_DIR/nccl_graph_${NODE_RANK}.graph"
 set_nccl_specific_configuration() {
   if [[ "$USE_TCPX" == "yes" ]]; then
     echo "Using TCPX"
+    # >>>> NCCL Tuning
     export NCCL_CROSS_NIC=0
     export NCCL_ALGO=Ring
     export NCCL_PROTO=Simple
@@ -65,11 +66,11 @@ set_nccl_specific_configuration() {
     export NCCL_P2P_PCI_CHUNKSIZE=524288
     export NCCL_P2P_NVL_CHUNKSIZE=1048576
     export NCCL_GPUDIRECTTCPX_TX_BINDINGS="eth1:8-21,112-125;eth2:8-21,112-125;eth3:60-73,164-177;eth4:60-73,164-177"
-    export NCCL_GPUDIRECTTCPX_RX_BINDINGS="eth1:22-35,124-139;eth2:22-35,124-139;eth3:74-87,178-191;eth4:74-87,178-191"
-    export NCCL_NSOCKS_PERTHREAD=4
-    export NCCL_SOCKET_NTHREADS=1
-    export NCCL_MAX_NCHANNELS=8
-    export NCCL_MIN_NCHANNELS=8
+    export NCCL_GPUDIRECTTCPX_RX_BINDINGS="eth1:22-35,126-139;eth2:22-35,126-139;eth3:74-87,178-191;eth4:74-87,178-191"
+    export NCCL_NSOCKS_PERTHREAD=${NCCL_NSOCKS_PERTHREAD:=4}
+    export NCCL_SOCKET_NTHREADS=${NCCL_SOCKET_NTHREADS:=1}
+    export NCCL_MAX_NCHANNELS=${NCCL_MAX_NCHANNELS:=12}
+    export NCCL_MIN_NCHANNELS=${NCCL_MIN_NCHANNELS:=12}
     export NCCL_GPUDIRECTTCPX_SOCKET_IFNAME=eth1,eth2,eth3,eth4
     export NCCL_GPUDIRECTTCPX_CTRL_DEV=eth0
     export NCCL_GPUDIRECTTCPX_PROGRAM_FLOW_STEERING_WAIT_MICROS=1000000
@@ -77,6 +78,10 @@ set_nccl_specific_configuration() {
     echo "NOT using TCPX"
   fi
 }
+
+# Add IRQ Pinning script here
+# >>>>
+./tune_network_tcpx.sh
 
 set_nccl_specific_configuration
 export OMP_NUM_THREADS=12
@@ -143,7 +148,8 @@ fi
 PIDS=()
 
 
-CPU_SETS=( "0-7,104-111" "8-15,112-119" "16-23,120-127" "24-31,128-135" "52-59,156-163" "60-67,164-171" "68-75,172-179" "76-83,180-187" )
+# >>>> Cpu Pinning
+CPU_SETS=( "0-1,104-105" "2-3,106-107" "4-5,108-109" "6-7,110,111" "52-53,156-157" "54-55,158-159" "56-57,160-161" "58-59,162-163" )
 
 YAML_FILE=/llm-foundry/scripts/train/yamls/pretrain/${MODEL_NAME}.yaml
 
@@ -172,9 +178,9 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
    if [[ "${COLLECT_NSYS_PROFILE:="no"}" == "yes" ]]; then
      echo "Collecting nsys profile"
      CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
-  elif [[ "${COLLECT_COMPOSER_PROFILE:="no"}" == "yes" ]]; then
-    export USE_CUSTOM_PROFILER='yes'
-  fi
+    elif [[ "${COLLECT_COMPOSER_PROFILE:="no"}" == "yes" ]]; then
+      export USE_CUSTOM_PROFILER='yes'
+    fi
 
 
    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
@@ -187,6 +193,8 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
      max_seq_len=${MAX_SEQ_LEN} \
      global_train_batch_size=${BATCH_SIZE} \
      device_train_microbatch_size=${DTMS} \
+     fsdp_config.backward_prefetch='BACKWARD_PRE' \
+     fsdp_config.verbose='true' \
      callbacks.speed_monitor.gpu_flops_available=989500000000000 \
      > >(tee "$LOG_DIR/pretrain_mpt_rank$RANK.log") 2>&1 &
 
