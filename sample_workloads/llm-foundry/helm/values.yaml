@@ -15,6 +15,8 @@ workload:
   collectNsysProfile: "no" # Currently does not work
   collectComposerProfile: "no" # set to "yes" to enable
   jobTimestamp: 1
+  experimentDir: '/'
+  dataDir: '/'
   maxSeqLen: 4096
   numBatches: 30
   globalBatchSize: 128
@@ -23,3 +25,4 @@ workload:
   ncclSocketNThreads: 1
   ncclMaxChannels: 12
   ncclMinChannels: 12
+  actCkpt: true
