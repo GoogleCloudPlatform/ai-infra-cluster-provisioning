@@ -187,6 +187,14 @@ spec:
         value: "{{$root.Values.workload.jobTimestamp}}"
       - name: NUM_BATCHES
         value: "{{$root.Values.workload.numBatches}}"
+      - name: NCCL_NSOCKS_PERTHREAD
+        value: "{{$root.Values.workload.ncclNsocksPerthread}}"
+      - name: NCCL_SOCKET_NTHREADS
+        value: "{{$root.Values.workload.ncclSocketNThreads}}"
+      - name: NCCL_MAX_NCHANNELS
+        value: "{{$root.Values.workload.ncclMaxChannels}}"
+      - name: NCCL_MIN_NCHANNELS
+        value: "{{$root.Values.workload.ncclMinChannels}}"
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
