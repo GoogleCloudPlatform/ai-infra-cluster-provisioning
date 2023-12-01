@@ -185,7 +185,7 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
      eval_loader.dataset.split=val_small max_duration=${NUM_BATCHES}ba eval_interval=0 \
      fsdp_config.activation_checkpointing=${ACT_CKPT} \
      model.n_layers=${N_LAYERS} \
-     model.max_seq_len=${MAX_SEQ_LEN} \
+     max_seq_len=${MAX_SEQ_LEN} \
      global_train_batch_size=${BATCH_SIZE} \
      device_train_microbatch_size=${DTMS} \
      callbacks.speed_monitor.gpu_flops_available=989500000000000 \
