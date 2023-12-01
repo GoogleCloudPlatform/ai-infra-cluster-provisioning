@@ -1,0 +1,43 @@
+
+--- trainer.py.backup   2023-11-27 20:10:06.402126085 +0000
++++ trainer.py  2023-11-27 20:42:44.700402218 +0000
+@@ -58,6 +58,8 @@
+                             model_eval_mode, parse_uri, reproducibility, using_torch_2)
+ from composer.utils.misc import is_model_deepspeed
++import nvtx
++
+ if is_tpu_installed():
+     import torch_xla.core.xla_model as xm
+     import torch_xla.distributed.parallel_loader as pl
+@@ -2014,6 +2016,8 @@
+         finished_epoch_early = False
+         last_wct = datetime.datetime.now()
++        batch_range = nvtx.start_range(message="full_step_train_loop", color="green")
++
+         while self.state.timestamp < self.state.max_duration:
+             try:
+                 if int(self.state.timestamp.batch_in_epoch) == 0:
+@@ -2077,6 +2081,14 @@
+                     now = datetime.datetime.now()
++
++                    nvtx.end_range(batch_range)
++                    torch.cuda.cudart().cudaProfilerStop()
++
++                    if batch_idx > 0 and batch_idx % 5 == 0:
++                        torch.cuda.cudart().cudaProfilerStart()
++                    batch_range = nvtx.start_range(message="full_step_train_loop", color="green")
++
+                     batch_time = now - last_wct
+                     total_num_samples, total_num_tokens, batch_time = self._accumulate_time_across_ranks(
+@@ -2153,6 +2165,7 @@
+             except BreakEpochException:
+                 log.info(f'Skipping the rest of Epoch {int(self.state.timestamp.epoch)}')
++        torch.cuda.cudart().cudaProfilerStop()
+         # Log final time values
+         self.logger.log_metrics({
+             'time/epoch': self.state.timestamp.epoch.value,
+@@ -2204,6 +2217,7 @@
+         self.engine.run_event(Event.EVAL_AFTER_ALL)
++    @nvtx.annotate(message="_train_batch", color="blue")
+     def _train_batch(self, use_grad_scaling: bool) -> Dict[str, torch.Tensor]:
+         """Compute loss by training on a full batch of data.

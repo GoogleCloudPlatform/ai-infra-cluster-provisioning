@@ -25,6 +25,7 @@ ADD scripts/llmfoundry_container_entrypoint.sh .
 ADD scripts/train.py train/train.py
 ADD scripts/tune_network_tcpx.sh .
 ADD yamls/ train/yamls/
+ADD patches/ patches/
 
 RUN chmod +x llmfoundry_container_entrypoint.sh
 RUN chmod +x tune_network_tcpx.sh
