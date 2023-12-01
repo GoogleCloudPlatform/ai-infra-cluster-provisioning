@@ -8,8 +8,10 @@ import sys
 import time
 import warnings
 from typing import Any, Dict, List, Optional, Union
+from pathlib import Path
 
 import torch
+import torch.multiprocessing as mp
 from composer import Trainer
 from composer.core import Evaluator
 from composer.core.callback import Callback
@@ -33,6 +35,15 @@ from llmfoundry.utils.builders import (build_algorithm, build_callback,
 from llmfoundry.utils.config_utils import (log_config, pop_config,
                                            process_init_device,
                                            update_batch_size_info)
+
+# support running without installing as a package
+wd = Path(__file__).parent.parent.resolve()
+sys.path.append(str(wd))
+mp.set_start_method("spawn", force=True)
+
+import monitor_collectives
+
+monitor_collectives.shunt_torch_communication()
 
 
 def validate_config(cfg: DictConfig):
