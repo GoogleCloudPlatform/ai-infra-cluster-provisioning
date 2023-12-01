@@ -641,7 +641,6 @@ def main(cfg: DictConfig) -> Trainer:
         save_filename=save_filename,
         save_latest_filename=save_latest_filename,
         save_interval=save_interval,
-        save_metrics=True,
         save_num_checkpoints_to_keep=save_num_checkpoints_to_keep,
         save_overwrite=save_overwrite,
         save_weights_only=save_weights_only,
