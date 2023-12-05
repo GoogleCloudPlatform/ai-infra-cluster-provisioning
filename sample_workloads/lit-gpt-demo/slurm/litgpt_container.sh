@@ -8,7 +8,7 @@ docker run \
     -v ${UDS_PATH}:${UDS_PATH} \
     -u 0 \
     -e LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/var/lib/tcpx/lib64:/usr/lib/lib32:/usr/lib/x86_64-linux-gnu/ \
-    -e JOB_TIMESTAMP=111113 \
+    -e JOB_TIMESTAMP=$(date +%s) \
     -e NNODES=$SLURM_NNODES \
     -e NODE_RANK=$SLURM_NODEID \
     -e MODEL_NAME='Llama-2-70b-hf' \
