@@ -39,7 +39,7 @@ srun --ntasks-per-node=1 \
     --volume ${UDS_PATH}:${UDS_PATH} \
     --env LD_LIBRARY_PATH=/usr/local/nvidia/lib64:${UDS_PATH}:/usr/lib/lib32:/usr/lib/x86_64-linux-gnu/ \
     --entrypoint /tcpgpudmarxd/build/app/tcpgpudmarxd \
-    us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.7 \
+    us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.9 \
     --setup_param "--verbose 128 2 0" \
     --gpu_nic_preset manual \
     --gpu_nic_topology ${GPU_NIC_TOPOLOGY} \
