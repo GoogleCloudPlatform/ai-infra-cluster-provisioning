@@ -46,7 +46,7 @@ srun --ntasks-per-node=1 \
     --gpu_shmem_type fd \
     --uds_path ${UDS_PATH}
 
-# Lauch the litgpt script
+# Launch the litgpt script
 srun -l --ntasks-per-node=1 bash litgpt_container.sh
 
 # Stop rxdm container
