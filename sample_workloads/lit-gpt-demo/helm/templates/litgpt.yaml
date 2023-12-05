@@ -92,7 +92,7 @@ spec:
     - "bash"
     - "-c"
     - |
-      /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd --setup_param "--verbose 128 5 0" &
+      /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd --setup_param "--verbose 128 2 0" &
       while [ ! -e "/usr/share/litgpt/workload_terminated" ]; do sleep 10; done
     securityContext:
       privileged: true
