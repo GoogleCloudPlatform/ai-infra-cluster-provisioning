@@ -47,7 +47,7 @@ srun --ntasks-per-node=1 \
     --uds_path ${UDS_PATH}
 
 # Lauch the litgpt script
-srun -l --ntasks-per-node=1 bash litgpt.sh
+srun -l --ntasks-per-node=1 bash litgpt_container.sh
 
 # Stop rxdm container
 srun --ntasks-per-node=1 docker container stop receive-datapath-manager-${SLURM_JOB_ID}
