@@ -237,7 +237,7 @@ network:
   useTcpx: "yes"
   ncclIfnames: 'eth0'
   ncclPlugin: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.6_2023_10_06"
-  rxdmContainer: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd:v2.0.7"
+  rxdmContainer: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd:v2.0.9"
   disablePmtu: "yes"
 workload:
   jobTimestamp: <int: add a timestamp here or unique identifier>
