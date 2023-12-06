@@ -74,13 +74,11 @@ RUN ssh-keygen -t rsa -b 4096 -q -f /root/.ssh/id_rsa -N ""
 RUN touch /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
 RUN cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 
-# remove NCCL source
+# remove NCCL from container
 WORKDIR /third_party/nccl-netsupport
-RUN rm -rf src/ build/obj build/include .git
-
-# build NCCL pipeline test source
-WORKDIR /third_party/nccl-tests-pipeline
-RUN rm -rf src/ build/obj build/include .git
+RUN rm -f build/lib/libnccl*
+WORKDIR /usr/lib/x86_64-linux-gnu/
+RUN rm -f libnccl*
 
 # Install gcsfuse and python3.
 RUN apt-get update \
