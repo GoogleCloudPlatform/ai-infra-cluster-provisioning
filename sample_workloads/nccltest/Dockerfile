@@ -14,11 +14,11 @@ ARG CUDA12_PTX='-gencode=arch=compute_90,code=compute_90'
 
 WORKDIR /third_party
 # Install patched NCCL
-WORKDIR nccl-netsupport
 RUN git clone https://github.com/NVIDIA/nccl.git nccl-netsupport && \
 cd nccl-netsupport && \
 git fetch --all --tags && \
 git checkout -b github_nccl_2_18_5 05121c8191984aada7ed57dd8081bd987f73288f
+WORKDIR nccl-netsupport
 RUN make NVCC_GENCODE="$CUDA12_GENCODE $CUDA12_PTX" -j 16
 
 WORKDIR /third_party
