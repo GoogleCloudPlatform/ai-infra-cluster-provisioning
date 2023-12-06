@@ -12,12 +12,13 @@ docker run \
     -e NNODES=$SLURM_NNODES \
     -e NODE_RANK=$SLURM_NODEID \
     -e MODEL_NAME='Llama-2-70b-hf' \
-    -e GCS_BUCKET=litgpt-public-bucket \
+    -e GCS_EXPERIMENT_BUCKET=litgpt-public-bucket \
+    -e GCS_DATA_BUCKET=litgpt-public-bucket \
     -e USE_TCPX=yes \
     -e CLUSTER_TYPE=SLURM \
-    -e EXPERIMENT_ROOT_DIR=tejasn_nama/training_logs \
+    -e EXPERIMENT_ROOT_DIR=llama-70b/training_logs \
     -e DATA_DIR=openwebtext_dataset \
     -e MASTER_ADDR=$MASTER_ADDR \
     -e MASTER_PORT=20120 \
     -e NCCL_GPUDIRECTTCPX_UNIX_CLIENT_PREFIX=${UDS_PATH} \
-    us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt:latest
+    us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt:slurm
