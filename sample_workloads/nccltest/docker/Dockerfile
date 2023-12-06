@@ -95,7 +95,8 @@ RUN apt-get update \
 # Install required python3 packages.
 RUN pip3 install humanize matplotlib numpy pandas
 
-ADD scripts /workspace
-
 WORKDIR /workspace
+ADD scripts /workspace
+RUN chmod +x container_entry.sh gen_hostfiles.sh init_ssh.sh mpi_entry.sh run_nccl_benchmark.sh 
+
 ENTRYPOINT ["/bin/bash", "/workspace/container_entry.sh"]
