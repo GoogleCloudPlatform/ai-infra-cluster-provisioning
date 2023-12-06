@@ -99,7 +99,7 @@ ADD root_scripts /scripts
 RUN chmod +x /scripts/gen_hostfiles.sh /scripts/init_ssh.sh
 
 ADD scripts /workspace
-RUN chmod +x container_entry.sh mpi_entry.sh run_nccl_benchmark.sh 
+RUN chmod +x /workspace/container_entry.sh /workspace/mpi_entry.sh /workspace/run_nccl_benchmark.sh 
 
 WORKDIR /workspace
 ENTRYPOINT ["/bin/bash", "/workspace/container_entry.sh"]
