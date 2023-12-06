@@ -97,6 +97,7 @@ RUN pip3 install humanize matplotlib numpy pandas
 
 WORKDIR /workspace
 ADD scripts /workspace
-RUN chmod +x container_entry.sh gen_hostfiles.sh init_ssh.sh mpi_entry.sh run_nccl_benchmark.sh 
+RUN chmod +x container_entry.sh mpi_entry.sh run_nccl_benchmark.sh 
+RUN chmod +x scripts/gen_hostfiles.sh scripts/init_ssh.sh
 
 ENTRYPOINT ["/bin/bash", "/workspace/container_entry.sh"]
