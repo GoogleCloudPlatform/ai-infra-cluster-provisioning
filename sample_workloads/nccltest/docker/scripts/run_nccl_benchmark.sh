@@ -10,7 +10,8 @@ set -o pipefail
 # Benchmark parameters.
 : "${BENCHMARK:?Must set BENCHMARK}"
 : "${MASK:?Must set MASK}"
-: "${MSG_SIZES_CSV:?Must set MSG_SIZES_CSV}"
+: "${MSG_SIZE_BEGIN:?Must set MSG_SIZE_BEGIN}"
+: "${MSG_SIZE_END:?Must set MSG_SIZE_END}"
 : "${GPUS_PER_NODE:?Must set GPUS_PER_NODE}"
 : "${N_COMMS:?Must set N_COMMS}"
 : "${WARMUP_ITERS:?Must set WARMUP_ITERS}"
@@ -28,41 +29,6 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 IFS=',' read -r -a MSG_SIZES <<< "$MSG_SIZES_CSV"
 NRANKS=$(( NNODES * GPUS_PER_NODE ))
-
-# Compute number of NCCL communicators.
-N_NCCL_COMMS=1
-MASK_CPY="$MASK"
-while [[ "$MASK_CPY" -gt 0 ]]; do
-  : $(( N_NCCL_COMMS <<= (MASK_CPY & 1), MASK_CPY >>= 1 ))
-done
-
-# Generate input file content for all message sizes.
-TOTAL_ITERS=$(( WARMUP_ITERS + RUN_ITERS ))
-ENDL=$'\n'
-# TODO: b/310239133 - Once this is fixed, need to change input file format to
-# textprotos.
-echo "Generating input file for benchmark..."
-BENCHMARK_INPUT="COMM_GROUP_SPLIT_MASK ${MASK}${ENDL}"
-for MSG_SIZE in "${MSG_SIZES[@]}"; do
-  # First divide by size of float (4).
-  COUNT=$(( MSG_SIZE / 4 ))
-  # Then divide by number of ranks, if necessary.
-  if [[ "$BENCHMARK" == "AllGather" || "$BENCHMARK" == "ReduceScatter" ]]; then
-    COUNT=$(( COUNT / ( NRANKS / N_NCCL_COMMS ) ))
-  fi
-
-  # Add the benchmark parameters for this message size.
-  #                 benchmark     count     dtype  reduce_op  root
-  BENCHMARK_INPUT+="${BENCHMARK}  ${COUNT}  float  sum        0     "
-  #                 comm_group  comm_restart  repeat
-  BENCHMARK_INPUT+="0           0             ${TOTAL_ITERS}${ENDL}"
-done
-
-# Create input file for all nodes to be used by run_colls.
-mpirun --mca btl tcp,self --mca btl_tcp_if_include eth0 \
-  --mca routed direct --allow-run-as-root \
-  -np "$NNODES" --hostfile "/scripts/hostfiles${NNODES}/hostfile1" \
-  bash -c "echo \"$BENCHMARK_INPUT\" > ${SCRIPT_DIR}/benchmark_input"
 
 # Generate CUDA_VISIBLE_DEVICES.
 CUDA_VISIBLE_DEVICES=$( seq -s, 0 1 $(( GPUS_PER_NODE - 1 )) )
@@ -90,6 +56,9 @@ for (( i = 1; i <= N_RUNS; ++i )); do
     -x "N_COMMS=${N_COMMS}" \
     -x "UNRESERVED_CORES=${UNRESERVED_CORES}" \
     -x "GPU_TELEMETRY=${GPU_TELEMETRY}" \
+    -x "BENCHMARK=${BENCHMARK}" \
+    -x "MSG_SIZE_BEGIN=${MSG_SIZE_BEGIN}" \
+    -x "MSG_SIZE_END=${MSG_SIZE_END}" \
       "${SCRIPT_DIR}/mpi_entry.sh" 2>&1 | \
   tee "$LOGFILE_PATH"
 

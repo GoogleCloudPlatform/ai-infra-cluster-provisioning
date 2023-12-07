@@ -17,7 +17,8 @@ set -u
 # Benchmark parameters.
 : "${BENCHMARKS_CSV:?Must set BENCHMARKS_CSV}"
 : "${MASKS_CSV:?Must set MASKS_CSV}"
-: "${MSG_SIZES_CSV:?Must set MSG_SIZES_CSV}"
+: "${MSG_SIZE_BEGIN:?Must set MSG_SIZE_BEGIN}"
+: "${MSG_SIZE_END:?Must set MSG_SIZE_END}"
 : "${GPUS_PER_NODE:?Must set GPUS_PER_NODE}"
 : "${N_COMMS:?Must set N_COMMS}"
 : "${WARMUP_ITERS:?Must set WARMUP_ITERS}"
@@ -43,11 +44,11 @@ if [[ "${#BENCHMARKS[@]}" -ne "${#MASKS[@]}" ]]; then
 fi
 
 for BENCHMARK in ${BENCHMARKS[@]}; do
-  if [[ "$BENCHMARK" != "AllGather"     && "$BENCHMARK" != "AllReduce" && \
-        "$BENCHMARK" != "ReduceScatter" && "$BENCHMARK" != "Broadcast" && \
-        "$BENCHMARK" != "Reduce"        && "$BENCHMARK" != "SendRecv" && \
-        "$BENCHMARK" != "Scatter"       && "$BENCHMARK" != "Gather" && \
-        "$BENCHMARK" != "AlltoAll"      && "$BENCHMARK" != "HyperCube" ]]; then
+  if [[ "$BENCHMARK" != "all_gather_perf"     && "$BENCHMARK" != "all_reduce_perf" && \
+        "$BENCHMARK" != "reduce_scatter_perf" && "$BENCHMARK" != "broadcast_perf" && \
+        "$BENCHMARK" != "reduce_perf"         && "$BENCHMARK" != "sendrecv_perf" && \
+        "$BENCHMARK" != "scatter_perf"        && "$BENCHMARK" != "gather_perf" && \
+        "$BENCHMARK" != "alltoall_perf"       && "$BENCHMARK" != "hypercube_perf" ]]; then
     echo "${BENCHMARK} is not a legal benchmark, aborting..."
     exit 2
   fi
@@ -144,7 +145,8 @@ if [[ "$NODE_RANK" -eq 0 ]]; then
     BM_LOG_DIR="$BM_LOG_DIR" \
     BENCHMARK="$BENCHMARK" \
     MASK="$MASK" \
-    MSG_SIZES_CSV="$MSG_SIZES_CSV" \
+    MSG_SIZE_BEGIN="$MSG_SIZE_BEGIN" \
+    MSG_SIZE_END="$MSG_SIZE_END" \
     GPUS_PER_NODE="$GPUS_PER_NODE" \
     N_COMMS="$N_COMMS" \
     WARMUP_ITERS="$WARMUP_ITERS" \

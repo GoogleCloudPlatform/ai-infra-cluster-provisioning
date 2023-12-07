@@ -6,16 +6,16 @@ cluster:
   gcsBucket: "pirillo-sct-bucket"
 
 ncclBenchmarks:
-  image: " us-central1-docker.pkg.dev/supercomputer-testing/pirillo-gcr/nccltest"
+  image: "us-central1-docker.pkg.dev/supercomputer-testing/pirillo-gcr/nccltest"
   tag: "latest"
   # A comma-separated list of benchmarks to run.
-  benchmarks: "AllGather"
+  benchmarks: "all_gather_perf,all_reduce_perf,send_recv_perf"
   # A comma-separated list of hex masks for the benchmarks.
   # Must be of the same length as ncclBenchmarks.benchmarks.
   # Each mask must be less than ncclBenchmarks.gpusPerNode.
-  masks: "0x0"
-  # A comma-separated list of message sizes, used by all benchmarks.
-  msgSizes: "1M,2M,4M,8M,16M,32M,64M,128M,256M,512M,1G,2G,4G,8G"
+  masks: "0x0,0x0,0x0"
+  msgSizeBegin: "1M"
+  msgSizeEnd: "8G"
   # Number of GPUs per node. Must be one of 1, 2, 4, 8.
   gpusPerNode: 8
   nComms: 1

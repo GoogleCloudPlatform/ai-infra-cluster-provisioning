@@ -134,8 +134,10 @@ spec:
         value: "{{ $.Values.ncclBenchmarks.benchmarks }}"
       - name: MASKS_CSV
         value: "{{ $.Values.ncclBenchmarks.masks }}"
-      - name: MSG_SIZES_CSV
-        value: "{{ $.Values.ncclBenchmarks.msgSizes }}"
+      - name: MSG_SIZE_BEGIN
+        value: "{{ $.Values.ncclBenchmarks.msgSizeBegin }}"
+      - name: MSG_SIZE_END
+        value: "{{ $.Values.ncclBenchmarks.msgSizeEnd }}"
       - name: GPUS_PER_NODE
         value: "{{ $.Values.ncclBenchmarks.gpusPerNode }}"
       - name: N_COMMS
