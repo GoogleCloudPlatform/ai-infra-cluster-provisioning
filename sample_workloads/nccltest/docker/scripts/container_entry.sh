@@ -123,15 +123,6 @@ if [[ "$NODE_RANK" -eq 0 ]]; then
   cat /run/mpi_bootstrap/hosts.txt | xargs /scripts/gen_hostfiles.sh
   popd
 
-  # Process potentially human-readable message sizes to bytes.
-  IFS=',' read -r -a MSG_SIZES <<< "$MSG_SIZES_CSV"
-  for i in "${!MSG_SIZES[@]}"; do
-    MSG_SIZES[i]=$( numfmt --from=iec "${MSG_SIZES[i]}" )
-  done
-  printf -v MSG_SIZES_CSV '%s,' "${MSG_SIZES[@]}"
-  # Truncate last comma.
-  MSG_SIZES_CSV="${MSG_SIZES_CSV::-1}"
-
   # Run workload and process results.
   for i in "${!BENCHMARKS[@]}"; do
     BENCHMARK=${BENCHMARKS[i]}

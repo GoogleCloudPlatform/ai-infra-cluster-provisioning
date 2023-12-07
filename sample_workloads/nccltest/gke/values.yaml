@@ -9,7 +9,7 @@ ncclBenchmarks:
   image: "us-central1-docker.pkg.dev/supercomputer-testing/pirillo-gcr/nccltest"
   tag: "latest"
   # A comma-separated list of benchmarks to run.
-  benchmarks: "all_gather_perf,all_reduce_perf,send_recv_perf"
+  benchmarks: "all_gather_perf,all_reduce_perf,sendrecv_perf"
   # A comma-separated list of hex masks for the benchmarks.
   # Must be of the same length as ncclBenchmarks.benchmarks.
   # Each mask must be less than ncclBenchmarks.gpusPerNode.
