@@ -38,6 +38,6 @@ fi
 
 $NSYS_PREFIX \
 taskset -c "$UNRESERVED_CORES" \
-  /third_party/nccl-tests-mpi/build/run_colls \
-    -b 0 -e 8G -f 2 -g 1 -w 0 --iters "$N_COMMS" -c 0 \
-    -l "${SCRIPT_DIR}/benchmark_input"
+  /third_party/nccl-tests-mpi/build/all_gather_perf \
+    -b 1G -e 8G -f 2 -g 1 -w 0 --iters "$N_COMMS" -c 0
+    # -l "${SCRIPT_DIR}/benchmark_input"
