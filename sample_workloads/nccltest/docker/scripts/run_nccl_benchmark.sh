@@ -27,7 +27,6 @@ set -o pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-IFS=',' read -r -a MSG_SIZES <<< "$MSG_SIZES_CSV"
 NRANKS=$(( NNODES * GPUS_PER_NODE ))
 
 # Generate CUDA_VISIBLE_DEVICES.
