@@ -67,8 +67,10 @@ mkdir -p /usr/share/nccl_benchmarks
 # Wait for master node to be ready.
 MASTER_READY=""
 while [[ -z "$MASTER_READY" ]]; do
+  echo "Waiting for master..."
   MASTER_READY=$( getent hosts ${MASTER_ADDR} )
-  sleep 1
+  echo $MASTER_READY
+  sleep 5
 done
 
 # IRQ tunings.
