@@ -101,7 +101,7 @@ if [[ ! -z "${GCS_BUCKET}" ]]; then
   gcsfuse --implicit-dirs "$GCS_BUCKET" "$GCS_ROOT_DIR"
   echo "GCS mount complete; results at ${GCS_BUCKET}/${JOB_LOG_DIR_NAME}"
 else
-  echo "GCS Bucket not specified, no logs will be uploaded. Local logs can be found at ${GCS_LOG_DIR}/${JOB_LOG_DIR_NAME}"
+  echo "GCS Bucket not specified, no logs will be uploaded. Local logs can be found at ${GCS_ROOT_DIR}/${JOB_LOG_DIR_NAME}"
 fi
 
 if [[ "$NODE_RANK" -eq 0 ]]; then
