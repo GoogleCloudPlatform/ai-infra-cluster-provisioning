@@ -93,15 +93,15 @@ done
 # Mount GCS.
 echo "Mounting GCS..."
 GCS_ROOT_DIR=/workspace/logs
+JOB_LOG_DIR_NAME="${JOB_TIMESTAMP}_${JOB_NAME}_nnodes_${NNODES}_gpus_${GPUS_PER_NODE}"
+JOB_LOG_DIR="${GCS_ROOT_DIR}/${JOB_LOG_DIR_NAME}"
+  
 mkdir -p "$GCS_ROOT_DIR"
 if [[ ! -z "${GCS_BUCKET}" ]]; then
   gcsfuse --implicit-dirs "$GCS_BUCKET" "$GCS_ROOT_DIR"
-
-  JOB_LOG_DIR_NAME="${JOB_TIMESTAMP}_${JOB_NAME}_nnodes_${NNODES}_gpus_${GPUS_PER_NODE}"
-  JOB_LOG_DIR="${GCS_ROOT_DIR}/${JOB_LOG_DIR_NAME}"
   echo "GCS mount complete; results at ${GCS_BUCKET}/${JOB_LOG_DIR_NAME}"
 else
-  echo "GCS Bucket not specified, no logs will be uploaded."
+  echo "GCS Bucket not specified, no logs will be uploaded. Local logs can be found at ${GCS_LOG_DIR}/${JOB_LOG_DIR_NAME}"
 fi
 
 if [[ "$NODE_RANK" -eq 0 ]]; then
