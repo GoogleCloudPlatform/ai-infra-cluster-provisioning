@@ -13,7 +13,6 @@ set -o pipefail
 : "${MSG_SIZE_BEGIN:?Must set MSG_SIZE_BEGIN}"
 : "${MSG_SIZE_END:?Must set MSG_SIZE_END}"
 : "${GPUS_PER_NODE:?Must set GPUS_PER_NODE}"
-: "${N_COMMS:?Must set N_COMMS}"
 : "${WARMUP_ITERS:?Must set WARMUP_ITERS}"
 : "${RUN_ITERS:?Must set RUN_ITERS}"
 : "${N_RUNS:?Must set N_RUNS}"
@@ -36,7 +35,7 @@ CUDA_VISIBLE_DEVICES=$( seq -s, 0 1 $(( GPUS_PER_NODE - 1 )) )
 NCCL_FLAGS=$( env | egrep ^NCCL | awk '{ printf "-x %s ", $0; }' )
 
 # Run actual NCCL benchmarks.
-for (( i = 1; i <= N_RUNS; ++i )); do
+for (( i = 1; i <= $N_RUNS; ++i )); do
   RUN_LOG_DIR="${BM_LOG_DIR}/per_run_results/run_${i}"
   mkdir -p "$RUN_LOG_DIR"
   LOGFILE_PATH="${RUN_LOG_DIR}/logs.txt"
@@ -52,7 +51,6 @@ for (( i = 1; i <= N_RUNS; ++i )); do
     -x "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}" \
     $NCCL_FLAGS \
     -x "RUN_LOG_DIR=${RUN_LOG_DIR}" \
-    -x "N_COMMS=${N_COMMS}" \
     -x "UNRESERVED_CORES=${UNRESERVED_CORES}" \
     -x "GPU_TELEMETRY=${GPU_TELEMETRY}" \
     -x "BENCHMARK=${BENCHMARK}" \

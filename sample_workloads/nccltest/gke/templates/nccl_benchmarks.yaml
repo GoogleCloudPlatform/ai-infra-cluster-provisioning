@@ -140,8 +140,6 @@ spec:
         value: "{{ $.Values.ncclBenchmarks.msgSizeEnd }}"
       - name: GPUS_PER_NODE
         value: "{{ $.Values.ncclBenchmarks.gpusPerNode }}"
-      - name: N_COMMS
-        value: "{{ $.Values.ncclBenchmarks.nComms }}"
       - name: WARMUP_ITERS
         value: "{{ $.Values.ncclBenchmarks.warmupIters }}"
       - name: RUN_ITERS

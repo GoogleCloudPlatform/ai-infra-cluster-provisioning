@@ -4,9 +4,10 @@
 : "${RUN_LOG_DIR:?Must set RUN_LOG_DIR}"
 
 # Benchmark parameters.
-: "${N_COMMS:?Must set N_COMMS}"
 : "${MSG_SIZE_BEGIN:?Must set MSG_SIZE_BEGIN}"
 : "${MSG_SIZE_END:?Must set MSG_SIZE_END}"
+: "${WARMUP_ITERS:?Must set WARMUP_ITERS}"
+: "${RUN_ITERS:?Must set RUN_ITERS}"
 
 # Unreserved cores for taskset call. This is a CSV of ranges for cores unused
 # by TCPX.
@@ -41,4 +42,4 @@ fi
 $NSYS_PREFIX \
 taskset -c "$UNRESERVED_CORES" \
   /third_party/nccl-tests-mpi/build/${BENCHMARK} \
-    -b "$MSG_SIZE_BEGIN" -e "$MSG_SIZE_END" -f 2 -g 1 -w 0 --iters "$N_COMMS" -c 0
+    -b "$MSG_SIZE_BEGIN" -e "$MSG_SIZE_END" -f 2 -g 1 -w "$WARMUP_ITERS" --iters "$RUN_ITERS" -c 0

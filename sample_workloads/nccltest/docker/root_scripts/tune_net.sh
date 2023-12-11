@@ -46,6 +46,9 @@ set_irq_range() {
   done
 }
 
+# The below eth0-eth0 ranges are named based on expectations for using COS on GKE.
+# If this is being run on a system with different eth0-4 names, change these to the correct names.
+
 a3_bind_irqs() {
   set_irq_range eth0 32 4
   set_irq_range eth1 36 8

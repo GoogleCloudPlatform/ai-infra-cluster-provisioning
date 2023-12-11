@@ -11,8 +11,8 @@ set -u
 : "${NNODES:?Must set NNODES}"
 : "${NODE_RANK:?Must set NODE_RANK}"
 
-# GCS bucket to be used.
-: "${GCS_BUCKET:?Must set GCS_BUCKET}"
+# GCS bucket to upload logs to.
+: "${GCS_BUCKET:=''}"
 
 # Benchmark parameters.
 : "${BENCHMARKS_CSV:?Must set BENCHMARKS_CSV}"
@@ -20,7 +20,6 @@ set -u
 : "${MSG_SIZE_BEGIN:?Must set MSG_SIZE_BEGIN}"
 : "${MSG_SIZE_END:?Must set MSG_SIZE_END}"
 : "${GPUS_PER_NODE:?Must set GPUS_PER_NODE}"
-: "${N_COMMS:?Must set N_COMMS}"
 : "${WARMUP_ITERS:?Must set WARMUP_ITERS}"
 : "${RUN_ITERS:?Must set RUN_ITERS}"
 : "${N_RUNS:?Must set N_RUNS}"
@@ -98,11 +97,15 @@ done
 echo "Mounting GCS..."
 GCS_ROOT_DIR=/workspace/logs
 mkdir -p "$GCS_ROOT_DIR"
-gcsfuse --implicit-dirs "$GCS_BUCKET" "$GCS_ROOT_DIR"
+if [[ ! -z "${GCS_BUCKET}" ]]; then
+  gcsfuse --implicit-dirs "$GCS_BUCKET" "$GCS_ROOT_DIR"
 
-JOB_LOG_DIR_NAME="${JOB_TIMESTAMP}_${JOB_NAME}_nnodes_${NNODES}_gpus_${GPUS_PER_NODE}"
-JOB_LOG_DIR="${GCS_ROOT_DIR}/${JOB_LOG_DIR_NAME}"
-echo "GCS mount complete; results at ${GCS_BUCKET}/${JOB_LOG_DIR_NAME}"
+  JOB_LOG_DIR_NAME="${JOB_TIMESTAMP}_${JOB_NAME}_nnodes_${NNODES}_gpus_${GPUS_PER_NODE}"
+  JOB_LOG_DIR="${GCS_ROOT_DIR}/${JOB_LOG_DIR_NAME}"
+  echo "GCS mount complete; results at ${GCS_BUCKET}/${JOB_LOG_DIR_NAME}"
+else
+  echo "GCS Bucket not specified, no logs will be uploaded."
+fi
 
 if [[ "$NODE_RANK" -eq 0 ]]; then
   # Once host information has arrived, initialize SSH, generate hostfile, and
@@ -139,7 +142,6 @@ if [[ "$NODE_RANK" -eq 0 ]]; then
     MSG_SIZE_BEGIN="$MSG_SIZE_BEGIN" \
     MSG_SIZE_END="$MSG_SIZE_END" \
     GPUS_PER_NODE="$GPUS_PER_NODE" \
-    N_COMMS="$N_COMMS" \
     WARMUP_ITERS="$WARMUP_ITERS" \
     RUN_ITERS="$RUN_ITERS" \
     N_RUNS="$N_RUNS" \
