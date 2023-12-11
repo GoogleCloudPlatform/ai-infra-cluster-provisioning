@@ -11,9 +11,6 @@ set -u
 : "${NNODES:?Must set NNODES}"
 : "${NODE_RANK:?Must set NODE_RANK}"
 
-# GCS bucket to upload logs to.
-: "${GCS_BUCKET:=''}"
-
 # Benchmark parameters.
 : "${BENCHMARKS_CSV:?Must set BENCHMARKS_CSV}"
 : "${MASKS_CSV:?Must set MASKS_CSV}"

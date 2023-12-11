@@ -3,7 +3,7 @@ cluster:
   sbPlacement: false # Set `true` if running across multiple superblocks
   nSuperblocks: 1
   startSuperblock: 1
-  gcsBucket: ''
+  gcsBucket: null
 
 ncclBenchmarks:
   image: "us-central1-docker.pkg.dev/supercomputer-testing/pirillo-gcr/nccltest"
