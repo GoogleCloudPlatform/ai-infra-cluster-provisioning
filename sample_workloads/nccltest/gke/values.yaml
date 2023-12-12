@@ -12,7 +12,7 @@ ncclBenchmarks:
   benchmarks: "all_gather_perf,all_reduce_perf,sendrecv_perf"
   # A comma-separated list of hex masks for the benchmarks.
   # Must be of the same length as ncclBenchmarks.benchmarks.
-  # Each mask must be less than ncclBenchmarks.gpusPerNode.
+  # Each mask is recommended to be less than ncclBenchmarks.gpusPerNode.
   masks: "0x0,0x0,0x7"
   msgSizeBegin: "1M"
   msgSizeEnd: "8G"

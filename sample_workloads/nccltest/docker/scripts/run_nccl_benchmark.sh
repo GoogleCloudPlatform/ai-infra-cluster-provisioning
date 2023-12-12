@@ -58,6 +58,7 @@ for (( i = 1; i <= $N_RUNS; ++i )); do
     -x "MSG_SIZE_END=${MSG_SIZE_END}" \
     -x "WARMUP_ITERS=${WARMUP_ITERS}" \
     -x "RUN_ITERS=${RUN_ITERS}" \
+    -x "NCCL_TESTS_SPLIT_MASK=${MASK}" \
       "${SCRIPT_DIR}/mpi_entry.sh" 2>&1 | \
   tee "$LOGFILE_PATH"
 

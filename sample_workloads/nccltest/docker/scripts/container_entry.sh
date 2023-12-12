@@ -50,14 +50,6 @@ for BENCHMARK in ${BENCHMARKS[@]}; do
   fi
 done
 
-for MASK in ${MASKS[@]}; do
-  if [[ "$MASK" -ge "$GPUS_PER_NODE" ]]; then
-    echo "Mask ${MASK} is greater than ${GPUS_PER_NODE}, this might create" \
-         "an asymmetric traffic pattern across VMs, aborting..."
-    exit 3
-  fi
-done
-
 # Create shared directory for GCE compatibility.
 mkdir -p /usr/share/nccl_benchmarks
 

@@ -23,7 +23,7 @@ If you intend to run with GKE, run:
 ```shell
 cd gke
 PARAMS="cluster.nNodes=2,"
-PARAMS+="ncclBenchmarks.benchmarks=AllGather,"
+PARAMS+="ncclBenchmarks.benchmarks=all_reduce_perf,"
 PARAMS+="ncclBenchmarks.masks=0x0,"
 PARAMS+="ncclBenchmarks.msgSizes=1G\,8G"
 helm install "${USER}-nccl-bm" . --set "$PARAMS"
@@ -50,7 +50,7 @@ Each test run is logged separately. If you specify a release that uses multiple 
 An example test output would look like:
 ```
 benchmark: all_reduce_perf, mask: 0x0, run 1/1
-# nThread 1 nGpus 1 minBytes 1048576 maxBytes 8589934592 step: 2(factor) warmup iters: 2 iters: 2 agg iters: 1 validation: 0 graph: 0
+# nThread 1 nGpus 1 minBytes 1048576 maxBytes 8589934592 step: 2(factor) warmup iters: 2 iters: 10 agg iters: 1 validation: 0 graph: 0
 #
 #                                                              out-of-place                       in-place
 #       size         count      type   redop    root     time   algbw   busbw #wrong     time   algbw   busbw #wrong
@@ -85,7 +85,7 @@ If `gcsBucket` is specified in the values.yaml file, then the logs will also be 
 |---|---|
 |`ncclBenchmarks.benchmarks`|A CSV of benchmarks to run.|
 |`ncclBenchmarks.masks`|A CSV of hexadecimal masks to use.|
-|`ncclBenchmarks.msgSizeEnd`|The minimum message size to use,  |
+|`ncclBenchmarks.msgSizeBegin`|The minimum message size to use,  |
 |`ncclBenchmarks.msgSizeEnd`|The maximum message size to use, specified using 'G', 'M', 'K', or no suffix for bytes. [Source](https://github.com/NVIDIA/nccl-tests/blob/master/src/common.cu#L86). |
 |`ncclBenchmarks.nGpusPerNode`|Number of GPUs per node to use.|
 |`ncclBenchmarks.warmupIters`|Number of warmup iterations.|
@@ -107,14 +107,13 @@ goes in the same NCCL communicator. Examples:
 - For a rail-aligned NCCL operation using all 8 GPUs on a VM, `MASK=0x7`.
 - For a rail-aligned NCCL operation using only 4 GPUs on a VM, `MASK=0x3`.
 
-*To guarantee symmetry in communication pattern across multiple VMs, we require
-the mask to be less than the number of GPUs used per node.*
+*Note: Providing a mask larger than the numbers of GPUs on a VM will result in asymetric network traffic between VMs.*
 
 Message sizes should be specified using 'G', 'M', 'K', or no suffix for bytes. For example 1G == 1024M == (1024 * 1024)K == (1024 * 1024 * 1024). [Source](https://github.com/NVIDIA/nccl-tests/blob/1292b25553bd0384f2faa2965f9d82b99797a348/src/common.cu#L86C1-L120C2).
 
 ##### WARMUP_ITERS, and RUN_ITERS
 
-For each iteration, the benchmark will measure the average latency and bus
+For each message size, the benchmark will measure the average latency and bus
 bandwidth used. Each run consists of a few
 warmup iterations, followed by the actual measurements used to derive
 performance.
