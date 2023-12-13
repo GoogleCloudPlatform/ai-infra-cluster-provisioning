@@ -64,7 +64,9 @@ tail -f slurm-<<job_id>>.out
 
 1. Uninstall any previous Helm 
 
-`helm uninstall <<name>>`
+```
+helm uninstall <<name>>
+```
 
 2. Install Helm chart i.e. submit the job
 
