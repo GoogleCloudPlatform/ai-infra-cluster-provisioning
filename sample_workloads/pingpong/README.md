@@ -3,8 +3,8 @@
 This document provides instructions on 
 * Building a simple Pingpong PyTorch-based workload on A3 using GPUDirectTCPx
 * Running the workload on
-- SLURM
-- GKE
+    - SLURM
+    - GKE
 
 
 ## Pre-Requisites
