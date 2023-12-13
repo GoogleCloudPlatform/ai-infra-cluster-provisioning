@@ -2,15 +2,14 @@
 
 This document provides instructions on 
 * Building a simple Pingpong PyTorch-based workload on A3 using GPUDirectTCPx
-* Running the workload on
-    - SLURM
-    - GKE
-
+* Running the workload on SLURM and GKE
 
 ## Pre-Requisites
 
 This guide assumes that you already have created a GKE and SLURM cluster according to this repo with the proper GPU drivers and host images for GPUDirectTCPx.
 
+* [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview)
+* [SLURM HPC Toolkit](https://cloud.google.com/hpc-toolkit/docs/quickstarts/slurm-cluster)
 
 ## Pingpong
 
