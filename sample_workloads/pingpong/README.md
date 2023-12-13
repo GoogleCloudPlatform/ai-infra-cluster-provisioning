@@ -21,12 +21,12 @@ To build the Docker container
 Run the following command
 
 ```
-sudo docker build . -t "us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/litgpt-full:<ADD TAG HERE>"
+sudo docker build . -t "us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/pingpong:<ADD TAG HERE>"
 ```
 
 Upload the Artifact to a Registry 
 ```
-sudo docker push us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/litgpt-full:<ADD TAG HERE>
+sudo docker push us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/pingpong:<ADD TAG HERE>
 ```
 
 ### Running the workload on SLURM
@@ -46,7 +46,7 @@ gcloud compute ssh <<Cluster Node Id >> --zone=$ZONE --project=$PROJECT_ID
 
 **Note:** 
 * mv `pingpong_container.sh.example` to `pingpong_container.sh.example`
-* Update the image information `    us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/litgpt-full:<ADD TAG HERE>`
+* Update the image information `    us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/pingpong:<ADD TAG HERE>`
 
 If these changes are not done and the job will fail.
 

@@ -1,0 +1,21 @@
+MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+
+# Start the Lit-GPT training container
+docker run \
+    --privileged \
+    --gpus all \
+    --net="host" \
+    --pull=always \
+    -v /var/lib/tcpx/lib64:/var/lib/tcpx/lib64 \
+    -v ${UDS_PATH}:${UDS_PATH} \
+    -u 0 \
+    -e JOB_TIMESTAMP=$(date +%s) \
+    -e NNODES=$SLURM_NNODES \
+    -e NODE_RANK=$SLURM_NODEID \
+    -e USE_GPUDIRECT_TCPX=yes \
+    -e CLUSTER_TYPE=SLURM \
+    -e GPUS_PER_NODE=8 \
+    -e MASTER_ADDR=$MASTER_ADDR \
+    -e MASTER_PORT=6000 \
+    -e NCCL_GPUDIRECTTCPX_UNIX_CLIENT_PREFIX=${UDS_PATH} \
+    us-central1-docker.pkg.dev/<YOUR PROJECT ID>/<ARTIFACT REGISTRY NAME>/litgpt-full:<ADD TAG HERE>
