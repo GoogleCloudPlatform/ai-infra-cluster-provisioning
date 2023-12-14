@@ -44,7 +44,7 @@ weight_decay = 1e-1
 beta1 = 0.9
 beta2 = 0.95
 decay_lr = True
-warmup_iters = int(os.getenv("WARMUP_ITERS", "100"))
+warmup_iters = int(os.getenv("WARMUP_ITERS", "10"))
 lr_decay_iters = max_iters
 min_lr = 6e-5
 
