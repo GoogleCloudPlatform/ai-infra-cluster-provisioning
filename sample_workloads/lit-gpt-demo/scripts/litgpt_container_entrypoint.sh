@@ -11,7 +11,7 @@ set -o pipefail
 : "${EXPERIMENT_ROOT_DIR:?Must set EXPERIMENT_ROOT_DIR}"
 : "${GCS_DATA_BUCKET:?Must set GCS_DATA_BUCKET}"
 : "${DATA_DIR:?Must set DATA_DIR}"
-: "${CLUSTER_TYPE:=GKE}"
+: "${CLUSTER_TYPE:='GKE'}"
 
 export EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
 

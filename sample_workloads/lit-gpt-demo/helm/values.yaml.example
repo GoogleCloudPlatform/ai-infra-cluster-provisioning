@@ -20,3 +20,5 @@ workload:
   batchSize: 6
   microBatchSize: 6
   modelName: Llama-2-70b-hf
+  warmupIters: 10
+  maxIters: 1000

@@ -21,4 +21,6 @@ docker run \
     -e MASTER_ADDR=$MASTER_ADDR \
     -e MASTER_PORT=20120 \
     -e NCCL_GPUDIRECTTCPX_UNIX_CLIENT_PREFIX=${UDS_PATH} \
+    -e WARMUP_ITERS=10 \
+    -e MAX_ITERS=1000 \
     us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt:slurm

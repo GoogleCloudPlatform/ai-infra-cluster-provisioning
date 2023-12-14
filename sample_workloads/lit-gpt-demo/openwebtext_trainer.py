@@ -1,11 +1,11 @@
-# Vendored from https://github.com/Lightning-AI/lit-gpt/blob/main/pretrain/openwebtext_trainer.py
+# Modified from https://github.com/Lightning-AI/lit-gpt/blob/d5d371417ecb3d3b6c4f30837d8bb7cf2b5310ae/pretrain/openwebtext_trainer.py
 import math
 import sys
 import time
 from pathlib import Path
 from typing import Any, Optional
 
-import lightning as L
+import lightning as  L
 import numpy as np
 import torch
 import os
@@ -39,12 +39,12 @@ batch_size = int(os.getenv("BATCH_SIZE", "6"))
 micro_batch_size = int(os.getenv("MICRO_BATCH_SIZE", "6"))
 gradient_accumulation_steps = batch_size // micro_batch_size
 assert gradient_accumulation_steps > 0
-max_iters = 600000  # num_epochs * (epoch_size // micro_batch_size) // devices
+max_iters = int(os.getenv("MAX_ITERS", "1000"))  # num_epochs * (epoch_size // micro_batch_size) // devices
 weight_decay = 1e-1
 beta1 = 0.9
 beta2 = 0.95
 decay_lr = True
-warmup_iters = 2000
+warmup_iters = int(os.getenv("WARMUP_ITERS", "100"))
 lr_decay_iters = max_iters
 min_lr = 6e-5
 
@@ -125,7 +125,7 @@ def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -
 
     logger = step_csv_logger(out_dir, name, cls=CSVLogger, flush_logs_every_n_steps=log_interval)
     speed_monitor = SpeedMonitorCallback(
-        length_fn=lambda batch: batch[0].size(1), batch_size=micro_batch_size, window_size=50, time_unit="seconds"
+        length_fn=lambda batch: batch[0].size(1), batch_size=micro_batch_size, window_size=10, time_unit="seconds"
     )
     model_checkpoint = ModelCheckpoint(dirpath=out_dir, every_n_train_steps=save_interval, save_last=True, verbose=True)
     trainer = L.Trainer(
