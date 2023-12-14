@@ -1,4 +1,4 @@
-{{- $requiredVar := .Values.cluster.nNodes | required ".Values.cluster.nNodes is required" -}}
+
 {{- $requiredVar := .Values.cluster.nodePool | required ".Values.cluster.nodePool is required" -}}
 {{- $requiredVar := .Values.network.ncclIfnames | required ".Values.ncclIfnames is required" -}}
 {{- $requiredVar := .Values.workload.jobTimestamp | required ".Values.jobTimestamp is required" -}}
@@ -160,6 +160,8 @@ spec:
         value: "{{$root.Values.workload.microBatchSize}}"
       - name: MODEL_NAME
         value: "{{$root.Values.workload.modelName}}"
+      - name: CLUSTER_TYPE
+        value: GKE
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
