@@ -1,4 +1,4 @@
-
+{{- $requiredVar := .Values.cluster.nNodes | required ".Values.cluster.nNodes is required" -}}
 {{- $requiredVar := .Values.cluster.nodePool | required ".Values.cluster.nodePool is required" -}}
 {{- $requiredVar := .Values.network.ncclIfnames | required ".Values.ncclIfnames is required" -}}
 {{- $requiredVar := .Values.workload.jobTimestamp | required ".Values.jobTimestamp is required" -}}

@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-import lightning as  L
+import lightning as L
 import numpy as np
 import torch
 import os

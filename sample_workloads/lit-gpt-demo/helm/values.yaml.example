@@ -22,3 +22,4 @@ workload:
   modelName: Llama-2-70b-hf
   warmupIters: 10
   maxIters: 1000
+  
