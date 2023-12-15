@@ -1,0 +1,176 @@
+# yamllint disable
+{{- $requiredVar := .Values.cluster.nNodes | required ".Values.cluster.nNodes is required, add --set cluster.nNodes=2" -}}
+
+{{ $timestamp := now | date "2006-01-02-150405" }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: "nccl-benchmarks-{{ $.Release.Name }}-{{ $timestamp }}"
+spec:
+  selector:
+    name: "nccl-benchmarks-{{ $.Release.Name }}-{{ $timestamp }}"
+  clusterIP: None
+---
+{{ $node_count := .Values.cluster.nNodes | int }}
+{{ $superblock_count := .Values.cluster.nSuperblocks | int }}
+{{ $nodesPerSuperblock := divf $node_count $superblock_count | ceil }}
+
+{{- range $node_index, $element := until $node_count }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nccl-benchmarks-{{ $.Release.Name }}-{{ $timestamp }}-pod{{ $node_index }}
+  {{- if eq $node_index 0 }}
+  labels:
+    name: nccl-benchmarks-{{ $.Release.Name }}-{{ $timestamp }}
+  {{- end }}
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  hostname: nccl-benchmarks-pod{{ $node_index }}
+  subdomain: nccl-benchmarks-{{ $timestamp }}
+  serviceAccountName: "default"
+  restartPolicy: Never
+  {{- if $.Values.cluster.sbPlacement }}
+  {{ $superblockChunk :=  div $node_index $nodesPerSuperblock | int }}
+  {{ $superblockIndex :=  add $.Values.cluster.startSuperblock $superblockChunk | int }}
+  nodeSelector:
+    superblock: "{{ $superblockIndex }}"
+  {{- end }}
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-accelerator
+            operator: Exists
+  tolerations:
+  - operator: "Exists"
+    key: nvidia.com/gpu
+  volumes:
+  - name: nvidia-install-dir-host
+    hostPath:
+      path: /home/kubernetes/bin/nvidia/lib64
+  - name: tcpd-socket
+    hostPath:
+      path: /run/tcpx
+  - name: shared-memory
+    emptyDir:
+      medium: "Memory"
+      sizeLimit: 200Gi
+  - name: tcpx-nccl-plugin-volume
+    emptyDir: {}
+  - name: workload-terminated-volume
+    emptyDir: {}
+  initContainers:
+  - name: tcpx-nccl-plugin-installer
+    image: {{ $.Values.ncclPlugin.image }}:{{ $.Values.ncclPlugin.tag }}
+    imagePullPolicy: Always
+    volumeMounts:
+    - name: tcpx-nccl-plugin-volume
+      mountPath: /var/lib/tcpx
+    resources:
+      requests:
+        cpu: 150m
+    command:
+      - /bin/bash
+      - -c
+      - |
+        /scripts/container_entry.sh install --install-nccl
+        {{- if $.Values.telemetry.gpu }} \
+          --nccl-buildtype=nvtx
+        {{- end }}
+  containers:
+  - name: tcpd-daemon
+    image: {{ $.Values.rxdm.image }}:{{ $.Values.rxdm.tag }}
+    imagePullPolicy: Always
+    command:
+    - "bash"
+    - "-c"
+    - |
+      /tcpgpudmarxd/build/app/tcpgpudmarxd {{- range $.Values.rxdm.flags }} {{.}} {{- end }} &
+      while [ ! -e "/usr/share/nccl_benchmarks/workload_terminated" ]; do sleep 10; done
+      pkill -e "^"tcpgpudmarxd || true
+      sleep 30
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: nvidia-install-dir-host
+      mountPath: /usr/local/nvidia/lib64
+    - name: tcpd-socket
+      mountPath: /tmp
+    - name: workload-terminated-volume
+      mountPath: /usr/share/nccl_benchmarks
+    env:
+    - name: LD_LIBRARY_PATH
+      value: /usr/local/nvidia/lib64
+  - name: nccl-benchmarks
+    image: {{ $.Values.ncclBenchmarks.image }}:{{ $.Values.ncclBenchmarks.tag }}
+    imagePullPolicy: Always
+    securityContext:
+      privileged: true
+      capabilities:
+        add:
+          - SYS_ADMIN
+          - SYS_PTRACE
+          - IPC_LOCK
+    env:
+      - name: JOB_TIMESTAMP
+        value: "{{ $timestamp }}"
+      - name: JOB_NAME
+        value: "{{ $.Release.Name }}"
+      - name: MASTER_ADDR
+        value: "nccl-benchmarks-{{ $.Release.Name }}-{{ $timestamp }}"
+      - name: NNODES
+        value: "{{ $node_count }}"
+      - name: NODE_RANK
+        value: "{{ $node_index }}"
+      - name: GCS_BUCKET
+        value: "{{ $.Values.cluster.gcsBucket }}"
+      - name: LD_LIBRARY_PATH
+        value: "/usr/local/tcpx/lib64:/usr/local/nvidia/lib64"
+      - name: BENCHMARKS_CSV
+        value: "{{ $.Values.ncclBenchmarks.benchmarks }}"
+      - name: MASKS_CSV
+        value: "{{ $.Values.ncclBenchmarks.masks }}"
+      - name: MSG_SIZE_BEGIN
+        value: "{{ $.Values.ncclBenchmarks.msgSizeBegin }}"
+      - name: MSG_SIZE_END
+        value: "{{ $.Values.ncclBenchmarks.msgSizeEnd }}"
+      - name: GPUS_PER_NODE
+        value: "{{ $.Values.ncclBenchmarks.gpusPerNode }}"
+      - name: WARMUP_ITERS
+        value: "{{ $.Values.ncclBenchmarks.warmupIters }}"
+      - name: RUN_ITERS
+        value: "{{ $.Values.ncclBenchmarks.runIters }}"
+      - name: N_RUNS
+        value: "{{ $.Values.ncclBenchmarks.nRuns }}"
+      - name: UNRESERVED_CORES
+        value: "{{ $.Values.ncclPlugin.unreservedCores }}"
+      - name: GPU_TELEMETRY
+        value: "{{ $.Values.telemetry.gpu }}"
+      {{- range $key, $value := $.Values.ncclPlugin.envs }}
+      - name: "{{ $key }}"
+        value: "{{ $value }}"
+      {{- end }}
+      {{- if $.Values.telemetry.gpu }}
+      - name: NCCL_PROXY_NVTX_ENABLE
+        value: "1"
+      {{- end }}
+    volumeMounts:
+      - name: nvidia-install-dir-host
+        mountPath: /usr/local/nvidia/lib64
+      - name: tcpd-socket
+        mountPath: /tmp
+      - name: shared-memory
+        mountPath: /dev/shm
+      - name: tcpx-nccl-plugin-volume
+        mountPath: /usr/local/tcpx
+      - name: workload-terminated-volume
+        mountPath: /usr/share/nccl_benchmarks
+    resources:
+      limits:
+        nvidia.com/gpu: !!int 8
+---
+{{- end }}

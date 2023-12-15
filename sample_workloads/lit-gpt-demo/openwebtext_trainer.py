@@ -1,18 +1,17 @@
-# Vendored from https://github.com/Lightning-AI/lit-gpt/blob/main/pretrain/openwebtext_trainer.py
-
+# Modified from https://github.com/Lightning-AI/lit-gpt/blob/d5d371417ecb3d3b6c4f30837d8bb7cf2b5310ae/pretrain/openwebtext_trainer.py
 import math
 import sys
 import time
-import os
 from pathlib import Path
 from typing import Any, Optional
 
 import lightning as L
 import numpy as np
 import torch
+import os
 from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.loggers import CSVLogger
-from lightning.pytorch.strategies import FSDPStrategy
+from lightning.pytorch.strategies import FSDPStrategy, XLAStrategy
 from torch.utils.data import DataLoader, IterableDataset
 
 # support running without installing as a package
@@ -22,11 +21,11 @@ sys.path.append(str(wd))
 from lit_gpt import Config
 from lit_gpt.model import GPT, Block
 from lit_gpt.speed_monitor import SpeedMonitorCallback, estimate_flops, measure_flops
-from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision
+from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, step_csv_logger
 
-model_name = "pythia-70m"
+model_name = os.getenv("MODEL_NAME", "Llama-2-70b-hf")
 name = "openwebtext"
-out_dir = Path("out") / name
+out_dir = Path(os.getenv("EXPERIMENT_LOCAL_DIR", "")) / "out"
 data_dir = Path("/data")
 save_interval = 1000
 eval_interval = 1000
@@ -36,16 +35,16 @@ num_nodes = int(os.getenv("NNODES", "1"))
 
 # Hyperparameters
 learning_rate = 6e-4
-batch_size = int(os.getenv("BATCH_SIZE", "125"))
-micro_batch_size = int(os.getenv("MICRO_BATCH_SIZE", "5"))
+batch_size = int(os.getenv("BATCH_SIZE", "6"))
+micro_batch_size = int(os.getenv("MICRO_BATCH_SIZE", "6"))
 gradient_accumulation_steps = batch_size // micro_batch_size
 assert gradient_accumulation_steps > 0
-max_iters = 600000  # num_epochs * (epoch_size // micro_batch_size) // devices
+max_iters = int(os.getenv("MAX_ITERS", "1000"))  # num_epochs * (epoch_size // micro_batch_size) // devices
 weight_decay = 1e-1
 beta1 = 0.9
 beta2 = 0.95
 decay_lr = True
-warmup_iters = 2000
+warmup_iters = int(os.getenv("WARMUP_ITERS", "10"))
 lr_decay_iters = max_iters
 min_lr = 6e-5
 
@@ -77,7 +76,7 @@ class LightningGPTModule(L.LightningModule):
             # consider setting `self.measured_flops = estimated_flops` instead
             estimated_flops = estimate_flops(meta_model) * micro_batch_size
             self.print(f"Estimated TFLOPs: {estimated_flops * trainer.world_size / 1e12:.2f}")
-            x = torch.randint(0, 1, (micro_batch_size, meta_model.max_seq_length))
+            x = torch.randint(0, 1, (micro_batch_size, meta_model.config.block_size))
             self.measured_flops = measure_flops(meta_model, x)
             self.print(f"Measured TFLOPs: {self.measured_flops * trainer.world_size / 1e12:.2f}")
 
@@ -104,24 +103,29 @@ class LightningGPTModule(L.LightningModule):
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
 
 
-def main(devices: int = 1, precision: Optional[str] = None) -> None:
-    precision = precision or get_default_supported_precision(training=True)
+def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -> None:
+    precision = precision or get_default_supported_precision(training=True, tpu=tpu)
 
     if devices > 1:
-        strategy = FSDPStrategy(
-            auto_wrap_policy={Block},
-            activation_checkpointing_policy={Block},
-            # the argument is not available in the Trainer strategy, but it's the default anyways
-            # state_dict_type="full",
-            limit_all_gathers=True,
-            cpu_offload=False,
-        )
+        if tpu:
+            # For multi-host TPU training, the device count for Fabric is limited to the count on a single host.
+            devices = "auto"
+            strategy = XLAStrategy(sync_module_states=False)
+        else:
+            strategy = FSDPStrategy(
+                auto_wrap_policy={Block},
+                activation_checkpointing_policy={Block},
+                # the argument is not available in the Trainer strategy, but it's the default anyways
+                # state_dict_type="full",
+                limit_all_gathers=True,
+                cpu_offload=False,
+            )
     else:
         strategy = "auto"
 
-    logger = CSVLogger("out", name, flush_logs_every_n_steps=log_interval)
+    logger = step_csv_logger(out_dir, name, cls=CSVLogger, flush_logs_every_n_steps=log_interval)
     speed_monitor = SpeedMonitorCallback(
-        length_fn=lambda batch: batch[0].size(1), batch_size=micro_batch_size, window_size=50, time_unit="seconds"
+        length_fn=lambda batch: batch[0].size(1), batch_size=micro_batch_size, window_size=10, time_unit="seconds"
     )
     model_checkpoint = ModelCheckpoint(dirpath=out_dir, every_n_train_steps=save_interval, save_last=True, verbose=True)
     trainer = L.Trainer(
@@ -180,7 +184,7 @@ class Dataset(IterableDataset):
 
 
 # learning rate decay scheduler (cosine with warmup)
-def get_lr(it: int) -> float:
+def get_lr(it):
     # 1) linear warmup for warmup_iters steps
     if it < warmup_iters:
         return learning_rate * it / warmup_iters
@@ -195,6 +199,8 @@ def get_lr(it: int) -> float:
 
 
 if __name__ == "__main__":
+    # Uncomment this line if you see an error: "Expected is_sm80 to be true, but got false"
+    # torch.backends.cuda.enable_flash_sdp(False)
     torch.set_float32_matmul_precision("high")
 
     from jsonargparse import CLI

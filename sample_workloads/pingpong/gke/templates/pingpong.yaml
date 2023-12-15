@@ -1,22 +1,17 @@
 {{- $requiredVar := .Values.cluster.nNodes | required ".Values.cluster.nNodes is required" -}}
 {{- $requiredVar := .Values.cluster.nodePool | required ".Values.cluster.nodePool is required" -}}
-{{- $requiredVar := .Values.network.ncclIfnames | required ".Values.ncclIfnames is required" -}}
 {{- $requiredVar := .Values.workload.jobTimestamp | required ".Values.jobTimestamp is required" -}}
-{{- $requiredVar := .Values.workload.gcsExperimentBucket | required ".Values.gcsExperimentBucket is required" -}}
-{{- $requiredVar := .Values.workload.experimentDir | required ".Values.experimentDir is required" -}}
-{{- $requiredVar := .Values.workload.gcsDataBucket | required ".Values.gcsDataBucket is required" -}}
-{{- $requiredVar := .Values.workload.dataDir| required ".Values.dataDir is required" -}}
 {{- $requiredVar := .Values.workload.image | required ".Values.image is required" -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: "pytorch-leader-{{$.Release.Name}}"
+  name: "pingpong-leader-{{$.Release.Name}}"
 spec:
   selector:
-    name: "pytorch-leader-{{$.Release.Name}}"
+    name: "pingpong-leader-{{$.Release.Name}}"
   clusterIP: None
   ports:
-  - name: pytorch-leader
+  - name: pingpong-leader
     port: 6002
 ---
 {{$node_count := .Values.cluster.nNodes | int}}
@@ -26,16 +21,16 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: litgpt-{{$.Release.Name}}-pod{{$node_index}}
+  name: pingpong-{{$.Release.Name}}-pod{{$node_index}}
   {{if eq $node_index 0}}
   labels:
-    name: pytorch-leader-{{$.Release.Name}}
+    name: pingpong-leader-{{$.Release.Name}}
   {{end}}
 spec:
   hostNetwork: true
   dnsPolicy: ClusterFirstWithHostNet
-  hostname: litgpt-pod{{$node_index}}
-  subdomain: litgpt-{{$.Release.Name}}
+  hostname: pingpong-pod{{$node_index}}
+  subdomain: pingpong-{{$.Release.Name}}
   serviceAccountName: "default"
   restartPolicy: Never
   affinity:
@@ -66,7 +61,7 @@ spec:
     emptyDir: {}
   - name: tcpx-nccl-plugin-volume
     emptyDir: {}
-  {{if eq $root.Values.network.useTcpx "yes"}}
+  {{if eq $root.Values.network.useGPUDirectTcpx "yes"}}
   initContainers:
   - name: tcpx-nccl-plugin-installer
     image: {{$root.Values.network.ncclPlugin}}
@@ -84,7 +79,7 @@ spec:
         /scripts/container_entry.sh install --install-nccl
   {{end}}
   containers:
-  {{if eq $root.Values.network.useTcpx "yes"}}
+  {{if eq $root.Values.network.useGPUDirectTcpx "yes"}}
   - name: tcpd-daemon
     image: {{$root.Values.network.rxdmContainer}}
     imagePullPolicy: Always
@@ -93,7 +88,7 @@ spec:
     - "-c"
     - |
       /tcpgpudmarxd/build/app/tcpgpudmarxd --gpu_nic_preset a3vm --gpu_shmem_type fd --setup_param "--verbose 128 2 0" &
-      while [ ! -e "/usr/share/litgpt/workload_terminated" ]; do sleep 10; done
+      while [ ! -e "/usr/share/pingpong/workload_terminated" ]; do sleep 10; echo "sleeping"; done
     securityContext:
       privileged: true
     volumeMounts:
@@ -102,70 +97,33 @@ spec:
     - name: tcpd-socket
       mountPath: /tmp
     - name: workload-terminated-volume
-      mountPath: /usr/share/litgpt
+      mountPath: /usr/share/pingpong
     env:
     - name: LD_LIBRARY_PATH
       value: /usr/local/nvidia/lib64
   {{end}}
-  - name: litgpt
+  - name: pingpong
     image: {{$root.Values.workload.image}}
     imagePullPolicy: Always
     securityContext:
       privileged: true
-      capabilities:
-        add:
-          - SYS_ADMIN
-          - SYS_PTRACE
-          - IPC_LOCK
     env:
-      - name: NODE_NAME
-        valueFrom:
-          fieldRef:
-            fieldPath: spec.nodeName
-      - name: NODE_IP
-        valueFrom:
-          fieldRef:
-            fieldPath: status.hostIP
-      - name: LD_LIBRARY_PATH
-        value: "/usr/local/nvidia/lib64"
       - name: JOB_TIMESTAMP
         value: "{{$root.Values.workload.jobTimestamp}}"
+      - name: MASTER_PORT
+        value: "6000"
+      - name: GPUS_PER_NODE
+        value: "8"
       - name: MASTER_ADDR
-        value: "pytorch-leader-{{$.Release.Name}}"
-      - name: NCCL_SOCKET_IFNAME
-        value: "{{$root.Values.network.ncclIfnames}}"
+        value: "pingpong-leader-{{$.Release.Name}}"
       - name: NNODES
         value: "{{$node_count}}"
       - name: NODE_RANK
         value: "{{ $node_index }}"
-      - name: USE_TCPX
-        value: "{{$root.Values.network.useTcpx}}"
-      - name: TCPX_FORCE_ACK
-        value: "{{$root.Values.network.tcpxForceAck}}"
-      - name: DISABLE_PMTU
-        value: "{{$root.Values.network.disablePmtu}}"
-      - name: CPU_PINNING_MODE
-        value: "{{$root.Values.network.cpuPinningMode}}"
-      - name: GCS_EXPERIMENT_BUCKET
-        value: "{{$root.Values.workload.gcsExperimentBucket}}"
-      - name: EXPERIMENT_ROOT_DIR
-        value: "{{$root.Values.workload.experimentDir}}"
-      - name: GCS_DATA_BUCKET
-        value: "{{$root.Values.workload.gcsDataBucket}}"
-      - name: DATA_DIR
-        value: "{{$root.Values.workload.dataDir}}"
-      - name: BATCH_SIZE
-        value: "{{$root.Values.workload.batchSize}}"
-      - name: MICRO_BATCH_SIZE
-        value: "{{$root.Values.workload.microBatchSize}}"
-      - name: MODEL_NAME
-        value: "{{$root.Values.workload.modelName}}"
-      - name: WARMUP_ITERS
-        value: "{{$root.Values.workload.warmupIters}}"
-      - name: MAX_ITERS
-        value: "{{$root.Values.workload.maxIters}}"
+      - name: USE_GPUDIRECT_TCPX
+        value: "{{$root.Values.network.useGPUDirectTcpx}}"
       - name: CLUSTER_TYPE
-        value: GKE
+        value: "GKE"
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
@@ -176,7 +134,7 @@ spec:
       - name: shared-memory
         mountPath: /dev/shm
       - name: workload-terminated-volume
-        mountPath: /usr/share/litgpt
+        mountPath: /usr/share/pingpong
     resources:
       limits:
         nvidia.com/gpu: !!int 8
