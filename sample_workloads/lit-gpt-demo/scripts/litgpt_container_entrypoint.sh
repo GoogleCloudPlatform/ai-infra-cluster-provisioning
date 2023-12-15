@@ -123,7 +123,7 @@ non_blocking_wait() {
 
 function on_script_completion {
    # semaphore to cleanly exit hardware utilization monitor
-   touch /usr/share/workload_terminated
+   touch /usr/share/litgpt/workload_terminated
 
    echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
    gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
@@ -133,7 +133,7 @@ function on_script_completion {
 trap on_script_completion EXIT
 
 # Launch background process that samples hardware utilization
-rm -f /usr/share/workload_terminated
+rm -f /usr/share/litgpt/workload_terminated
 
 if [[ "${DISABLE_PMTU:="yes"}" == "yes" ]]; then
   echo "Disabling PMTU"
