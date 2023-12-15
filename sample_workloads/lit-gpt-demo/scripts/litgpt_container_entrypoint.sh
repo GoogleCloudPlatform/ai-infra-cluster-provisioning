@@ -11,6 +11,7 @@ set -o pipefail
 : "${EXPERIMENT_ROOT_DIR:?Must set EXPERIMENT_ROOT_DIR}"
 : "${GCS_DATA_BUCKET:?Must set GCS_DATA_BUCKET}"
 : "${DATA_DIR:?Must set DATA_DIR}"
+: "${CLUSTER_TYPE:='GKE'}"
 
 export EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
 
@@ -67,14 +68,14 @@ set_nccl_specific_configuration() {
     export NCCL_GPUDIRECTTCPX_PROGRAM_FLOW_STEERING_WAIT_MICROS=1000000
     export NCCL_SOCKET_IFNAME=eth0
     export NCCL_GPUDIRECTTCPX_TX_BINDINGS="eth1:8-21,112-125;eth2:8-21,112-125;eth3:60-73,164-177;eth4:60-73,164-177"
-    export NCCL_GPUDIRECTTCPX_RX_BINDINGS="eth1:22-35,124-139;eth2:22-35,124-139;eth3:74-87,178-191;eth4:74-87,178-191"
+    export NCCL_GPUDIRECTTCPX_RX_BINDINGS="eth1:22-35,126-139;eth2:22-35,126-139;eth3:74-87,178-191;eth4:74-87,178-191"
     export NCCL_GPUDIRECTTCPX_SOCKET_IFNAME=eth1,eth2,eth3,eth4
     export NCCL_GPUDIRECTTCPX_CTRL_DEV=eth0
     if [[ "$CLUSTER_TYPE" == "SLURM" ]]; then
       echo "Overriding with SLURM Specific Envvar"
       export NCCL_SOCKET_IFNAME=enp0s12 
       export NCCL_GPUDIRECTTCPX_TX_BINDINGS="enp6s0:8-21,112-125;enp12s0:8-21,112-125;enp134s0:60-73,164-177;enp140s0:60-73,164-177"
-      export NCCL_GPUDIRECTTCPX_RX_BINDINGS="enp6s0:22-35,124-139;enp12s0:22-35,124-139;enp134s0:74-87,178-191;enp140s0:74-87,178-191"
+      export NCCL_GPUDIRECTTCPX_RX_BINDINGS="enp6s0:22-35,126-139;enp12s0:22-35,126-139;enp134s0:74-87,178-191;enp140s0:74-87,178-191"
       export NCCL_GPUDIRECTTCPX_SOCKET_IFNAME=enp6s0,enp12s,enp134s0,enp140s0
       export NCCL_GPUDIRECTTCPX_CTRL_DEV=enp0s12
     fi
@@ -122,7 +123,7 @@ non_blocking_wait() {
 
 function on_script_completion {
    # semaphore to cleanly exit hardware utilization monitor
-   touch /tmp/workload_terminated
+   touch /usr/share/workload_terminated
 
    echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
    gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
@@ -132,7 +133,7 @@ function on_script_completion {
 trap on_script_completion EXIT
 
 # Launch background process that samples hardware utilization
-rm -f /tmp/workload_terminated
+rm -f /usr/share/workload_terminated
 
 if [[ "${DISABLE_PMTU:="yes"}" == "yes" ]]; then
   echo "Disabling PMTU"

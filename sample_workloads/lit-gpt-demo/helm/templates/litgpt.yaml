@@ -160,6 +160,12 @@ spec:
         value: "{{$root.Values.workload.microBatchSize}}"
       - name: MODEL_NAME
         value: "{{$root.Values.workload.modelName}}"
+      - name: WARMUP_ITERS
+        value: "{{$root.Values.workload.warmupIters}}"
+      - name: MAX_ITERS
+        value: "{{$root.Values.workload.maxIters}}"
+      - name: CLUSTER_TYPE
+        value: GKE
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
