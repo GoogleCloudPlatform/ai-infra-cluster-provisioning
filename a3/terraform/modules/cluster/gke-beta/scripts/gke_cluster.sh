@@ -39,7 +39,14 @@ gke_cluster::create () {
     #    --cluster-secondary-range-name="${cluster_name}-pods" \
     #    --services-secondary-range-name="${cluster_name}-services" \
 
+    cluster_cidr_second_dot_offset=$((8 + 4 * (RANDOM % 60)))
+    service_cidr_second_dot_offset=$((cluster_cidr_second_dot_offset + 4))
+
     echo "Creating cluster '${cluster_name}'..." >&2
+    
+    echo "Using cluster CIDR range 10.${cluster_cidr_second_dot_offset}.0.0/14"
+    echo "Using services CIDR range 10.${service_cidr_second_dot_offset}.0.0/20"
+
     gcloud beta container clusters create "${cluster_name}" \
         --no-enable-autoupgrade \
         --no-enable-shielded-nodes \
@@ -52,6 +59,8 @@ gke_cluster::create () {
         --project="${project_id}" \
         --network="${network_name}" \
         --subnetwork="${subnetwork_name}" \
+        --cluster-ipv4-cidr "10.${cluster_cidr_second_dot_offset}.0.0/14" \
+        --services-ipv4-cidr "10.${service_cidr_second_dot_offset}.0.0/20" \
         --workload-pool="${project_id}.svc.id.goog" || {
         echo "Failed to create cluster '${cluster_name}'."
         return 1
