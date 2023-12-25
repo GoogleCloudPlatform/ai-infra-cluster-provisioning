@@ -42,10 +42,6 @@ data "google_container_engine_versions" "gkeversion" {
 module "network" {
   source = "../../common/network"
 
-  nic0_existing = {
-    network_name    = "default"
-    subnetwork_name = "default"
-  }
   project_id      = var.project_id
   region          = var.region
   resource_prefix = var.resource_prefix
