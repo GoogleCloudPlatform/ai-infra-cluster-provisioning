@@ -100,7 +100,7 @@ class LightningGPTModule(L.LightningModule):
             for param_group in optimizer.param_groups:
                 param_group["lr"] = lr
         
-        global_batch_idx = batch_idx / self.gradient_accumulation_steps
+        global_batch_idx = batch_idx / gradient_accumulation_steps
         if (
             global_batch_idx > 0
             and global_batch_idx % self.nsys_profile_step_multiple == 0
@@ -112,9 +112,9 @@ class LightningGPTModule(L.LightningModule):
     def on_train_batch_end(
         self, outputs, batch: Any, batch_idx: int, unused: int = 0
     ) -> None:
-        global_batch_idx = batch_idx // self.gradient_accumulation_steps
-        global_batch_offset = batch_idx % self.gradient_accumulation_steps
-        is_last_microbatch = global_batch_offset == self.gradient_accumulation_steps - 1
+        global_batch_idx = batch_idx // gradient_accumulation_steps
+        global_batch_offset = batch_idx % gradient_accumulation_steps
+        is_last_microbatch = global_batch_offset == gradient_accumulation_steps - 1
         if self.prof and is_last_microbatch:
             self.prof.step()
 
