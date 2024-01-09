@@ -115,8 +115,6 @@ class LightningGPTModule(L.LightningModule):
         global_batch_idx = batch_idx // gradient_accumulation_steps
         global_batch_offset = batch_idx % gradient_accumulation_steps
         is_last_microbatch = global_batch_offset == gradient_accumulation_steps - 1
-        if self.prof and is_last_microbatch:
-            self.prof.step()
 
         if (
             global_batch_idx > 1
