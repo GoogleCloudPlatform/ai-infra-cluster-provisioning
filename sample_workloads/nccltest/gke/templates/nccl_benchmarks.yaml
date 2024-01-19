@@ -63,7 +63,7 @@ spec:
     emptyDir: {}
   - name: workload-terminated-volume
     emptyDir: {}
-  {{if eq $root.Values.network.useTcpx "yes"}}
+  {{if eq $.Values.ncclPlugin.useTcpx "yes"}}
   initContainers:
   - name: tcpx-nccl-plugin-installer
     image: {{ $.Values.ncclPlugin.image }}:{{ $.Values.ncclPlugin.tag }}
@@ -84,7 +84,7 @@ spec:
         {{- end }}
   {{end}}
   containers:
-  {{if eq $root.Values.network.useTcpx "yes"}}
+  {{if eq $.Values.ncclPlugin.useTcpx "yes"}}
   - name: tcpd-daemon
     image: {{ $.Values.rxdm.image }}:{{ $.Values.rxdm.tag }}
     imagePullPolicy: Always
