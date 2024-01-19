@@ -63,6 +63,7 @@ spec:
     emptyDir: {}
   - name: workload-terminated-volume
     emptyDir: {}
+  {{if eq $root.Values.network.useTcpx "yes"}}
   initContainers:
   - name: tcpx-nccl-plugin-installer
     image: {{ $.Values.ncclPlugin.image }}:{{ $.Values.ncclPlugin.tag }}
@@ -81,7 +82,9 @@ spec:
         {{- if $.Values.telemetry.gpu }} \
           --nccl-buildtype=nvtx
         {{- end }}
+  {{end}}
   containers:
+  {{if eq $root.Values.network.useTcpx "yes"}}
   - name: tcpd-daemon
     image: {{ $.Values.rxdm.image }}:{{ $.Values.rxdm.tag }}
     imagePullPolicy: Always
@@ -105,6 +108,7 @@ spec:
     env:
     - name: LD_LIBRARY_PATH
       value: /usr/local/nvidia/lib64
+  {{end}}
   - name: nccl-benchmarks
     image: {{ $.Values.ncclBenchmarks.image }}:{{ $.Values.ncclBenchmarks.tag }}
     imagePullPolicy: Always
