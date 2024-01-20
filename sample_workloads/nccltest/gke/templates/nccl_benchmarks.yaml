@@ -132,8 +132,6 @@ spec:
         value: "{{ $node_index }}"
       - name: GCS_BUCKET
         value: "{{ $.Values.cluster.gcsBucket }}"
-      - name: LD_LIBRARY_PATH
-        value: "/usr/local/tcpx/lib64:/usr/local/nvidia/lib64"
       - name: BENCHMARKS_CSV
         value: "{{ $.Values.ncclBenchmarks.benchmarks }}"
       - name: MASKS_CSV
@@ -162,17 +160,25 @@ spec:
       - name: NCCL_PROXY_NVTX_ENABLE
         value: "1"
       {{- end }}
+      {{if eq $.Values.ncclPlugin.useTcpx "yes"}}
+      - name: LD_LIBRARY_PATH
+        value: "/usr/local/tcpx/lib64:/usr/local/nvidia/lib64"
+      {{end}}
+      - name: USE_TCPX
+        value: "{{ $.Values.ncclPlugin.useTcpx }}"
     volumeMounts:
+      {{if eq $.Values.ncclPlugin.useTcpx "yes"}}
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
       - name: tcpd-socket
         mountPath: /tmp
-      - name: shared-memory
-        mountPath: /dev/shm
       - name: tcpx-nccl-plugin-volume
         mountPath: /usr/local/tcpx
       - name: workload-terminated-volume
         mountPath: /usr/share/nccl_benchmarks
+      {{end}}
+      - name: shared-memory
+        mountPath: /dev/shm
     resources:
       limits:
         nvidia.com/gpu: !!int 8
