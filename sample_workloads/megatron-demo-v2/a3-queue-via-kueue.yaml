@@ -1,0 +1,37 @@
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: "a3-pool"
+spec:
+  nodeLabels:
+    node.kubernetes.io/instance-type: a3-highgpu-8g
+  tolerations:
+  - key: "nvidia.com/gpu"
+    operator: "Exists"
+    effect: "NoSchedule"      
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: "a3-queue"
+spec:
+  namespaceSelector: {} # match all.
+  queueingStrategy: BestEffortFIFO
+  preemption:
+    withinClusterQueue: LowerOrNewerEqualPriority
+  resourceGroups:
+  - coveredResources: ["nvidia.com/gpu"]
+    flavors:
+    - name: "a3-pool"
+      resources:
+      - name: "nvidia.com/gpu"
+        nominalQuota: 16 # match number of A3 VMs.
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  namespace: "default"
+  name: "a3-queue"
+spec:
+  clusterQueue: "a3-queue"
+

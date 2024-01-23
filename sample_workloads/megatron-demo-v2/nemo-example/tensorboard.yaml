@@ -1,0 +1,81 @@
+# Copyright 2022 Google LLC
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tensorboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tensorboard
+  template:
+    metadata:
+      labels:
+        app: tensorboard
+    spec:
+      volumes:
+      - name: cluster-file-store
+        persistentVolumeClaim:
+          claimName: cluster-sharedfs
+      containers:
+      - name: tensorboard
+        image: us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/tensorboard:latest
+        command: ["/bin/sh", "-c"]
+        args: ["tensorboard --logdir /cfs/nemo-experiments"]          
+        ports:
+        - name: web
+          containerPort: 6006
+        volumeMounts:
+        - name: cluster-file-store
+          mountPath: /cfs 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tensorboard
+spec:
+  clusterIP: None
+  selector:
+    app: tensorboard
+  ports:
+  - name: web
+    port: 6006
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: inverse-proxy
+spec:
+  serviceAccountName: default
+  containers:
+  - name: inverse-proxy
+    image: us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/inverse-proxy-tensorboard:latest
+    ports:
+    - containerPort: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inverse-proxy-config
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: inverse-proxy-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: inverse-proxy-role-binding
+subjects:
+- kind: ServiceAccount
+  name: default
+roleRef:
+  kind: Role
+  name: inverse-proxy-role
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,27 @@
+workload:
+  nodes: 2
+  image: "us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/nccl-kueue-job:latest"
+  ncclTestBinary: "all_reduce_perf"
+  ncclTestMessageSizeMin: "1"
+  ncclTestMessageSizeMax: "8G"
+  ncclTestIterations: "10"
+
+tcpx:
+  enabled: "true"
+  repository: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx"
+  daemonVersion: "tcpgpudmarxd-dev:v2.0.6"
+  pluginVersion: "nccl-plugin-gpudirecttcpx-dev:v3.1.6_2023_10_06"
+ 
+  ncclSettings:
+  - name: NCCL_DEBUG
+    value: "VERSION"
+ 
+  # The following NCCL settings are recommended (but tunable):
+  - name: NCCL_MIN_NCHANNELS
+    value: "8"
+  - name: NCCL_MAX_NCHANNELS
+    value: "8"
+  - name: NCCL_SOCKET_NTHREADS
+    value: "1"
+  - name: NCCL_NSOCKS_PERTHREAD
+    value: "4"

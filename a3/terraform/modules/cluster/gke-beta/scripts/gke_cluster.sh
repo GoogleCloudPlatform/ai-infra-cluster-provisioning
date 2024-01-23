@@ -54,7 +54,7 @@ gke_cluster::create () {
         --region="${region}" \
         --enable-ip-alias \
         --enable-multi-networking \
-        --num-nodes='15' \
+        --num-nodes='10' \
         --cluster-version="${version}" \
         --project="${project_id}" \
         --network="${network_name}" \
