@@ -1,5 +1,3 @@
-# Copyright 2022 Google LLC
-#
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,8 +19,14 @@ spec:
       containers:
       - name: tensorboard
         image: us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/tensorboard:latest
-        command: ["/bin/sh", "-c"]
-        args: ["tensorboard --logdir /cfs/nemo-experiments"]          
+        command: 
+        - bash
+        - -c
+        - |
+          apt install net-tools
+          IP=$(ifconfig | grep -Eo "inet (addr:)?([0-9]*\.){3}[0-9]*" | grep -Eo "([0-9]*\.){3}[0-9]*" | grep -v "127.0.0.1")
+          tensorboard --logdir /cfs/nemo-experiments --host $IP
+
         ports:
         - name: web
           containerPort: 6006

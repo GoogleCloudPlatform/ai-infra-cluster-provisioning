@@ -7,7 +7,7 @@ volumeBindingMode: Immediate
 allowVolumeExpansion: true
 parameters:
   tier: enterprise
-  network: sufkha-megatron-test
+  network: daily-run-single-zone-gker26-net-0
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1

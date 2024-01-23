@@ -59,7 +59,7 @@ spec:
         path: /mnt/stateful_partition/kube-ephemeral-ssd   
     - name: cluster-file-store
       persistentVolumeClaim:
-        claimName: cluster-sharedfs
+        claimName: cluster-sharedfs 
     initContainers:
     {{ if eq $root.Values.tcpx.enabled "true" }}
     - name: tcpx-nccl-plugin-installer
