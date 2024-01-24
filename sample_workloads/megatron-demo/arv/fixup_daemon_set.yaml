@@ -1,0 +1,77 @@
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fixup-nvidia-driver-installer
+  namespace: kube-system
+  labels:
+    k8s-app: fixup-nvidia-driver-installer
+spec:
+  selector:
+    matchLabels:
+      k8s-app: fixup-nvidia-driver-installer
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: fixup-nvidia-driver-installer
+        k8s-app: fixup-nvidia-driver-installer
+    spec:
+      priorityClassName: system-node-critical
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: cloud.google.com/gke-accelerator
+                operator: Exists
+              - key: cloud.google.com/gke-gpu-driver-version
+                operator: DoesNotExist
+              - key: gpu-custom-cos-image.gke.io
+                operator: Exists
+      tolerations:
+      - operator: "Exists"
+      hostNetwork: true
+      hostPID: true
+      initContainers:
+      - image: "ubuntu"
+        name: bind-mount-install-dir
+        securityContext:
+          privileged: true
+        command:
+        - nsenter
+        - -at
+        - '1'
+        - --
+        - sh
+        - -c
+        - |
+          if [ -d /home/kubernetes/bin/nvidia ]; then
+            echo "The directory /home/kubernetes/bin/nvidia exists."
+          else
+            echo "The directory /home/kubernetes/bin/nvidia does not exist. Creating"
+            mkdir -p /var/lib/nvidia /home/kubernetes/bin/nvidia && mount --bind /home/kubernetes/bin/nvidia /var/lib/nvidia
+          fi
+      - name: installer
+        image: "ubuntu"
+        securityContext:
+          privileged: true
+        command:
+        - nsenter
+        - -at
+        - '1'
+        - --
+        - sh
+        - -c
+        - |
+          if /usr/bin/ctr -n k8s.io images list | grep -q "cos-nvidia-installer:fixed"; then
+            echo "The image cos-nvidia-installer:fixed exists."
+          else
+            echo "The image cos-nvidia-installer:fixed does not exist."
+            /usr/bin/ctr -n k8s.io images pull $(/usr/bin/cos-extensions list -- --gpu-installer)
+            /usr/bin/ctr -n k8s.io images tag $(/usr/bin/cos-extensions list -- --gpu-installer) docker.io/library/cos-nvidia-installer:fixed
+          fi
+      containers:
+      - image: "gcr.io/google-containers/pause:2.0"
+        name: pause
