@@ -23,7 +23,6 @@ Internal notes:
 4. Todo: The tool does not apply the network pass-through mode.
 5. Todo: The non-beta version is unable to apply the PERIODIC maintenance interval.
 6. Todo: Is it necessary to create a non-default service account?
-7. Todo: The tool may be deprecated (for whales) in favor of gSC.
 
 ### Optional (Recommended): Install Kueue batching system
 
