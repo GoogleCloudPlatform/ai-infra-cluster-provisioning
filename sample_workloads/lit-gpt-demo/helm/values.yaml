@@ -1,5 +1,5 @@
 cluster:
-  nNodes: 8
+  nNodes: 1
   nodePool: np-1
 network:
   useTcpx: "yes"
@@ -8,15 +8,15 @@ network:
   rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.9
   disablePmtu: "yes"
 workload:
-  jobTimestamp: # Must be defined
-  gcsExperimentBucket: # Must be defined
-  experimentDir: llama2-70b
+  jobTimestamp: 1 # Must be defined
+  gcsExperimentBucket: tejas_gpu # Must be defined
+  experimentDir: llama2-7b-dummy
   gcsDataBucket: litgpt-public-bucket
   dataDir: openwebtext_dataset
   image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt
-  modelName: Llama-2-70b-hf
-  batchSize: 6
-  microBatchSize: 6
+  modelName: Llama-2-7b-hf
+  batchSize: 1
+  microBatchSize: 1
   warmupIters: 10
-  maxIters: 1000
+  maxIters: 50
   
