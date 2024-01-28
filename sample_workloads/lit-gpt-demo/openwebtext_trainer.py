@@ -117,7 +117,7 @@ def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -
         else:
             strategy = FSDPStrategy(
                 auto_wrap_policy={MultiBlock},
-                activation_checkpointing_policy={Block},
+                activation_checkpointing_policy={MultiBlock},
                 # the argument is not available in the Trainer strategy, but it's the default anyways
                 # state_dict_type="full",
                 limit_all_gathers=True,

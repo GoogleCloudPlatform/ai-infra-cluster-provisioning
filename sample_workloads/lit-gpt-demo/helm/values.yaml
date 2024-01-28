@@ -13,7 +13,7 @@ workload:
   experimentDir: llama2-7b-combinedblocks
   gcsDataBucket: litgpt-public-bucket
   dataDir: openwebtext_dataset
-  image: us-central1-docker.pkg.dev/supercomputer-testing/tejasnama-gcr/litgpt-full:d5d3714-d7277035-3aaf-4a34-82c0-82c7495025e5
+  image: us-central1-docker.pkg.dev/supercomputer-testing/tejasnama-gcr/litgpt-full:latest
   modelName: Llama-2-7b-hf
   batchSize: 6
   microBatchSize: 6

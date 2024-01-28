@@ -19,7 +19,7 @@ from lit_gpt.model import Block, GPT
 
 class GPTFSDP(GPT):
     def __init__(self, config: Config) -> None:
-        super().__init__()
+        super().__init__(config)
         print ("##### Using gpt_fsdp #####")
         # Overload the transformer
         self.transformer = nn.ModuleDict(
@@ -31,34 +31,36 @@ class GPTFSDP(GPT):
         )
     
     def construct_blocks(self, config):
+        config.num_blocks_to_combine = int(config.num_blocks_to_combine)
         # Don't use multiBlocks
         if config.num_blocks_to_combine <= 1:
             return nn.ModuleList(Block(config) for _ in range(config.n_layer))
 
         # using multiblocks
         num_multi_blocks = config.n_layer // config.num_blocks_to_combine
-        num_blocks = config.n_layer - num_multi_blocks * config.num_blocks_to_combine
+        num_last_blocks = config.n_layer - num_multi_blocks * config.num_blocks_to_combine
         
-        print (f"##### num_multi_blocks: {num_multi_blocks},  num_blocks: {num_blocks} #####")
+        print (f"##### num_multi_blocks: {num_multi_blocks},  num_blocks: {num_last_blocks} #####")
 
-        h = nn.ModuleList(MultiBlock(config) for _ in range(num_multi_blocks))
-        h.extend(Block(config) for _ in range(num_blocks))
+        h = nn.ModuleList(MultiBlock(config, config.num_blocks_to_combine) for _ in range(num_multi_blocks))
+        if num_last_blocks > 0:
+            h.append(MultiBlock(config, num_last_blocks))
         return h
 
 class MultiBlock(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, num_blocks_to_combine):
         super().__init__()
-        self.num_blocks_to_combine = config.num_blocks_to_combine
-        self.blocks = [nn.ModuleList(Block(config) for _ in range(self.num_blocks_to_combine))]
-    
+        self.blocks = nn.ModuleList(Block(config) for _ in range(num_blocks_to_combine))
+   
     def forward(
         self,
-        x: torch.Tensor,
-        cos: torch.Tensor,
-        sin: torch.Tensor,
-        mask: Optional[torch.Tensor] = None,
-        input_pos: Optional[torch.Tensor] = None,
+        x,
+        rope,
+        max_seq_length,
+        mask = None,
+        input_pos = None,
+        kv_cache = None,
     ):
         for block in self.blocks:
-            x = block(x, cos, sin, mask, input_pos)
-        return x
+            x, _ = block(x, rope, max_seq_length)
+        return x, kv_cache
