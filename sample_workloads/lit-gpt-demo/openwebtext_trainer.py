@@ -23,6 +23,8 @@ from lit_gpt.model import GPT, Block
 from lit_gpt.speed_monitor import SpeedMonitorCallback, estimate_flops, measure_flops
 from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, step_csv_logger
 
+from gpt_fsdp import GPTFSDP, MultiBlock
+
 model_name = os.getenv("MODEL_NAME", "Llama-2-70b-hf")
 name = "openwebtext"
 out_dir = Path(os.getenv("EXPERIMENT_LOCAL_DIR", "")) / "out"
@@ -32,6 +34,7 @@ eval_interval = 1000
 eval_iters = 100
 log_interval = 1
 num_nodes = int(os.getenv("NNODES", "1"))
+num_blocks_to_combine = os.getenv("NUM_BLOCKS_TO_COMBINE", 1)
 
 # Hyperparameters
 learning_rate = 6e-4
@@ -59,7 +62,7 @@ class LightningGPTModule(L.LightningModule):
         self.measured_flops: Optional[int] = None
 
     def configure_model(self) -> None:
-        self.module = GPT(self.config)
+        self.module = GPTFSDP(self.config)
         self.module.apply(self.module._init_weights)
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
@@ -113,7 +116,7 @@ def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -
             strategy = XLAStrategy(sync_module_states=False)
         else:
             strategy = FSDPStrategy(
-                auto_wrap_policy={Block},
+                auto_wrap_policy={MultiBlock},
                 activation_checkpointing_policy={Block},
                 # the argument is not available in the Trainer strategy, but it's the default anyways
                 # state_dict_type="full",
@@ -151,6 +154,7 @@ def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -
         out_dir.mkdir(parents=True, exist_ok=True)
 
     config = Config.from_name(model_name)
+    config.num_blocks_to_combine = num_blocks_to_combine
     trainer.print(f"Loading model with {config.__dict__}")
     t0 = time.perf_counter()
     model = LightningGPTModule(config)
@@ -206,3 +210,4 @@ if __name__ == "__main__":
     from jsonargparse import CLI
 
     CLI(main)
+

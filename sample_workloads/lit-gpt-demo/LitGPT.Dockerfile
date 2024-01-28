@@ -19,6 +19,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
 
 COPY scripts /workspace/scripts
 COPY openwebtext_trainer.py /workspace/pretrain/
+COPY gpt_fsdp.py /workspace/pretrain/
 
 ENTRYPOINT ["/bin/bash", "/workspace/scripts/litgpt_container_entrypoint.sh"]
 

@@ -160,6 +160,8 @@ spec:
         value: "{{$root.Values.workload.microBatchSize}}"
       - name: MODEL_NAME
         value: "{{$root.Values.workload.modelName}}"
+      - name: NUM_BLOCKS_TO_COMBINE
+        value: "{{$root.Values.workload.numBlocksToCombine}}"
       - name: WARMUP_ITERS
         value: "{{$root.Values.workload.warmupIters}}"
       - name: MAX_ITERS
@@ -182,3 +184,4 @@ spec:
         nvidia.com/gpu: !!int 8
 ---
 {{end}}
+
