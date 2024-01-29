@@ -20,4 +20,4 @@ workload:
   warmupIters: 10
   maxIters: 100
   numBlocksToCombine: 4
-  
+  collectNsysProfile: 'no' # Set to 'yes' for profiles
