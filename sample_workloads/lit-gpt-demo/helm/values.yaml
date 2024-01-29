@@ -19,5 +19,5 @@ workload:
   microBatchSize: 4
   warmupIters: 10
   maxIters: 100
-  numBlocksToCombine: 1
+  numBlocksToCombine: 4
   
