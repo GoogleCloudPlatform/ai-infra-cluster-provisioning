@@ -1,5 +1,5 @@
 cluster:
-  nNodes: 2
+  nNodes: 8
   nodePool: np-1
 network:
   useTcpx: "yes"
@@ -10,14 +10,14 @@ network:
 workload:
   jobTimestamp: 1 # Must be defined
   gcsExperimentBucket: tejas_gpu # Must be defined
-  experimentDir: llama2-7b-combinedblocks
+  experimentDir: llama2-7b-8nodes-bs6-original
   gcsDataBucket: litgpt-public-bucket
   dataDir: openwebtext_dataset
   image: us-central1-docker.pkg.dev/supercomputer-testing/tejasnama-gcr/litgpt-full:latest
   modelName: Llama-2-7b-hf
   batchSize: 6
-  microBatchSize: 6
+  microBatchSize: 4
   warmupIters: 10
-  maxIters: 10
-  numBlocksToCombine: 4
+  maxIters: 100
+  numBlocksToCombine: 1
   
