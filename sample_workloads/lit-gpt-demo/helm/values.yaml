@@ -8,15 +8,16 @@ network:
   rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.9
   disablePmtu: "yes"
 workload:
-  jobTimestamp: # Must be defined
-  gcsExperimentBucket: # Must be defined
-  experimentDir: llama2-70b
+  jobTimestamp: 1 # Must be defined
+  gcsExperimentBucket: tejas_gpu # Must be defined
+  experimentDir: llama2-7b-8nodes-bs6-original
   gcsDataBucket: litgpt-public-bucket
   dataDir: openwebtext_dataset
-  image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt
-  modelName: Llama-2-70b-hf
+  image: us-central1-docker.pkg.dev/supercomputer-testing/tejasnama-gcr/litgpt-full:latest
+  modelName: Llama-2-7b-hf
   batchSize: 6
-  microBatchSize: 6
+  microBatchSize: 4
   warmupIters: 10
-  maxIters: 1000
-  
+  maxIters: 100
+  numBlocksToCombine: 4
+  collectNsysProfile: 'no' # Set to 'yes' for profiles

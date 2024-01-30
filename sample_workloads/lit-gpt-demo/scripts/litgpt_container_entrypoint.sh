@@ -12,6 +12,7 @@ set -o pipefail
 : "${GCS_DATA_BUCKET:?Must set GCS_DATA_BUCKET}"
 : "${DATA_DIR:?Must set DATA_DIR}"
 : "${CLUSTER_TYPE:='GKE'}"
+: "${COLLECT_NSYS_PROFILE:='no'}"
 
 export EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
 
@@ -32,6 +33,9 @@ export WORLD_SIZE=$((NNODES * GPUS_PER_NODE))
 
 LOG_DIR=$EXPERIMENT_LOCAL_DIR/training_logs
 mkdir -p $LOG_DIR
+
+PROFILING_DIR=$EXPERIMENT_LOCAL_DIR/nsys_profiles
+mkdir -p $PROFILING_DIR
 
 OUT_DIR=$EXPERIMENT_LOCAL_DIR/out
 mkdir -p $OUT_DIR
@@ -145,7 +149,6 @@ fi
 
 PIDS=()
 
-
 CPU_SETS=( "0-7,104-111" "8-15,112-119" "16-23,120-127" "24-31,128-135" "52-59,156-163" "60-67,164-171" "68-75,172-179" "76-83,180-187" )
 
 for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
@@ -161,6 +164,10 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
    fi
    CMD_PREFIX="numactl --membind=$MEMBIND_NUMA_NODE --physcpubind $CPUS"
 
+   if [[ "${COLLECT_NSYS_PROFILE:="no"}" == "yes" ]]; then
+     echo "Collecting nsys profile"
+     CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
+   fi
 
    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
      $CMD_PREFIX \
