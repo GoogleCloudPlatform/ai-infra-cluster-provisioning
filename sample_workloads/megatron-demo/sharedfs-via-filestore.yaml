@@ -1,0 +1,24 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: cluster-sharedfs
+provisioner: filestore.csi.storage.gke.io
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+parameters:
+  tier: enterprise
+  network: daily-run-single-zone-gker26-net-0
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: cluster-sharedfs
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: cluster-sharedfs
+  resources:
+    requests:
+      storage: 1Ti
+
+

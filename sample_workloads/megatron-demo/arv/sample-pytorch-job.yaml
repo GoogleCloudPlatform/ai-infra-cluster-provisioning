@@ -1,0 +1,51 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-svc
+spec:
+  clusterIP: None # clusterIP must be None to create a headless service
+  selector:
+    job-name: sample-pytorch-job # must match Job name
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sample-pytorch-job
+  namespace: default
+  labels:
+    kueue.x-k8s.io/queue-name: a3-queue 
+spec:
+  suspend: true
+  parallelism: 2
+  completions: 2
+  completionMode: Indexed
+  template:
+   spec:
+    subdomain: headless-svc # has to match Service name
+    restartPolicy: Never
+    containers:
+    - name: pytorch
+      image: us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/pytorch-kueue-job:latest
+      imagePullPolicy: Always
+      ports:
+      - containerPort: 3389
+      env:
+      - name: MASTER_ADDR
+        value: "sample-pytorch-job-0.headless-svc.default.svc.cluster.local"
+      - name: MASTER_PORT
+        value: "3389"
+      - name: NCCL_DEBUG
+        value: "INFO"
+      - name: NCCL_SOCKET_IFNAME
+        value: "eth0"
+      command:
+      - bash
+      - -c
+      - |
+        echo "Hello from $(hostname --fqdn)"
+        sleep 3
+        torchrun --nproc_per_node=8 --nnodes=2 --rdzv_id=1002 --rdzv_backend=c10d --rdzv_endpoint=$MASTER_ADDR /workspace/pytorch_example.py
+      resources:
+        limits:
+          nvidia.com/gpu: 8

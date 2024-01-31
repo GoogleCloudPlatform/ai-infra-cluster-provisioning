@@ -69,6 +69,15 @@ variable "enable_gke_dashboard" {
   }
 }
 
+variable "network_existing" {
+  description = "Existing network to attach to nic0. Setting to null will create a new network for it."
+  type = object({
+    network_name    = string
+    subnetwork_name = string
+  })
+  default = null
+}
+
 variable "node_pools" {
   description = <<-EOT
     The list of node pools for the GKE cluster.
