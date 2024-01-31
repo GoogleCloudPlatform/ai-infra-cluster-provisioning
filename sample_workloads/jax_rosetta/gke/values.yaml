@@ -1,0 +1,26 @@
+workload:
+  nodes: 2
+  image: "nvcr.io/nvidia/jax:23.10-paxml-py3"
+  config: "Synthetic126M"
+  outputDir: "output_synthetic_126m"
+  baseWorkspaceDir: "output_base_dir"
+
+tcpx:
+  enabled: "true"
+  repository: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx"
+  daemonVersion: "tcpgpudmarxd-dev:v2.0.9"
+  pluginVersion: "nccl-plugin-gpudirecttcpx-dev:v3.1.6_2023_10_06"
+ 
+  ncclSettings:
+  - name: NCCL_DEBUG
+    value: "VERSION"
+ 
+  # The following NCCL settings are recommended (but tunable):
+  - name: NCCL_MIN_NCHANNELS
+    value: "8"
+  - name: NCCL_MAX_NCHANNELS
+    value: "8"
+  - name: NCCL_SOCKET_NTHREADS
+    value: "1"
+  - name: NCCL_NSOCKS_PERTHREAD
+    value: "4"
