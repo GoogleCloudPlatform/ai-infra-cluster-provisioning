@@ -1,7 +1,7 @@
 workload:
-  nodes: 2
+  nodes: 1
   image: "nvcr.io/nvidia/jax:23.10-paxml-py3"
-  config: "Synthetic126M"
+  config: "GPT126M"
   outputDir: "output_synthetic_126m"
   baseWorkspaceDir: "output_base_dir"
 
