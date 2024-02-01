@@ -1,9 +1,9 @@
 {{ $timestamp := now | date "2006-01-02-150405" }}
-{{ $jobidentifier := randAlphaNum 8 | lower }}
+{{ $jobid := randAlphaNum 8 | lower }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "nemo-job-{{$jobidentifier}}" 
+  name: "sufkha-nemo-job-{{$jobid}}" 
 data:
   nemo-configuration.yaml: |-
 {{ .Files.Get "selected-configuration.yaml" | nindent 4 }}
@@ -11,17 +11,17 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: "nemo-job-{{$jobidentifier}}"
+  name: "sufkha-nemo-job-{{$jobid}}"
 spec:
   clusterIP: None
   selector:
-    job-name: "nemo-job-{{$jobidentifier}}"
+    job-name: "sufkha-nemo-job-{{$jobid}}"
 ---
 {{- $root := . -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "nemo-job-{{$jobidentifier}}"
+  name: "sufkha-nemo-job-{{$jobid}}"
   namespace: default
   labels:
     kueue.x-k8s.io/queue-name: a3-queue 
@@ -37,7 +37,7 @@ spec:
    spec:
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
-    subdomain: "nemo-job-{{$jobidentifier}}"
+    subdomain: "sufkha-nemo-job-{{$jobid}}"
     restartPolicy: Never
     volumes:
     - name: nvidia-install-dir-host
@@ -65,7 +65,7 @@ spec:
         sizeLimit: 200Gi          
     - name: workload-configuration
       configMap:
-        name: "nemo-job-{{$jobidentifier}}"
+        name: "sufkha-nemo-job-{{$jobid}}"
     initContainers:
     - name: training-data-downloader
       image: gcr.io/google.com/cloudsdktool/google-cloud-cli
@@ -138,13 +138,15 @@ spec:
       imagePullPolicy: Always
       env:
       - name: MASTER_ADDR
-        value: "nemo-job-{{$jobidentifier}}-0.nemo-job-{{$jobidentifier}}.default.svc.cluster.local"
+        value: "sufkha-nemo-job-{{$jobid}}-0.sufkha-nemo-job-{{$jobid}}.default.svc.cluster.local"
+      - name: GLOO_SOCKET_IFNAME
+        value: eth0
       - name: NNODES
         value: "{{ $root.Values.workload.nodes }}"
       - name: TORCH_RUN_TARGET
         value: "{{ $root.Values.workload.torchRunTarget }}"
       - name: JOB_IDENTIFER
-        value: "nemo-job-{{$jobidentifier}}"
+        value: "sufkha-nemo-job-{{$jobid}}"
 
        # The following NCCL settings should likely not be adjusted:
       - name: NCCL_SOCKET_IFNAME
@@ -225,6 +227,19 @@ spec:
 
         sleep 10 # <- Hack to allow some time for service to boot
 
+        #torchrun \
+        #  --nproc_per_node=8 \
+        #  --nnodes=$NNODES \
+        #  --rdzv_id=$JOB_IDENTIFER \
+        #  --rdzv_backend=c10d \
+        #  --rdzv_endpoint=$MASTER_ADDR \
+        #  $TORCH_RUN_TARGET \
+        #  --config-path="/etc/workload-configuration" \
+        #  --config-name="nemo-configuration.yaml" \
+        #  +trainer.num_nodes="$NNODES" \
+        #  +exp_manager.version="$JOB_IDENTIFER" \
+        #  +cluster_type=BCP
+      
         export GPUS_PER_NODE=8
         export NODE_RANK=$JOB_COMPLETION_INDEX
         export MASTER_PORT=6002
@@ -276,4 +291,18 @@ spec:
 #          +trainer.num_nodes="$NNODES" \
 #          +exp_manager.version="$JOB_IDENTIFER"
 #
-           
+#        export GPUS_PER_NODE=8
+#        export NODE_RANK=$JOB_COMPLETION_INDEX
+#        export MASTER_PORT=6002
+#        export WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
+#
+#        for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
+#          RANK=$((8*$NODE_RANK + $LOCAL_RANK))
+#
+#          OMP_NUM_THREADS=12 RANK=$RANK LOCAL_RANK=$LOCAL_RANK /usr/bin/python3.8 $TORCH_RUN_TARGET \
+#            --config-path="/etc/workload-configuration" \
+#            --config-name="nemo-configuration.yaml" \
+#            +trainer.num_nodes="$NNODES" \
+#            +exp_manager.version="$JOB_IDENTIFER" &
+#        done
+#          

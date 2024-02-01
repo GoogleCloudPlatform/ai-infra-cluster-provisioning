@@ -60,6 +60,10 @@ spec:
     - name: cluster-file-store
       persistentVolumeClaim:
         claimName: cluster-sharedfs 
+    - name: shared-memory
+      emptyDir:
+        medium: "Memory"
+        sizeLimit: 200Gi
     initContainers:
     {{ if eq $root.Values.tcpx.enabled "true" }}
     - name: tcpx-nccl-plugin-installer
@@ -188,7 +192,7 @@ spec:
         mkdir /run/sshd
         /usr/sbin/sshd -p 2222
         echo "Pod has started SSH daemon"
-        sleep 10 # Note: This hack allow all SSH daemon sufficient startup time
+        sleep 20 # Note: This hack allow all SSH daemon sufficient startup time
 
         export LD_LIBRARY_PATH="/usr/local/tcpx/lib64:${LD_LIBRARY_PATH}"
         echo "Warning: Set LD_LIBRARY_PATH=$LD_LIBRARY_PATH to override the NCCL library"
@@ -266,6 +270,8 @@ spec:
           mountPath: /semaphore 
         - name: cluster-file-store
           mountPath: /cfs
+        - name: shared-memory
+          mountPath: /dev/shm 
       resources:
         limits:
           nvidia.com/gpu: 8

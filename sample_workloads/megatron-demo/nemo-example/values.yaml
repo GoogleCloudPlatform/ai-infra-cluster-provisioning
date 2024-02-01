@@ -1,5 +1,5 @@
 workload:
-  nodes: 2
+  nodes: 32
   image: "us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/nemo-kueue-example:latest"
   torchRunTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
   trainingDataSource: "gs://megatron-data-us/training-data/wikitext"
