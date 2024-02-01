@@ -1,29 +1,66 @@
-# Megatron on GKE
+# NeMo Megatron on GKE
+
+This document demonstrates running [NeMo Megatron](https://github.com/NVIDIA/NeMo) on A3 VMs in a GKE environment usng TCPx technology. The A3 VMs have 8x NVIDIA H100 GPUs and 4x 200 Gbps NICs and leverage TCPx for direct GPU to NIC transfers.
 
 ### Prerequisites
 
-- Gcloud Cli
-- Terraform
-- Helm
-- Kubectl
-- A3 quota
+- [Gcloud Cli](https://cloud.google.com/sdk/docs/install)
+- [Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
+- [Helm](https://helm.sh/docs/intro/install/)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 
-### Provision GKE cluster
+In addition to the above tools, you will need quota for: 
+- NVIDIA H100 GPUs
+- Cloud FileStore Enterprise (optional)
+
+### Select project, zone, and resource prefix
+Adjust the values in `set-enviroment.sh` to suit your case:
 ```
-terraform init && terraform apply
+export TF_VAR_PROJECT=<your-project-name>
+export TF_VAR_PREFIX=nemo-megatron-demo
+export TF_VAR_REGION=us-central1
+export TF_VAR_ZONE=us-central1-c
+
+export TF_VAR_A3_NODE_COUNT=2
+export TF_VAR_E2_NODE_COUNT=4
+export TF_VAR_NFS_SIZE="1Ti"
 ```
-This leverages the AI cluster provisioning tool to provision the following resources:
-1. Regional GKE cluster with A3 VMs (todo: Make it zonal)
-2. Five VPCs, one per NIC.
+The E2 nodes are used for system services (e.g. DNS pods, custom controllers).
+*The prefix `TF_VAR_` exposes the variables to Terraform. Take note that some variables are still used non-Terraform commands below.*
 
-Internal notes: 
-1. Bug: The default node pool is missing and needs to be added back in! Need to specify its VM type
-2. Bug: The tool has a bug that causes conflict of service, pod IP ranges in VPC.
-3. Todo: The tool should optionally enable GCS fuse driver for GKE.
-4. Todo: The tool does not apply the network pass-through mode.
-5. Todo: The non-beta version is unable to apply the PERIODIC maintenance interval.
-6. Todo: Is it necessary to create a non-default service account?
+Enable this environment in your shell by running:
+```
+source set-environment.sh
+```
+*This environment should be present in your shell in subsequent steps.*
 
+### Create a GCS bucket that will retain the Terraform state
+
+```
+bash scripts/create-terraform-gcs-backend-bucket.sh
+```
+
+Then initialize the Terraform state using this GCS bucket
+```
+terraform init \
+  -backend-config="bucket=$TF_VAR_PREFIX" \
+  -backend-config="prefix=$TF_VAR_PREFIX"
+```
+
+### Create a GKE cluster with A3 VMs
+Create a GKE cluster with the desired count of A3 VMs.
+```
+terraform apply
+```
+This step may take 15 or more minutes. You can check the progress of the cluster provisioning by visiting [Cloud Console](https://console.cloud.google.com/kubernetes/list/overview).
+
+### Augment your cluster with a pool of E2 VMs
+
+Add a node pool with E2 VMs in your GKE cluster in order to host system services (e.g. DNS pods, custom controllers).
+```
+
+```
+ 
 ### Optional (Recommended): Install Kueue batching system
 
 ```
@@ -33,12 +70,7 @@ kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases
 kubectl create -f a3-queue-via-kueue.yaml
 ```
 
-Kueue enables workload batching, adminstrative control, and all or nothing semantics.
-
-Internal Notes:
-1. It is necessary to adjust the nominalQuota to GPUs available!
-2. Describe the usefulness of Kueue, the various concepts (with diagram)
-3. Describe the drawbacks of Kueue.
+Kueue enables workload batching, adminstrative control, and all or nothing semantics. 
 
 ### Optional (Recommended): Connect a shared NFS file-system
 
@@ -68,12 +100,13 @@ Compare to Google Cloud storage
 https://cloud.google.com/storage/quotas
 Ostensibly 200 Gbps (but can be increased)
 
+### Place your training data in a GCS bucket
+
+
+
 ### Launch NeMo GPT-5B example
 
-```
-cd nemo-example
-```
-
+The 
 The `selected-configuration.yaml` is soft-linked to one of the configurations in `nemo-configuration/`. Adjust this as necessary.
 
 Launch the NeMo workload
