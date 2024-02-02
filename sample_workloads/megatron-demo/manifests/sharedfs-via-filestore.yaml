@@ -7,7 +7,7 @@ volumeBindingMode: Immediate
 allowVolumeExpansion: true
 parameters:
   tier: enterprise
-  network: daily-run-single-zone-gker26-net-0
+  network: $TF_VAR_PREFIX
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -19,6 +19,4 @@ spec:
   storageClassName: cluster-sharedfs
   resources:
     requests:
-      storage: 1Ti
-
-
+      storage: $TF_VAR_NFS_SIZE

@@ -47,8 +47,8 @@ kind: GKENetworkParamSet
 metadata:
   name: vpc1
 spec:
-  vpc: sufkha-megatron-test-gpu-0
-  vpcSubnet: sufkha-megatron-test-gpu-0
+  vpc: $TF_VAR_PREFIX-gpu-0
+  vpcSubnet: $TF_VAR_PREFIX-gpu-0
   deviceMode: NetDevice
 ---
 apiVersion: networking.gke.io/v1
@@ -56,8 +56,8 @@ kind: GKENetworkParamSet
 metadata:
   name: vpc2
 spec:
-  vpc: sufkha-megatron-test-gpu-1
-  vpcSubnet: sufkha-megatron-test-gpu-1
+  vpc: $TF_VAR_PREFIX-gpu-1
+  vpcSubnet: $TF_VAR_PREFIX-gpu-1
   deviceMode: NetDevice
 ---
 apiVersion: networking.gke.io/v1
@@ -65,8 +65,8 @@ kind: GKENetworkParamSet
 metadata:
   name: vpc3
 spec:
-  vpc: sufkha-megatron-test-gpu-2
-  vpcSubnet: sufkha-megatron-test-gpu-2
+  vpc: $TF_VAR_PREFIX-gpu-2
+  vpcSubnet: $TF_VAR_PREFIX-gpu-2
   deviceMode: NetDevice
 ---
 apiVersion: networking.gke.io/v1
@@ -74,7 +74,7 @@ kind: GKENetworkParamSet
 metadata:
   name: vpc4
 spec:
-  vpc: sufkha-megatron-test-gpu-3
-  vpcSubnet: sufkha-megatron-test-gpu-3
+  vpc: $TF_VAR_PREFIX-gpu-3
+  vpcSubnet: $TF_VAR_PREFIX-gpu-3
   deviceMode: NetDevice
 

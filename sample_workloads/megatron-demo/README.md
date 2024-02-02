@@ -8,6 +8,7 @@ This document demonstrates running [NeMo Megatron](https://github.com/NVIDIA/NeM
 - [Terraform](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli)
 - [Helm](https://helm.sh/docs/intro/install/)
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+- [Envsubst](https://manpages.ubuntu.com/manpages/trusty/man1/envsubst.1.html)
 
 In addition to the above tools, you will need quota for: 
 - NVIDIA H100 GPUs
@@ -28,7 +29,7 @@ export TF_VAR_E2_NODE_COUNT=4
 export TF_VAR_NFS_SIZE="1Ti"
 ```
 The E2 nodes are used for system services (e.g. DNS pods, custom controllers).
-*The prefix `TF_VAR_` exposes the variables to Terraform. Take note that some variables are still used by non-Terraform commands below.*
+*The prefix `TF_VAR_` exposes the variables to Terraform. Take note that some of these environment variables are still used by non-Terraform commands below.*
 
 Enable this environment in your shell by running:
 ```
@@ -63,77 +64,88 @@ Add a node pool with the desired count of E2 VMs in your GKE cluster in order to
 ```
 bash scripts/create-e2-node-pool.sh 
 ```
- 
+### Fetch the credentials from your cluster to direct `kubectl` commands
+
+Fetch the credentials from your GKE cluster.
+```
+bash scripts/fetch-gke-credentials-for-kubectl.sh
+```
+Now any `kubectl` commands will be applied against your GKE cluster.
+
+### Adjust GKE networking such that the VPCs are in device mode
+
+Adjust GKE networking to place the VPCs in device mode.
+```
+cat manifests/enable-network-pass-through.yaml | envsubst | kubectl apply -f -
+```
+This bypasses some GKE networking layers and is needed to run workloads with `hostNetwork: false` (the default).
+
 ### Optional: Install Kueue as a batching and administrative system
 
-Install the Kueue batching system. Kueue enables workload batching, pre-emption, adminstrative control, and all-or-nothing launch semantics. To learn more about Kueue visit https://kueue.sigs.k8s.io/docs/concepts/.
+Install the Kueue batching system. Kueue provides services for workload batching, pre-emption, adminstrative control, and all-or-nothing launch semantics. To learn more about Kueue visit https://kueue.sigs.k8s.io/docs/concepts/.
 ```
 VERSION=v0.5.2 kubectl apply --server-side \
   -f https://github.com/kubernetes-sigs/kueue/releases/download/$VERSION/manifests.yaml
 ```
 
-The Kueue controller will run on the E2 node pool provisioned earlier. After installing the Kueue system, create a single queue `a3-queue` to which A3 workloads can be submitted.
+The Kueue controller will run on the E2 node pool provisioned earlier. 
+
+After installing the Kueue system, create a single queue named `a3-queue` to which A3 workloads can be submitted.
 
 ```
-kubectl create -f a3-queue-via-kueue.yaml
+cat manifests/a3-queue-via-kueue.yaml | envsubst | kubectl apply -f -
 ```
-
 
 ### Optional: Provision and attach a shared NFS file-system
 
-Enable the GCP Filestore driver are your cluster.
+Enable the GCP Filestore driver on your cluster.
 ```
-gcloud \
-  container clusters update <your-gke-cluster> \
-  --update-addons=GcpFilestoreCsiDriver=ENABLED \
-  --project <your-gke-cluster-project> \
-  --zone <your-gke-cluster-zone>
+bash scripts/enable-filestore-driver-on-gke-cluster.sh
 ```
 
-Provision an Filestore volume 
+Then provision and attach a shared Filestore volume of the desired size to your cluster.
 ```
-kubectl create -f sharedfs-via-filestore.yaml
+cat manifests/sharedfs-via-filestore.yaml| envsubst | kubectl apply -f -
 ```
+This step may take 15 or more minutes. You can check the progress of the cluster provisioning by visiting [Cloud Console](https://console.cloud.google.com/filestore/instances). To learn more about the performance about Filestore, see https://cloud.google.com/filestore/docs/service-tiers.
 
-Internal Notes:
-1. It is necessary to set the correct GKE eth0 network.
-2. It is necessary to set the desired NFS storage size.
-3. Todo: Integrate this into the AI provisioning tool.
-4. This step takes approximately 15 minutes to execute.
-5. Enterprise NFS storage quota not available out of the box.
-6. NFS enterprise performance at
-
-https://cloud.google.com/filestore/docs/service-tiers
-Read 120 MiB/s per 1 TiB of provisioned capacity
-Write 100 MiB/s per 1 TiB of provisioned capacity
-
-Compare to Google Cloud storage
-https://cloud.google.com/storage/quotas
-Ostensibly 200 Gbps (but can be increased)
 
 ## Workload Setup and Launch
 
 ### Optional: Place your custom training data in a GCS bucket
 
-Create a GCS bucket and upload your training data to it:
+For the purposes of demonstration, we host a pre-tokenized version of the Wikipedia data in a public bucket at `gs://nemo-megatron-demo/training-data/processed/gpt/wikitext`. This dataset was created by following the section [Collecting Wikipedia Training Data](https://github.com/NVIDIA/Megatron-LM/tree/main?tab=readme-ov-file#collecting-wikipedia-training-data) in the [Megatron-LM](https://github.com/NVIDIA/Megatron-LM?tab=readme-ov-file#data-preprocessing) repository. It is recommended you use this data source on your first workload launch.
+
+If you choose, you can upload your own training data. In our demonstration we invoke NeMo Megatron pre-training for the standard GPT model. Therefore it is expected the dataset is already tokenized and compatible format followed by [Megatron-LM](https://github.com/NVIDIA/Megatron-LM?tab=readme-ov-file#data-preprocessing) for tokenizer type `GPT2BPETokenizer`. 
+
+First create a GCS bucket that will host the training data.
 ```
-bash scripts/upload-training-data-to-new-gcs-bucket <bucket-name> <>
+gcloud storage buckets create gs://my-training-bucket --location=$REGION
 ```
 
-In our demonstration we invoke NeMo Megatron pre-training for the standard GPT model and it is expected the dataset is pre-tokenized for BPE and compatible with tokenization followed by [Megatron-LM](https://github.com/NVIDIA/Megatron-LM?tab=readme-ov-file#data-preprocessing) for tokenizer type `GPT2BPETokenizer`. Note that in this demonstration the training data cannot exceed the size of the local SSD (i.e. 6 TiB). This is due to the training data being cached in the local SSD on launch. *
+Then upload your pre-tokenized training data to it.
+```
+gcloud storage cp my-training-data.{idx,bin} gs://my-training-bucket
+```
 
-For the purposes of demonstration, we host a pre-tokenized version of the Wikipedia data in a public bucket at `gs://...`. It is recommended you use data source on your first workload launch.
+Note that in this demonstration the training data cannot exceed the size of the local SSD (i.e. 6 TiB). This limitation is only due to our setup caching the training data to the local SSD on launch. For larger sizes the shared file-system or [GCF fuse](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/cloud-storage-fuse-csi-driver) can be used.
 
-### Launch NeMo Megatro GPT-5B example
+### Launch the NeMo Megatron GPT-5B example
 
-The file `selected-configuration.yaml` is by default soft-linked to `nemo-configurations/gpt-5b.yaml`. On a first attempt we recommend leaving this as-is. On later launches, you may review and edit the configuration.
+The file `selected-configuration.yaml` is a [NeMo Megatron](https://github.com/NVIDIA/NeMo) compatible configuration file. It is by initially soft-linked to `nemo-configurations/gpt-5b.yaml`. On a first attempt we recommend leaving this as-is. On later launches, you may review and edit the configuration. See [NeMo Megatron Launcher](https://github.com/NVIDIA/NeMo-Megatron-Launcher/tree/master/launcher_scripts/conf/training) for examples of configurations of alternate models and model sizes.
 
 Consider how many nodes you expect to launch NeMo Megatron GPT across. On a first launch, we suggest running the GPT-5B model across 2 nodes. Then launch the NeMo Megatron GPT workload using helm.
 ```
-helm install --set workload.nodes=2 $USER-nemo-$(date +%s) . 
+helm install --set workload.nodes=2 $USER-nemo-$(date +%s) nemo-example/ 
 ```
 
-Verify the launch succeeded 
+Verify the launch succeeded by seeing the corresponding pods in `Running` state.
+```
+$ kubectl get pods
+```
+
+### Watch the training step time and loss curves
+
 
 Install Tensorboard and the inverse proxy
 ```

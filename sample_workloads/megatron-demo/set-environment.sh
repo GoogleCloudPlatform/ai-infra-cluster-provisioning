@@ -6,3 +6,5 @@ export TF_VAR_ZONE=us-central1-c
 export TF_VAR_A3_NODE_COUNT=4
 export TF_VAR_E2_NODE_COUNT=4
 export TF_VAR_NFS_SIZE="1Ti"
+
+export TF_VAR_A3_GPU_COUNT=$((8*$TF_VAR_A3_NODE_COUNT))
