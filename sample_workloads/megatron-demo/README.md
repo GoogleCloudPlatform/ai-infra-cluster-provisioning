@@ -13,6 +13,8 @@ In addition to the above tools, you will need quota for:
 - NVIDIA H100 GPUs
 - Cloud FileStore Enterprise (optional)
 
+## Infrastructure Setup
+
 ### Select project, zone, and resource prefix
 Adjust the values in `set-enviroment.sh` to suit your case:
 ```
@@ -26,7 +28,7 @@ export TF_VAR_E2_NODE_COUNT=4
 export TF_VAR_NFS_SIZE="1Ti"
 ```
 The E2 nodes are used for system services (e.g. DNS pods, custom controllers).
-*The prefix `TF_VAR_` exposes the variables to Terraform. Take note that some variables are still used non-Terraform commands below.*
+*The prefix `TF_VAR_` exposes the variables to Terraform. Take note that some variables are still used by non-Terraform commands below.*
 
 Enable this environment in your shell by running:
 ```
@@ -35,12 +37,13 @@ source set-environment.sh
 *This environment should be present in your shell in subsequent steps.*
 
 ### Create a GCS bucket that will retain the Terraform state
-
+Create a GCS bucket that will retain Terraform state.
 ```
 bash scripts/create-terraform-gcs-backend-bucket.sh
 ```
+*Note: Most bash scripts in this example are one-line gcloud commands wrapped for convenience.*
 
-Then initialize the Terraform state using this GCS bucket
+Then initialize the Terraform state using this GCS bucket.
 ```
 terraform init \
   -backend-config="bucket=$TF_VAR_PREFIX" \
@@ -56,31 +59,39 @@ This step may take 15 or more minutes. You can check the progress of the cluster
 
 ### Augment your cluster with a pool of E2 VMs
 
-Add a node pool with E2 VMs in your GKE cluster in order to host system services (e.g. DNS pods, custom controllers).
+Add a node pool with the desired count of E2 VMs in your GKE cluster in order to host system services (e.g. DNS pods, custom controllers). *The Terraform module will integate this in the near future.*
 ```
-
+bash scripts/create-e2-node-pool.sh 
 ```
  
-### Optional (Recommended): Install Kueue batching system
+### Optional: Install Kueue as a batching and administrative system
+
+Install the Kueue batching system. Kueue enables workload batching, pre-emption, adminstrative control, and all-or-nothing launch semantics. To learn more about Kueue visit https://kueue.sigs.k8s.io/docs/concepts/.
+```
+VERSION=v0.5.2 kubectl apply --server-side \
+  -f https://github.com/kubernetes-sigs/kueue/releases/download/$VERSION/manifests.yaml
+```
+
+The Kueue controller will run on the E2 node pool provisioned earlier. After installing the Kueue system, create a single queue `a3-queue` to which A3 workloads can be submitted.
 
 ```
-VERSION=v0.5.2
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/kueue/releases/download/$VERSION/manifests.yaml
-
 kubectl create -f a3-queue-via-kueue.yaml
 ```
 
-Kueue enables workload batching, adminstrative control, and all or nothing semantics. 
 
-### Optional (Recommended): Connect a shared NFS file-system
+### Optional: Provision and attach a shared NFS file-system
 
+Enable the GCP Filestore driver are your cluster.
 ```
 gcloud \
   container clusters update <your-gke-cluster> \
   --update-addons=GcpFilestoreCsiDriver=ENABLED \
   --project <your-gke-cluster-project> \
   --zone <your-gke-cluster-zone>
+```
 
+Provision an Filestore volume 
+```
 kubectl create -f sharedfs-via-filestore.yaml
 ```
 
@@ -100,19 +111,29 @@ Compare to Google Cloud storage
 https://cloud.google.com/storage/quotas
 Ostensibly 200 Gbps (but can be increased)
 
-### Place your training data in a GCS bucket
+## Workload Setup and Launch
 
+### Optional: Place your custom training data in a GCS bucket
 
+Create a GCS bucket and upload your training data to it:
+```
+bash scripts/upload-training-data-to-new-gcs-bucket <bucket-name> <>
+```
 
-### Launch NeMo GPT-5B example
+In our demonstration we invoke NeMo Megatron pre-training for the standard GPT model and it is expected the dataset is pre-tokenized for BPE and compatible with tokenization followed by [Megatron-LM](https://github.com/NVIDIA/Megatron-LM?tab=readme-ov-file#data-preprocessing) for tokenizer type `GPT2BPETokenizer`. Note that in this demonstration the training data cannot exceed the size of the local SSD (i.e. 6 TiB). This is due to the training data being cached in the local SSD on launch. *
 
-The 
-The `selected-configuration.yaml` is soft-linked to one of the configurations in `nemo-configuration/`. Adjust this as necessary.
+For the purposes of demonstration, we host a pre-tokenized version of the Wikipedia data in a public bucket at `gs://...`. It is recommended you use data source on your first workload launch.
 
-Launch the NeMo workload
+### Launch NeMo Megatro GPT-5B example
+
+The file `selected-configuration.yaml` is by default soft-linked to `nemo-configurations/gpt-5b.yaml`. On a first attempt we recommend leaving this as-is. On later launches, you may review and edit the configuration.
+
+Consider how many nodes you expect to launch NeMo Megatron GPT across. On a first launch, we suggest running the GPT-5B model across 2 nodes. Then launch the NeMo Megatron GPT workload using helm.
 ```
 helm install --set workload.nodes=2 $USER-nemo-$(date +%s) . 
 ```
+
+Verify the launch succeeded 
 
 Install Tensorboard and the inverse proxy
 ```
