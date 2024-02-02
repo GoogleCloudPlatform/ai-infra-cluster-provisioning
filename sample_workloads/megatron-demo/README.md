@@ -10,9 +10,10 @@ This document demonstrates running [NeMo Megatron](https://github.com/NVIDIA/NeM
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 - [Envsubst](https://manpages.ubuntu.com/manpages/trusty/man1/envsubst.1.html)
 
-In addition to the above tools, you will need quota for: 
-- NVIDIA H100 GPUs
-- Cloud FileStore Enterprise (optional)
+In addition to the above tools, you will need: 
+- Quota for NVIDIA H100 GPUs
+- Quota Cloud FileStore Enterprise (this is optional)
+- Access to [NVIDIA NGC Big NLP Training](https://registry.ngc.nvidia.com/orgs/ea-bignlp/containers/bignlp-training) Docker images
 
 ## Infrastructure Setup
 
@@ -60,7 +61,7 @@ This step may take 15 or more minutes. You can check the progress of the cluster
 
 ### Augment your cluster with a pool of E2 VMs
 
-Add a node pool with the desired count of E2 VMs in your GKE cluster in order to host system services (e.g. DNS pods, custom controllers). *The Terraform module will integate this in the near future.*
+Add a node pool with the desired count of E2 VMs in your GKE cluster in order to host system services (e.g. DNS pods, custom controllers). *The Terraform module will integate this in the future.*
 ```
 bash scripts/create-e2-node-pool.sh 
 ```
@@ -78,7 +79,7 @@ Adjust GKE networking to place the VPCs in device mode.
 ```
 cat manifests/enable-network-pass-through.yaml | envsubst | kubectl apply -f -
 ```
-This bypasses some GKE networking layers and is needed to run workloads with `hostNetwork: false` (the default).
+This bypasses some GKE networking layers and is needed to run workloads with `hostNetwork: false` (the default). *The Terraform module will integate this in the future.*
 
 ### Optional: Install Kueue as a batching and administrative system
 
@@ -107,14 +108,14 @@ Then provision and attach a shared Filestore volume of the desired size to your 
 ```
 cat manifests/sharedfs-via-filestore.yaml| envsubst | kubectl apply -f -
 ```
-This step may take 15 or more minutes. You can check the progress of the cluster provisioning by visiting [Cloud Console](https://console.cloud.google.com/filestore/instances). To learn more about the performance about Filestore, see https://cloud.google.com/filestore/docs/service-tiers.
+This step may take 15 or more minutes. You can check the progress of the cluster provisioning by visiting [Cloud Console](https://console.cloud.google.com/filestore/instances). To learn more about the performance about Filestore, see https://cloud.google.com/filestore/docs/service-tiers. *The Terraform module may integate this in the future.*
 
 
 ## Workload Setup and Launch
 
 ### Optional: Place your custom training data in a GCS bucket
 
-For the purposes of demonstration, we host a pre-tokenized version of the Wikipedia data in a public bucket at `gs://nemo-megatron-demo/training-data/processed/gpt/wikitext`. This dataset was created by following the section [Collecting Wikipedia Training Data](https://github.com/NVIDIA/Megatron-LM/tree/main?tab=readme-ov-file#collecting-wikipedia-training-data) in the [Megatron-LM](https://github.com/NVIDIA/Megatron-LM?tab=readme-ov-file#data-preprocessing) repository. It is recommended you use this data source on your first workload launch.
+For the purposes of demonstration, we host a pre-tokenized version of the Wikipedia data in a public bucket at `gs://nemo-megatron-demo/training-data/processed/gpt/wikitext`. This dataset was created by following [Collecting Wikipedia Training Data](https://github.com/NVIDIA/Megatron-LM/tree/main?tab=readme-ov-file#collecting-wikipedia-training-data). It is recommended you use this data source on your first workload launch.
 
 If you choose, you can upload your own training data. In our demonstration we invoke NeMo Megatron pre-training for the standard GPT model. Therefore it is expected the dataset is already tokenized and compatible format followed by [Megatron-LM](https://github.com/NVIDIA/Megatron-LM?tab=readme-ov-file#data-preprocessing) for tokenizer type `GPT2BPETokenizer`. 
 
@@ -130,16 +131,61 @@ gcloud storage cp my-training-data.{idx,bin} gs://my-training-bucket
 
 Note that in this demonstration the training data cannot exceed the size of the local SSD (i.e. 6 TiB). This limitation is only due to our setup caching the training data to the local SSD on launch. For larger sizes the shared file-system or [GCF fuse](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/cloud-storage-fuse-csi-driver) can be used.
 
-### Launch the NeMo Megatron GPT-5B example
+### Upload NeMo Megatron Docker image to Artifact registry
 
-The file `selected-configuration.yaml` is a [NeMo Megatron](https://github.com/NVIDIA/NeMo) compatible configuration file. It is by initially soft-linked to `nemo-configurations/gpt-5b.yaml`. On a first attempt we recommend leaving this as-is. On later launches, you may review and edit the configuration. See [NeMo Megatron Launcher](https://github.com/NVIDIA/NeMo-Megatron-Launcher/tree/master/launcher_scripts/conf/training) for examples of configurations of alternate models and model sizes.
+For this step you need access to the [NVIDIA Big NLP training](https://registry.ngc.nvidia.com/orgs/ea-bignlp/containers/bignlp-training) Docker images. In particular `nvcr.io/ea-bignlp/nemofw-training:23.05-py3`. Obtain access to these Docker images by registering with NVIDIA. In the future the source of this image may change.
 
-Consider how many nodes you expect to launch NeMo Megatron GPT across. On a first launch, we suggest running the GPT-5B model across 2 nodes. Then launch the NeMo Megatron GPT workload using helm.
+Create an artifact registry that can host the Docker image.
+```
+bash scripts/create-artifact-registry.sh 
+```
+
+Fetch the credentials for your registry
+```
+docker-credential-gcr configure-docker --registries=$REGION
+```
+
+Now build the Dockerfile.
+```
+docker build \
+  -f nemo-example/docker/nemo_example.Dockerfile
+  -t $REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3
+  nemo-example/docker
+```
+Note that the Dockerfile is essentially just `nvcr.io/ea-bignlp/nemofw-training:23.05-py3`.
+
+Push the Docker image to the artifact registry.
+```
+docker push $REGION-docker.pkg.dev/$PROJECT/$PREFIX
+```
+
+You will not need to modify this Docker image.
+
+### Setup the training and model configuration
+
+The file `nemo-example/selected-configuration.yaml` is a [NeMo Megatron](https://github.com/NVIDIA/NeMo) compatible configuration file. It is by initially soft-linked as follows:
+```
+selected-configuration.yaml --> nemo-configurations/gpt-5b.yaml
+```
+On a first attempt we recommend leaving as-is. On later launches, you may review and edit the configuration. See [NeMo Megatron Launcher](https://github.com/NVIDIA/NeMo-Megatron-Launcher/tree/master/launcher_scripts/conf/training) for examples of configurations of alternate models and model sizes.
+
+Before launching the model training, we need review `nemo-example/values.yaml`:
+```
+workload:
+  nodes: 2                
+  image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3"                                         
+  torchRunTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"                               
+  trainingDataSource: "gs://megatron-data-us/training-data/wikitext"
+```
+
+### Launch NeMo Megatron training
+
+Launch the GPT model training across the desired node scale.
 ```
 helm install --set workload.nodes=2 $USER-nemo-$(date +%s) nemo-example/ 
 ```
 
-Verify the launch succeeded by seeing the corresponding pods in `Running` state.
+Verify the launch succeeded by seeing the corresponding pods in `Running` state. This may take a few minutes the first time it is executed.
 ```
 $ kubectl get pods
 ```
