@@ -1,9 +1,10 @@
 workload:
   nodes: 1
-  image: "nvcr.io/nvidia/jax:23.10-paxml-py3"
-  config: "GPT126M"
+  image: "us-central1-docker.pkg.dev/supercomputer-testing/tejasnama-gcr/paxml-full"
+  config: "Pile126M"
   outputDir: "output_synthetic_126m"
   baseWorkspaceDir: "output_base_dir"
+  tokenizerPath: "/usr/local/google/home/tejasnama/scratch/ai-infra-cluster-provisioning/sample_workloads/jax_rosetta/c4_sentencepiece/c4_en_301_5Mexp2_spm.model"
 
 tcpx:
   enabled: "true"
