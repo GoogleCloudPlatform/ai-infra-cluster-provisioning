@@ -21,7 +21,7 @@ trainer:
 
 exp_manager:
   explicit_log_dir: null
-  exp_dir: /cfs/nemo-experiments/
+  exp_dir: /ssd/nemo-experiments/
   name: megatron_gpt
   create_wandb_logger: false
   wandb_logger_kwargs:

@@ -203,7 +203,3 @@ Find the corresponding URL endpoint for Tensorboard
 kubectl describe configmap inverse-proxy-config
 ```
 If successful, the URL corresponds to the `Hostname` field.
-
-Internal Notes:
-1. The tensorboard and inverse proxy to move onto the job itself.
-2. The inverse proxy doesn't work with non-default service account specified by AI provision tool.

@@ -18,21 +18,21 @@ spec:
           claimName: cluster-sharedfs
       containers:
       - name: tensorboard
-        image: us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/tensorboard:latest
+        image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/tensorboard:latest"
         command: 
         - bash
         - -c
         - |
           apt install net-tools
           IP=$(ifconfig | grep -Eo "inet (addr:)?([0-9]*\.){3}[0-9]*" | grep -Eo "([0-9]*\.){3}[0-9]*" | grep -v "127.0.0.1")
-          tensorboard --logdir /cfs/nemo-experiments --host $IP
+          tensorboard --logdir /nfs/nemo-experiments --host $IP
 
         ports:
         - name: web
           containerPort: 6006
         volumeMounts:
         - name: cluster-file-store
-          mountPath: /cfs 
+          mountPath: /nfs 
 ---
 apiVersion: v1
 kind: Service
@@ -49,12 +49,13 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: inverse-proxy
+  name: inverse-proxy-to-tensorboard
 spec:
   serviceAccountName: default
   containers:
-  - name: inverse-proxy
-    image: us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/inverse-proxy-tensorboard:latest
+  - name: inverse-proxy-to-tensorboard
+    image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/inverse-proxy"
+    args: ["tensorboard", "6006"]
     ports:
     - containerPort: 80
 ---
