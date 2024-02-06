@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "nemo-job-{{$jobid}}" 
+  name: "{{ .Release.Name }}" 
 data:
   nemo-configuration.yaml: |-
 {{ .Files.Get "selected-configuration.yaml" | nindent 4 }}
@@ -11,17 +11,17 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: "nemo-job-{{$jobid}}"
+  name: "{{ .Release.Name }}"
 spec:
   clusterIP: None
   selector:
-    job-name: "nemo-job-{{$jobid}}"
+    job-name: "{{ .Release.Name }}"
 ---
 {{- $root := . -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "nemo-job-{{$jobid}}"
+  name: "{{ .Release.Name }}"
   namespace: default
   labels:
   {{- if $root.Values.queue }}
@@ -41,7 +41,7 @@ spec:
    spec:
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
-    subdomain: "nemo-job-{{$jobid}}"
+    subdomain: "{{.Release.Name}}"
     restartPolicy: Never
     tolerations:
     - operator: "Exists"
@@ -74,7 +74,7 @@ spec:
         sizeLimit: 200Gi 
     - name: workload-configuration
       configMap:
-        name: "nemo-job-{{$jobid}}"
+        name: "{{.Release.Name}}"
     initContainers:
     - name: training-data-downloader
       image: gcr.io/google.com/cloudsdktool/google-cloud-cli
@@ -106,10 +106,10 @@ spec:
           duration=$SECONDS
           echo "Training data downloaded to local SSD in $duration seconds."
       
-    {{- if $root.Values.tcpx.enabled }}
+    {{- if $root.Values.networking.enableTcpx }}
 
     - name: tcpx-nccl-plugin-installer
-      image: "{{$root.Values.tcpx.repository}}/{{$root.Values.tcpx.pluginVersion}}"
+      image: "{{$root.Values.networking.tcpxRepository}}/{{$root.Values.networking.tcpxPluginVersion}}"
       imagePullPolicy: Always
       volumeMounts:
       - name: tcpx-nccl-plugin-volume
@@ -123,9 +123,9 @@ spec:
     {{- end }}  
 
     containers:
-    {{- if $root.Values.tcpx.enabled }}
+    {{- if $root.Values.networking.enableTcpx }}
     - name: tcpd-daemon
-      image: "{{$root.Values.tcpx.repository}}/{{$root.Values.tcpx.daemonVersion}}"
+      image: "{{$root.Values.networking.tcpxRepository}}/{{$root.Values.networking.tcpxDaemonVersion}}"
       imagePullPolicy: Always
       command:
       - "bash"
@@ -153,13 +153,13 @@ spec:
       imagePullPolicy: Always
       env:
       - name: MASTER_ADDR
-        value: "nemo-job-{{$jobid}}-0.nemo-job-{{$jobidentifier}}.default.svc.cluster.local"
+        value: "{{.Release.Name}}-0.{{.Release.Name}}.default.svc.cluster.local"
       - name: NNODES
         value: "{{ $root.Values.workload.nodes }}"
       - name: TORCH_RUN_TARGET
         value: "{{ $root.Values.workload.torchRunTarget }}"
       - name: JOB_IDENTIFER
-        value: "nemo-job-{{$jobid}}"
+        value: "{{$jobid}}"
 
       # Mount paths for volumes:
       - name: NFS_MOUNT_PATH
@@ -191,12 +191,12 @@ spec:
       - name: NCCL_P2P_PXN_LEVEL
         value: "0"
  
-      {{- range $environment_variable := $root.Values.tcpx.ncclSettings }}
+      {{- range $environment_variable := $root.Values.networking.ncclSettings }}
       - name: {{ $environment_variable.name }}
         value: "{{ $environment_variable.value }}"
       {{- end }}
     
-      {{- if eq $root.Values.tcpx.enabled }}
+      {{- if $root.Values.networking.enableTcpx }}
 
       # The following TCPx settings should likely not be adjusted:
       - name: NCCL_GPUDIRECTTCPX_CTRL_DEV
@@ -214,7 +214,7 @@ spec:
       - name: NCCL_GPUDIRECTTCPX_TX_COMPLETION_NANOSLEEP
         value: "1000"     
     
-      {{- range $environment_variable := $root.Values.tcpx.tcpxSettings }}
+      {{- range $environment_variable := $root.Values.networking.tcpxSettings }}
       - name: {{ $environment_variable.name }}
         value: "{{ $environment_variable.value }}"
       {{- end }}
@@ -231,6 +231,7 @@ spec:
         trap on_script_completion EXIT
         echo "Pod on $(hostname --fqdn) is running"
         echo "Pod is assigned job index of $JOB_COMPLETION_INDEX"
+        echo "Job ID is $JOB_IDENTIFIER"
 
         export LD_LIBRARY_PATH="/usr/local/tcpx/lib64:${LD_LIBRARY_PATH}"
         echo "Warning: Set LD_LIBRARY_PATH=$LD_LIBRARY_PATH to override the NCCL library"

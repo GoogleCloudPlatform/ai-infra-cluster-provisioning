@@ -115,7 +115,7 @@ This step may take 15 or more minutes. You can check the progress of the cluster
 
 ### Optional: Place your custom training data in a GCS bucket
 
-For the purposes of demonstration, we host a pre-tokenized version of the Wikipedia data in a public bucket at `gs://nemo-megatron-demo/training-data/processed/gpt/wikitext`. This dataset was created by following [Collecting Wikipedia Training Data](https://github.com/NVIDIA/Megatron-LM/tree/main?tab=readme-ov-file#collecting-wikipedia-training-data). It is recommended you use this data source on your first workload launch.
+For the purposes of demonstration, we host a pre-tokenized version of the Wikipedia data in a public bucket at `gs://nemo-megatron-demo/training-data/processed/gpt/wikitext`. This dataset was created by following [Collecting Wikipedia Training Data](https://github.com/NVIDIA/Megatron-LM/tree/main?tab=readme-ov-file#collecting-wikipedia-training-data). It is recommended you use this data source on your first workload launch. Alternative, larger, 
 
 If you choose, you can upload your own training data. In our demonstration we invoke NeMo Megatron pre-training for the standard GPT model. Therefore it is expected the dataset is already tokenized and compatible format followed by [Megatron-LM](https://github.com/NVIDIA/Megatron-LM?tab=readme-ov-file#data-preprocessing) for tokenizer type `GPT2BPETokenizer`. 
 
@@ -182,7 +182,7 @@ workload:
 
 Launch the GPT model training across the desired node scale.
 ```
-helm install --set workload.nodes=2 $USER-nemo-$(date +%s) nemo-example/ 
+cat nemo-example/value.yaml | envsubst | helm install --set workload.nodes=2 $USER-nemo-$(date +%s) -f - nemo-example/ 
 ```
 
 Verify the launch succeeded by seeing the corresponding pods in `Running` state. This may take a few minutes the first time it is executed.

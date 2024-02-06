@@ -2,17 +2,16 @@ queue: null # optional (must have installed Kueue and pre-provisioned 'a3-queue'
 
 workload:
   nodes: 2
-  image: "us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/nemo-kueue-example:latest"
+  image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3"
   torchRunTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
-  trainingDataSource: "gs://megatron-data-us/training-data/wikitext"
+  trainingDataSource: "gs://megatron-data-us/training-data/wikitext" # this folder is cached to local SSD on workload start
 
 volumes:
   nfsMountPath: null # optional (must have pre-provisioned a FileStore and bound it to 'cluster-sharedfs' persistent volume claim, see previous guide steps)
-  gcsMountPath: null # optional (must have pre-provisioned GCS fuse, see previous guide steps)
   ssdMountPath: /ssd
 
 networking:
-  enableTcpx: "true"
+  enableTcpx: "true" # required for optimal performance
   tcpxRepository: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx"
   tcpxDaemonVersion: "tcpgpudmarxd-dev:v2.0.9"
   tcpxPluginVersion: "nccl-plugin-gpudirecttcpx-dev:v3.1.6_2023_10_06"
