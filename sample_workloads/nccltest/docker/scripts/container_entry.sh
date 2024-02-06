@@ -70,6 +70,7 @@ else
   rm -r /var/lib/tcpx/lib64/
   rm -r /var/lib/nvidia/lib64/
   unset LD_LIBRARY_PATH
+fi
 
 # Start SSH service on hosts and send address of self to master node.
 mkdir -p /run/mpi_bootstrap
