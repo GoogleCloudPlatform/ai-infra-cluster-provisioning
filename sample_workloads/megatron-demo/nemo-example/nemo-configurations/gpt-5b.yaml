@@ -167,5 +167,5 @@ model:
     index_mapping_dir: null  # path to save index mapping .npy files, by default will save in the same location as data_prefix
     data_prefix:  # Should be weight path weight path... for a blended dataset
     - 1.0
-    - /lssd/training-data/wikitext-tokenized-for-gpt2_text_document
+    - /ssd/training-data/wikitext-tokenized-for-gpt2_text_document
 

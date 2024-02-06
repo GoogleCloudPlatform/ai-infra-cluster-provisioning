@@ -18,7 +18,7 @@ In addition to the above tools, you will need:
 ## Infrastructure Setup
 
 ### Select project, zone, and resource prefix
-Adjust the values in `set-enviroment.sh` to suit your case:
+Adjust the values in `set-enviroment.sh` to suit your case.
 ```
 export TF_VAR_PROJECT=<your-project-name>
 export TF_VAR_PREFIX=nemo-megatron-demo

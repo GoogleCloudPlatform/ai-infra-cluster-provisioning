@@ -1,9 +1,9 @@
 {{ $timestamp := now | date "2006-01-02-150405" }}
-{{ $jobidentifier := randAlphaNum 8 | lower }}
+{{ $jobid := randAlphaNum 8 | lower }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "nemo-job-{{$jobidentifier}}" 
+  name: "nemo-job-{{$jobid}}" 
 data:
   nemo-configuration.yaml: |-
 {{ .Files.Get "selected-configuration.yaml" | nindent 4 }}
@@ -11,22 +11,26 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: "nemo-job-{{$jobidentifier}}"
+  name: "nemo-job-{{$jobid}}"
 spec:
   clusterIP: None
   selector:
-    job-name: "nemo-job-{{$jobidentifier}}"
+    job-name: "nemo-job-{{$jobid}}"
 ---
 {{- $root := . -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "nemo-job-{{$jobidentifier}}"
+  name: "nemo-job-{{$jobid}}"
   namespace: default
   labels:
-    kueue.x-k8s.io/queue-name: a3-queue 
+  {{- if $root.Values.queue }}
+    kueue.x-k8s.io/queue-name: "$root.Values.queue"
+  {{- end }}
 spec:
+  {{- if $root.Values.queue }}
   suspend: true
+  {{- end }}
   parallelism: {{ $root.Values.workload.nodes }}
   completions: {{ $root.Values.workload.nodes }}
   completionMode: Indexed
@@ -37,8 +41,11 @@ spec:
    spec:
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
-    subdomain: "nemo-job-{{$jobidentifier}}"
+    subdomain: "nemo-job-{{$jobid}}"
     restartPolicy: Never
+    tolerations:
+    - operator: "Exists"
+      key: nvidia.com/gpu
     volumes:
     - name: nvidia-install-dir-host
       hostPath:
@@ -56,42 +63,50 @@ spec:
     - name: local-ssd
       hostPath:
         path: /mnt/stateful_partition/kube-ephemeral-ssd   
+    {{- if $root.Values.volumes.nfsMountPath }}
     - name: cluster-file-store
       persistentVolumeClaim:
         claimName: cluster-sharedfs
+    {{- end }}
     - name: shared-memory
       emptyDir:
         medium: "Memory"
-        sizeLimit: 200Gi          
+        sizeLimit: 200Gi 
     - name: workload-configuration
       configMap:
-        name: "nemo-job-{{$jobidentifier}}"
+        name: "nemo-job-{{$jobid}}"
     initContainers:
     - name: training-data-downloader
       image: gcr.io/google.com/cloudsdktool/google-cloud-cli
       volumeMounts:
       - name: local-ssd
-        mountPath: /lssd
+        mountPath: "{{ $root.Values.volumes.ssdMountPath }}"
+      {{- if $root.Values.volumes.nfsMountPath }}
       - name: cluster-file-store
-        mountPath: /cfs
+        mountPath: "{{ $root.Values.volumes.nfsMountPath }}"
+      {{- end }}
       env:
       - name: TRAINING_DATA_SOURCE
-        value: "{{ $root.Values.workload.trainingDataSource }}"          
+        value: "{{ $root.Values.workload.trainingDataSource }}"
+      - name: NFS_MOUNT_PATH
+        value: "{{ $root.Values.volumes.nfsMountPath }}"
+      - name: SSD_MOUNT_PATH
+        value: "{{ $root.Values.volumes.ssdMountPath }}" 
       command:
         - /bin/sh
         - -c
         - |
-          echo "Caching training data from $TRAINING_DATA_SOURCE to /lssd/training-data"
-          mkdir -p /lssd/training-data
+          echo "Caching training data from $TRAINING_DATA_SOURCE to $SSD_MOUNT_PATH/training-data"
+          mkdir -p /ssd/training-data
 
           SECONDS=0
           gcloud storage rsync \
             --recursive \
-            $TRAINING_DATA_SOURCE /lssd/training-data
+            $TRAINING_DATA_SOURCE $SSD_MOUNT_PATH/training-data
           duration=$SECONDS
           echo "Training data downloaded to local SSD in $duration seconds."
       
-    {{ if eq $root.Values.tcpx.enabled "true" }}
+    {{- if $root.Values.tcpx.enabled }}
 
     - name: tcpx-nccl-plugin-installer
       image: "{{$root.Values.tcpx.repository}}/{{$root.Values.tcpx.pluginVersion}}"
@@ -105,10 +120,10 @@ spec:
         - |
           /scripts/container_entry.sh install --install-nccl
 
-    {{ end }}  
+    {{- end }}  
 
     containers:
-    {{ if eq $root.Values.tcpx.enabled "true" }}
+    {{- if $root.Values.tcpx.enabled }}
     - name: tcpd-daemon
       image: "{{$root.Values.tcpx.repository}}/{{$root.Values.tcpx.daemonVersion}}"
       imagePullPolicy: Always
@@ -132,20 +147,26 @@ spec:
       env:
       - name: LD_LIBRARY_PATH
         value: /usr/local/nvidia/lib64
-    {{ end }} 
+    {{- end }} 
     - name: nemo
       image: "{{ $root.Values.workload.image }}"
       imagePullPolicy: Always
       env:
       - name: MASTER_ADDR
-        value: "nemo-job-{{$jobidentifier}}-0.nemo-job-{{$jobidentifier}}.default.svc.cluster.local"
+        value: "nemo-job-{{$jobid}}-0.nemo-job-{{$jobidentifier}}.default.svc.cluster.local"
       - name: NNODES
         value: "{{ $root.Values.workload.nodes }}"
       - name: TORCH_RUN_TARGET
         value: "{{ $root.Values.workload.torchRunTarget }}"
       - name: JOB_IDENTIFER
-        value: "nemo-job-{{$jobidentifier}}"
+        value: "nemo-job-{{$jobid}}"
 
+      # Mount paths for volumes:
+      - name: NFS_MOUNT_PATH
+        value: "{{ $root.Values.volumes.nfsMountPath }}"
+      - name: SSD_MOUNT_PATH
+        value: "{{ $root.Values.volumes.ssdMountPath }}"      
+         
        # The following NCCL settings should likely not be adjusted:
       - name: NCCL_SOCKET_IFNAME
         value: "eth0"
@@ -175,7 +196,7 @@ spec:
         value: "{{ $environment_variable.value }}"
       {{- end }}
     
-      {{ if eq $root.Values.tcpx.enabled "true" }}
+      {{- if eq $root.Values.tcpx.enabled }}
 
       # The following TCPx settings should likely not be adjusted:
       - name: NCCL_GPUDIRECTTCPX_CTRL_DEV
@@ -198,7 +219,7 @@ spec:
         value: "{{ $environment_variable.value }}"
       {{- end }}
     
-      {{ end }} 
+      {{- end }} 
       command:
       - bash
       - -c
@@ -214,11 +235,15 @@ spec:
         export LD_LIBRARY_PATH="/usr/local/tcpx/lib64:${LD_LIBRARY_PATH}"
         echo "Warning: Set LD_LIBRARY_PATH=$LD_LIBRARY_PATH to override the NCCL library"
 
-        touch /lssd/hello-from-$HOSTNAME.txt
-        echo "Local SSD contents (path /lssd):"; ls /lssd | sed 's/^/  /'
+        touch $SSD_MOUNT_PATH/hello-from-$HOSTNAME.txt
+        echo "Local SSD contents (path $SSD_MOUNT_PATH):"; ls $SSD_MOUNT_PATH | sed 's/^/  /'
 
-        touch /cfs/hello-from-$HOSTNAME.txt
-        echo "Cluster NFS contents (path /cfs):"; ls /cfs | sed 's/^/  /'
+        if [ -d "$NFS_MOUNT_PATH" ]; then
+          echo "Detected $NFS_MOUNT_PATH exists and assuming an NFS mount is bound there"        
+
+          touch $NFS_MOUNT_PATH/hello-from-$HOSTNAME.txt
+          echo "NFS contents (path $NFS_MOUNT_PATH):"; ls $NFS_MOUNT_PATH | sed 's/^/  /'
+        fi
 
         echo "NeMo configuration file:"
         cat /etc/workload-configuration/nemo-configuration.yaml | sed 's/^/| /'
@@ -254,11 +279,13 @@ spec:
         - name: workload-configuration
           mountPath: /etc/workload-configuration  
         - name: shared-memory
-          mountPath: /dev/shm            
+          mountPath: /dev/shm 
         - name: local-ssd
-          mountPath: /lssd
+          mountPath: "$root.Values.volumes.ssdMountPath"
+      {{- if $root.Values.volumes.nfsMountPath }}
         - name: cluster-file-store
-          mountPath: /cfs
+          mountPath: "$root.Values.volumes.nfsMountPath"
+      {{- end }}
       resources:
         limits:
           nvidia.com/gpu: 8
