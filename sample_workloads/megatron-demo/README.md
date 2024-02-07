@@ -169,14 +169,22 @@ selected-configuration.yaml --> nemo-configurations/gpt-5b.yaml
 ```
 On a first attempt we recommend leaving as-is. On later launches, you may review and edit the configuration. See [NeMo Megatron Launcher](https://github.com/NVIDIA/NeMo-Megatron-Launcher/tree/master/launcher_scripts/conf/training) for examples of configurations of alternate models and model sizes.
 
-Before launching the model training, we need review `nemo-example/values.yaml`:
+Before launching the model training, we need to review `nemo-example/values.yaml`:
 ```
+queue: null
+
 workload:
-  nodes: 2                
-  image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3"                                         
-  torchRunTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"                               
-  trainingDataSource: "gs://megatron-data-us/training-data/wikitext"
+  nodes: 2
+  image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3"
+  torchRunTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
+  trainingDataSource: "gs://megatron-data-us/training-data/wikitext" # this folder is cached to local SSD on workload start
+
+volumes:
+  nfsMountPath: null
+  ssdMountPath: /ssd
 ```
+
+If you followed the step to provision and attach a Filestore, then replace `nfsMountPath: null` with `nfsMountPath: /nfs`. You will also want to adjust the output directory.
 
 ### Launch NeMo Megatron training
 
@@ -193,7 +201,29 @@ $ kubectl get pods
 ### Watch the training step time and loss curves
 
 
-Install Tensorboard and the inverse proxy
+
+## Create a Tensorboard endpoint bound to the cluster to ease access
+
+In this section we demonstrate how to deploy a Tensorboard endpoint that can be accessed by a browser on any host that is logged into, and has the relevant permissions, for the associated project. For this step you will need to have deployed a shared file-system (as described in the optional steps above).
+
+As there is no official Tensorboard image, you'll need to build one from the GitHub repository. Run the following from the `tensorboard-endpoint` directory.
+```
+bash tensorboard/build-and-push-tensorboard.sh
+```
+
+In addition to Tensorboard, you'll need to deploy a proxy agent that can relay the URL to the Tensorboard endpoint. Run the following from the `tensorboard-endpoint` directory:
+```
+bash inverse-proxy/build-and-push-inverse-proxy.sh
+```
+
+In `tensorboard-endpoint.yaml`, confirm the Tensorboard endpoint points to the shared file-system deployed in the cluster. Your workload needs to emit its Tensorboard logs to this shared file-system directory.
+```
+...
+          tensorboard --logdir /nfs/nemo-experiments --host $IP
+...
+```
+
+Deploy the Tensorboard and inverse-proxy to your GKE cluster.
 ```
 kubectl apply -f tensorboard.yaml
 ```
@@ -202,4 +232,5 @@ Find the corresponding URL endpoint for Tensorboard
 ```
 kubectl describe configmap inverse-proxy-config
 ```
-If successful, the URL corresponds to the `Hostname` field.
+
+If successful, the URL corresponds to the `Hostname` field. You can visit this URL in your browser and should see the Tensorboard page.
