@@ -177,7 +177,8 @@ workload:
   nodes: 2
   image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3"
   torchRunTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
-  trainingDataSource: "gs://megatron-data-us/training-data/wikitext" # this folder is cached to local SSD on workload start
+  trainingDataSource: "gs://megatron-data-us/training-data/wikitext" 
+  # ^^^ on workload launch, the GCS bucket folder will be cached into the local SSD mount path
 
 volumes:
   nfsMountPath: null
