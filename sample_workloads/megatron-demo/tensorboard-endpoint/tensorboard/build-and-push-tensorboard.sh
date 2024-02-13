@@ -2,9 +2,12 @@
 
 pushd .
 mkdir workspace && cd workspace
-git clone https://github.com/tensorflow/tensorboard.git && cd tensorboard
-docker build -t $REGION-docker.pkg.dev/$PROJECT/$PREFIX:tensorboard .
-cd .. && rm -fr tensorboard
+git clone https://github.com/tensorflow/tensorboard.git
+docker build \
+  -f tensorboard/Dockerfile
+  -t $REGION-docker.pkg.dev/$PROJECT/$PREFIX/tensorboard 
+  tensorboard/
+cd .. && rm -fr workspace
 popd
 
-docker push $REGION-docker.pkg.dev/$PROJECT/$PREFIX:tensorboard
+docker push $REGION-docker.pkg.dev/$PROJECT/$PREFIX/tensorboard

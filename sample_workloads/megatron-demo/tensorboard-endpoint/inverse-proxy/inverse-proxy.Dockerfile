@@ -13,20 +13,18 @@
 # limitations under the License.
 
 # Pin to a specific version of invert proxy agent
-# FROM gcr.io/inverting-proxy/agent@sha256:762c500f748e00753e6b1af0a273e0097130344a793258108b3886789e2fe744
-FROM gcr.io/inverting-proxy/agent@sha256:3e87056c44cefb7b490616bc42f1989e1e7465679494b2cb1bad7ceeb2b58f09
+FROM gcr.io/inverting-proxy/agent@sha256:762c500f748e00753e6b1af0a273e0097130344a793258108b3886789e2fe744
 
 # We need --allow-releaseinfo-change, because of https://github.com/kubeflow/pipelines/issues/6311#issuecomment-899224137.
-RUN apt update --allow-releaseinfo-change && apt-get install -y curl jq python3-pip python3-venv
-COPY requirements.txt .
+RUN apt update --allow-releaseinfo-change && apt-get install -y curl jq python-pip python3
 
-RUN python3 -m venv .venv &&\
-    . .venv/bin/activate &&\
-    python3 -m pip install -r requirements.txt &&\
-    rm -f requirements.txt
+COPY requirements.txt .
+RUN python2 -m pip install -r \
+    requirements.txt --quiet --no-cache-dir \
+    && rm -f requirements.txt
 
 # Install gcloud SDK
-RUN curl https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > /tmp/google-cloud-sdk.tar.gz
+RUN curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-447.0.0-linux-x86_64.tar.gz > /tmp/google-cloud-sdk.tar.gz
 RUN mkdir -p /usr/local/gcloud
 RUN tar -C /usr/local/gcloud -xf /tmp/google-cloud-sdk.tar.gz
 RUN /usr/local/gcloud/google-cloud-sdk/install.sh

@@ -1,14 +1,25 @@
 queue: null # optional (must have installed Kueue and pre-provisioned 'a3-queue' queue, see previous guide steps)
 
-workload:
-  nodes: 2
-  image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3"
-  torchRunTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
-  trainingDataSource: "gs://megatron-data-us/training-data/wikitext" # this folder is cached to local SSD on workload start
-
 volumes:
   nfsMountPath: null # optional (must have pre-provisioned a FileStore and bound it to 'cluster-sharedfs' persistent volume claim, see previous guide steps)
-  ssdMountPath: /ssd
+  ssdMountPath: "/ssd"
+  gcsDownload:  # downloads or synchronizes from GCS bucket folder on initialization
+    source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia" 
+    target: "/ssd/.cache/"
+
+workload:
+  image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/nemofw-training:23.05-py3"
+  torchDistributedTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
+
+  gpus: 16 # This should be one of: {<= 8,  multiple of 8}
+  arguments:
+  - name: "exp_manager.exp_dir"
+    value: "/tmp/nemo-experiments/"
+  - name: "data.data_prefix"
+    value: "[1.0,/ssd/.cache/wikipedia/wikipedia-tokenized-for-gpt2]"
+    # The following will always be overridden:
+    # trainer.num_nodes = < matches the requested GPUs specified > 
+    # exp_manager.version = < a random, unique identifier for each job >
 
 networking:
   enableTcpx: "true" # required for optimal performance

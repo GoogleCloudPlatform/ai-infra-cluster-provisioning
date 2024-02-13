@@ -1,5 +1,8 @@
 {{ $timestamp := now | date "2006-01-02-150405" }}
 {{ $jobid := randAlphaNum 8 | lower }}
+{{ $nodes := div .Values.workload.gpus 8 | max 1 }}
+{{ $gpusPerNode := min .Values.workload.gpus 8 }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -31,8 +34,8 @@ spec:
   {{- if $root.Values.queue }}
   suspend: true
   {{- end }}
-  parallelism: {{ $root.Values.workload.nodes }}
-  completions: {{ $root.Values.workload.nodes }}
+  parallelism: {{ $nodes }}
+  completions: {{ $nodes }}
   completionMode: Indexed
   template:
    metadata:
@@ -46,6 +49,8 @@ spec:
     tolerations:
     - operator: "Exists"
       key: nvidia.com/gpu
+    - operator: "Exists"
+      key: cloud.google.com/impending-node-termination 
     volumes:
     - name: nvidia-install-dir-host
       hostPath:
@@ -86,8 +91,10 @@ spec:
         mountPath: "{{ $root.Values.volumes.nfsMountPath }}"
       {{- end }}
       env:
-      - name: TRAINING_DATA_SOURCE
-        value: "{{ $root.Values.workload.trainingDataSource }}"
+      - name: GCS_DATA_SOURCE
+        value: "{{ $root.Values.volumes.gcsDownload.source }}"
+      - name: GCS_DATA_TARGET
+        value: "{{ $root.Values.volumes.gcsDownload.target }}"
       - name: NFS_MOUNT_PATH
         value: "{{ $root.Values.volumes.nfsMountPath }}"
       - name: SSD_MOUNT_PATH
@@ -96,15 +103,15 @@ spec:
         - /bin/sh
         - -c
         - |
-          echo "Caching training data from $TRAINING_DATA_SOURCE to $SSD_MOUNT_PATH/training-data"
-          mkdir -p /ssd/training-data
+          echo "Caching training data from $GCS_DATA_SOURCE to $GCS_DATA_TARGET"
+          mkdir -p $SSD_MOUNT_PATH/.cache
 
           SECONDS=0
           gcloud storage rsync \
             --recursive \
-            $TRAINING_DATA_SOURCE $SSD_MOUNT_PATH/training-data
+            $GCS_DATA_SOURCE $GCS_DATA_TARGET
           duration=$SECONDS
-          echo "Training data downloaded to local SSD in $duration seconds."
+          echo "Transferred or synchronized $GCS_DATA_SOURCE to $GCS_DATA_TARGET in $duration seconds."
       
     {{- if $root.Values.networking.enableTcpx }}
 
@@ -154,12 +161,25 @@ spec:
       env:
       - name: MASTER_ADDR
         value: "{{.Release.Name}}-0.{{.Release.Name}}.default.svc.cluster.local"
+      - name: MASTER_PORT
+        value: "6002"
+      - name: WORLD_SIZE
+        value: "{{ $root.Values.workload.gpus }}"        
       - name: NNODES
-        value: "{{ $root.Values.workload.nodes }}"
-      - name: TORCH_RUN_TARGET
-        value: "{{ $root.Values.workload.torchRunTarget }}"
-      - name: JOB_IDENTIFER
-        value: "{{$jobid}}"
+        value: "{{ $nodes }}"        
+      - name: GPUS_PER_NODE
+        value: "{{ $gpusPerNode }}"        
+      - name: TORCH_DISTRIBUTED_TARGET
+        value: "{{ $root.Values.workload.torchDistributedTarget }}"
+      - name: JOB_IDENTIFIER
+        value: "{{ $jobid }}"
+      - name: GLOO_SOCKET_IFNAME
+        value: "eth0"
+
+      {{- range $environment_variable := $root.Values.workload.arguments }}
+      - name: "WORKLOAD_{{ $environment_variable.name }}"
+        value: "{{ $environment_variable.value }}"
+      {{- end }}        
 
       # Mount paths for volumes:
       - name: NFS_MOUNT_PATH
@@ -219,7 +239,8 @@ spec:
         value: "{{ $environment_variable.value }}"
       {{- end }}
     
-      {{- end }} 
+      {{- end }}
+
       command:
       - bash
       - -c
@@ -248,25 +269,41 @@ spec:
 
         echo "NeMo configuration file:"
         cat /etc/workload-configuration/nemo-configuration.yaml | sed 's/^/| /'
+        echo ""
+
+        readarray -d "" workload_arguments < <(env | grep -e "^WORKLOAD_" | sed 's/^WORKLOAD_/++/' | tr '\n' '\0')
+        echo "Detected requested workload arguments:"
+        for workload_argument in "${workload_arguments[@]}"; do
+          echo "  $workload_argument"
+        done
 
         sleep 10 # <- Hack to allow some time for service to boot
 
-        export GPUS_PER_NODE=8
         export NODE_RANK=$JOB_COMPLETION_INDEX
-        export MASTER_PORT=6002
-        export WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
-
+        echo "Launching Torch distributed as node rank $NODE_RANK out of $NNODES nodes"
         for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
           RANK=$((8*$NODE_RANK + $LOCAL_RANK))
 
-          OMP_NUM_THREADS=12 RANK=$RANK LOCAL_RANK=$LOCAL_RANK /usr/bin/python3.8 $TORCH_RUN_TARGET \
+          OMP_NUM_THREADS=12 RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
+          /usr/bin/python3.8 $TORCH_DISTRIBUTED_TARGET \
             --config-path="/etc/workload-configuration" \
             --config-name="nemo-configuration.yaml" \
             +trainer.num_nodes="$NNODES" \
-            +exp_manager.version="$JOB_IDENTIFER" &
+            +exp_manager.version="$JOB_IDENTIFIER" \
+            ${workload_arguments[@]} &
+
+          TORCH_PIDS[$LOCAL_RANK]=$!
         done
 
-        wait
+        if [ "$NODE_RANK" -eq "0" ]; then
+          TENSORBOARD_LOG_PATH="${workload_arguments[exp_manager.exp_dir]}/$JOB_IDENTIFIER"
+          echo "Launching Tensorboard against log directory $TENSORBOARD_LOG_PATH"
+          tensorboard --logdir $TENSORBOARD_LOG_PATH &
+        fi
+
+        for TORCH_PID in ${TORCH_PIDS[*]}; do
+            wait $TORCH_PID
+        done
         echo "Pod on $(hostname --fqdn) is exiting"
       volumeMounts:
         - name: nvidia-install-dir-host
@@ -282,14 +319,14 @@ spec:
         - name: shared-memory
           mountPath: /dev/shm 
         - name: local-ssd
-          mountPath: "$root.Values.volumes.ssdMountPath"
+          mountPath: "{{ $root.Values.volumes.ssdMountPath }}"
       {{- if $root.Values.volumes.nfsMountPath }}
         - name: cluster-file-store
-          mountPath: "$root.Values.volumes.nfsMountPath"
+          mountPath: "{{ $root.Values.volumes.nfsMountPath }}"
       {{- end }}
       resources:
         limits:
-          nvidia.com/gpu: 8
+          nvidia.com/gpu: {{ $gpusPerNode }}
 ---
 
 #        torchrun \

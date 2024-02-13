@@ -19,6 +19,7 @@ spec:
       containers:
       - name: tensorboard
         image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/tensorboard:latest"
+          # image: "us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/tensorboard:latest"
         command: 
         - bash
         - -c
@@ -54,7 +55,9 @@ spec:
   serviceAccountName: default
   containers:
   - name: inverse-proxy-to-tensorboard
-    image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/inverse-proxy"
+    image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/inverse-proxy:latest"
+      # image: "us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/inverse-proxy-tensorboard:latest"
+    command: ["/opt/proxy/attempt-register-vm-on-proxy.sh"]
     args: ["tensorboard", "6006"]
     ports:
     - containerPort: 80

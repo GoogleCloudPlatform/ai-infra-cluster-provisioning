@@ -1,3 +1,3 @@
-gcloud artifacts repositories create $TF_VAR_PREFIX \
+gcloud artifacts repositories create $PREFIX \
     --repository-format=docker \
-    --location=$TF_VAR_REGION
+    --location=$REGION

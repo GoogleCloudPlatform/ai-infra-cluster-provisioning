@@ -22,7 +22,7 @@ trainer:
 
 exp_manager:
   explicit_log_dir: null
-  exp_dir: /gcs/nemo/nemo-experiments
+  exp_dir: /nfs/nemo-experiments
   name: megatron_gpt
   create_wandb_logger: false
   wandb_logger_kwargs:
@@ -146,7 +146,7 @@ model:
 
   optim:
     name: distributed_fused_adam
-    bucket_cap_mb: 100
+    bucket_cap_mb: 200
     overlap_grad_sync: true
     overlap_param_sync: true
     contiguous_grad_buffer: true

@@ -20,17 +20,15 @@ In addition to the above tools, you will need:
 ### Select project, zone, and resource prefix
 Adjust the values in `set-enviroment.sh` to suit your case.
 ```
-export TF_VAR_PROJECT=<your-project-name>
-export TF_VAR_PREFIX=nemo-megatron-demo
-export TF_VAR_REGION=us-central1
-export TF_VAR_ZONE=us-central1-c
-
-export TF_VAR_A3_NODE_COUNT=2
-export TF_VAR_E2_NODE_COUNT=4
-export TF_VAR_NFS_SIZE="1Ti"
+export PROJECT=<your-project-id>
+export PREFIX=<prefix-for-resource-names>
+export REGION=<target-region>
+export ZONE=<target-zone>
+export A3_NODE_COUNT=4
+export E2_NODE_COUNT=4
+export NFS_SIZE="1Ti"
 ```
-The E2 nodes are used for system services (e.g. DNS pods, custom controllers).
-*The prefix `TF_VAR_` exposes the variables to Terraform. Take note that some of these environment variables are still used by non-Terraform commands below.*
+The E2 nodes are used for system services (e.g. DNS pods, custom controllers). Some of these variables are exposed to Terraform by defining additional environment variables using the `TF`
 
 Enable this environment in your shell by running:
 ```
@@ -48,8 +46,8 @@ bash scripts/create-terraform-gcs-backend-bucket.sh
 Then initialize the Terraform state using this GCS bucket.
 ```
 terraform init \
-  -backend-config="bucket=$TF_VAR_PREFIX" \
-  -backend-config="prefix=$TF_VAR_PREFIX"
+  -backend-config="bucket=$PREFIX" \
+  -backend-config="prefix=$PREFIX"
 ```
 
 ### Create a GKE cluster with A3 VMs
@@ -72,6 +70,20 @@ Fetch the credentials from your GKE cluster.
 bash scripts/fetch-gke-credentials-for-kubectl.sh
 ```
 Now any `kubectl` commands will be applied against your GKE cluster.
+
+### Install the GPU drivers
+
+Trigger installation of the GPU drivers.
+```
+bash scripts/install-gpu-drivers.sh
+```
+
+Check the GPU devices are exposed.
+```
+kubectl get pods -n kube-system | grep nvidia
+```
+
+You should see all pods to be listed in `Running` state.
 
 ### Adjust GKE networking such that the VPCs are in device mode
 
@@ -115,7 +127,7 @@ This step may take 15 or more minutes. You can check the progress of the cluster
 
 ### Optional: Place your custom training data in a GCS bucket
 
-For the purposes of demonstration, we host a pre-tokenized version of the Wikipedia data in a public bucket at `gs://nemo-megatron-demo/training-data/processed/gpt/wikitext`. This dataset was created by following [Collecting Wikipedia Training Data](https://github.com/NVIDIA/Megatron-LM/tree/main?tab=readme-ov-file#collecting-wikipedia-training-data). It is recommended you use this data source on your first workload launch. Alternative, larger, 
+For the purposes of demonstration, we host a pre-tokenized sample of Wikipedia data in a public bucket at `gs://nemo-megatron-demo/training-data/processed/gpt/wikitext`. This dataset was created by following [Collecting Wikipedia Training Data](https://github.com/NVIDIA/Megatron-LM/tree/main?tab=readme-ov-file#collecting-wikipedia-training-data). Note that this is a static snapshot of Wikipedia text captured in the middle of 2023. It is recommended you use this data source on your first workload launch.
 
 If you choose, you can upload your own training data. In our demonstration we invoke NeMo Megatron pre-training for the standard GPT model. Therefore it is expected the dataset is already tokenized and compatible format followed by [Megatron-LM](https://github.com/NVIDIA/Megatron-LM?tab=readme-ov-file#data-preprocessing) for tokenizer type `GPT2BPETokenizer`. 
 
@@ -129,7 +141,7 @@ Then upload your pre-tokenized training data to it.
 gcloud storage cp my-training-data.{idx,bin} gs://my-training-bucket
 ```
 
-Note that in this demonstration the training data cannot exceed the size of the local SSD (i.e. 6 TiB). This limitation is only due to our setup caching the training data to the local SSD on launch. For larger sizes the shared file-system or [GCF fuse](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/cloud-storage-fuse-csi-driver) can be used.
+Note that in this demonstration the training data cannot exceed the size of the local SSD (i.e. 6 TiB). This limitation is only due to our setup caching the training data to the local SSD on launch. For larger sizes the shared FileStore or [GCF fuse](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/cloud-storage-fuse-csi-driver) can be used.
 
 ### Upload NeMo Megatron Docker image to Artifact registry
 
@@ -142,24 +154,14 @@ bash scripts/create-artifact-registry.sh
 
 Fetch the credentials for your registry
 ```
-docker-credential-gcr configure-docker --registries=$REGION
+gcloud auth configure-docker --registries=$REGION-docker.pkg.dev
 ```
 
-Now build the Dockerfile.
+Now build the Dockerfile and push it to this registry.
 ```
-docker build \
-  -f nemo-example/docker/nemo_example.Dockerfile
-  -t $REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3
-  nemo-example/docker
+bash scripts/build-and-push-nemo-training-image.sh
 ```
-Note that the Dockerfile is essentially just `nvcr.io/ea-bignlp/nemofw-training:23.05-py3`.
-
-Push the Docker image to the artifact registry.
-```
-docker push $REGION-docker.pkg.dev/$PROJECT/$PREFIX
-```
-
-You will not need to modify this Docker image.
+Note that the Dockerfile is essentially just `nvcr.io/ea-bignlp/nemofw-training:23.05-py3`. You will not need to modify this Docker image.
 
 ### Setup the training and model configuration
 
@@ -173,16 +175,23 @@ Before launching the model training, we need to review `nemo-example/values.yaml
 ```
 queue: null
 
-workload:
-  nodes: 2
-  image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX:nemofw-training:23.05-py3"
-  torchRunTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
-  trainingDataSource: "gs://megatron-data-us/training-data/wikitext" 
-  # ^^^ on workload launch, the GCS bucket folder will be cached into the local SSD mount path
-
 volumes:
   nfsMountPath: null
-  ssdMountPath: /ssd
+  ssdMountPath: "/ssd"
+  gcsDownload:
+    source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia" 
+    target: "/ssd/.cache/"
+
+workload:
+  image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/nemofw-training:23.05-py3"
+  torchDistributedTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
+
+  gpus: 16
+  arguments:
+  - name: "exp_manager.exp_dir"
+    value: "/tmp/nemo-experiments/"
+  - name: "data.data_prefix"
+    value: "[1.0,/ssd/.cache/wikipedia/wikipedia-tokenized-for-gpt2]"
 ```
 
 If you followed the step to provision and attach a Filestore, then replace `nfsMountPath: null` with `nfsMountPath: /nfs`. You will also want to adjust the output directory.
@@ -191,7 +200,8 @@ If you followed the step to provision and attach a Filestore, then replace `nfsM
 
 Launch the GPT model training across the desired node scale.
 ```
-cat nemo-example/value.yaml | envsubst | helm install --set workload.nodes=2 $USER-nemo-$(date +%s) -f - nemo-example/ 
+cat nemo-example/values.yaml | envsubst \
+  | helm install --set workload.nodes=2 $USER-nemo-$(date +%s) -f - nemo-example/
 ```
 
 Verify the launch succeeded by seeing the corresponding pods in `Running` state. This may take a few minutes the first time it is executed.
@@ -211,7 +221,6 @@ As there is no official Tensorboard image, you'll need to build one from the Git
 ```
 bash tensorboard/build-and-push-tensorboard.sh
 ```
-
 In addition to Tensorboard, you'll need to deploy a proxy agent that can relay the URL to the Tensorboard endpoint. Run the following from the `tensorboard-endpoint` directory:
 ```
 bash inverse-proxy/build-and-push-inverse-proxy.sh
