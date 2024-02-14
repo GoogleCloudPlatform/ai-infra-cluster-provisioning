@@ -69,9 +69,9 @@ spec:
       hostPath:
         path: /mnt/stateful_partition/kube-ephemeral-ssd   
     {{- if $root.Values.volumes.nfsMountPath }}
-    - name: cluster-file-store
+    - name: cluster-filestore
       persistentVolumeClaim:
-        claimName: cluster-sharedfs
+        claimName: cluster-filestore
     {{- end }}
     - name: shared-memory
       emptyDir:
@@ -87,7 +87,7 @@ spec:
       - name: local-ssd
         mountPath: "{{ $root.Values.volumes.ssdMountPath }}"
       {{- if $root.Values.volumes.nfsMountPath }}
-      - name: cluster-file-store
+      - name: cluster-filestore
         mountPath: "{{ $root.Values.volumes.nfsMountPath }}"
       {{- end }}
       env:
@@ -159,6 +159,12 @@ spec:
       image: "{{ $root.Values.workload.image }}"
       imagePullPolicy: Always
       env:
+      - name: JOB_IDENTIFIER
+        value: "{{ $jobid }}"
+
+      # The following settings are specific to the Torch distributed launcher:
+      - name: TORCH_DISTRIBUTED_TARGET
+        value: "{{ $root.Values.workload.torchDistributedTarget }}"
       - name: MASTER_ADDR
         value: "{{.Release.Name}}-0.{{.Release.Name}}.default.svc.cluster.local"
       - name: MASTER_PORT
@@ -169,13 +175,16 @@ spec:
         value: "{{ $nodes }}"        
       - name: GPUS_PER_NODE
         value: "{{ $gpusPerNode }}"        
-      - name: TORCH_DISTRIBUTED_TARGET
-        value: "{{ $root.Values.workload.torchDistributedTarget }}"
-      - name: JOB_IDENTIFIER
-        value: "{{ $jobid }}"
       - name: GLOO_SOCKET_IFNAME
         value: "eth0"
 
+      # The leader node can launch an embedded Tensorboard server (if needed)
+      {{- if $root.Values.workload.embeddedTensorboardTarget }}
+      - name: EMBEDDED_TENSORBOARD_TARGET
+        value: "{{ $root.Values.workload.embeddedTensorboardTarget}}"             
+      {{- end }}
+
+      # The following arguments are passed to the Workload:
       {{- range $environment_variable := $root.Values.workload.arguments }}
       - name: "WORKLOAD_{{ $environment_variable.name }}"
         value: "{{ $environment_variable.value }}"
@@ -271,8 +280,8 @@ spec:
         cat /etc/workload-configuration/nemo-configuration.yaml | sed 's/^/| /'
         echo ""
 
-        readarray -d "" workload_arguments < <(env | grep -e "^WORKLOAD_" | sed 's/^WORKLOAD_/++/' | tr '\n' '\0')
-        echo "Detected requested workload arguments:"
+        readarray -d "" workload_arguments < <(env | grep -e "^WORKLOAD_" | sed 's/^WORKLOAD_/+/' | tr '\n' '\0')
+        echo "Detected the following additional workload arguments:"
         for workload_argument in "${workload_arguments[@]}"; do
           echo "  $workload_argument"
         done
@@ -295,15 +304,12 @@ spec:
           TORCH_PIDS[$LOCAL_RANK]=$!
         done
 
-        if [ "$NODE_RANK" -eq "0" ]; then
-          TENSORBOARD_LOG_PATH="${workload_arguments[exp_manager.exp_dir]}/$JOB_IDENTIFIER"
-          echo "Launching Tensorboard against log directory $TENSORBOARD_LOG_PATH"
-          tensorboard --logdir $TENSORBOARD_LOG_PATH &
+        if [ "$NODE_RANK" -eq "0" ] && { ! [ -z ${EMBEDDED_TENSORBOARD_TARGET} ]; }; then
+          echo "Launching an embedded Tensorboard against log directory $EMBEDDED_TENSORBOARD_TARGET"
+          tensorboard --logdir $EMBEDDED_TENSORBOARD_TARGET &
         fi
 
-        for TORCH_PID in ${TORCH_PIDS[*]}; do
-            wait $TORCH_PID
-        done
+        wait # <-- This will wait on Tensorboard (if it exists)
         echo "Pod on $(hostname --fqdn) is exiting"
       volumeMounts:
         - name: nvidia-install-dir-host
@@ -321,7 +327,7 @@ spec:
         - name: local-ssd
           mountPath: "{{ $root.Values.volumes.ssdMountPath }}"
       {{- if $root.Values.volumes.nfsMountPath }}
-        - name: cluster-file-store
+        - name: cluster-filestore
           mountPath: "{{ $root.Values.volumes.nfsMountPath }}"
       {{- end }}
       resources:

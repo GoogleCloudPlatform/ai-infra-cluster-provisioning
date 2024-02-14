@@ -1,0 +1,10 @@
+tensorboard:
+  image: us-docker.pkg.dev/llm-containers/nemo-megatron-demo/tensorboard
+  persistentVolumeClaim: cluster-filestore # it will be mounted to /mnt
+  logDirectory: /mnt/nemo-experiments/
+
+inverseProxy:
+  image: us-docker.pkg.dev/llm-containers/nemo-megatron-demo/inverse-proxy 
+  upstreamService: tensorboard
+  upstreamPort: 6006
+  

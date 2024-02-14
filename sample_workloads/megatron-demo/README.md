@@ -12,7 +12,7 @@ This document demonstrates running [NeMo Megatron](https://github.com/NVIDIA/NeM
 
 In addition to the above tools, you will need: 
 - Quota for NVIDIA H100 GPUs
-- Quota Cloud FileStore Enterprise (this is optional)
+- Quota Cloud FileStore
 - Access to [NVIDIA NGC Big NLP Training](https://registry.ngc.nvidia.com/orgs/ea-bignlp/containers/bignlp-training) Docker images
 
 ## Infrastructure Setup
@@ -20,15 +20,21 @@ In addition to the above tools, you will need:
 ### Select project, zone, and resource prefix
 Adjust the values in `set-enviroment.sh` to suit your case.
 ```
-export PROJECT=<your-project-id>
-export PREFIX=<prefix-for-resource-names>
-export REGION=<target-region>
-export ZONE=<target-zone>
-export A3_NODE_COUNT=4
+export PROJECT=supercomputer-testing
+
+# GKE cluster name, location, and scale
+export PREFIX=sufkha-nemo-demo-test
+export REGION=us-central1
+export ZONE=us-central1-c
 export E2_NODE_COUNT=4
+export A3_NODE_COUNT=4
+
+# GKE cluster shared Filestore (i.e. NFS)
+# Tier is one of {basic, standard, premium, zonal, or enterprise} 
 export NFS_SIZE="1Ti"
+export NFS_TIER="enterprise" 
 ```
-The E2 nodes are used for system services (e.g. DNS pods, custom controllers). Some of these variables are exposed to Terraform by defining additional environment variables using the `TF`
+The E2 nodes are used for system services (e.g. DNS pods, custom controllers). Some of these variables are exposed to Terraform by defining additional environment variables using the `TF_VAR_` prefix. 
 
 Enable this environment in your shell by running:
 ```
@@ -93,6 +99,19 @@ cat manifests/enable-network-pass-through.yaml | envsubst | kubectl apply -f -
 ```
 This bypasses some GKE networking layers and is needed to run workloads with `hostNetwork: false` (the default). *The Terraform module will integate this in the future.*
 
+### Provision and attach a shared NFS file-system
+
+Enable the GCP Filestore driver on your cluster.
+```
+bash scripts/enable-filestore-driver-on-gke-cluster.sh
+```
+
+Then provision and attach a shared Filestore volume of the desired size to your cluster.
+```
+cat manifests/sharedfs-via-filestore.yaml| envsubst | kubectl apply -f -
+```
+This step may take 15 or more minutes. You can check the progress of the cluster provisioning by visiting [Cloud Console](https://console.cloud.google.com/filestore/instances). To learn more about the performance about Filestore, see https://cloud.google.com/filestore/docs/service-tiers. *The Terraform module may integate this in the future.*
+
 ### Optional: Install Kueue as a batching and administrative system
 
 Install the Kueue batching system. Kueue provides services for workload batching, pre-emption, adminstrative control, and all-or-nothing launch semantics. To learn more about Kueue visit https://kueue.sigs.k8s.io/docs/concepts/.
@@ -108,20 +127,6 @@ After installing the Kueue system, create a single queue named `a3-queue` to whi
 ```
 cat manifests/a3-queue-via-kueue.yaml | envsubst | kubectl apply -f -
 ```
-
-### Optional: Provision and attach a shared NFS file-system
-
-Enable the GCP Filestore driver on your cluster.
-```
-bash scripts/enable-filestore-driver-on-gke-cluster.sh
-```
-
-Then provision and attach a shared Filestore volume of the desired size to your cluster.
-```
-cat manifests/sharedfs-via-filestore.yaml| envsubst | kubectl apply -f -
-```
-This step may take 15 or more minutes. You can check the progress of the cluster provisioning by visiting [Cloud Console](https://console.cloud.google.com/filestore/instances). To learn more about the performance about Filestore, see https://cloud.google.com/filestore/docs/service-tiers. *The Terraform module may integate this in the future.*
-
 
 ## Workload Setup and Launch
 

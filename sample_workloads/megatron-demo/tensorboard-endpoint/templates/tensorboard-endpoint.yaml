@@ -13,27 +13,29 @@ spec:
         app: tensorboard
     spec:
       volumes:
-      - name: cluster-file-store
+      - name: cluster-file-system
         persistentVolumeClaim:
-          claimName: cluster-sharedfs
+          claimName: {{ .Values.tensorboard.persistentVolumeClaim }}
       containers:
       - name: tensorboard
-        image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/tensorboard:latest"
-          # image: "us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/tensorboard:latest"
+        image: "{{.Values.tensorboard.image}}"
         command: 
         - bash
         - -c
         - |
           apt install net-tools
           IP=$(ifconfig | grep -Eo "inet (addr:)?([0-9]*\.){3}[0-9]*" | grep -Eo "([0-9]*\.){3}[0-9]*" | grep -v "127.0.0.1")
-          tensorboard --logdir /nfs/nemo-experiments --host $IP
+          tensorboard --logdir $TENSORBOARD_LOG_DIRECTORY --host $IP
 
+        env:
+        - name: TENSORBOARD_LOG_DIRECTORY
+          value: "{{ .Values.tensorboard.logDirectory }}"
         ports:
         - name: web
           containerPort: 6006
         volumeMounts:
-        - name: cluster-file-store
-          mountPath: /nfs 
+        - name: cluster-file-system
+          mountPath: "/mnt"
 ---
 apiVersion: v1
 kind: Service
@@ -55,10 +57,9 @@ spec:
   serviceAccountName: default
   containers:
   - name: inverse-proxy-to-tensorboard
-    image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/inverse-proxy:latest"
-      # image: "us-central1-docker.pkg.dev/supercomputer-testing/sufkha-registry/inverse-proxy-tensorboard:latest"
+    image: "{{.Values.inverseProxy.image}}"
     command: ["/opt/proxy/attempt-register-vm-on-proxy.sh"]
-    args: ["tensorboard", "6006"]
+    args: ["{{ .Values.inverseProxy.upstreamService }}", " {{ .Values.inverseProxy.upstreamPort }}"]
     ports:
     - containerPort: 80
 ---

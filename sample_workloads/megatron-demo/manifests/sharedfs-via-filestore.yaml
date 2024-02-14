@@ -1,22 +1,22 @@
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: cluster-sharedfs
+  name: cluster-filestore
 provisioner: filestore.csi.storage.gke.io
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
 parameters:
-  tier: enterprise
-  network: $TF_VAR_PREFIX
+  tier: $NFS_TIER
+  network: $PREFIX
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: cluster-sharedfs
+  name: cluster-filestore
 spec:
   accessModes:
   - ReadWriteMany
-  storageClassName: cluster-sharedfs
+  storageClassName: cluster-filestore
   resources:
     requests:
-      storage: $TF_VAR_NFS_SIZE
+      storage: $NFS_SIZE

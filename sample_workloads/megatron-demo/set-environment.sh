@@ -1,12 +1,19 @@
 export PROJECT=supercomputer-testing
+
+# GKE cluster name, location, and scale
 export PREFIX=sufkha-nemo-demo-test
 export REGION=us-central1
 export ZONE=us-central1-c
-export A3_NODE_COUNT=4
 export E2_NODE_COUNT=4
-export NFS_SIZE="1Ti"
+export A3_NODE_COUNT=4
 
-# Expose these variables to Terraform
+# GKE cluster shared Filestore (i.e. NFS)
+# Tier is one of {basic, standard, premium, zonal, or enterprise} 
+export NFS_SIZE="1Ti"
+export NFS_TIER="enterprise"  
+
+# ---
+# Do not edit below this line
 export TF_VAR_PROJECT=$PROJECT
 export TF_VAR_PREFIX=$PREFIX
 export TF_VAR_REGION=$REGION

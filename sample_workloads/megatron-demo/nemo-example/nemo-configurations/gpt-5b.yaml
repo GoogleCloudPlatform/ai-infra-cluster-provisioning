@@ -21,7 +21,6 @@ trainer:
 
 exp_manager:
   explicit_log_dir: null
-  exp_dir: /tmp/nemo-experiments/
   name: megatron_gpt
   create_wandb_logger: false
   wandb_logger_kwargs:
@@ -165,7 +164,4 @@ model:
     reset_attention_mask: false  # Reset attention mask after end-of-document token
     eod_mask_loss: false  # Mask loss for the end of document tokens
     index_mapping_dir: null  # path to save index mapping .npy files, by default will save in the same location as data_prefix
-    data_prefix:  # Should be weight path weight path... for a blended dataset
-    - 1.0
-    - /ssd/training-data/wikitext-tokenized-for-gpt2_text_document
 

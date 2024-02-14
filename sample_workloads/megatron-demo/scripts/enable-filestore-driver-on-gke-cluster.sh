@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gcloud container clusters update $TF_VAR_PREFIX \
+gcloud container clusters update $PREFIX \
   --update-addons=GcpFilestoreCsiDriver=ENABLED \
-  --project $TF_VAR_PROJECT \
-  --zone $TF_VAR_ZONE
+  --project $PROJECT \
+  --region $REGION
