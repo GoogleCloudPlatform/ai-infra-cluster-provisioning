@@ -27,7 +27,7 @@ workload:
 
   # If not 'null', launches a Tensorboard server on first node. By design, the job will then not exit on first node.
   # This is primarly intended for debugging purposes, when a shared file-system or external Tensorboard is unavailable.  
-  embeddedTensorboardTarget: "/nfs/nemo-experiments/"
+  embeddedTensorboardTarget: null
 
 networking:
   enableTcpx: "true" # required for optimal performance

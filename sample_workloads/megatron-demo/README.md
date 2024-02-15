@@ -128,6 +128,23 @@ After installing the Kueue system, create a single queue named `a3-queue` to whi
 cat manifests/a3-queue-via-kueue.yaml | envsubst | kubectl apply -f -
 ```
 
+## Setup a Tensorboard endpoint for viewing training runs
+
+In this section we demonstrate how to deploy a Tensorboard endpoint that can be accessed by a browser on any host that is logged into, and has the relevant permissions, for the associated project. For this step it is necessary that you did **not** enable Workload Identity on your GKE cluster. *The security boundaries will be revised in the future.*
+
+Deploy the Tensorboard and inverse-proxy to your GKE cluster.
+```
+kubectl apply -f tensorboard-endpoint/tensorboard.yaml
+```
+
+Wait for both the inverse-proxe and tensorboard pods to go `Running`. 
+
+Then find the corresponding URL endpoint for Tensorboard.
+```
+kubectl describe configmap inverse-proxy-config
+```
+If successful, the URL corresponds to the `Hostname` field. You can visit this URL in your browser and should see the Tensorboard page. *In case you have trouble with this step, you can still proceed to the next section.*
+
 ## Workload Setup and Launch
 
 ### Optional: Place your custom training data in a GCS bucket
@@ -185,8 +202,6 @@ volumes:
   pvcMounts:
   - name: cluster-filestore
     mountPath: "/nfs"
-  - name: cluster-gcsfuse
-    mountPath: "/gcs"
 
 gcsDownload: # downloads or synchronizes contents of a GCS bucket folder on initialization
   source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia/" 
@@ -210,14 +225,11 @@ workload:
   embeddedTensorboardTarget: null
 ```
 
-If you deployed  
-
 ### Launch NeMo Megatron training
 
 Launch the GPT model training across the desired node scale.
 ```
-cat nemo-example/values.yaml | envsubst \
-  | helm install --set workload.nodes=2 $USER-nemo-$(date +%s) -f - nemo-example/
+cat nemo-example/values.yaml | envsubst | helm install $USER-nemo-gpt-5b -f - nemo-example/
 ```
 
 Verify the launch succeeded by seeing the corresponding pods in `Running` state. 
@@ -225,21 +237,4 @@ Verify the launch succeeded by seeing the corresponding pods in `Running` state.
 $ kubectl get pods
 ```
 
-This may take a few minutes the first time it is executed.
-
-## Create a Tensorboard endpoint to view the training
-
-In this section we demonstrate how to deploy a Tensorboard endpoint that can be accessed by a browser on any host that is logged into, and has the relevant permissions, for the associated project. For this step it is necessary that you did **not** enable Workload Identity on your GKE cluster. *The security boundaries will be improved in the future.*
-
-Deploy the Tensorboard and inverse-proxy to your GKE cluster.
-```
-kubectl apply -f tensorboard-endpoing/tensorboard.yaml
-```
-
-Wait for both the inverse-proxe and tensorboard pods to go `Running`. 
-
-Then find the corresponding URL endpoint for Tensorboard.
-```
-kubectl describe configmap inverse-proxy-config
-```
-If successful, the URL corresponds to the `Hostname` field. You can visit this URL in your browser and should see the Tensorboard page.
+This may take a few minutes the first time it is executed. 
