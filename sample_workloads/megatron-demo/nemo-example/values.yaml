@@ -12,7 +12,8 @@ workload:
   torchDistributedTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
 
   gpus: 16 # This should be one of: {<= 8,  multiple of 8}
-  arguments: # These argument name will be prefixed with '+' (see https://hydra.cc/docs/advanced/override_grammar/basic/)
+  arguments: 
+  # These argument name will be prefixed with '+' (see https://hydra.cc/docs/advanced/override_grammar/basic/)
   - name: "exp_manager.exp_dir"
     value: "/nfs/nemo-experiments/"
   - name: "model.data.data_prefix"
@@ -20,7 +21,7 @@ workload:
 
   # If not 'null', launches a Tensorboard server on first node. By design, the job will then not exit on first node.
   # This is primarly intended for debugging purposes, when a shared file-system or external Tensorboard is unavailable.  
-  embeddedTensorboardTarget: "/tmp/nemo-experiments/"
+  embeddedTensorboardTarget: "/nfs/nemo-experiments/"
 
 networking:
   enableTcpx: "true" # required for optimal performance

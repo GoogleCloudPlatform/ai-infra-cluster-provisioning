@@ -59,7 +59,7 @@ spec:
   - name: inverse-proxy-to-tensorboard
     image: "{{.Values.inverseProxy.image}}"
     command: ["/opt/proxy/attempt-register-vm-on-proxy.sh"]
-    args: ["{{ .Values.inverseProxy.upstreamService }}", " {{ .Values.inverseProxy.upstreamPort }}"]
+    args: ["{{ .Values.inverseProxy.upstreamService }}", "{{ .Values.inverseProxy.upstreamPort }}"]
     ports:
     - containerPort: 80
 ---

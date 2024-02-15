@@ -178,25 +178,30 @@ On a first attempt we recommend leaving as-is. On later launches, you may review
 
 Before launching the model training, we need to review `nemo-example/values.yaml`:
 ```
-queue: null
+queue: null # optional (must have installed Kueue and pre-provisioned 'a3-queue' queue, see previous guide steps)
 
 volumes:
-  nfsMountPath: null
+  nfsMountPath: "/nfs"
   ssdMountPath: "/ssd"
-  gcsDownload:
-    source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia" 
+  gcsDownload:  # downloads or synchronizes contents of GCS bucket folder on initialization
+    source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia/" 
     target: "/ssd/.cache/"
 
 workload:
   image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/nemofw-training:23.05-py3"
   torchDistributedTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
 
-  gpus: 16
-  arguments:
+  gpus: 16 # This should be one of: {<= 8,  multiple of 8}
+  arguments: 
+  # These argument name will be prefixed with '+' (see https://hydra.cc/docs/advanced/override_grammar/basic/)
   - name: "exp_manager.exp_dir"
-    value: "/tmp/nemo-experiments/"
-  - name: "data.data_prefix"
-    value: "[1.0,/ssd/.cache/wikipedia/wikipedia-tokenized-for-gpt2]"
+    value: "/nfs/nemo-experiments/"
+  - name: "model.data.data_prefix"
+    value: "[1.0,/ssd/.cache/wikipedia-tokenized-for-gpt2]"
+
+  # If not 'null', launches a Tensorboard server on first node. By design, the job will then not exit on first node.
+  # This is primarly intended for debugging purposes, when a shared file-system or external Tensorboard is unavailable.  
+  embeddedTensorboardTarget: "/nfs/nemo-experiments/"
 ```
 
 If you followed the step to provision and attach a Filestore, then replace `nfsMountPath: null` with `nfsMountPath: /nfs`. You will also want to adjust the output directory.
@@ -209,43 +214,26 @@ cat nemo-example/values.yaml | envsubst \
   | helm install --set workload.nodes=2 $USER-nemo-$(date +%s) -f - nemo-example/
 ```
 
-Verify the launch succeeded by seeing the corresponding pods in `Running` state. This may take a few minutes the first time it is executed.
+Verify the launch succeeded by seeing the corresponding pods in `Running` state. 
 ```
 $ kubectl get pods
 ```
 
-### Watch the training step time and loss curves
+This may take a few minutes the first time it is executed.
 
+## Create a Tensorboard endpoint to view the training
 
-
-## Create a Tensorboard endpoint bound to the cluster to ease access
-
-In this section we demonstrate how to deploy a Tensorboard endpoint that can be accessed by a browser on any host that is logged into, and has the relevant permissions, for the associated project. For this step you will need to have deployed a shared file-system (as described in the optional steps above).
-
-As there is no official Tensorboard image, you'll need to build one from the GitHub repository. Run the following from the `tensorboard-endpoint` directory.
-```
-bash tensorboard/build-and-push-tensorboard.sh
-```
-In addition to Tensorboard, you'll need to deploy a proxy agent that can relay the URL to the Tensorboard endpoint. Run the following from the `tensorboard-endpoint` directory:
-```
-bash inverse-proxy/build-and-push-inverse-proxy.sh
-```
-
-In `tensorboard-endpoint.yaml`, confirm the Tensorboard endpoint points to the shared file-system deployed in the cluster. Your workload needs to emit its Tensorboard logs to this shared file-system directory.
-```
-...
-          tensorboard --logdir /nfs/nemo-experiments --host $IP
-...
-```
+In this section we demonstrate how to deploy a Tensorboard endpoint that can be accessed by a browser on any host that is logged into, and has the relevant permissions, for the associated project. For this step it is necessary that you did **not** enable Workload Identity on your GKE cluster. *The security boundaries will be improved in the future.*
 
 Deploy the Tensorboard and inverse-proxy to your GKE cluster.
 ```
-kubectl apply -f tensorboard.yaml
+kubectl apply -f tensorboard-endpoing/tensorboard.yaml
 ```
 
-Find the corresponding URL endpoint for Tensorboard
+Wait for both the inverse-proxe and tensorboard pods to go `Running`. 
+
+Then find the corresponding URL endpoint for Tensorboard.
 ```
 kubectl describe configmap inverse-proxy-config
 ```
-
 If successful, the URL corresponds to the `Hostname` field. You can visit this URL in your browser and should see the Tensorboard page.

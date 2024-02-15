@@ -334,17 +334,3 @@ spec:
         limits:
           nvidia.com/gpu: {{ $gpusPerNode }}
 ---
-
-#        torchrun \
-#          --nproc_per_node=8 \
-#          --nnodes=$NNODES \
-#          --rdzv_id=1002 \
-#          --rdzv_backend=c10d \
-#          --rdzv_endpoint=$MASTER_ADDR \
-#          $TORCH_RUN_TARGET \
-#          --config-path="/etc/workload-configuration" \
-#          --config-name="nemo-configuration.yaml" \
-#          +trainer.num_nodes="$NNODES" \
-#          +exp_manager.version="$JOB_IDENTIFER"
-#
-           

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -ex
+set -e
 
 TARGET_SERVICE=$1
 TARGET_PORT=$2
