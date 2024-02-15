@@ -39,6 +39,9 @@ mkdir -p $OUT_DIR
 DEBUG_DIR=$EXPERIMENT_LOCAL_DIR/debug
 mkdir -p $DEBUG_DIR
 
+PROFILING_DIR=$EXPERIMENT_LOCAL_DIR/nsys_profiles
+mkdir -p $PROFILING_DIR
+
 export NCCL_TOPO_DUMP_FILE=$DEBUG_DIR/nccl_topo_${JOB_TIMESTAMP}_${NODE_RANK}.xml
 export NCCL_GRAPH_DUMP_FILE="$DEBUG_DIR/nccl_graph_${JOB_TIMESTAMP}_${NODE_RANK}.graph"
 
@@ -162,6 +165,10 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
    fi
    CMD_PREFIX="numactl --membind=$MEMBIND_NUMA_NODE --physcpubind $CPUS"
 
+   # Add Nsys profile to command
+   if [[ "${COLLECT_NSYS_PROFILE:="no"}" == "yes" ]]; then
+     echo "Collecting nsys profile"
+     CMD_PREFIX="${CMD_PREFIX} nsys profile --sample=none --trace=cuda,nvtx -o $PROFILING_DIR/node_${NODE_RANK:?}_local_rank_${LOCAL_RANK} --capture-range=cudaProfilerApi --capture-range-end=repeat:${PROFILE_REPS:=5} --export sqlite "
 
    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
      $CMD_PREFIX \
