@@ -12,7 +12,7 @@ This document demonstrates running [NeMo Megatron](https://github.com/NVIDIA/NeM
 
 In addition to the above tools, you will need: 
 - Quota for NVIDIA H100 GPUs
-- Quota Cloud FileStore
+- Quota for FileStore
 - Access to [NVIDIA NGC Big NLP Training](https://registry.ngc.nvidia.com/orgs/ea-bignlp/containers/bignlp-training) Docker images
 
 ## Infrastructure Setup
@@ -178,14 +178,19 @@ On a first attempt we recommend leaving as-is. On later launches, you may review
 
 Before launching the model training, we need to review `nemo-example/values.yaml`:
 ```
-queue: null # optional (must have installed Kueue and pre-provisioned 'a3-queue' queue, see previous guide steps)
+queue: null # optional (must have installed Kueue and pre-provisioned a local queue, see previous guide steps)
 
 volumes:
-  nfsMountPath: "/nfs"
   ssdMountPath: "/ssd"
-  gcsDownload:  # downloads or synchronizes contents of GCS bucket folder on initialization
-    source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia/" 
-    target: "/ssd/.cache/"
+  pvcMounts:
+  - name: cluster-filestore
+    mountPath: "/nfs"
+  - name: cluster-gcsfuse
+    mountPath: "/gcs"
+
+gcsDownload: # downloads or synchronizes contents of a GCS bucket folder on initialization
+  source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia/" 
+  target: "/ssd/.cache/"
 
 workload:
   image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/nemofw-training:23.05-py3"
@@ -199,12 +204,13 @@ workload:
   - name: "model.data.data_prefix"
     value: "[1.0,/ssd/.cache/wikipedia-tokenized-for-gpt2]"
 
-  # If not 'null', launches a Tensorboard server on first node. By design, the job will then not exit on first node.
-  # This is primarly intended for debugging purposes, when a shared file-system or external Tensorboard is unavailable.  
-  embeddedTensorboardTarget: "/nfs/nemo-experiments/"
+  # If not 'null', launches a Tensorboard server on first node. By design, enabling this will cause the job to not exit on the first node!
+  # This is primarly intended for debugging (e.g. when a shared file-system and/or alternative Tensorboard is unavailable).
+  # You can view this Tensorboard on your local host with `kubectl port-forward <first-pod-name> 6006:6006` and visiting `localhost:6006` in your browser.  
+  embeddedTensorboardTarget: null
 ```
 
-If you followed the step to provision and attach a Filestore, then replace `nfsMountPath: null` with `nfsMountPath: /nfs`. You will also want to adjust the output directory.
+If you deployed  
 
 ### Launch NeMo Megatron training
 

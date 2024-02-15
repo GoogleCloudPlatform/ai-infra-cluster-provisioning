@@ -1,11 +1,17 @@
-queue: null # optional (must have installed Kueue and pre-provisioned 'a3-queue' queue, see previous guide steps)
+queue: null # optional (must have installed Kueue and pre-provisioned a local queue, see previous guide steps)
 
 volumes:
-  nfsMountPath: "/nfs" # optional (must have pre-provisioned a FileStore and bound it to 'cluster-filestore' persistent volume claim, see previous guide steps)
   ssdMountPath: "/ssd"
-  gcsDownload:  # downloads or synchronizes contents of GCS bucket folder on initialization
-    source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia/" 
-    target: "/ssd/.cache/"
+  pvcMounts:
+  - name: cluster-filestore
+    mountPath: "/nfs"
+  # gcsMounts:
+  # - bucketName: "nemo-megatron-demo"
+  #   mountPath: "/gcs"
+
+gcsDownload: # downloads or synchronizes contents of a GCS bucket folder on initialization
+  source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia/" 
+  target: "/ssd/.cache/"
 
 workload:
   image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/nemofw-training:23.05-py3"

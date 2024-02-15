@@ -40,7 +40,21 @@ spec:
   template:
    metadata:
     annotations:
-      kubectl.kubernetes.io/default-container: nemo 
+      kubectl.kubernetes.io/default-container: nemo
+      networking.gke.io/default-interface: 'eth0'
+      networking.gke.io/interfaces: |
+        [
+          {"interfaceName":"eth0","network":"default"},
+          {"interfaceName":"eth1","network":"vpc1"},
+          {"interfaceName":"eth2","network":"vpc2"},
+          {"interfaceName":"eth3","network":"vpc3"},
+          {"interfaceName":"eth4","network":"vpc4"}
+        ]        
+
+      {{- if $root.Values.volumes.gcsMounts }}
+      gke-gcsfuse/volumes: "true"
+      {{- end}}
+
    spec:
     hostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
@@ -68,11 +82,21 @@ spec:
     - name: local-ssd
       hostPath:
         path: /mnt/stateful_partition/kube-ephemeral-ssd   
-    {{- if $root.Values.volumes.nfsMountPath }}
-    - name: cluster-filestore
+
+    {{- range $pvc := $root.Values.volumes.pvcMounts }}
+    - name: "{{ $pvc.name }}"
       persistentVolumeClaim:
-        claimName: cluster-filestore
-    {{- end }}
+        claimName: "{{ $pvc.name }}"
+    {{- end }}    
+
+    {{- range $gcs := $root.Values.volumes.gcsMounts }}
+    - name: "{{ $gcs.bucketName }}"
+      csi:
+        driver: gcsfuse.csi.storage.gke.io
+        volumeAttributes:
+          bucketName: "{{ $gcs.bucketName }}"
+    {{- end}}
+
     - name: shared-memory
       emptyDir:
         medium: "Memory"
@@ -86,25 +110,28 @@ spec:
       volumeMounts:
       - name: local-ssd
         mountPath: "{{ $root.Values.volumes.ssdMountPath }}"
-      {{- if $root.Values.volumes.nfsMountPath }}
-      - name: cluster-filestore
-        mountPath: "{{ $root.Values.volumes.nfsMountPath }}"
+
+      {{- range $pvc := $root.Values.volumes.pvcMounts }}
+      - name: "{{ $pvc.name }}"
+        mountPath: "{{ $pvc.mountPath }}"
       {{- end }}
+
+      {{- range $gcs := $root.Values.volumes.gcsMounts }}
+      - name: "{{ $gcs.bucketName }}"
+        mountPath: "{{ $gcs.mountPath }}"
+      {{- end }}
+
       env:
       - name: GCS_DATA_SOURCE
-        value: "{{ $root.Values.volumes.gcsDownload.source }}"
+        value: "{{ $root.Values.gcsDownload.source }}"
       - name: GCS_DATA_TARGET
-        value: "{{ $root.Values.volumes.gcsDownload.target }}"
-      - name: NFS_MOUNT_PATH
-        value: "{{ $root.Values.volumes.nfsMountPath }}"
-      - name: SSD_MOUNT_PATH
-        value: "{{ $root.Values.volumes.ssdMountPath }}" 
+        value: "{{ $root.Values.gcsDownload.target }}"
       command:
         - /bin/sh
         - -c
         - |
           echo "Caching training data from $GCS_DATA_SOURCE to $GCS_DATA_TARGET"
-          mkdir -p $SSD_MOUNT_PATH/.cache
+          mkdir -p $GCS_DATA_TARGET
 
           SECONDS=0
           gcloud storage rsync \
@@ -191,8 +218,6 @@ spec:
       {{- end }}        
 
       # Mount paths for volumes:
-      - name: NFS_MOUNT_PATH
-        value: "{{ $root.Values.volumes.nfsMountPath }}"
       - name: SSD_MOUNT_PATH
         value: "{{ $root.Values.volumes.ssdMountPath }}"      
          
@@ -269,13 +294,6 @@ spec:
         touch $SSD_MOUNT_PATH/hello-from-$HOSTNAME.txt
         echo "Local SSD contents (path $SSD_MOUNT_PATH):"; ls $SSD_MOUNT_PATH | sed 's/^/  /'
 
-        if [ -d "$NFS_MOUNT_PATH" ]; then
-          echo "Detected $NFS_MOUNT_PATH exists and assuming an NFS mount is bound there"        
-
-          touch $NFS_MOUNT_PATH/hello-from-$HOSTNAME.txt
-          echo "NFS contents (path $NFS_MOUNT_PATH):"; ls $NFS_MOUNT_PATH | sed 's/^/  /'
-        fi
-
         echo "NeMo configuration file:"
         cat /etc/workload-configuration/nemo-configuration.yaml | sed 's/^/| /'
         echo ""
@@ -326,10 +344,17 @@ spec:
           mountPath: /dev/shm 
         - name: local-ssd
           mountPath: "{{ $root.Values.volumes.ssdMountPath }}"
-      {{- if $root.Values.volumes.nfsMountPath }}
-        - name: cluster-filestore
-          mountPath: "{{ $root.Values.volumes.nfsMountPath }}"
-      {{- end }}
+
+        {{- range $pvc := $root.Values.volumes.pvcMounts }}
+        - name: "{{ $pvc.name }}"
+          mountPath: "{{ $pvc.mountPath }}"
+        {{- end }}
+
+        {{- range $gcs := $root.Values.volumes.gcsMounts }}
+        - name: "{{ $gcs.bucketName }}"
+          mountPath: "{{ $gcs.mountPath }}"
+        {{- end }}        
+
       resources:
         limits:
           nvidia.com/gpu: {{ $gpusPerNode }}

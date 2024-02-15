@@ -27,11 +27,7 @@ module "a3-gke" {
   gke_version     = "1.27.8-gke.1067000"
   region          = var.REGION
 
-  ksa = {
-    namespace = "default"
-    name = "default"
-  }
-
+  ksa = null
   enable_gke_dashboard = false
 
   node_pools = [
