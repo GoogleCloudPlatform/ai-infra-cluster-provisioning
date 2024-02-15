@@ -99,6 +99,8 @@ message sizes to sweep over are shared across all benchmarks.** Supported
 benchmarks are `all_gather_perf`, `all_reduce_perf`, `reduce_scatter_perf`, `broadcast_perf`,
 `reduce_perf`, `sendrecv_perf`, `scatter_perf`, `gather_perf`, `alltoall_perf`, and `hypercube_perf`.
 
+*Note: If you want to use orchestrators relying on SSH to launch processes (e.g. MPI) to run communication patterns doing send-recvs between many GPU pairs (e.g. all-to-all), be sure to set `ulimit -n 1048576` for every process you start. To do this, you would need `CAP_SYS_RESOURCE` capability in your workload container, or make it privileged. If you are unsure whether your job orchestrator uses SSH, we recommend doing this out of caution.*
+
 For each benchmark, you must supply a mask. The benchmark does a bitwise AND
 between the rank and the mask to get a color, and ranks with the same color
 goes in the same NCCL communicator. Examples:
