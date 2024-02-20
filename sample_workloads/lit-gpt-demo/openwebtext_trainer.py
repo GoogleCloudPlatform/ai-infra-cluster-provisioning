@@ -128,6 +128,7 @@ class LightningGPTModule(L.LightningModule):
             self.print(
                 f"Max memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB"
             )
+            torch.cuda.reset_peak_memory_stats()
             sys.stdout.flush()
             sys.stderr.flush()
 
