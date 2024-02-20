@@ -77,6 +77,10 @@ class LightningGPTModule(L.LightningModule):
         return torch.optim.AdamW(
             self.module.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2), foreach=False
         )
+    
+    def on_train_epoch_start(self) -> None:
+        print("Resetting max memory allocation")
+        torch.cuda.reset_peak_memory_stats()
 
     def on_fit_start(self) -> None:
         trainer = self.trainer
@@ -93,8 +97,6 @@ class LightningGPTModule(L.LightningModule):
             self.print(f"Measured TFLOPs: {self.measured_flops * trainer.world_size / 1e12:.2f}")
 
     def on_train_batch_start(self, batch: Any, batch_idx: int) -> None:
-        print("Resetting max memory allocation")
-        torch.cuda.reset_peak_memory_stats()
         if not decay_lr:
             return
         # determine and set the learning rate for this iteration
