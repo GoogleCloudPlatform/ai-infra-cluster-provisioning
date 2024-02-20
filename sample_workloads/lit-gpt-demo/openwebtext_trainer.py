@@ -23,6 +23,7 @@ sys.path.append(str(wd))
 
 mp.set_start_method("spawn", force=True)
 import utilities.monitor_collectives
+
 utilities.monitor_collectives.shunt_torch_communication()
 
 
