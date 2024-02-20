@@ -93,6 +93,8 @@ class LightningGPTModule(L.LightningModule):
             self.print(f"Measured TFLOPs: {self.measured_flops * trainer.world_size / 1e12:.2f}")
 
     def on_train_batch_start(self, batch: Any, batch_idx: int) -> None:
+        print("Resetting max memory allocation")
+        torch.cuda.reset_peak_memory_stats()
         if not decay_lr:
             return
         # determine and set the learning rate for this iteration
@@ -129,7 +131,6 @@ class LightningGPTModule(L.LightningModule):
             self.print(
                 f"Max memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB"
             )
-            torch.cuda.reset_peak_memory_stats()
             sys.stdout.flush()
             sys.stderr.flush()
 
