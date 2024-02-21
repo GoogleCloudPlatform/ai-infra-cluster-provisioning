@@ -19,4 +19,4 @@ workload:
   microBatchSize: 6
   warmupIters: 10
   maxIters: 1000
-  
+  collectNsysProfile: 'no' # Set to 'yes' for profiles

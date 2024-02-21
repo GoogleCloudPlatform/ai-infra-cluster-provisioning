@@ -14,9 +14,18 @@ from lightning.pytorch.loggers import CSVLogger
 from lightning.pytorch.strategies import FSDPStrategy, XLAStrategy
 from torch.utils.data import DataLoader, IterableDataset
 
+import torch.multiprocessing as mp
+import nvtx
+
 # support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
+
+mp.set_start_method("spawn", force=True)
+import utilities.monitor_collectives
+
+utilities.monitor_collectives.shunt_torch_communication()
+
 
 from lit_gpt import Config
 from lit_gpt.model import GPT, Block
@@ -57,6 +66,8 @@ class LightningGPTModule(L.LightningModule):
         self.config = config
         self.module: Optional[torch.nn.Module] = None
         self.measured_flops: Optional[int] = None
+        self.nsys_profile_step_multiple = 5
+        self.backward_nvtx_range = None
 
     def configure_model(self) -> None:
         self.module = GPT(self.config)
@@ -66,9 +77,14 @@ class LightningGPTModule(L.LightningModule):
         return torch.optim.AdamW(
             self.module.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2), foreach=False
         )
+    
+    def on_train_epoch_start(self) -> None:
+        print("Resetting max memory allocation")
+        torch.cuda.reset_peak_memory_stats()
 
     def on_fit_start(self) -> None:
         trainer = self.trainer
+
         with torch.device("meta"):
             meta_model = GPT(self.module.config)
             # "estimated" is not as precise as "measured". Estimated is optimistic but widely used in the wild.
@@ -88,13 +104,56 @@ class LightningGPTModule(L.LightningModule):
         for optimizer in self.trainer.strategy.optimizers:
             for param_group in optimizer.param_groups:
                 param_group["lr"] = lr
+        
+        global_batch_idx = batch_idx / gradient_accumulation_steps
+        if (
+            global_batch_idx > 0
+            and global_batch_idx % self.nsys_profile_step_multiple == 0
+        ):
+            print(f"Starting Nsys profiling")
+            torch.cuda.cudart().cudaProfilerStart()
+  
 
+    def on_train_batch_end(
+        self, outputs, batch: Any, batch_idx: int, unused: int = 0
+    ) -> None:
+        global_batch_idx = batch_idx // gradient_accumulation_steps
+        global_batch_offset = batch_idx % gradient_accumulation_steps
+        is_last_microbatch = global_batch_offset == gradient_accumulation_steps - 1
+
+        if (
+            global_batch_idx > 1
+            and global_batch_idx % self.nsys_profile_step_multiple == 0
+            and is_last_microbatch
+        ):
+            self.print(f"Stopping Nsys profiling")
+            torch.cuda.cudart().cudaProfilerStop()
+        if is_last_microbatch:
+            self.print(f"HEARTBEAT: {global_batch_idx=}, {batch_idx=}")
+            self.print(
+                f"Max memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB"
+            )
+            sys.stdout.flush()
+            sys.stderr.flush()
+
+    @nvtx.annotate(color='green')
     def training_step(self, batch: Any, batch_idx: int) -> torch.Tensor:
         input_ids, targets = batch
         logits = self.module(input_ids)
         loss = chunked_cross_entropy(logits, targets, chunk_size=0)
         self.log("train_loss", loss, on_step=True, on_epoch=False, prog_bar=True)
         return loss
+
+    def on_before_backward(self, loss):
+        self.backward_nvtx_range = nvtx.start_range(message="backward", color="red")
+
+    def on_after_backward(self):
+        if self.backward_nvtx_range:
+            nvtx.end_range(self.backward_nvtx_range)
+
+    @nvtx.annotate(color='orange')
+    def optimizer_step(self, epoch, batch_idx, optimizer, optimizer_closure):
+        optimizer.step(closure=optimizer_closure)
 
     def validation_step(self, batch: Any, batch_idx: int) -> None:
         input_ids, targets = batch
@@ -104,68 +163,70 @@ class LightningGPTModule(L.LightningModule):
 
 
 def main(devices: int = 1, precision: Optional[str] = None, tpu: bool = False) -> None:
-    precision = precision or get_default_supported_precision(training=True, tpu=tpu)
+    cm = torch.autograd.profiler.emit_nvtx()
+    with cm:
+        precision = precision or get_default_supported_precision(training=True, tpu=tpu)
 
-    if devices > 1:
-        if tpu:
-            # For multi-host TPU training, the device count for Fabric is limited to the count on a single host.
-            devices = "auto"
-            strategy = XLAStrategy(sync_module_states=False)
+        if devices > 1:
+            if tpu:
+                # For multi-host TPU training, the device count for Fabric is limited to the count on a single host.
+                devices = "auto"
+                strategy = XLAStrategy(sync_module_states=False)
+            else:
+                strategy = FSDPStrategy(
+                    auto_wrap_policy={Block},
+                    activation_checkpointing_policy={Block},
+                    # the argument is not available in the Trainer strategy, but it's the default anyways
+                    # state_dict_type="full",
+                    limit_all_gathers=True,
+                    cpu_offload=False,
+                )
         else:
-            strategy = FSDPStrategy(
-                auto_wrap_policy={Block},
-                activation_checkpointing_policy={Block},
-                # the argument is not available in the Trainer strategy, but it's the default anyways
-                # state_dict_type="full",
-                limit_all_gathers=True,
-                cpu_offload=False,
-            )
-    else:
-        strategy = "auto"
+            strategy = "auto"
 
-    logger = step_csv_logger(out_dir, name, cls=CSVLogger, flush_logs_every_n_steps=log_interval)
-    speed_monitor = SpeedMonitorCallback(
-        length_fn=lambda batch: batch[0].size(1), batch_size=micro_batch_size, window_size=10, time_unit="seconds"
-    )
-    model_checkpoint = ModelCheckpoint(dirpath=out_dir, every_n_train_steps=save_interval, save_last=True, verbose=True)
-    trainer = L.Trainer(
-        devices=devices,
-        strategy=strategy,
-        precision=precision,
-        logger=logger,
-        callbacks=[speed_monitor, model_checkpoint],
-        max_steps=max_iters,
-        max_epochs=1,
-        limit_val_batches=eval_iters,
-        accumulate_grad_batches=gradient_accumulation_steps,
-        log_every_n_steps=log_interval,
-        val_check_interval=eval_interval,
-        num_nodes=num_nodes
-    )
+        logger = step_csv_logger(out_dir, name, cls=CSVLogger, flush_logs_every_n_steps=log_interval)
+        speed_monitor = SpeedMonitorCallback(
+            length_fn=lambda batch: batch[0].size(1), batch_size=micro_batch_size, window_size=10, time_unit="seconds"
+        )
+        model_checkpoint = ModelCheckpoint(dirpath=out_dir, every_n_train_steps=save_interval, save_last=True, verbose=True)
+        trainer = L.Trainer(
+            devices=devices,
+            strategy=strategy,
+            precision=precision,
+            logger=logger,
+            callbacks=[speed_monitor, model_checkpoint],
+            max_steps=max_iters,
+            max_epochs=1,
+            limit_val_batches=eval_iters,
+            accumulate_grad_batches=gradient_accumulation_steps,
+            log_every_n_steps=log_interval,
+            val_check_interval=eval_interval,
+            num_nodes=num_nodes
+        )
 
-    L.seed_everything(1337, workers=True)  # same seed for every process to init model (FSDP)
+        L.seed_everything(1337, workers=True)  # same seed for every process to init model (FSDP)
 
-    trainer.print(hparams)
+        trainer.print(hparams)
 
-    if trainer.global_rank == 0:
-        out_dir.mkdir(parents=True, exist_ok=True)
+        if trainer.global_rank == 0:
+            out_dir.mkdir(parents=True, exist_ok=True)
 
-    config = Config.from_name(model_name)
-    trainer.print(f"Loading model with {config.__dict__}")
-    t0 = time.perf_counter()
-    model = LightningGPTModule(config)
-    trainer.print(f"Time to instantiate model: {time.perf_counter() - t0:.02f} seconds.")
+        config = Config.from_name(model_name)
+        trainer.print(f"Loading model with {config.__dict__}")
+        t0 = time.perf_counter()
+        model = LightningGPTModule(config)
+        trainer.print(f"Time to instantiate model: {time.perf_counter() - t0:.02f} seconds.")
 
-    train_data = Dataset(str(data_dir / "train.bin"), config.block_size)
-    val_data = Dataset(str(data_dir / "val.bin"), config.block_size)
-    train_dataloader = DataLoader(train_data, batch_size=micro_batch_size, num_workers=2)
-    val_dataloader = DataLoader(val_data, batch_size=micro_batch_size, num_workers=2)
+        train_data = Dataset(str(data_dir / "train.bin"), config.block_size)
+        val_data = Dataset(str(data_dir / "val.bin"), config.block_size)
+        train_dataloader = DataLoader(train_data, batch_size=micro_batch_size, num_workers=2)
+        val_dataloader = DataLoader(val_data, batch_size=micro_batch_size, num_workers=2)
 
-    t0 = time.perf_counter()
-    trainer.fit(model, train_dataloader, val_dataloader, ckpt_path="last")
-    trainer.print(f"Training time: {(time.perf_counter()-t0):.2f}s")
-    if trainer.strategy.root_device.type == "cuda":
-        trainer.print(f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB")
+        t0 = time.perf_counter()
+        trainer.fit(model, train_dataloader, val_dataloader, ckpt_path="last")
+        trainer.print(f"Training time: {(time.perf_counter()-t0):.2f}s")
+        if trainer.strategy.root_device.type == "cuda":
+            trainer.print(f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB")
 
 
 class Dataset(IterableDataset):

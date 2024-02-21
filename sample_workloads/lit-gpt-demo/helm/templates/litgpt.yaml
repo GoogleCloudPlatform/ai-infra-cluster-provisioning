@@ -164,6 +164,8 @@ spec:
         value: "{{$root.Values.workload.warmupIters}}"
       - name: MAX_ITERS
         value: "{{$root.Values.workload.maxIters}}"
+      - name: COLLECT_NSYS_PROFILE
+        value: "{{$root.Values.workload.collectNsysProfile}}"
       - name: CLUSTER_TYPE
         value: GKE
     volumeMounts:
