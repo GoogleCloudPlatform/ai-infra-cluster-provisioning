@@ -126,8 +126,8 @@ spec:
         valueFrom:
           fieldRef:
             fieldPath: status.hostIP
-      - name: LD_LIBRARY_PATH
-        value: "/usr/local/nvidia/lib64"
+      # - name: LD_LIBRARY_PATH
+      #   value: "/usr/local/nvidia/lib64"
       - name: JOB_TIMESTAMP
         value: "{{$root.Values.workload.jobTimestamp}}"
       - name: MASTER_ADDR

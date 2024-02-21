@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM nvcr.io/nvidia/pytorch:23.09-py3
+FROM nvcr.io/nvidia/pytorch:24.01-py3
 
 
 # Ensure apt-get won't prompt for selecting options
