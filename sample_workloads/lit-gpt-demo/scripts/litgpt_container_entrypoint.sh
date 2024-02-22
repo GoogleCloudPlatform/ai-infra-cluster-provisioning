@@ -7,7 +7,7 @@ set -o pipefail
 : "${NODE_RANK:?Must set NODE_RANK}"
 : "${JOB_TIMESTAMP:?Must set JOB_TIMESTAMP}"
 : "${NNODES:?Must set NNODES}"
-: "${GCS_EXPERIMENT_BUCKET:?Must set GCS_EXPERIMENT_BUCKET}"
+#: "${GCS_EXPERIMENT_BUCKET:?Must set GCS_EXPERIMENT_BUCKET}"
 : "${EXPERIMENT_ROOT_DIR:?Must set EXPERIMENT_ROOT_DIR}"
 : "${GCS_DATA_BUCKET:?Must set GCS_DATA_BUCKET}"
 : "${DATA_DIR:?Must set DATA_DIR}"
@@ -22,7 +22,8 @@ mkdir -p $EXPERIMENT_LOCAL_DIR
 echo $EXPERIMENT_ROOT_DIR
 echo $EXPERIMENT_LOCAL_DIR
 
-gsutil rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+echo "Disabling gsutil calls. Not syncing experiment dir."
+# gsutil rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
 
 LOCAL_DATA_DIR=/data
 mkdir -p $LOCAL_DATA_DIR
@@ -127,12 +128,16 @@ non_blocking_wait() {
 }
 
 function on_script_completion {
-   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
-   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+   # echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
+   # gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+   echo "Disabling gsutil. Not uploading logs."
 
    # semaphore to cleanly exit hardware utilization monitor
    echo "Writing semaphore to exit sidecar container to /usr/share/litgpt/workload_terminated"
    touch /usr/share/litgpt/workload_terminated
+
+   echo "Printing out metrics.csv results"
+   cat $EXPERIMENT_LOCAL_DIR/out/openwebtext/version_0/metrics.csv
 }
 
 
