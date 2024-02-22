@@ -126,8 +126,8 @@ spec:
         valueFrom:
           fieldRef:
             fieldPath: status.hostIP
-      # - name: LD_LIBRARY_PATH
-      #   value: "/usr/local/nvidia/lib64"
+      - name: LD_LIBRARY_PATH
+        value: "/usr/lib/x86_64-linux-gnu:/usr/local/nvidia/lib64"
       - name: JOB_TIMESTAMP
         value: "{{$root.Values.workload.jobTimestamp}}"
       - name: MASTER_ADDR
@@ -168,6 +168,8 @@ spec:
         value: "{{$root.Values.workload.collectNsysProfile}}"
       - name: CLUSTER_TYPE
         value: GKE
+      - name: NCCL_NVLS_ENABLE
+        value: '0'
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
