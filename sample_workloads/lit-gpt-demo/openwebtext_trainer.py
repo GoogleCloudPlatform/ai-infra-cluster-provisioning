@@ -22,15 +22,16 @@ wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
 mp.set_start_method("spawn", force=True)
-import utilities.monitor_collectives
-
-utilities.monitor_collectives.shunt_torch_communication()
-
 
 from lit_gpt import Config
 from lit_gpt.model import GPT, Block
 from lit_gpt.speed_monitor import SpeedMonitorCallback, estimate_flops, measure_flops
 from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, step_csv_logger
+
+use_nsight = os.getenv("COLLECT_NSYS_PROFILE") is "yes"
+if (use_nsight):
+    import utilities.monitor_collectives
+    utilities.monitor_collectives.shunt_torch_communication()
 
 model_name = os.getenv("MODEL_NAME", "Llama-2-70b-hf")
 name = "openwebtext"
@@ -79,8 +80,9 @@ class LightningGPTModule(L.LightningModule):
         )
     
     def on_train_epoch_start(self) -> None:
-        print("Resetting max memory allocation")
-        torch.cuda.reset_peak_memory_stats()
+        if use_nsight:
+            print("Resetting max memory allocation")
+            torch.cuda.reset_peak_memory_stats()
 
     def on_fit_start(self) -> None:
         trainer = self.trainer
@@ -107,7 +109,8 @@ class LightningGPTModule(L.LightningModule):
         
         global_batch_idx = batch_idx / gradient_accumulation_steps
         if (
-            global_batch_idx > 0
+            use_nsight
+            and global_batch_idx > 0
             and global_batch_idx % self.nsys_profile_step_multiple == 0
         ):
             print(f"Starting Nsys profiling")
@@ -122,7 +125,8 @@ class LightningGPTModule(L.LightningModule):
         is_last_microbatch = global_batch_offset == gradient_accumulation_steps - 1
 
         if (
-            global_batch_idx > 1
+            use_nsight
+            and global_batch_idx > 1
             and global_batch_idx % self.nsys_profile_step_multiple == 0
             and is_last_microbatch
         ):

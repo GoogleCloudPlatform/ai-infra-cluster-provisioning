@@ -170,6 +170,8 @@ spec:
         value: GKE
       - name: NCCL_NVLS_ENABLE
         value: '0'
+      - name: NCCL_DEBUG
+        value: "{{$root.Values.workload.ncclDebugLevel}}"
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64

@@ -13,6 +13,7 @@ set -o pipefail
 : "${DATA_DIR:?Must set DATA_DIR}"
 : "${CLUSTER_TYPE:='GKE'}"
 : "${COLLECT_NSYS_PROFILE:='no'}"
+: "${NCCL_DEBUG:='INFO'}"
 
 export EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
 
@@ -57,7 +58,7 @@ set_nccl_specific_configuration() {
     export NCCL_NET_GDR_LEVEL=PIX
     export NCCL_P2P_PXN_LEVEL=0
     export NCCL_DEBUG_SUBSYS=INIT,GRAPH,ENV,TUNING,NET,VERSION
-    export NCCL_DEBUG=INFO
+    export NCCL_DEBUG=${NCCL_DEBUG}
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/tcpx/lib64"
     export NCCL_GPUDIRECTTCPX_FORCE_ACK=1
     export NCCL_GPUDIRECTTCPX_TX_COMPLETION_NANOSLEEP=1000

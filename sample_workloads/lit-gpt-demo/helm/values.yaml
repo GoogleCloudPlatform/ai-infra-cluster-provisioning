@@ -19,4 +19,5 @@ workload:
   microBatchSize: 6
   warmupIters: 10
   maxIters: 30
-  collectNsysProfile: 'no' # Set to 'yes' for profiles
+  collectNsysProfile: 'yes' # Set to 'yes' for profiles
+  ncclDebugLevel: TRACE
