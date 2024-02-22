@@ -28,10 +28,11 @@ from lit_gpt.model import GPT, Block
 from lit_gpt.speed_monitor import SpeedMonitorCallback, estimate_flops, measure_flops
 from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, step_csv_logger
 
-use_nsight = os.getenv("COLLECT_NSYS_PROFILE") is "yes"
+use_nsight = os.getenv("COLLECT_NSYS_PROFILE") == "yes"
 if (use_nsight):
     import utilities.monitor_collectives
     utilities.monitor_collectives.shunt_torch_communication()
+    print("Enabling nsight profiling.")
 
 model_name = os.getenv("MODEL_NAME", "Llama-2-70b-hf")
 name = "openwebtext"
