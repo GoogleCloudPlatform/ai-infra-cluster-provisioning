@@ -14,7 +14,7 @@ FULL_IMAGE=${FULL_IMAGE:="$ARTIFACT_REGISTRY/litgpt-bolt"}
 if [ ! -d $LITGPT_PATH ]; then
     git clone https://github.com/Lightning-AI/lit-gpt.git
     cd lit-gpt
-    git checkout d5d371417ecb3d3b6c4f30837d8bb7cf2b5310ae
+    git checkout 44c3c58b759fa0903ab31ed8863a66c157d5ccd9
     cd ..
     LITGPT_PATH=lit-gpt
 fi
