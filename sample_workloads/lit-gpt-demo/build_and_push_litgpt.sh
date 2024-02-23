@@ -8,7 +8,7 @@ LITGPT_PATH=${LITGPT_PATH:="lit-gpt"}
 echo $LITGPT_PATH
 
 BASE_IMAGE=${BASE_IMAGE:="$ARTIFACT_REGISTRY/litgpt-base"}
-FULL_IMAGE=${FULL_IMAGE:="$ARTIFACT_REGISTRY/litgpt-bolt"}
+FULL_IMAGE=${FULL_IMAGE:="$ARTIFACT_REGISTRY/litgpt-full"}
 
 # Clone LitGPT and checkout a flash-attn enabled commit
 if [ ! -d $LITGPT_PATH ]; then
@@ -25,7 +25,7 @@ cd $LITGPT_PATH
 LITGPT_SHA=$(git rev-parse --short HEAD)
 cd -
 
-BASE_SHORT_TAG="${LITGPT_SHA}"
+BASE_SHORT_TAG="${LITGPT_SHA}-newlitgptcommit"
 BASE_LONG_TAG="${BASE_IMAGE}:${BASE_SHORT_TAG}"
 
 FULL_SHORT_TAG="${BASE_SHORT_TAG}-${SOME_UUID}"

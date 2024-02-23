@@ -18,16 +18,17 @@ RUN apt-get update && \
 
 WORKDIR /workspace/
 
-COPY . .
+COPY requirements-all.txt .
+COPY requirements.txt .
 
 RUN pip install -r requirements-all.txt tokenizers sentencepiece ujson
+RUN pip install --upgrade torchvision
 
 RUN pip install nvidia-dlprof-pytorch-nvtx nvidia-pyindex nvidia-dlprof
 
+COPY . .
 
 # Check install
 RUN python -c "from lit_gpt.model import GPT, Block, Config" && \
   python -c "import lightning as L" && \
   python -c "from lightning.fabric.strategies import FSDPStrategy"
-
-
