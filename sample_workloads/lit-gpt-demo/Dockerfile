@@ -18,13 +18,12 @@ RUN apt-get update && \
 
 WORKDIR /workspace/
 
-COPY requirements-all.txt requirements.txt
+COPY . .
 
-RUN pip install -r requirements.txt tokenizers sentencepiece ujson
+RUN pip install -r requirements-all.txt tokenizers sentencepiece ujson
 
 RUN pip install nvidia-dlprof-pytorch-nvtx nvidia-pyindex nvidia-dlprof
 
-COPY . .
 
 # Check install
 RUN python -c "from lit_gpt.model import GPT, Block, Config" && \
