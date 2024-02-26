@@ -1,6 +1,7 @@
 # Copyright Lightning AI. Licensed under the Apache License 2.0, see LICENSE file.
 
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -25,9 +26,9 @@ from lit_gpt.utils import chunked_cross_entropy, estimate_flops, get_default_sup
 
 
 def setup(
-    model_name: str = "Llama-2-13b-hf",
+    model_name: str = os.getenv("MODEL_NAME", "Llama-2-70b-hf"),
     data_dir: Path = Path("/data"),
-    out_dir: Path = Path("out/openwebtext"),
+    out_dir: Path = Path(os.getenv("EXPERIMENT_LOCAL_DIR", "")) / "out",
     precision: Optional[str] = None,
     resume: Union[bool, Path] = False,
     eval_interval: int = 1000,
@@ -41,10 +42,10 @@ def setup(
     beta2: float = 0.95,
     lr_warmup_steps: int = 100,
     min_lr: float = 6e-5,
-    global_batch_size: int = 6,
-    micro_batch_size: int = 6,
+    global_batch_size: int = (int(os.getenv("NNODES", "1")) * 8 * int(os.getenv("MICRO_BATCH_SIZE", "6"))),
+    micro_batch_size: int = int(os.getenv("MICRO_BATCH_SIZE", "6")),
     max_norm: float = 1.0,
-    epochs: int = 1,
+    epochs: int = int(os.getenv("NUMBER_OF_EPOCHS", "2")),
     train_epoch_size: int = 30,
 ) -> None:
     print(locals())
