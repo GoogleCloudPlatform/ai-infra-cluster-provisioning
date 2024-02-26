@@ -41,10 +41,10 @@ def setup(
     beta2: float = 0.95,
     lr_warmup_steps: int = 100,
     min_lr: float = 6e-5,
-    global_batch_size: int = 6,
+    global_batch_size: int = 96,
     micro_batch_size: int = 6,
     max_norm: float = 1.0,
-    epochs: int = 1,
+    epochs: int = 1000,
     train_epoch_size: int = 30,
 ) -> None:
     print(locals())
