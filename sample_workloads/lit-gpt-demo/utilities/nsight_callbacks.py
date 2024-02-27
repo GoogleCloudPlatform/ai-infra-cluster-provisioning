@@ -32,11 +32,11 @@ class NsightCallback:
             and global_batch_idx % self.nsys_profile_step_multiple == 0
             and is_last_microbatch
         ):
-            self.print(f"Stopping Nsys profiling")
+            print(f"Stopping Nsys profiling")
             torch.cuda.cudart().cudaProfilerStop()
         if is_last_microbatch:
-            self.print(f"HEARTBEAT: {global_batch_idx=}, {batch_idx=}")
-            self.print(
+            print(f"HEARTBEAT: {global_batch_idx=}, {batch_idx=}")
+            print(
                 f"Max memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB"
             )
             sys.stdout.flush()
