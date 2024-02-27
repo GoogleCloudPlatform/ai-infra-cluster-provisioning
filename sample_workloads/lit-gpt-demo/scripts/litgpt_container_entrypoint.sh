@@ -148,6 +148,7 @@ function on_script_completion {
     cat $EXPERIMENT_LOCAL_DIR/out/version_0/metrics.csv
   else
     echo "Metrics.csv not located at $METRICS_FILE"
+  fi
 }
 
 
