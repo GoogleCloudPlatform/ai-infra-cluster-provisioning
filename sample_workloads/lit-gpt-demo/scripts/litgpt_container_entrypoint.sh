@@ -137,7 +137,7 @@ function on_script_completion {
    touch /usr/share/litgpt/workload_terminated
 
    echo "Printing out metrics.csv results"
-   cat $EXPERIMENT_LOCAL_DIR/out/openwebtext/version_0/metrics.csv
+   cat $EXPERIMENT_LOCAL_DIR/out/version_0/metrics.csv
 }
 
 
