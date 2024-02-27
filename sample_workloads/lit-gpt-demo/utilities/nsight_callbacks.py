@@ -5,7 +5,7 @@ import nvtx
 import inspect
 
 class NsightCallback:
-    def init(self):
+    def __init__(self):
         self.nsys_profile_step_multiple = 5
         self.backward_nvtx_range = None
 
