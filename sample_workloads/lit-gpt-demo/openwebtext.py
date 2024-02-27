@@ -55,7 +55,7 @@ def setup(
     micro_batch_size: int = int(os.getenv("MICRO_BATCH_SIZE", "6")),
     max_norm: float = 1.0,
     epochs: int = int(os.getenv("NUMBER_OF_EPOCHS", "2")),
-    train_epoch_size: int = int(os.getenv("STEPS_PER_EPOCH", "30")),
+    train_epoch_size: int = 8 * int(os.getenv("MICRO_BATCH_SIZE", "6")) * int(os.getenv("STEPS_PER_EPOCH", "30")),
 ) -> None:
     print(locals())
     precision = precision or get_default_supported_precision(training=True)
@@ -72,7 +72,10 @@ def setup(
         strategy = "auto"
 
     logger = CSVLogger(out_dir.parent, out_dir.name, flush_logs_every_n_steps=log_interval)
-    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=logger)
+    callbacks = []
+    if use_nsight:
+        callbacks.append(NsightCallback())
+    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=logger, callbacks=callbacks)
 
     fabric.launch(
         main,
