@@ -21,3 +21,4 @@ workload:
   maxIters: 30
   collectNsysProfile: 'yes' # Set to 'yes' for profiles
   ncclDebugLevel: TRACE
+  numberOfEpochs: 51
