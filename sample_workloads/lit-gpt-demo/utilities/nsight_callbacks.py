@@ -5,9 +5,9 @@ import nvtx
 import inspect
 
 class NsightCallback:
-    def init():
-        nsys_profile_step_multiple = 5
-        backward_nvtx_range = None
+    def init(self):
+        self.nsys_profile_step_multiple = 5
+        self.backward_nvtx_range = None
 
     def on_train_batch_start(self, batch_idx: int, gradient_accumulation_steps: int) -> None:
         global_batch_idx = batch_idx / gradient_accumulation_steps

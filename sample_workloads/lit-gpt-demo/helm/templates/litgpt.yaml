@@ -68,6 +68,9 @@ spec:
     emptyDir: {}
   - name: tcpx-nccl-plugin-volume
     emptyDir: {}
+  - name: data-volume
+    hostPath:
+      path: /home/data
   {{if eq $root.Values.network.useTcpx "yes"}}
   initContainers:
   - name: tcpx-nccl-plugin-installer
@@ -189,6 +192,8 @@ spec:
         mountPath: /dev/shm
       - name: workload-terminated-volume
         mountPath: /usr/share/litgpt
+      - name: data-volume
+        mountPath: /data
     resources:
       limits:
         nvidia.com/gpu: !!int 8
