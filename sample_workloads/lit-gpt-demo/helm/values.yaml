@@ -22,3 +22,4 @@ workload:
   collectNsysProfile: 'yes' # Set to 'yes' for profiles
   ncclDebugLevel: TRACE
   numberOfEpochs: 51
+  stepsPerEpoch: 30
