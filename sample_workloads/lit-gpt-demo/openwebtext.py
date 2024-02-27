@@ -195,7 +195,7 @@ def train(
 
     lr_warmup_iters = train_args.lr_warmup_steps * train_args.gradient_accumulation_iters(devices)
     for state["iter_num"] in range(state["iter_num"], train_args.max_iters(devices)):
-        print("state['iter_num']: {}, range(state['iter_num']: {}, train_args.max_iters(devices): {}".format(state["iter_num"], range(state["iter_num"], train_args.max_iters(devices))))
+        print("state['iter_num']: {}, train_args.max_iters(devices): {}".format(state["iter_num"], train_args.max_iters(devices)))
         # determine and set the learning rate for this iteration
         lr = get_lr(
             train_args.learning_rate,

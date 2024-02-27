@@ -25,7 +25,7 @@ echo $EXPERIMENT_LOCAL_DIR
 if [[ -z $GCS_EXPERIMENT_BUCKET ]]; then
   echo "Disabling gsutil calls. Not syncing experiment dir."
 else
-  gsutil rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+  gsutil -m rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
 fi
 
 LOCAL_DATA_DIR=/data
