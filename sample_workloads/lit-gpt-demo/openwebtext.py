@@ -9,6 +9,7 @@ from typing import Optional, Tuple, Union
 
 import lightning as L
 import numpy as np
+import nvtx
 import torch
 from lightning.fabric.loggers import CSVLogger
 from lightning.fabric.strategies import FSDPStrategy
@@ -23,6 +24,14 @@ from lit_gpt import Config
 from lit_gpt.args import EvalArgs, IOArgs, TrainArgs
 from lit_gpt.model import GPT, Block
 from lit_gpt.utils import chunked_cross_entropy, estimate_flops, get_default_supported_precision, num_parameters
+
+from utilities.nsight_callbacks import NsightCallback
+
+use_nsight = os.getenv("COLLECT_NSYS_PROFILE") == "yes"
+if (use_nsight):
+    import utilities.monitor_collectives
+    utilities.monitor_collectives.shunt_torch_communication()
+    print("Enabling nsight profiling.")
 
 
 def setup(
@@ -42,11 +51,11 @@ def setup(
     beta2: float = 0.95,
     lr_warmup_steps: int = 100,
     min_lr: float = 6e-5,
-    global_batch_size: int = (int(os.getenv("NNODES", "1")) * 8 * int(os.getenv("MICRO_BATCH_SIZE", "6"))),
+    global_batch_size: int = (int(os.getenv("NNODES", "1")) * 8 * int(os.getenv("BATCH_SIZE", "6"))),
     micro_batch_size: int = int(os.getenv("MICRO_BATCH_SIZE", "6")),
     max_norm: float = 1.0,
     epochs: int = int(os.getenv("NUMBER_OF_EPOCHS", "2")),
-    train_epoch_size: int = 30,
+    train_epoch_size: int = int(os.getenv("STEPS_PER_EPOCH", "30")),
 ) -> None:
     print(locals())
     precision = precision or get_default_supported_precision(training=True)
@@ -174,10 +183,12 @@ def train(
         fabric.print(f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}")
         del meta_model, x
 
-    throughput = ThroughputMonitor(fabric, window_size=50)
+    throughput = ThroughputMonitor(fabric, window_size=int(os.getenv("WINDOW_SIZE", "10")))
     total_t0 = time.perf_counter()
 
     train_iter = iter(train_dataloader)
+
+    fabric.call("on_train_epoch_start")
 
     lr_warmup_iters = train_args.lr_warmup_steps * train_args.gradient_accumulation_iters(devices)
     for state["iter_num"] in range(state["iter_num"], train_args.max_iters(devices)):
@@ -197,16 +208,21 @@ def train(
 
         input_ids, targets = next(train_iter)
 
+        fabric.call("on_train_batch_start", iter_num, train_args.gradient_accumulation_iters(devices))
+
         is_accumulating = iter_num % train_args.gradient_accumulation_iters(devices) != 0
         with fabric.no_backward_sync(model, enabled=is_accumulating):
             logits = model(input_ids)
             loss = chunked_cross_entropy(logits, targets, chunk_size=0)
+            fabric.call("on_before_backward")
             fabric.backward(loss / train_args.gradient_accumulation_iters(devices))
+            fabric.call("on_after_backward")
 
         if not is_accumulating:
             fabric.clip_gradients(model, optimizer, max_norm=train_args.max_norm)
-            optimizer.step()
-            optimizer.zero_grad()
+            with nvtx.annotate(color="orange"):
+                optimizer.step()
+                optimizer.zero_grad()
             state["step_count"] += 1
 
         if iter_num % train_args.log_interval == 0:
@@ -231,6 +247,9 @@ def train(
             t1 = time.perf_counter() - t0
             fabric.print(f"step {iter_num}: val loss {val_loss.item():.4f}, val time: {t1 * 1000:.2f}ms")
             fabric.barrier()
+
+        fabric.call("on_train_batch_end", iter_num, train_args.gradient_accumulation_iters(devices))
+
         if not is_accumulating and state["step_count"] % train_args.save_interval == 0:
             checkpoint_path = io_args.out_dir / f"iter-{iter_num:06d}-ckpt.pth"
             fabric.print(f"Saving checkpoint to {str(checkpoint_path)!r}")

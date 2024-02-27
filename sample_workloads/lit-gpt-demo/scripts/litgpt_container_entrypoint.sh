@@ -7,10 +7,10 @@ set -o pipefail
 : "${NODE_RANK:?Must set NODE_RANK}"
 : "${JOB_TIMESTAMP:?Must set JOB_TIMESTAMP}"
 : "${NNODES:?Must set NNODES}"
-#: "${GCS_EXPERIMENT_BUCKET:?Must set GCS_EXPERIMENT_BUCKET}"
 : "${EXPERIMENT_ROOT_DIR:?Must set EXPERIMENT_ROOT_DIR}"
 : "${GCS_DATA_BUCKET:?Must set GCS_DATA_BUCKET}"
 : "${DATA_DIR:?Must set DATA_DIR}"
+: "${GCS_EXPERIMENT_BUCKET:=''}"
 : "${CLUSTER_TYPE:='GKE'}"
 : "${COLLECT_NSYS_PROFILE:='no'}"
 : "${NCCL_DEBUG:='INFO'}"
@@ -22,8 +22,11 @@ mkdir -p $EXPERIMENT_LOCAL_DIR
 echo $EXPERIMENT_ROOT_DIR
 echo $EXPERIMENT_LOCAL_DIR
 
-echo "Disabling gsutil calls. Not syncing experiment dir."
-# gsutil rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+if [[ -z $GCS_EXPERIMENT_BUCKET ]]; then
+  echo "Disabling gsutil calls. Not syncing experiment dir."
+else
+  gsutil rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+fi
 
 LOCAL_DATA_DIR=/data
 mkdir -p $LOCAL_DATA_DIR
@@ -128,16 +131,23 @@ non_blocking_wait() {
 }
 
 function on_script_completion {
-   # echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
-   # gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
-   echo "Disabling gsutil. Not uploading logs."
+   if [[ -z $GCS_EXPERIMENT_BUCKET ]]; then
+    echo "Disabling gsutil. Not uploading logs."
+  else
+    echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
+    gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+  fi
 
-   # semaphore to cleanly exit hardware utilization monitor
-   echo "Writing semaphore to exit sidecar container to /usr/share/litgpt/workload_terminated"
-   touch /usr/share/litgpt/workload_terminated
+  # semaphore to cleanly exit hardware utilization monitor
+  echo "Writing semaphore to exit sidecar container to /usr/share/litgpt/workload_terminated"
+  touch /usr/share/litgpt/workload_terminated
 
-   echo "Printing out metrics.csv results"
-   cat $EXPERIMENT_LOCAL_DIR/out/version_0/metrics.csv
+  METRICS_FILE=$EXPERIMENT_LOCAL_DIR/out/version_0/metrics.csv
+  if test -f $METRICS_FILE; then
+    echo "Printing out metrics.csv results from $METRICS_FILE"
+    cat $EXPERIMENT_LOCAL_DIR/out/version_0/metrics.csv
+  else
+    echo "Metrics.csv not located at $METRICS_FILE"
 }
 
 
@@ -179,11 +189,11 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
      $CMD_PREFIX \
      python /workspace/pretrain/openwebtext.py \
-     --devices=$GPUS_PER_NODE --precision="bf16-true" --model_name="Llama-2-13b-hf" > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
+     --devices=$GPUS_PER_NODE --precision="bf16-true" --model_name="$MODEL_NAME" > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
    PID=$!
    PIDS+=($PID)
 
-   echo "Launched openwebtext_trainer.py for rank $RANK with PID $PID"
+   echo "Launched openwebtext.py for rank $RANK with PID $PID"
 done
 
 wait_all_success_or_exit "${PIDS[@]}"
