@@ -195,6 +195,7 @@ def train(
 
     lr_warmup_iters = train_args.lr_warmup_steps * train_args.gradient_accumulation_iters(devices)
     for state["iter_num"] in range(state["iter_num"], train_args.max_iters(devices)):
+        print("state['iter_num']: {}, range(state['iter_num']: {}, train_args.max_iters(devices): {}".format(state["iter_num"], range(state["iter_num"], train_args.max_iters(devices))))
         # determine and set the learning rate for this iteration
         lr = get_lr(
             train_args.learning_rate,
@@ -215,8 +216,11 @@ def train(
 
         is_accumulating = iter_num % train_args.gradient_accumulation_iters(devices) != 0
         with fabric.no_backward_sync(model, enabled=is_accumulating):
+            # Forward pass
             logits = model(input_ids)
             loss = chunked_cross_entropy(logits, targets, chunk_size=0)
+            
+            # Backward pass
             fabric.call("on_before_backward")
             fabric.backward(loss / train_args.gradient_accumulation_iters(devices))
             fabric.call("on_after_backward")
