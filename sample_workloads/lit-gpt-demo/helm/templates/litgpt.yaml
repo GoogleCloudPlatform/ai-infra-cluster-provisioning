@@ -1,9 +1,9 @@
 {{- $requiredVar := .Values.cluster.nNodes | required ".Values.cluster.nNodes is required" -}}
 {{- $requiredVar := .Values.cluster.nodePool | required ".Values.cluster.nodePool is required" -}}
 {{- $requiredVar := .Values.network.ncclIfnames | required ".Values.ncclIfnames is required" -}}
-{{- $requiredVar := .Values.workload.jobTimestamp | required ".Values.jobTimestamp is required" -}}
-{{- $requiredVar := .Values.workload.gcsExperimentBucket | required ".Values.gcsExperimentBucket is required" -}}
-{{- $requiredVar := .Values.workload.experimentDir | required ".Values.experimentDir is required" -}}
+{{- $requiredVar := .Values.logging.jobTimestamp | required ".Values.jobTimestamp is required" -}}
+{{- $requiredVar := .Values.logging.gcsExperimentBucket | required ".Values.gcsExperimentBucket is required" -}}
+{{- $requiredVar := .Values.logging.experimentDir | required ".Values.experimentDir is required" -}}
 {{- $requiredVar := .Values.workload.gcsDataBucket | required ".Values.gcsDataBucket is required" -}}
 {{- $requiredVar := .Values.workload.dataDir| required ".Values.dataDir is required" -}}
 {{- $requiredVar := .Values.workload.image | required ".Values.image is required" -}}
@@ -152,9 +152,9 @@ spec:
       - name: CPU_PINNING_MODE
         value: "{{$root.Values.network.cpuPinningMode}}"
       - name: GCS_EXPERIMENT_BUCKET
-        value: "{{$root.Values.workload.gcsExperimentBucket}}"
+        value: "{{$root.Values.logging.gcsExperimentBucket}}"
       - name: EXPERIMENT_ROOT_DIR
-        value: "{{$root.Values.workload.experimentDir}}"
+        value: "{{$root.Values.logging.experimentDir}}"
       - name: GCS_DATA_BUCKET
         value: "{{$root.Values.workload.gcsDataBucket}}"
       - name: DATA_DIR
@@ -167,16 +167,14 @@ spec:
         value: "{{$root.Values.workload.modelName}}"
       - name: WARMUP_ITERS
         value: "{{$root.Values.workload.warmupIters}}"
-      - name: MAX_ITERS
-        value: "{{$root.Values.workload.maxIters}}"
       - name: COLLECT_NSYS_PROFILE
-        value: "{{$root.Values.workload.collectNsysProfile}}"
+        value: "{{$root.Values.logging.collectNsysProfile}}"
       - name: CLUSTER_TYPE
         value: GKE
       - name: NCCL_NVLS_ENABLE
         value: '0'
       - name: NCCL_DEBUG
-        value: "{{$root.Values.workload.ncclDebugLevel}}"
+        value: "{{$root.Values.logging.ncclDebugLevel}}"
       - name: NUMBER_OF_EPOCHS
         value: "{{$root.Values.workload.numberOfEpochs}}"
       - name: STEPS_PER_EPOCH

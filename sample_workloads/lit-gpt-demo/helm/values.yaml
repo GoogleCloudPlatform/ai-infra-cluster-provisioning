@@ -7,10 +7,13 @@ network:
   ncclPlugin: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.7
   rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.11
   disablePmtu: "yes"
-workload:
-  jobTimestamp: 1
+logging:
+  collectNsysProfile: 'no' # Set to 'yes' for profiles
+  ncclDebugLevel: INFO
   gcsExperimentBucket: pirillo-sct-bucket
+  jobTimestamp: 1
   experimentDir: llama2-13b
+workload:
   gcsDataBucket: litgpt-public-bucket
   dataDir: openwebtext_dataset
   image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt/litgpt-full:d5d3714-pytorch22-pytorch22 
@@ -18,8 +21,5 @@ workload:
   batchSize: 6
   microBatchSize: 6
   warmupIters: 10
-  maxIters: 30
-  collectNsysProfile: 'yes' # Set to 'yes' for profiles
-  ncclDebugLevel: TRACE
   numberOfEpochs: 51
   stepsPerEpoch: 30

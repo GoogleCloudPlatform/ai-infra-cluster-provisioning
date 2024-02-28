@@ -13,11 +13,11 @@ FULL_IMAGE=${FULL_IMAGE:="$ARTIFACT_REGISTRY/litgpt-full"}
 # Clone LitGPT and checkout a flash-attn enabled commit
 if [ ! -d $LITGPT_PATH ]; then
     git clone https://github.com/Lightning-AI/lit-gpt.git
-    cd lit-gpt
-    git checkout 44c3c58b759fa0903ab31ed8863a66c157d5ccd9
-    cd ..
     LITGPT_PATH=lit-gpt
 fi
+cd lit-gpt
+git checkout 44c3c58b759fa0903ab31ed8863a66c157d5ccd9
+cd ..
 
 cp Dockerfile $LITGPT_PATH/Dockerfile
 
@@ -25,7 +25,7 @@ cd $LITGPT_PATH
 LITGPT_SHA=$(git rev-parse --short HEAD)
 cd -
 
-BASE_SHORT_TAG="${LITGPT_SHA}-newlitgptcommit"
+BASE_SHORT_TAG="${LITGPT_SHA}"
 BASE_LONG_TAG="${BASE_IMAGE}:${BASE_SHORT_TAG}"
 
 FULL_SHORT_TAG="${BASE_SHORT_TAG}-${SOME_UUID}"

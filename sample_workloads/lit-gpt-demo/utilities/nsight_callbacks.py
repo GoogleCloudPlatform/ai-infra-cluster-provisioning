@@ -1,8 +1,7 @@
 import torch
 import sys
-from typing import Optional, Tuple, Union, Any
+from typing import Any
 import nvtx
-import inspect
 
 class NsightCallback:
     def __init__(self):
@@ -11,7 +10,6 @@ class NsightCallback:
 
     def on_train_batch_start(self, batch_idx: int, gradient_accumulation_steps: int) -> None:
         global_batch_idx = batch_idx / gradient_accumulation_steps
-        print("In callback: {}".format(inspect.currentframe().f_code.co_name))
         if (
             global_batch_idx > 0
             and global_batch_idx % self.nsys_profile_step_multiple == 0
@@ -22,7 +20,6 @@ class NsightCallback:
     def on_train_batch_end(
         self, batch_idx: int, gradient_accumulation_steps: int
     ) -> None:
-        print("In callback: {}".format(inspect.currentframe().f_code.co_name))
         global_batch_idx = batch_idx // gradient_accumulation_steps
         global_batch_offset = batch_idx % gradient_accumulation_steps
         is_last_microbatch = global_batch_offset == gradient_accumulation_steps - 1
@@ -44,11 +41,9 @@ class NsightCallback:
 
     
     def on_before_backward(self):
-        print("In callback: {}".format(inspect.currentframe().f_code.co_name))
         self.backward_nvtx_range = nvtx.start_range(message="backward", color="red")
 
     def on_after_backward(self):
-        print("In callback: {}".format(inspect.currentframe().f_code.co_name))
         if self.backward_nvtx_range:
             nvtx.end_range(self.backward_nvtx_range)
 
