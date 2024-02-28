@@ -22,7 +22,7 @@ mkdir -p $EXPERIMENT_LOCAL_DIR
 echo $EXPERIMENT_ROOT_DIR
 echo $EXPERIMENT_LOCAL_DIR
 
-if [[ ${#GCS_EXPERIMENT_BUCKET} <= 2 ]]; then
+if [[ ${#GCS_EXPERIMENT_BUCKET} -le 2 ]]; then
   echo "Disabling gsutil calls. Not syncing experiment dir."
 else
   gsutil -m rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
@@ -131,7 +131,7 @@ non_blocking_wait() {
 }
 
 function on_script_completion {
-  if [[ ${#GCS_EXPERIMENT_BUCKET} <= 2 ]]; then
+  if [[ ${#GCS_EXPERIMENT_BUCKET} -le 2 ]]; then
     echo "Disabling gsutil. Not uploading logs."
   else
     echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
