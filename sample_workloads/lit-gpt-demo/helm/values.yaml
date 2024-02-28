@@ -1,6 +1,6 @@
 cluster:
   nNodes: 4
-  nodePool: a3-multi-nic
+  nodePool: np-1
 network:
   useTcpx: "yes"
   ncclIfnames: 'eth0'
@@ -10,16 +10,16 @@ network:
 logging:
   collectNsysProfile: 'no' # Set to 'yes' for profiles
   ncclDebugLevel: INFO
-  gcsExperimentBucket: pirillo-sct-bucket
+  gcsExperimentBucket: ''
   jobTimestamp: 1
   experimentDir: llama2-13b
 workload:
   gcsDataBucket: litgpt-public-bucket
   dataDir: openwebtext_dataset
-  image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt/litgpt-full:d5d3714-pytorch22-pytorch22 
+  image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt/litgpt-full:latest
   modelName: Llama-2-13b-hf
   batchSize: 6
   microBatchSize: 6
   warmupIters: 10
-  numberOfEpochs: 51
+  numberOfEpochs: 1
   stepsPerEpoch: 30

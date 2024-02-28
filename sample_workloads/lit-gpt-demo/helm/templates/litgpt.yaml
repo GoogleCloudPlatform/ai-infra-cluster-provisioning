@@ -2,7 +2,6 @@
 {{- $requiredVar := .Values.cluster.nodePool | required ".Values.cluster.nodePool is required" -}}
 {{- $requiredVar := .Values.network.ncclIfnames | required ".Values.ncclIfnames is required" -}}
 {{- $requiredVar := .Values.logging.jobTimestamp | required ".Values.jobTimestamp is required" -}}
-{{- $requiredVar := .Values.logging.gcsExperimentBucket | required ".Values.gcsExperimentBucket is required" -}}
 {{- $requiredVar := .Values.logging.experimentDir | required ".Values.experimentDir is required" -}}
 {{- $requiredVar := .Values.workload.gcsDataBucket | required ".Values.gcsDataBucket is required" -}}
 {{- $requiredVar := .Values.workload.dataDir| required ".Values.dataDir is required" -}}
