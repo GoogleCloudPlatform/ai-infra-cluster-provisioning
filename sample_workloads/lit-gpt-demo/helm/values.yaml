@@ -5,7 +5,7 @@ network:
   useTcpx: "yes"
   ncclIfnames: 'eth0'
   ncclPlugin: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.7
-  image: us-docker.pkg.dev/tcpfastrak-staging/fastrak-guest-image-multi-region/fastrak-rxdm:latest
+  rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.11
   disablePmtu: "yes"
 logging:
   collectNsysProfile: 'no' # Set to 'yes' for profiles
