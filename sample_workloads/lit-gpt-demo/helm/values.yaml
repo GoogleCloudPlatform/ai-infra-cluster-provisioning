@@ -5,19 +5,19 @@ network:
   useTcpx: "yes"
   ncclIfnames: 'eth0'
   ncclPlugin: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.7
-  rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.11
+  rxdmContainer: us-docker.pkg.dev/tcpfastrak-staging/fastrak-guest-image-multi-region/fastrak-rxdm:latest
   disablePmtu: "yes"
 logging:
   collectNsysProfile: 'no' # Set to 'yes' for profiles
   ncclDebugLevel: INFO
   gcsExperimentBucket: ''
   jobTimestamp: 1
-  experimentDir: llama2-13b
+  experimentDir: llama2-70b-fastrak
 workload:
   gcsDataBucket: litgpt-public-bucket
   dataDir: openwebtext_dataset
-  image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt/litgpt-full:latest
-  modelName: Llama-2-13b-hf
+  image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt/litgpt-full:44c3c58-a3plus-228db205-180a-4cd6-a2ef-ace9632b2f93
+  modelName: Llama-2-70b-hf
   batchSize: 6
   microBatchSize: 6
   warmupIters: 10
