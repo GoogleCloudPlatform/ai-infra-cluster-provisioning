@@ -7,12 +7,13 @@ set -o pipefail
 : "${NODE_RANK:?Must set NODE_RANK}"
 : "${JOB_TIMESTAMP:?Must set JOB_TIMESTAMP}"
 : "${NNODES:?Must set NNODES}"
-: "${GCS_EXPERIMENT_BUCKET:?Must set GCS_EXPERIMENT_BUCKET}"
 : "${EXPERIMENT_ROOT_DIR:?Must set EXPERIMENT_ROOT_DIR}"
 : "${GCS_DATA_BUCKET:?Must set GCS_DATA_BUCKET}"
 : "${DATA_DIR:?Must set DATA_DIR}"
+: "${GCS_EXPERIMENT_BUCKET:=''}"
 : "${CLUSTER_TYPE:='GKE'}"
 : "${COLLECT_NSYS_PROFILE:='no'}"
+: "${NCCL_DEBUG:='INFO'}"
 
 export EXPERIMENT_LOCAL_DIR=/experiment/${EXPERIMENT_ROOT_DIR}
 
@@ -21,7 +22,11 @@ mkdir -p $EXPERIMENT_LOCAL_DIR
 echo $EXPERIMENT_ROOT_DIR
 echo $EXPERIMENT_LOCAL_DIR
 
-gsutil rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+if [[ ${#GCS_EXPERIMENT_BUCKET} -le 2 ]]; then
+  echo "Disabling gsutil calls. Not syncing experiment dir."
+else
+  gsutil -m rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+fi
 
 LOCAL_DATA_DIR=/data
 mkdir -p $LOCAL_DATA_DIR
@@ -57,7 +62,7 @@ set_nccl_specific_configuration() {
     export NCCL_NET_GDR_LEVEL=PIX
     export NCCL_P2P_PXN_LEVEL=0
     export NCCL_DEBUG_SUBSYS=INIT,GRAPH,ENV,TUNING,NET,VERSION
-    export NCCL_DEBUG=INFO
+    export NCCL_DEBUG=${NCCL_DEBUG}
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/tcpx/lib64"
     export NCCL_GPUDIRECTTCPX_FORCE_ACK=1
     export NCCL_GPUDIRECTTCPX_TX_COMPLETION_NANOSLEEP=1000
@@ -126,12 +131,24 @@ non_blocking_wait() {
 }
 
 function on_script_completion {
-   echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
-   gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+  if [[ ${#GCS_EXPERIMENT_BUCKET} -le 2 ]]; then
+    echo "Disabling gsutil. Not uploading logs."
+  else
+    echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
+    gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+  fi
 
-   # semaphore to cleanly exit hardware utilization monitor
-   echo "Writing semaphore to exit sidecar container to /usr/share/litgpt/workload_terminated"
-   touch /usr/share/litgpt/workload_terminated
+  # semaphore to cleanly exit hardware utilization monitor
+  echo "Writing semaphore to exit sidecar container to /usr/share/litgpt/workload_terminated"
+  touch /usr/share/litgpt/workload_terminated
+
+  METRICS_FILE=$EXPERIMENT_LOCAL_DIR/out/version_0/metrics.csv
+  if test -f $METRICS_FILE; then
+    echo "Printing out metrics.csv results from $METRICS_FILE"
+    cat $EXPERIMENT_LOCAL_DIR/out/version_0/metrics.csv
+  else
+    echo "Metrics.csv not located at $METRICS_FILE"
+  fi
 }
 
 
@@ -172,12 +189,12 @@ for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
 
    RANK=$RANK LOCAL_RANK=$LOCAL_RANK \
      $CMD_PREFIX \
-     python /workspace/pretrain/openwebtext_trainer.py \
-     --devices=$GPUS_PER_NODE --precision="bf16-true" > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
+     python /workspace/pretrain/openwebtext.py \
+     --devices=$GPUS_PER_NODE --precision="bf16-true" --model_name="$MODEL_NAME" > >(tee "$LOG_DIR/pretrain_gpt_rank$RANK.log") 2>&1 &
    PID=$!
    PIDS+=($PID)
 
-   echo "Launched openwebtext_trainer.py for rank $RANK with PID $PID"
+   echo "Launched openwebtext.py for rank $RANK with PID $PID"
 done
 
 wait_all_success_or_exit "${PIDS[@]}"

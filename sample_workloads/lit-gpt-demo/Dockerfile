@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM nvcr.io/nvidia/pytorch:23.09-py3
+FROM nvcr.io/nvidia/pytorch:24.01-py3
 
 
 # Ensure apt-get won't prompt for selecting options
@@ -18,10 +18,11 @@ RUN apt-get update && \
 
 WORKDIR /workspace/
 
-COPY requirements.txt requirements.txt
+COPY requirements-all.txt .
+COPY requirements.txt .
 
-RUN MAX_JOBS=4 pip install 'flash-attn==2.0.4' --no-build-isolation \
-  && pip install -r requirements.txt tokenizers sentencepiece ujson
+RUN pip install -r requirements-all.txt tokenizers sentencepiece ujson
+RUN pip install --upgrade torchvision
 
 RUN pip install nvidia-dlprof-pytorch-nvtx nvidia-pyindex nvidia-dlprof
 
@@ -31,5 +32,3 @@ COPY . .
 RUN python -c "from lit_gpt.model import GPT, Block, Config" && \
   python -c "import lightning as L" && \
   python -c "from lightning.fabric.strategies import FSDPStrategy"
-
-
