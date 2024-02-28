@@ -75,7 +75,9 @@ def setup(
     callbacks = []
     if use_nsight:
         callbacks.append(NsightCallback())
-    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=logger, callbacks=callbacks)
+    fabric = L.Fabric(
+        devices=devices, strategy=strategy, precision=precision,
+        loggers=logger, callbacks=callbacks, num_nodes=int(os.getenv("NNODES", "1")))
 
     fabric.launch(
         main,
