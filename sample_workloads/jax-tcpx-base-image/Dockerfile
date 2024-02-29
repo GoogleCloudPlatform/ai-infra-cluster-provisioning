@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-ENV VERSION=0.4.25
+ARG VERSION=0.4.25
 
 RUN pip install --no-cache-dir --upgrade pip
 
