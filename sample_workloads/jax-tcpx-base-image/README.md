@@ -10,5 +10,5 @@ us-docker.pkg.dev/$PROJECT_ID/jax-gpu/base-tcpx:0.4.21
 ## Pushing new image
 ```
 gcloud builds submit --config=cloudbuild.yaml \
-  --substitutions=_VERSION=0.4.21
+  --substitutions=_VERSION=0.4.21 --project gce-ai-infra
 ```
