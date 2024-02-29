@@ -1,0 +1,6 @@
+# Build and push image to Artifact Registry
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '--build-arg', 'VERSION=${_VERSION}', '-t', 'us-docker.pkg.dev/$PROJECT_ID/jax-gpu/base-tcpx:${_VERSION}', '.' ]
+images:
+- 'us-docker.pkg.dev/$PROJECT_ID/jax-gpu/base-tcpx:${_VERSION}'
