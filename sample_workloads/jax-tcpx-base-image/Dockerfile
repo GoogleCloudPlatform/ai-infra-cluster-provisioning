@@ -13,9 +13,9 @@ RUN pip install --no-cache-dir --upgrade "jax[cuda12_pip]==${VERSION}" -f https:
 
 WORKDIR /workspace/
 
-ADD entrypoint.sh .
+ADD entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT ["bash", "entrypoint.sh"]
+ENTRYPOINT ["bash", "/entrypoint.sh"]
 
 # Environment variables required by TCPX
 ENV NCCL_NVLS_ENABLE=0
