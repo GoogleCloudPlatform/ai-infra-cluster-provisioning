@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-ARG VERSION=0.4.25
+ARG VERSION=0.4.21
 
 # Install python and pip
 RUN apt-get update && apt-get install -y --no-install-recommends \
