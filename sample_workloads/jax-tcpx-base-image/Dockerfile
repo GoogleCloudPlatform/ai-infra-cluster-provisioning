@@ -1,13 +1,8 @@
-FROM ubuntu:22.04
+FROM python:3.10-slim
 
 ARG VERSION=0.4.25
 
-# Install python and pip
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    python3-pip && \
-    rm -rf /var/lib/apt/lists/*
-
+RUN pip install --no-cache-dir --upgrade pip
 
 RUN pip install --no-cache-dir --upgrade "jax[cuda12_pip]==${VERSION}" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
