@@ -1,9 +1,8 @@
 {{- $requiredVar := .Values.cluster.nNodes | required ".Values.cluster.nNodes is required" -}}
 {{- $requiredVar := .Values.cluster.nodePool | required ".Values.cluster.nodePool is required" -}}
 {{- $requiredVar := .Values.network.ncclIfnames | required ".Values.ncclIfnames is required" -}}
-{{- $requiredVar := .Values.workload.jobTimestamp | required ".Values.jobTimestamp is required" -}}
-{{- $requiredVar := .Values.workload.gcsExperimentBucket | required ".Values.gcsExperimentBucket is required" -}}
-{{- $requiredVar := .Values.workload.experimentDir | required ".Values.experimentDir is required" -}}
+{{- $requiredVar := .Values.logging.jobTimestamp | required ".Values.jobTimestamp is required" -}}
+{{- $requiredVar := .Values.logging.experimentDir | required ".Values.experimentDir is required" -}}
 {{- $requiredVar := .Values.workload.gcsDataBucket | required ".Values.gcsDataBucket is required" -}}
 {{- $requiredVar := .Values.workload.dataDir| required ".Values.dataDir is required" -}}
 {{- $requiredVar := .Values.workload.image | required ".Values.image is required" -}}
@@ -51,6 +50,8 @@ spec:
   tolerations:
   - operator: "Exists"
     key: nvidia.com/gpu
+  - operator: "Exists"
+    key: cloud.google.com/impending-node-termination
   volumes:
   - name: nvidia-install-dir-host
     hostPath:
@@ -66,6 +67,9 @@ spec:
     emptyDir: {}
   - name: tcpx-nccl-plugin-volume
     emptyDir: {}
+  - name: data-volume
+    hostPath:
+      path: /home/data
   {{if eq $root.Values.network.useTcpx "yes"}}
   initContainers:
   - name: tcpx-nccl-plugin-installer
@@ -127,9 +131,9 @@ spec:
           fieldRef:
             fieldPath: status.hostIP
       - name: LD_LIBRARY_PATH
-        value: "/usr/local/nvidia/lib64"
+        value: "/usr/lib/x86_64-linux-gnu:/usr/local/nvidia/lib64"
       - name: JOB_TIMESTAMP
-        value: "{{$root.Values.workload.jobTimestamp}}"
+        value: "{{$root.Values.logging.jobTimestamp}}"
       - name: MASTER_ADDR
         value: "pytorch-leader-{{$.Release.Name}}"
       - name: NCCL_SOCKET_IFNAME
@@ -147,9 +151,9 @@ spec:
       - name: CPU_PINNING_MODE
         value: "{{$root.Values.network.cpuPinningMode}}"
       - name: GCS_EXPERIMENT_BUCKET
-        value: "{{$root.Values.workload.gcsExperimentBucket}}"
+        value: "{{$root.Values.logging.gcsExperimentBucket}}"
       - name: EXPERIMENT_ROOT_DIR
-        value: "{{$root.Values.workload.experimentDir}}"
+        value: "{{$root.Values.logging.experimentDir}}"
       - name: GCS_DATA_BUCKET
         value: "{{$root.Values.workload.gcsDataBucket}}"
       - name: DATA_DIR
@@ -162,10 +166,18 @@ spec:
         value: "{{$root.Values.workload.modelName}}"
       - name: WARMUP_ITERS
         value: "{{$root.Values.workload.warmupIters}}"
-      - name: MAX_ITERS
-        value: "{{$root.Values.workload.maxIters}}"
+      - name: COLLECT_NSYS_PROFILE
+        value: "{{$root.Values.logging.collectNsysProfile}}"
       - name: CLUSTER_TYPE
         value: GKE
+      - name: NCCL_NVLS_ENABLE
+        value: '0'
+      - name: NCCL_DEBUG
+        value: "{{$root.Values.logging.ncclDebugLevel}}"
+      - name: NUMBER_OF_EPOCHS
+        value: "{{$root.Values.workload.numberOfEpochs}}"
+      - name: STEPS_PER_EPOCH
+        value: "{{$root.Values.workload.stepsPerEpoch}}"
     volumeMounts:
       - name: nvidia-install-dir-host
         mountPath: /usr/local/nvidia/lib64
@@ -177,6 +189,8 @@ spec:
         mountPath: /dev/shm
       - name: workload-terminated-volume
         mountPath: /usr/share/litgpt
+      - name: data-volume
+        mountPath: /data
     resources:
       limits:
         nvidia.com/gpu: !!int 8

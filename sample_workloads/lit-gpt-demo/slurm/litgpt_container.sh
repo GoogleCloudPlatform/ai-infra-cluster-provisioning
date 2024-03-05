@@ -1,3 +1,19 @@
+# Check for required environment variables
+if [ -z "$MODEL_NAME" ]; then
+  echo "Error: MODEL_NAME environment variable is not set. Please set it before running the script."
+  exit 1
+fi
+
+if [ -z "$GCS_EXPERIMENT_BUCKET" ]; then
+  echo "Error: GCS_EXPERIMENT_BUCKET environment variable is not set. Please set it before running the script."
+  exit 1
+fi
+
+if [ -z "$EXPERIMENT_ROOT_DIR" ]; then
+  echo "Error: EXPERIMENT_ROOT_DIR environment variable is not set. Please set it before running the script."
+  exit 1
+fi
+
 MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 
 # Start the Lit-GPT training container
@@ -11,12 +27,12 @@ docker run \
     -e JOB_TIMESTAMP=$(date +%s) \
     -e NNODES=$SLURM_NNODES \
     -e NODE_RANK=$SLURM_NODEID \
-    -e MODEL_NAME='Llama-2-70b-hf' \
-    -e GCS_EXPERIMENT_BUCKET=litgpt-public-bucket \
+    -e MODEL_NAME=${MODEL_NAME} \
+    -e GCS_EXPERIMENT_BUCKET=${GCS_EXPERIMENT_BUCKET} \
     -e GCS_DATA_BUCKET=litgpt-public-bucket \
     -e USE_TCPX=yes \
     -e CLUSTER_TYPE=SLURM \
-    -e EXPERIMENT_ROOT_DIR=llama-70b/training_logs \
+    -e EXPERIMENT_ROOT_DIR=${EXPERIMENT_ROOT_DIR} \
     -e DATA_DIR=openwebtext_dataset \
     -e MASTER_ADDR=$MASTER_ADDR \
     -e MASTER_PORT=20120 \

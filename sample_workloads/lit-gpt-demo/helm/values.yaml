@@ -1,22 +1,25 @@
 cluster:
-  nNodes: 8
+  nNodes: 4
   nodePool: np-1
 network:
   useTcpx: "yes"
   ncclIfnames: 'eth0'
-  ncclPlugin: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.6_2023_10_06
-  rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.9
+  ncclPlugin: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.7
+  rxdmContainer: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.11
   disablePmtu: "yes"
-workload:
-  jobTimestamp: # Must be defined
-  gcsExperimentBucket: # Must be defined
+logging:
+  collectNsysProfile: 'no' # Set to 'yes' for profiles
+  ncclDebugLevel: WARN
+  gcsExperimentBucket: '' # Set to a writable GCS bucket to upload logs and Nsys Profiles
+  jobTimestamp: 1
   experimentDir: llama2-70b
+workload:
   gcsDataBucket: litgpt-public-bucket
   dataDir: openwebtext_dataset
-  image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt
+  image: us-docker.pkg.dev/gce-ai-infra/litgpt-full/litgpt/litgpt-full:latest
   modelName: Llama-2-70b-hf
   batchSize: 6
   microBatchSize: 6
   warmupIters: 10
-  maxIters: 1000
-  
+  numberOfEpochs: 1
+  stepsPerEpoch: 30
