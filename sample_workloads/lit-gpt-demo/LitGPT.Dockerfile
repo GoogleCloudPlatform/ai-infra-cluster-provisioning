@@ -18,7 +18,8 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   && apt-get update -y && apt-get install google-cloud-cli -y
 
 COPY scripts /workspace/scripts
-COPY openwebtext_trainer.py /workspace/pretrain/
+COPY utilities /workspace/pretrain/utilities
+COPY openwebtext.py /workspace/pretrain/
 
 ENTRYPOINT ["/bin/bash", "/workspace/scripts/litgpt_container_entrypoint.sh"]
 
