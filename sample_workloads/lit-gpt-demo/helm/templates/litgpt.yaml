@@ -110,6 +110,7 @@ spec:
       - |
         set -ex
         mkdir -p /usr/local/nvidia/lib64
+        /scripts/container_entry.sh install
         cp -r /var/lib/tcpxo/lib64/. /usr/local/nvidia/lib64
         echo "installation finishes"
   {{end}}

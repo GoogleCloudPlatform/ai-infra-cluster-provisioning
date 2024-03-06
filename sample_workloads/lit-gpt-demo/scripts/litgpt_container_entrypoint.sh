@@ -63,7 +63,7 @@ set_nccl_specific_configuration() {
     export NCCL_P2P_PXN_LEVEL=0
     export NCCL_DEBUG_SUBSYS=INIT,GRAPH,ENV,TUNING,NET,VERSION
     export NCCL_DEBUG=${NCCL_DEBUG}
-    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/var/lib/fastrak/lib64"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/var/lib/tcpxo/lib64"
     export NCCL_DYNAMIC_CHUNK_SIZE=524288
     export NCCL_P2P_NET_CHUNKSIZE=524288
     export NCCL_P2P_PCI_CHUNKSIZE=524288
