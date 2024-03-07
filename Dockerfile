@@ -16,7 +16,7 @@ RUN curl -s "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terra
     && mv ./terraform /root/.local/bin/terraform
 COPY ./a3/terraform ./a3/terraform
 COPY ./a2/terraform ./a2/terraform
-
+COPY ./a3-mega/terraform ./a3-mega/terraform
 
 FROM base as test
 COPY test ./test
