@@ -73,27 +73,28 @@ data "google_compute_image" "image" {
 
 module "resource_policy" {
   source = "../resource_policy"
-  count  = var.use_compact_placement_policy ? 1 : 0
+  count = try(
+    var.compact_placement_policy.new_policy || var.compact_placement_policy.existing_policy_name != null
+    , false
+  ) ? 1 : 0
 
   project_id                    = var.project_id
   region                        = var.region
-  new_resource_policy_name      = var.existing_resource_policy_name == null ? var.resource_prefix : null
-  existing_resource_policy_name = var.existing_resource_policy_name == null ? null : var.existing_resource_policy_name
+  new_resource_policy_name      = var.compact_placement_policy.new_policy ? var.resource_prefix : null
+  existing_resource_policy_name = var.compact_placement_policy.existing_policy_name
 }
 
 resource "google_compute_instance_template" "template" {
   provider = google-beta
 
-  labels       = var.labels
-  machine_type = var.machine_type
-  metadata     = local.metadata
-  name         = var.use_static_naming ? var.resource_prefix : null
-  name_prefix  = var.use_static_naming ? null : var.resource_prefix
-  project      = var.project_id
-  region       = var.region
-  resource_policies = var.use_compact_placement_policy ? [
-    module.resource_policy[0].resource_self_link
-  ] : []
+  labels            = var.labels
+  machine_type      = var.machine_type
+  metadata          = local.metadata
+  name              = var.use_static_naming ? var.resource_prefix : null
+  name_prefix       = var.use_static_naming ? null : var.resource_prefix
+  project           = var.project_id
+  region            = var.region
+  resource_policies = module.resource_policy[*].resource_self_link
 
   disk {
     auto_delete  = true
@@ -140,5 +141,20 @@ resource "google_compute_instance_template" "template" {
     ignore_changes = [
       metadata["ssh-keys"],
     ]
+  }
+
+  dynamic "reservation_affinity" {
+    for_each = try(
+      var.compact_placement_policy.specific_reservation,
+      null,
+    ) != null ? [var.compact_placement_policy.specific_reservation] : []
+
+    content {
+      type = "SPECIFIC_RESERVATION"
+      specific_reservation {
+        key    = "compute.googleapis.com/reservation-name"
+        values = [reservation_affinity.value]
+      }
+    }
   }
 }

@@ -120,24 +120,18 @@ variable "maintenance_interval" {
   }
 }
 
-variable "use_compact_placement_policy" {
+variable "compact_placement_policy" {
   description = <<-EOT
     The flag to create and use a superblock level compact placement policy for the instances. Currently GCE supports using only 1 placement policy.
     
     Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template#resource_policies).
     EOT
-  type        = bool
-  default     = false
-}
-
-variable "existing_resource_policy_name" {
-  description = <<-EOT
-    The name of the existing resource policy. 
-
-    Related docs: [terraform](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_resource_policy#name).
-    EOT
-  type        = string
-  default     = null
+  type = object({
+    new_policy           = optional(bool, false)
+    existing_policy_name = optional(string)
+    specific_reservation = optional(string)
+  })
+  default = null
 }
 
 variable "metadata" {
