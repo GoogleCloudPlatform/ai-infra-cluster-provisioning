@@ -1,0 +1,55 @@
+{
+  "planned_values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.compute_instance_template[0]",
+          "child_modules": [
+            {
+              "address": "module.compute_instance_template[0].module.resource_policy[0]"
+            }
+          ]
+        },
+        {
+          "resources": [
+            {
+              "values": {
+                "resource_policies": [
+                  "resourcePolicies/test-rp"
+                ]
+              }
+            }
+          ],
+          "address": "module.compute_instance_template[1]"
+        },
+        {
+          "resources": [
+            {
+              "values": {
+                "resource_policies": [
+                  "resourcePolicies/test-rp"
+                ]
+              }
+            }
+          ],
+          "address": "module.compute_instance_template[2]"
+        },
+        {
+          "address": "module.compute_instance_group_manager[0]"
+        },
+        {
+          "address": "module.compute_instance_group_manager[1]"
+        },
+        {
+          "address": "module.compute_instance_group_manager[2]"
+        },
+        {
+          "address": "module.dashboard"
+        },
+        {
+          "address": "module.startup"
+        }
+      ]
+    }
+  }
+}

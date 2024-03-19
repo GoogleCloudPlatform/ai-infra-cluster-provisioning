@@ -1,0 +1,18 @@
+# cloud-config
+
+write_files:
+- path: /etc/systemd/system/aiinfra.target
+  permissions: 0644
+  content: |
+    [Unit]
+    Description=aiinfra target
+    After=cloud-init.target
+${aiinfra_network_storage}
+${aiinfra_startup_scripts}
+${aiinfra_pull_image}
+${aiinfra_start_container}
+
+runcmd:
+- systemctl daemon-reload
+- systemctl enable ${aiinfra_services}
+- systemctl start ${aiinfra_services}

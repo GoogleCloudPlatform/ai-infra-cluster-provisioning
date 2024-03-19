@@ -54,6 +54,7 @@ Parameters:
                 - a2 [docs](https://cloud.google.com/compute/docs/accelerator-optimized-machines#a2-vms)
                 - a3 [blog post](https://cloud.google.com/blog/products/compute/introducing-a3-supercomputers-with-nvidia-h100-gpus)
                  (docs not available yet)
+                - a3-mega (docs not available yet)
     var_file    Terraform variables file. Defaults to:
                 '${PWD}/input/terraform.tfvars'
 EOT
@@ -163,7 +164,7 @@ entrypoint_helpers::expect_contains () {
 entrypoint_helpers::validate_args () {
     local valid=true
 
-    declare -ar expected_machine_types=('a2' 'a3')
+    declare -ar expected_machine_types=('a2' 'a3' 'a3-mega')
     entrypoint_helpers::expect_contains expected_machine_types arg_machine_type \
     || valid=false
 

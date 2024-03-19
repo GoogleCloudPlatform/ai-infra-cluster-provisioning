@@ -1,0 +1,76 @@
+- path: /etc/systemd/system/aiinfra/startup_scripts.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh -ex
+    if ${install_gpu}; then
+      /etc/systemd/system/aiinfra/startup_script_install_gpu.sh
+    fi
+    /etc/systemd/system/aiinfra/startup_script_custom.sh
+
+- path: /etc/systemd/system/aiinfra/startup_script_install_gpu.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh -ex
+
+    echo 'Installing GPU drivers'
+    cos-extensions install gpu -- --version=latest
+    mount --bind /var/lib/nvidia /var/lib/nvidia
+    mount -o remount,exec /var/lib/nvidia
+    /var/lib/nvidia/bin/nvidia-smi -pm 1
+
+    echo 'Configuring docker auth...'
+    mount -t tmpfs tmpfs /root
+    docker-credential-gcr configure-docker
+    docker-credential-gcr configure-docker --registries us-docker.pkg.dev
+
+    echo 'Configuring the Receive Data Path Manager...'
+    device_flags=$(find /dev -type c -regex '\/dev\/nvidia[0-9]*' -printf '--device %p:%p ')
+    docker run --pull=always --rm \
+      --name receive-datapath-manager \
+      --detach \
+      --privileged \
+      --cap-add=NET_ADMIN --network=host \
+      --volume /var/lib/nvidia/lib64:/usr/local/nvidia/lib64 \
+      $${device_flags} \
+      --device /dev/nvidia-uvm:/dev/nvidia-uvm \
+      --device /dev/nvidiactl:/dev/nvidiactl \
+      --env LD_LIBRARY_PATH=/usr/local/nvidia/lib64 \
+      --volume /run/tcpx:/run/tcpx \
+      --entrypoint /tcpgpudmarxd/build/app/tcpgpudmarxd \
+      us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev:v2.0.7 \
+      --gpu_nic_preset a3vm --gpu_shmem_type fd --uds_path "/run/tcpx"
+
+    echo 'Installing iptable rules...'
+    /sbin/iptables -I INPUT -p tcp -m tcp -j ACCEPT
+
+    echo 'Configuring NCCL and GPUDirectTCPX plugin...'
+    docker run --rm \
+      --volume /var/lib:/var/lib \
+      us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.6_2023_10_06 \
+      install --install-nccl
+    mount --bind /var/lib/tcpx /var/lib/tcpx
+    mount -o remount,exec /var/lib/tcpx
+
+- path: /etc/systemd/system/aiinfra/startup_script_custom.sh
+  permissions: 0755
+  owner: root
+  content: |
+    ${script}
+
+- path: /etc/systemd/system/aiinfra-startup-scripts.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Install]
+    WantedBy=aiinfra.target
+    [Unit]
+    Description=Startup scripts
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra/startup_scripts.sh
+    RemainAfterExit=true
+    StandardOutput=journal+console
+    StandardError=journal+console
+    Type=oneshot
+    User=root

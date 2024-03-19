@@ -1,0 +1,19 @@
+{
+  "prior_state": {
+    "values": {
+      "root_module": {
+        "resources": [
+          {
+            "address": "data.http.gce-gke-gpu-utilization[0]"
+          },
+          {
+            "address": "data.http.nvidia-dcgm[0]"
+          },
+          {
+            "address": "data.http.nvidia-nvml[0]"
+          }
+        ]
+      }
+    }
+  }
+}

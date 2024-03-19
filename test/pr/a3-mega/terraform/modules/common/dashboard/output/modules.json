@@ -1,0 +1,11 @@
+{
+  "planned_values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.dashboard"
+        }
+      ]
+    }
+  }
+}

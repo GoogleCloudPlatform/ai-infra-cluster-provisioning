@@ -1,0 +1,35 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+blueprint_name: a3-mega-gke
+
+vars:
+  deployment_name: a3-mega-gke
+
+  node_pools:
+  - node_count: 4
+    zone: us-east4-a
+  - node_count: 4
+    zone: us-east4-a
+  project_id: my-project-id
+  region: us-east4
+  resource_prefix: my-cluster-name
+
+deployment_groups:
+- group: primary
+  modules:
+  - id: a3-mega-gke
+    source: "github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3-mega/terraform/modules/cluster/gke"

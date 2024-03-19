@@ -1,0 +1,27 @@
+- path: /etc/systemd/system/aiinfra/pull_image.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh
+    mount -t tmpfs tmpfs /root
+    docker-credential-gcr configure-docker
+    docker_image='${docker_image}'
+    docker-credential-gcr configure-docker --registries "$${docker_image%%/*}"
+    docker pull "$${docker_image}"
+- path: /etc/systemd/system/aiinfra-pull-image.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Install]
+    WantedBy=aiinfra.target
+    [Unit]
+    After=gcr-online.target docker.socket
+    Description=Pull a docker image
+    Requires=gcr-online.target docker.socket
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra/pull_image.sh
+    RemainAfterExit=true
+    StandardError=journal+console
+    StandardOutput=journal+console
+    Type=oneshot
+    User=root

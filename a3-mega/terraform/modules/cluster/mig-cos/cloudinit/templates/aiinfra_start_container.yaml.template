@@ -1,0 +1,37 @@
+- path: /etc/systemd/system/aiinfra/start_container.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh
+    device_flags=$(find /dev -type c -regex '\/dev\/nvidia[0-9]*' -printf '--device %p:%p ')
+    if ! docker container ls -a | grep -q aiinfra; then
+      docker run \
+        --detach \
+        --hostname $(hostname) \
+        --ipc host \
+        --name aiinfra \
+        --network host \
+        --privileged \
+        --restart always \
+        ${docker_device_flags} \
+        ${docker_volume_flags} \
+        ${docker_run_options} \
+        ${docker_image} ${docker_cmd}
+    fi
+- path: /etc/systemd/system/aiinfra-start-container.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Install]
+    WantedBy=aiinfra.target
+    [Unit]
+    After=${requirements}
+    Description=Run a docker container
+    Requires=${requirements}
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra/start_container.sh
+    RemainAfterExit=true
+    StandardError=journal+console
+    StandardOutput=journal+console
+    Type=oneshot
+    User=root
