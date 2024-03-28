@@ -9,7 +9,7 @@ gcloud container clusters update $PREFIX \
     --workload-pool=$PROJECT.svc.id.goog
 
 echo "Fetching compute engine default service account"
-SERVICE_ACCOUNT=$(gcloud iam service-accounts list --filter 'displayName="Compute Engine default service account"' --format "table[No-Heading](Name)")
+SERVICE_ACCOUNT=$(gcloud iam service-accounts list --filter 'displayName="Compute Engine default service account"' --format "table[no-heading](Name)")
 SERVICE_ACCOUNT=$(basename $SERVICE_ACCOUNT)
 echo "Found default service account $SERVICE_ACCOUNT"
 
@@ -20,5 +20,5 @@ gcloud iam service-accounts add-iam-policy-binding $SERVICE_ACCOUNT \
 
 echo "Annotating Kuberenetes service account with IAM service account"
 kubectl annotate serviceaccount default \
-    --namespace default \
+    --namespace default --overwrite \
     iam.gke.io/gcp-service-account=$SERVICE_ACCOUNT

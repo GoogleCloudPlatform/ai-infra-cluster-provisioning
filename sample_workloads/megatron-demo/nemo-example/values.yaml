@@ -5,9 +5,9 @@ volumes:
   pvcMounts:
   - name: cluster-filestore
     mountPath: "/nfs"
-  # gcsMounts:
-  # - bucketName: "nemo-megatron-demo"
-  #   mountPath: "/gcs"
+  gcsMounts:
+  - bucketName: "nemo-megatron-demo"
+    mountPath: "/gcs"
 
 gcsDownload: # downloads or synchronizes contents of a GCS bucket folder on initialization
   source: "gs://nemo-megatron-demo/training-data/tokenized/bpe2gpt/wikipedia/" 
@@ -17,7 +17,7 @@ workload:
   image: "$REGION-docker.pkg.dev/$PROJECT/$PREFIX/nemofw-training:23.05-py3"
   torchDistributedTarget: "/opt/NeMo/examples/nlp/language_modeling/megatron_gpt_pretraining.py"
 
-  gpus: 16 # This should be one of: {<= 8,  multiple of 8}
+  gpus: 32 # This should be one of: {<= 8,  multiple of 8}
   arguments: 
   # These argument name will be prefixed with '+' (see https://hydra.cc/docs/advanced/override_grammar/basic/)
   - name: "exp_manager.exp_dir"

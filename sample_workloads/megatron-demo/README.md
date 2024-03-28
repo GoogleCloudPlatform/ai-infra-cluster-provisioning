@@ -89,7 +89,7 @@ Check the GPU devices are exposed.
 kubectl get pods -n kube-system | grep nvidia
 ```
 
-You should see all pods to be listed in `Running` state.
+You should see the NVIDIA associated pods to be listed in `Running` state.
 
 ### Adjust GKE networking such that the VPCs are in device mode
 
@@ -234,7 +234,7 @@ cat nemo-example/values.yaml | envsubst | helm install $USER-nemo-gpt-5b -f - ne
 
 Verify the launch succeeded by seeing the corresponding pods in `Running` state. 
 ```
-$ kubectl get pods
+kubectl get pods | grep $USER-nemo-gpt-5b
 ```
 
-This may take a few minutes the first time it is executed. 
+This may take a few minutes the first time it is executed.

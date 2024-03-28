@@ -41,15 +41,15 @@ spec:
    metadata:
     annotations:
       kubectl.kubernetes.io/default-container: nemo
-      networking.gke.io/default-interface: 'eth0'
-      networking.gke.io/interfaces: |
-        [
-          {"interfaceName":"eth0","network":"default"},
-          {"interfaceName":"eth1","network":"vpc1"},
-          {"interfaceName":"eth2","network":"vpc2"},
-          {"interfaceName":"eth3","network":"vpc3"},
-          {"interfaceName":"eth4","network":"vpc4"}
-        ]        
+#      networking.gke.io/default-interface: 'eth0'
+#      networking.gke.io/interfaces: |
+#        [
+#          {"interfaceName":"eth0","network":"default"},
+#          {"interfaceName":"eth1","network":"vpc1"},
+#          {"interfaceName":"eth2","network":"vpc2"},
+#          {"interfaceName":"eth3","network":"vpc3"},
+#          {"interfaceName":"eth4","network":"vpc4"}
+#        ]        
 
       {{- if $root.Values.volumes.gcsMounts }}
       gke-gcsfuse/volumes: "true"
