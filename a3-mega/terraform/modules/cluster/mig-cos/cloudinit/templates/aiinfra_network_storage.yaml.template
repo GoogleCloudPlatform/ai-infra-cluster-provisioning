@@ -1,0 +1,52 @@
+- path: /etc/systemd/system/aiinfra/gcsfuse/Dockerfile
+  permissions: 0644
+  owner: root
+  content: |
+    FROM debian:bullseye-slim
+    RUN apt-get update -qq \
+        && apt-get install -y curl gnupg \
+        && echo "deb http://packages.cloud.google.com/apt gcsfuse-xenial main" >/etc/apt/sources.list.d/gcsfuse.list \
+        && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor >/etc/apt/trusted.gpg.d/apt-key.gpg \
+        && apt-get update -qq \
+        && apt-get install -y gcsfuse \
+        && rm -rf /var/lib/{apt,dpkg,cache,log}/
+    CMD ["sleep", "infinity"]
+- path: /etc/systemd/system/aiinfra/network_storage.sh
+  permissions: 0755
+  owner: root
+  content: |
+    #!/bin/sh
+    [ "${host_mountpoints}" != '.' ] || exit 0
+    mkdir -p ${host_mountpoints}
+    mount_filestores () {
+      [ "${filestore_mount_commands}" != 'true && true' ] || return 0
+      ${filestore_mount_commands}
+    }
+    mount_gcsfuses () {
+      [ "${gcsfuse_mount_commands}" != 'true && true' ] || return 0
+      docker build --tag gcsfuse /etc/systemd/system/aiinfra/gcsfuse \
+      && docker run --detach --rm \
+        --privileged \
+        --volume ${gcsfuse_host_mount}:${gcsfuse_host_mount}:rw,rshared \
+        --name gcsfuse \
+        gcsfuse \
+      && ${gcsfuse_mount_commands}
+    }
+    mount_filestores && mount_gcsfuses
+- path: /etc/systemd/system/aiinfra-network-storage.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Install]
+    WantedBy=aiinfra.target
+    [Unit]
+    After=gcr-online.target docker.socket
+    Description=Set up network storage
+    Requires=gcr-online.target docker.socket
+    [Service]
+    ExecStart=/etc/systemd/system/aiinfra/network_storage.sh
+    RemainAfterExit=true
+    StandardOutput=journal+console
+    StandardError=journal+console
+    Type=oneshot
+    User=root

@@ -1,0 +1,30 @@
+{
+  "planned_values": {
+    "outputs": {
+      "network_names": {
+        "value": [
+          "-gpu-0",
+          "-gpu-1",
+          "-gpu-2",
+          "-gpu-3",
+          "-gpu-4",
+          "-gpu-5",
+          "-gpu-6",
+          "-gpu-7"
+        ]
+      },
+      "subnetwork_names": {
+        "value": [
+          "-gpu-0",
+          "-gpu-1",
+          "-gpu-2",
+          "-gpu-3",
+          "-gpu-4",
+          "-gpu-5",
+          "-gpu-6",
+          "-gpu-7"
+        ]
+      }
+    }
+  }
+}

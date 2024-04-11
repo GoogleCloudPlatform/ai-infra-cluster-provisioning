@@ -76,7 +76,7 @@ resource "google_container_cluster" "cluster" {
 
   # We need to explicitly manage the node pool to enable features such as
   # auto-upgrade and auto-scaling, but we can't create a cluster with no node
-  # pool defined. So we create the smallest possible default  node pool and
+  # pool defined. So we create the smallest possible default node pool and
   # immediately delete it. This is a best-practice suggested in the Terraform
   # documentation for the container_cluster resource.
   initial_node_count  = 1
@@ -309,7 +309,7 @@ module "kubectl-apply" {
   daemonsets = {
     device_plugin = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml"
     nvidia_driver = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml"
-    nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml"
+    nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-fastrak/nccl-fastrak-installer.yaml" # TODO dead link
   }
   enable     = var.ksa != null
   ksa        = var.ksa
