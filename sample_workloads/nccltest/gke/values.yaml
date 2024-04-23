@@ -1,60 +1,56 @@
-runUser: null
+# Run metadata.
+runUser: "unknown"
+versionVec: "unknown"
+description: "unknown"
+# Do NOT set this field unless you are certain you are using LKG configs.
+# This will tamper with performance regression detection in future runs.
+isLkg: false
+
 cluster:
   nNodes: null  # Must specify on commandline (--set cluster.nNodes=2)
-  sbPlacement: false # Set `true` if running across multiple superblocks
-  nSuperblocks: 1
-  startSuperblock: 1
-  gcsBucket: null
+  # Must only specify one of topology aware and node-pool placement.
+  topologyAware: false
+  npPlacement: false
+  nNps: 1
+  startNp: 1
+  gcsBucket: "nccl-benchmarks-fastrak"
 
 ncclBenchmarks:
-  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-benchmark"
+  image: "us-docker.pkg.dev/kernel-net-team/gpudirect-tcpx/nccl-benchmarks"
   tag: "latest"
   # A comma-separated list of benchmarks to run.
-  benchmarks: "all_gather_perf,all_reduce_perf,sendrecv_perf"
+  benchmarks: "AllGather"
   # A comma-separated list of hex masks for the benchmarks.
   # Must be of the same length as ncclBenchmarks.benchmarks.
-  # Each mask is recommended to be less than ncclBenchmarks.gpusPerNode.
-  masks: "0x0,0x0,0x7"
-  msgSizeBegin: "1M"
-  msgSizeEnd: "8G"
+  # Each mask must be less than ncclBenchmarks.gpusPerNode.
+  masks: "0x0"
+  # A comma-separated list of message sizes, used by all benchmarks.
+  msgSizes: "1M,2M,4M,8M,16M,32M,64M,128M,256M,512M,1G,2G,4G,8G"
   # Number of GPUs per node. Must be one of 1, 2, 4, 8.
   gpusPerNode: 8
+  nComms: 1
   warmupIters: 5
   runIters: 100
   nRuns: 5
+  dataCheck: false
 
-telemetry:
-  gpu: false
+# Modularized telemetry.
+# Input is case insensitive. Default value is `none`.
+# To enable all telemetry, set this field to `all`.
+# To enable specific modules, set this field to a comma-separated list of
+# desired components, e.g. `tcp,gpu`. Available modules are: nic, tcp, cpu,
+# gpu, kernel.
+telemetry: "none"
 
 rxdm:
-  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/tcpgpudmarxd-dev"
-  tag: "v2.0.9"
-  flags: ["--setup_param \"--verbose 128 2 0\"", "--gpu_nic_preset a3vm", "--gpu_shmem_type fd"]
+  image: null
+  tag: null
+  flags: null
 
 ncclPlugin:
-  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev"
-  tag: "v3.1.6_2023_10_23"
-  unreservedCores: "0-7,104-111,52-59,156-163"
-  envs:
-    NCCL_GPUDIRECTTCPX_FORCE_ACK: "0"
-    NCCL_SOCKET_IFNAME: "eth0"
-    NCCL_DYNAMIC_CHUNK_SIZE: 524288
-    NCCL_P2P_NET_CHUNKSIZE: 524288
-    NCCL_P2P_PCI_CHUNKSIZE: 524288
-    NCCL_P2P_NVL_CHUNKSIZE: 1048576
-    NCCL_GPUDIRECTTCPX_TX_BINDINGS:
-      "eth1:8-21,112-125;eth2:8-21,112-125;eth3:60-73,164-177;eth4:60-73,164-177"
-    NCCL_GPUDIRECTTCPX_RX_BINDINGS:
-      "eth1:22-35,126-139;eth2:22-35,126-139;eth3:74-87,178-191;eth4:74-87,178-191"
-    NCCL_NSOCKS_PERTHREAD: 4
-    NCCL_SOCKET_NTHREADS: 1
-    NCCL_MAX_NCHANNELS: 12
-    NCCL_MIN_NCHANNELS: 12
-    NCCL_GPUDIRECTTCPX_SOCKET_IFNAME: "eth1,eth2,eth3,eth4"
-    NCCL_GPUDIRECTTCPX_CTRL_DEV: "eth0"
-    NCCL_GPUDIRECTTCPX_PROGRAM_FLOW_STEERING_WAIT_MICROS: "1000000"
-    NCCL_CROSS_NIC: 0
-    NCCL_ALGO: "Ring"
-    NCCL_PROTO: "Simple"
-    NCCL_NET_GDR_LEVEL: "PIX"
-    NCCL_P2P_PXN_LEVEL: 0
+  image: null
+  tag: null
+
+unreservedCores: null
+
+envs: null
