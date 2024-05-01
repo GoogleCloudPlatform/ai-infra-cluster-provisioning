@@ -126,7 +126,7 @@ the same as any other terraform:
 # assuming the directory containing main.tf is the current working directory
 
 # create/update the cluster
-terraform init && terraform validate && terraform apply
+terraform init && terraform validate && terraform apply -var-file="terraform.tfvars"
 
 # destroy the cluster
 terraform init && terraform validate && terraform apply -destroy
