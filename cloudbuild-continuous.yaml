@@ -46,4 +46,4 @@ images:
 timeout: 5400s
 
 substitutions:
-  _VERSION: 'v1.4.2'
+  _VERSION: 'v1.5.0'
