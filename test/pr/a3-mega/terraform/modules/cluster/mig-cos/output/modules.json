@@ -1,0 +1,19 @@
+{
+  "planned_values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.compute_instance_template[0]",
+          "child_modules": [
+            {
+              "address": "module.compute_instance_template[0].module.resource_policy[0]"
+            }
+          ]
+        },
+        {
+          "address": "module.compute_instance_group_manager[0]"
+        }
+      ]
+    }
+  }
+}
