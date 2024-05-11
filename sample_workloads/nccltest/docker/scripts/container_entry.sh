@@ -62,8 +62,15 @@ while [[ -z "$MASTER_READY" ]]; do
   sleep 5
 done
 
-# IRQ tunings.
-/scripts/tune_net.sh
+# TCPx Setup
+if [[ "$USE_TCPX" == "yes" ]]; then
+  /scripts/tune_net.sh
+else
+  # Disable TCPX
+  rm -r /var/lib/tcpx/lib64/
+  rm -r /var/lib/nvidia/lib64/
+  unset LD_LIBRARY_PATH
+fi
 
 # Start SSH service on hosts and send address of self to master node.
 mkdir -p /run/mpi_bootstrap
