@@ -116,6 +116,8 @@ spec:
     securityContext:
       privileged: true
     env:
+      - name: NCCL_DEBUG
+        value: "INFO"
       - name: JOB_TIMESTAMP
         value: "{{ $timestamp }}"
       - name: JOB_NAME

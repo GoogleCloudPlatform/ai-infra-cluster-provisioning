@@ -6,8 +6,8 @@ cluster:
   gcsBucket: null
 
 ncclBenchmarks:
-  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-benchmark"
-  tag: "latest"
+  image: "us-central1-docker.pkg.dev/supercomputer-testing/samcmho/nccl-benchmark"
+  tag: "a3-mega"
   # A comma-separated list of benchmarks to run.
   benchmarks: "all_gather_perf,all_reduce_perf,sendrecv_perf"
   # A comma-separated list of hex masks for the benchmarks.
