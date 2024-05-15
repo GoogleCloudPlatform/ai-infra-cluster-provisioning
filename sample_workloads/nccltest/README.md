@@ -25,7 +25,6 @@ cd gke
 PARAMS="cluster.nNodes=2,"
 PARAMS+="ncclBenchmarks.benchmarks=all_reduce_perf,"
 PARAMS+="ncclBenchmarks.masks=0x0,"
-PARAMS+="ncclBenchmarks.msgSizes=1G\,8G"
 helm install "${USER}-nccl-bm" . --set "$PARAMS"
 ```
 
