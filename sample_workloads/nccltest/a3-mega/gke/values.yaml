@@ -9,18 +9,18 @@ ncclBenchmarks:
   image: "us-central1-docker.pkg.dev/supercomputer-testing/samcmho/nccl-benchmark"
   tag: "a3-mega"
   # A comma-separated list of benchmarks to run.
-  benchmarks: "all_gather_perf,all_reduce_perf,sendrecv_perf"
+  benchmarks: "all_gather_perf,"
   # A comma-separated list of hex masks for the benchmarks.
   # Must be of the same length as ncclBenchmarks.benchmarks.
   # Each mask is recommended to be less than ncclBenchmarks.gpusPerNode.
-  masks: "0x0,0x0,0x7"
+  masks: "0x0,"
   msgSizeBegin: "1M"
   msgSizeEnd: "8G"
   # Number of GPUs per node. Must be one of 1, 2, 4, 8.
   gpusPerNode: 8
   nComms: 1
   warmupIters: 5
-  runIters: 100
+  runIters: 200
   nRuns: 5
 
 # Modularized telemetry.
@@ -33,13 +33,13 @@ telemetry:
   gpu: false
 
 rxdm:
-  image: "us-docker.pkg.dev/tcpfastrak-staging/fastrak-guest-image-multi-region/fastrak-rxdm" 
-  tag: "latest" 
+  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev" 
+  tag: "v1.0.8" 
   flags: ["--num_hops=2", "--num_nics=8", "--uid=", "--alsologtostderr"] 
 
 ncclPlugin:
-  image: "us-docker.pkg.dev/tcpfastrak-staging/fastrak-guest-image-multi-region/fastrak-nccl"
-  tag: "v20240311-nccl_unpack_optimization"
+  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirecttcpx-dev"
+  tag: "v1.0.0"
   unreservedCores: "0-7,104-111,52-59,156-163" 
   envs:
     NCCL_FASTRAK_CTRL_DEV: "eth0"

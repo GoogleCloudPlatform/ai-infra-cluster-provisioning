@@ -164,7 +164,7 @@ spec:
         value: "{{ $.Values.ncclPlugin.unreservedCores }}"
       - name: GPU_TELEMETRY
         value: "{{ $.Values.telemetry.gpu }}"
-      {{- range $key, $value := $.Values.envs }}
+      {{- range $key, $value := $.Values.ncclPlugin.envs }}
       - name: "{{ $key }}"
         value: "{{ $value }}"
       {{- end }}
