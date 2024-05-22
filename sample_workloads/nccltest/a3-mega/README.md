@@ -143,9 +143,6 @@ up by the benchmarking container.**
 |`cluster.startNp`|Which node pool to start job on.|
 
 In GKE, we have a flag to toggle deliberate superblock placement. If enabled,
-we will try to split the job among `cluster.nSuperblocks` superblocks, starting
-from superblock `cluster.startSuperblock`. **This guarantees closer affinity
+we will try to split the job among `cluster.nNps` node pools, starting
+from node pool `cluster.startNp`. **This guarantees closer affinity
 between the job nodes and should be enabled for performance benchmarking.**
-
-*Note that this feature is based on a `superblock` label in the Kubernetes
-cluster and would not work if that label is missing. For example, Superblock 1 should be labeled with `superblock`: 1 *
