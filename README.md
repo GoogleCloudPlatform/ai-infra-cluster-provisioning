@@ -22,7 +22,7 @@ This repository contains:
 - sets of terraform modules that create GCP resources, each tailored toward
   running AI/ML workloads on a specific
   [accelerator optimized machine type](https://cloud.google.com/compute/docs/accelerator-optimized-machines).
-- an [entrypoint script](../scripts/entrypoint.sh) that will find or create a
+- an [entrypoint script](./scripts/entrypoint.sh) that will find or create a
   terraform backend in a Google Cloud Storage (GCS) bucket, call the
   appropriate terraform commands using the terraform modules and a user
   provided terraform variables (`tfvars`) file, and upload all logs to the GCS
@@ -81,7 +81,7 @@ few ways to provision a cluster:
 
 For this method, all you need (in addition to the above requirements) is a
 `terraform.tfvars` file (user generated or copied from an example --
-[a3](./a3/examples)) in your current directory and the ability to run
+[a3-mega](./a3-mega/examples)) in your current directory and the ability to run
 [docker](https://www.docker.com/). In a terminal, run:
 
 ```bash
@@ -91,7 +91,7 @@ docker run \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  create a3 mig-cos
+  create a3-mega mig-cos
 
 # destroy the cluster
 docker run \
@@ -99,7 +99,7 @@ docker run \
   -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   -v "${PWD}:/root/aiinfra/input" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
-  destroy a3 mig-cos
+  destroy a3-mega mig-cos
 ```
 
 Quick explanation of the `docker run` flags (in same order as above):
@@ -110,7 +110,7 @@ Quick explanation of the `docker run` flags (in same order as above):
   the container so the tool can read the `terraform.tfvars` file.
 - `create/destroy` tells the tool whether it should create or destroy the whole
   cluster.
-- `a3` specifies which type of cluster to provision -- this will influence mainly machine type, networking, and startup scripts.
+- `a3-mega` specifies which type of cluster to provision -- this will influence mainly machine type, networking, and startup scripts.
 - `mig-cos` tells the tool to create a Managed Instance Group and
   start a container at boot.
 
@@ -119,7 +119,7 @@ Quick explanation of the `docker run` flags (in same order as above):
 For this method, you need to
 [install terraform](https://developer.hashicorp.com/terraform/downloads).
 Examples of usage as a terraform module can be found in the `main.tf` files in
-any of the examples -- [a3](./a3/examples). Cluster provisioning then happens
+any of the examples -- [a3-mega](./a3-mega/examples). Cluster provisioning then happens
 the same as any other terraform:
 
 ```bash
@@ -137,7 +137,7 @@ terraform init && terraform validate && terraform apply -destroy
 For this method, you need to
 [build ghpc](https://github.com/GoogleCloudPlatform/hpc-toolkit#quickstart).
 Examples of usage as an HPC Toolkit Blueprint can be found in the
-`blueprint.yaml` files in any of the examples -- [a3](./a3/examples). Cluster
+`blueprint.yaml` files in any of the examples -- [a3-mega](./a3-mega/examples). Cluster
 provisioning then happens the same as any blueprint:
 
 ```bash
@@ -145,8 +145,8 @@ provisioning then happens the same as any blueprint:
 # the current working directory
 
 # create/update the cluster
-./ghpc create -w ./blueprint.yaml && ./ghpc deploy a3-mig-cos
+./ghpc create -w ./blueprint.yaml && ./ghpc deploy a3-mega-mig-cos
 
 # destroy the cluster
-./ghpc create -w ./blueprint.yaml && ./ghpc destroy a3-mig-cos
+./ghpc create -w ./blueprint.yaml && ./ghpc destroy a3-mega-mig-cos
 ```
