@@ -85,6 +85,12 @@ resource "google_container_cluster" "cluster" {
   network    = module.network.network_self_links[0]
   subnetwork = module.network.subnetwork_self_links[0]
 
+  private_cluster_config {
+    enable_private_nodes    = true
+    enable_private_endpoint = false  # If you don't want to restrict access to the Kubernetes API
+    master_ipv4_cidr_block  = "172.16.0.0/28" # Choose a private CIDR block
+  }
+
   master_authorized_networks_config {
   }
 
