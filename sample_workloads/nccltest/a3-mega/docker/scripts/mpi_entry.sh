@@ -10,7 +10,7 @@
 : "${RUN_ITERS:?Must set RUN_ITERS}"
 
 # Unreserved cores for taskset call. This is a CSV of ranges for cores unused
-# by TCPX.
+# by GPUDirect-TCPXO.
 : "${UNRESERVED_CORES:?Must set UNRESERVED_CORES}"
 
 # Telemetry.
