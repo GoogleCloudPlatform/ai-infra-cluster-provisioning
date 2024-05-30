@@ -35,7 +35,7 @@ rxdm:
 ncclPlugin:
   image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirecttcpx-dev"
   tag: "v1.0.0"
-  unreservedCores: "0-7,104-111,52-59,156-163" 
+  unreservedCores: "32-63" 
   envs:
     NCCL_FASTRAK_CTRL_DEV: "eth0"
     NCCL_FASTRAK_IFNAME: "eth1,eth2,eth3,eth4,eth5,eth6,eth7,eth8"
