@@ -12,7 +12,7 @@ cd docker && docker build . -t nccl-benchmarks
 
 **Note: A pre-built image is available in the values.yaml file**
 
-## Running the TCPX NCCL Benchmarks
+## Running the GPUDirect-TCPXO NCCL Benchmarks
 
 This section describes how you can run a 2-node world-level all-gather
 benchmark at message sizes 1G and 8G.
@@ -97,15 +97,15 @@ performance.
 
 |GKE|Explanation|
 |---|---|
-|`rxdm.image`|Image for the TCPX RxDM.|
-|`rxdm.tag`|Tag for the TCPX RxDM.|
-|`rxdm.flags`|Runtime flags for the TCPX RxDM.|
-|`ncclPlugin.image`|Image for the TCPX NCCL plugin.|
-|`ncclPlugin.tag`|Tag for the TCPX NCCL plugin.|
+|`rxdm.image`|Image for the GPUDirect-TCPXO RxDM.|
+|`rxdm.tag`|Tag for the GPUDirect-TCPXO RxDM.|
+|`rxdm.flags`|Runtime flags for the GPUDirect-TCPXO RxDM.|
+|`ncclPlugin.image`|Image for the GPUDirect-TCPXO NCCL plugin.|
+|`ncclPlugin.tag`|Tag for the GPUDirect-TCPXO NCCL plugin.|
 |`ncclPlugin.unreservedCores`|Application reserved cores.|
-|`ncclPlugin.envs`|Environment variables for the TCPX NCCL plugin.|
+|`ncclPlugin.envs`|Environment variables for the GPUDirect-TCPXO NCCL plugin.|
 
-**For TCPX NCCL, any environment variables starting with `NCCL` will be picked
+**For GPUDirect-TCPXO NCCL, any environment variables starting with `NCCL` will be picked
 up by the benchmarking container.**
 
 #### More Fine-Grained Node Placement Control
