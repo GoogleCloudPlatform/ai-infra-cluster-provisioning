@@ -1,6 +1,6 @@
-# TCPX NCCL Level Benchmarks
+# GPUDirect-TCPXO NCCL Level Benchmarks
 
-This document will walk you through how to build, push, and deploy the nccl-benchmark image for use on a GKE cluster configured with an A3 nodepool.
+This document will walk you through how to build, push, and deploy the nccl-benchmark image for use on a GKE cluster configured with an A3 Mega nodepool.
 
 ## Building the Benchmark Docker Image
 
@@ -45,32 +45,6 @@ kubectl logs --follow <master-pod-name> -c nccl-benchmarks
 The container will log the output of Nvidia's nccl-test binaries for each of the tests that are requested in the parameters.
 
 Each test run is logged separately. If you specify a release that uses multiple tests and multiple runs, the logs will be ordered by Test0Run0...Test0RunN...TestNRunN.
-
-An example test output would look like:
-```
-benchmark: all_reduce_perf, mask: 0x0, run 1/1
-# nThread 1 nGpus 1 minBytes 1048576 maxBytes 8589934592 step: 2(factor) warmup iters: 2 iters: 10 agg iters: 1 validation: 0 graph: 0
-#
-#                                                              out-of-place                       in-place
-#       size         count      type   redop    root     time   algbw   busbw #wrong     time   algbw   busbw #wrong
-#        (B)    (elements)                               (us)  (GB/s)  (GB/s)            (us)  (GB/s)  (GB/s)
-     1048576        262144     float     sum      -1   1788.7    0.59    1.10    N/A   1725.9    0.61    1.14    N/A
-     2097152        524288     float     sum      -1   1645.1    1.27    2.39    N/A   1649.8    1.27    2.38    N/A
-     4194304       1048576     float     sum      -1   1701.3    2.47    4.62    N/A   1691.6    2.48    4.65    N/A
-     8388608       2097152     float     sum      -1   1891.3    4.44    8.32    N/A   1911.9    4.39    8.23    N/A
-    16777216       4194304     float     sum      -1   1932.8    8.68   16.28    N/A   2014.4    8.33   15.62    N/A
-    33554432       8388608     float     sum      -1   2190.8   15.32   28.72    N/A   2395.8   14.01   26.26    N/A
-    67108864      16777216     float     sum      -1   2367.6   28.34   53.15    N/A   2389.8   28.08   52.65    N/A
-   134217728      33554432     float     sum      -1   3539.5   37.92   71.10    N/A   3266.7   41.09   77.04    N/A
-   268435456      67108864     float     sum      -1   5969.3   44.97   84.32    N/A   5850.8   45.88   86.03    N/A
-   536870912     134217728     float     sum      -1    11625   46.18   86.59    N/A    11737   45.74   85.77    N/A
-  1073741824     268435456     float     sum      -1    23144   46.39   86.99    N/A    38777   27.69   51.92    N/A
-  2147483648     536870912     float     sum      -1    45662   47.03   88.18    N/A    45522   47.17   88.45    N/A
-  4294967296    1073741824     float     sum      -1    90227   47.60   89.25    N/A    90354   47.53   89.13    N/A
-  8589934592    2147483648     float     sum      -1   179880   47.75   89.54    N/A   178867   48.02   90.05    N/A
-# Out of bounds values : 0 OK
-# Avg bus bandwidth    : 49.6371
-```
 
 If `gcsBucket` is specified in the values.yaml file, then the logs will also be uploaded to the specified bucket.
 
