@@ -24,11 +24,6 @@ ncclBenchmarks:
   nRuns: 5
 
 # Modularized telemetry.
-# Input is case insensitive. Default value is `none`.
-# To enable all telemetry, set this field to `all`.
-# To enable specific modules, set this field to a comma-separated list of
-# desired components, e.g. `tcp,gpu`. Available modules are: nic, tcp, cpu,
-# gpu, kernel.
 telemetry:
   gpu: false
 
