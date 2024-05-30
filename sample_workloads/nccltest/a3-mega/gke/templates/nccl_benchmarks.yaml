@@ -111,8 +111,6 @@ spec:
     securityContext:
       privileged: true
     env:
-      - name: NCCL_DEBUG
-        value: "INFO"
       - name: JOB_TIMESTAMP
         value: "{{ $timestamp }}"
       - name: JOB_NAME
@@ -121,10 +119,6 @@ spec:
         value: "{{ $.Values.runUser }}"
       - name: VERSION_VECTOR
         value: "{{ $.Values.versionVec }}"
-      - name: DESCRIPTION
-        value: "{{ $.Values.description }}"
-      - name: IS_LKG
-        value: "{{ $.Values.isLkg }}"
       - name: MASTER_ADDR
         value: "nccl-benchmarks-{{ $uniqueId }}"
       - name: NNODES
@@ -151,10 +145,6 @@ spec:
         value: "{{ $.Values.ncclBenchmarks.warmupIters }}"
       - name: RUN_ITERS
         value: "{{ $.Values.ncclBenchmarks.runIters }}"
-      - name: N_RUNS
-        value: "{{ $.Values.ncclBenchmarks.nRuns }}"
-      - name: DATA_CHECK
-        value: "{{ $.Values.ncclBenchmarks.dataCheck }}"
       - name: UNRESERVED_CORES
         value: "{{ $.Values.ncclPlugin.unreservedCores }}"
       - name: GPU_TELEMETRY
