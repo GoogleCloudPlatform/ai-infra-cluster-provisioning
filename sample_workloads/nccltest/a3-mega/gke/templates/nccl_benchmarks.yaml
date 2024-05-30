@@ -37,17 +37,12 @@ spec:
   serviceAccountName: "default"
   restartPolicy: Never
 
-  {{- if $.Values.cluster.topologyAware }}
-  schedulingGates:
-  - name: "gke.io/topology-aware-auto-{{ $uniqueId }}"
-  {{- else }}
-    {{- if $.Values.cluster.npPlacement }}
-      {{ $npChunk :=  div $nodeIndex $nodesPerNp | int }}
-      {{ $npIndex :=  add $.Values.cluster.startNp $npChunk | int }}
-      {{ $nodepool := printf "np-%d" $npIndex }}
+  {{- if $.Values.cluster.npPlacement }}
+    {{ $npChunk :=  div $nodeIndex $nodesPerNp | int }}
+    {{ $npIndex :=  add $.Values.cluster.startNp $npChunk | int }}
+    {{ $nodepool := printf "np-%d" $npIndex }}
   nodeSelector:
     cloud.google.com/gke-nodepool: "{{ $nodepool }}"
-    {{- end }}
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
