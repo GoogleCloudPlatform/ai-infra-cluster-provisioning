@@ -63,16 +63,16 @@ spec:
     emptyDir:
       medium: "Memory"
       sizeLimit: 200Gi
-  - name: fastrak-nccl-plugin-volume
+  - name: tcpxo-nccl-plugin-volume
     emptyDir: {}
   - name: workload-terminated-volume
     emptyDir: {}
   initContainers:
-  - name: fastrak-nccl-plugin-installer
+  - name: tcpxo-nccl-plugin-installer
     image: {{ $.Values.ncclPlugin.image }}:{{ $.Values.ncclPlugin.tag }}
     imagePullPolicy: Always
     volumeMounts:
-    - name: fastrak-nccl-plugin-volume
+    - name: tcpxo-nccl-plugin-volume
       mountPath: /var/lib/fastrak
     resources:
       requests:
@@ -84,7 +84,7 @@ spec:
         --nccl-buildtype=nvtx
       {{- end }}
   containers:
-  - name: fastrak-daemon
+  - name: tcpxo-daemon
     image: {{ $.Values.rxdm.image }}:{{ $.Values.rxdm.tag }}
     imagePullPolicy: Always
     command:
@@ -158,7 +158,7 @@ spec:
         mountPath: /usr/local/nvidia/lib64
       - name: shared-memory
         mountPath: /dev/shm
-      - name: fastrak-nccl-plugin-volume
+      - name: tcpxo-nccl-plugin-volume
         mountPath: /usr/local/fastrak
       - name: workload-terminated-volume
         mountPath: /usr/share/nccl_benchmarks
