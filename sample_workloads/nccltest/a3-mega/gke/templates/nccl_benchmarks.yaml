@@ -141,6 +141,8 @@ spec:
         value: "{{ $.Values.ncclBenchmarks.gpusPerNode }}"
       - name: N_COMMS
         value: "{{ $.Values.ncclBenchmarks.nComms }}"
+      - name: N_RUNS
+        value: "{{ $.Values.ncclBenchmarks.nRuns }}"
       - name: WARMUP_ITERS
         value: "{{ $.Values.ncclBenchmarks.warmupIters }}"
       - name: RUN_ITERS
