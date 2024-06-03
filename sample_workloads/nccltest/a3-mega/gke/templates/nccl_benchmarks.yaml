@@ -1,0 +1,171 @@
+# yamllint disable
+{{- $requiredVar := .Values.cluster.nNodes | required ".Values.cluster.nNodes is required, add --set cluster.nNodes=2" -}}
+{{- if le $.Values.cluster.nNodes 0 }}
+  {{- fail "Invalid .Values.cluster.nNodes: must be a positive integer."}}
+{{- end }}
+{{ $timestamp := now | date "2006-01-02-150405" }}
+{{ $uniqueId := printf "%s-%s" $.Release.Name $timestamp }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: "nccl-benchmarks-{{ $uniqueId }}"
+spec:
+  selector:
+    name: "nccl-benchmarks-{{ $uniqueId }}"
+  clusterIP: None
+  serviceAccountName: "default"
+---
+{{ $nodeCount := .Values.cluster.nNodes | int }}
+{{ $npCount := $.Values.cluster.nNps | int }}
+{{ $nodesPerNp := divf $nodeCount $npCount | ceil }}
+
+{{- range $nodeIndex, $element := until $nodeCount }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nccl-benchmarks-{{ $uniqueId }}-pod{{ $nodeIndex }}
+  {{- if eq $nodeIndex 0 }}
+  labels:
+    name: nccl-benchmarks-{{ $uniqueId }}
+  {{- end }}
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  hostname: nccl-benchmarks-pod{{ $nodeIndex }}
+  subdomain: nccl-benchmarks-{{ $timestamp }}
+  serviceAccountName: "default"
+  restartPolicy: Never
+
+  {{- if $.Values.cluster.npPlacement }}
+    {{ $npChunk :=  div $nodeIndex $nodesPerNp | int }}
+    {{ $npIndex :=  add $.Values.cluster.startNp $npChunk | int }}
+    {{ $nodepool := printf "np-%d" $npIndex }}
+  nodeSelector:
+    cloud.google.com/gke-nodepool: "{{ $nodepool }}"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-accelerator
+            operator: Exists
+  {{- end }}
+
+  tolerations:
+  - operator: "Exists"
+    key: nvidia.com/gpu
+  volumes:
+  - name: nvidia-install-dir
+    hostPath:
+      path: /home/kubernetes/bin/nvidia/lib64
+  - name: shared-memory
+    emptyDir:
+      medium: "Memory"
+      sizeLimit: 200Gi
+  - name: tcpxo-nccl-plugin-volume
+    emptyDir: {}
+  - name: workload-terminated-volume
+    emptyDir: {}
+  initContainers:
+  - name: tcpxo-nccl-plugin-installer
+    image: {{ $.Values.ncclPlugin.image }}:{{ $.Values.ncclPlugin.tag }}
+    imagePullPolicy: Always
+    volumeMounts:
+    - name: tcpxo-nccl-plugin-volume
+      mountPath: /var/lib/fastrak
+    resources:
+      requests:
+        cpu: 150m
+    args:
+      - "install"
+      - "--install-nccl"
+      {{- if $.Values.telemetry.gpu }} \
+        --nccl-buildtype=nvtx
+      {{- end }}
+  containers:
+  - name: tcpxo-daemon
+    image: {{ $.Values.rxdm.image }}:{{ $.Values.rxdm.tag }}
+    imagePullPolicy: Always
+    command:
+    - "bash"
+    - "-c"
+    - |
+      bash /fts/entrypoint_rxdm_container.sh {{- range $.Values.rxdm.flags }} {{.}} {{- end }} &
+      while [ ! -e "/usr/share/nccl_benchmarks/workload_terminated" ]; do sleep 10; done
+      pkill -e fastrak_gpumem_manager || true
+      sleep 30
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: nvidia-install-dir
+      mountPath: /usr/local/nvidia/lib64
+    - name: workload-terminated-volume
+      mountPath: /usr/share/nccl_benchmarks
+    env:
+    - name: LD_LIBRARY_PATH
+      value: /usr/local/nvidia/lib64
+  - name: nccl-benchmarks
+    image: {{ $.Values.ncclBenchmarks.image }}:{{ $.Values.ncclBenchmarks.tag }}
+    imagePullPolicy: Always
+    securityContext:
+      privileged: true
+    env:
+      - name: JOB_TIMESTAMP
+        value: "{{ $timestamp }}"
+      - name: JOB_NAME
+        value: "{{ $.Release.Name }}"
+      - name: RUN_USER
+        value: "{{ $.Values.runUser }}"
+      - name: VERSION_VECTOR
+        value: "{{ $.Values.versionVec }}"
+      - name: MASTER_ADDR
+        value: "nccl-benchmarks-{{ $uniqueId }}"
+      - name: NNODES
+        value: "{{ $nodeCount }}"
+      - name: NODE_RANK
+        value: "{{ $nodeIndex }}"
+      - name: GCS_BUCKET
+        value: "{{ $.Values.cluster.gcsBucket }}"
+      - name: LD_LIBRARY_PATH
+        value: "/usr/local/fastrak/lib64:/usr/local/nvidia/lib64"
+      - name: BENCHMARKS_CSV
+        value: "{{ $.Values.ncclBenchmarks.benchmarks }}"
+      - name: MASKS_CSV
+        value: "{{ $.Values.ncclBenchmarks.masks }}"
+      - name: MSG_SIZE_BEGIN
+        value: "{{ $.Values.ncclBenchmarks.msgSizeBegin }}"
+      - name: MSG_SIZE_END
+        value: "{{ $.Values.ncclBenchmarks.msgSizeEnd }}"
+      - name: GPUS_PER_NODE
+        value: "{{ $.Values.ncclBenchmarks.gpusPerNode }}"
+      - name: N_COMMS
+        value: "{{ $.Values.ncclBenchmarks.nComms }}"
+      - name: N_RUNS
+        value: "{{ $.Values.ncclBenchmarks.nRuns }}"
+      - name: WARMUP_ITERS
+        value: "{{ $.Values.ncclBenchmarks.warmupIters }}"
+      - name: RUN_ITERS
+        value: "{{ $.Values.ncclBenchmarks.runIters }}"
+      - name: UNRESERVED_CORES
+        value: "{{ $.Values.ncclPlugin.unreservedCores }}"
+      - name: GPU_TELEMETRY
+        value: "{{ $.Values.telemetry.gpu }}"
+      {{- range $key, $value := $.Values.ncclPlugin.envs }}
+      - name: "{{ $key }}"
+        value: "{{ $value }}"
+      {{- end }}
+    volumeMounts:
+      - name: nvidia-install-dir
+        mountPath: /usr/local/nvidia/lib64
+      - name: shared-memory
+        mountPath: /dev/shm
+      - name: tcpxo-nccl-plugin-volume
+        mountPath: /usr/local/fastrak
+      - name: workload-terminated-volume
+        mountPath: /usr/share/nccl_benchmarks
+    resources:
+      limits:
+        nvidia.com/gpu: !!int 8
+---
+{{- end }}

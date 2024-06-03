@@ -18,7 +18,7 @@ set -o pipefail
 : "${N_RUNS:?Must set N_RUNS}"
 
 # Unreserved cores for taskset call. This is a CSV of ranges for cores unused
-# by TCPX.
+# by GPUDirect-TCPXO.
 : "${UNRESERVED_CORES:?Must set UNRESERVED_CORES}"
 
 # Telemetry.
