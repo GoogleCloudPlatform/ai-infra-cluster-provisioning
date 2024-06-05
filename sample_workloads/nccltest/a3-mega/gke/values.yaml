@@ -1,0 +1,59 @@
+cluster:
+  nNodes: null  # Must specify on commandline (--set cluster.nNodes=2)
+  npPlacement: false
+  nNps: 1
+  startNp: 1
+  gcsBucket: null
+
+ncclBenchmarks:
+  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-benchmark"
+  tag: "latest"
+  # A comma-separated list of benchmarks to run.
+  benchmarks: "all_gather_perf,"
+  # A comma-separated list of hex masks for the benchmarks.
+  # Must be of the same length as ncclBenchmarks.benchmarks.
+  # Each mask is recommended to be less than ncclBenchmarks.gpusPerNode.
+  masks: "0x0,"
+  msgSizeBegin: "1M"
+  msgSizeEnd: "8G"
+  # Number of GPUs per node. Must be one of 1, 2, 4, 8.
+  gpusPerNode: 8
+  nComms: 1
+  warmupIters: 5
+  runIters: 200
+  nRuns: 5
+
+# Modularized telemetry.
+telemetry:
+  gpu: false
+
+rxdm:
+  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev" 
+  tag: "v1.0.8" 
+  flags: ["--num_hops=2", "--num_nics=8", "--uid=", "--alsologtostderr"] 
+
+ncclPlugin:
+  image: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirecttcpx-dev"
+  tag: "v1.0.0"
+  unreservedCores: "32-63" 
+  envs:
+    NCCL_FASTRAK_CTRL_DEV: "eth0"
+    NCCL_FASTRAK_IFNAME: "eth1,eth2,eth3,eth4,eth5,eth6,eth7,eth8"
+    NCCL_SOCKET_IFNAME: "eth0"
+    NCCL_CROSS_NIC: "0"
+    NCCL_ALGO: "Ring"
+    NCCL_PROTO: "Simple"
+    NCCL_MIN_NCHANNELS: "4"
+    NCCL_DYNAMIC_CHUNK_SIZE: "524288"
+    NCCL_P2P_NET_CHUNKSIZE: "524288"
+    NCCL_P2P_PCI_CHUNKSIZE: "524288"
+    NCCL_P2P_NVL_CHUNKSIZE: "1048576"
+    NCCL_FASTRAK_NUM_FLOWS: "2"
+    NCCL_FASTRAK_USE_SNAP: "1"
+    NCCL_FASTRAK_ENABLE_CONTROL_CHANNEL: "0"
+    NCCL_BUFFSIZE: "8388608"
+    CUDA_VISIBLE_DEVICES: "0,1,2,3,4,5,6,7"
+    NCCL_NET_GDR_LEVEL: "PIX"
+    NCCL_FASTRAK_ENABLE_HOTPATH_LOGGING: "0"
+    NCCL_FASTRAK_USE_LLCM: "1"
+    NCCL_NVLS_ENABLE: "0"

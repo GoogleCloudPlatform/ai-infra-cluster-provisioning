@@ -31,9 +31,13 @@ node_pools = [
 ]
 EOF
 
-docker run --rm -v "${PWD}:/root/aiinfra/input" \
+docker run --rm \
+  -v "${PWD}:/root/aiinfra/input" \
+  -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
   create a3-mega gke
+
+
 ```
 
 A deeper dive into how to use this tool can be found at the [top-level README](../README.md#how-to-provision-a-cluster).
@@ -59,7 +63,9 @@ region          = "us-central1"
 resource_prefix = "my-cluster"
 EOF
 
-docker run --rm -v "${PWD}:/root/aiinfra/input" \
+docker run --rm \
+  -v "${PWD}:/root/aiinfra/input" \
+  -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
   create a3-mega mig-cos
 ```
