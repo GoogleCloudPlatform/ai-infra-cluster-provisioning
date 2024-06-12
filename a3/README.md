@@ -19,6 +19,7 @@ cat >./terraform.tfvars <<EOF
 project_id      = "my-project"
 region          = "us-central1"
 resource_prefix = "my-cluster"
+gke_version = "1.27.8-gke.1067000"
 node_pools = [
   {
     zone       = "us-central1-c"
@@ -32,6 +33,7 @@ node_pools = [
 EOF
 
 docker run --rm -v "${PWD}:/root/aiinfra/input" \
+  -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
   create a3 gke
 ```
@@ -60,6 +62,7 @@ resource_prefix = "my-cluster"
 EOF
 
 docker run --rm -v "${PWD}:/root/aiinfra/input" \
+  -v "${HOME}/.config/gcloud:/root/.config/gcloud" \
   us-docker.pkg.dev/gce-ai-infra/cluster-provision-dev/cluster-provision-image:latest \
   create a3 mig-cos
 ```
