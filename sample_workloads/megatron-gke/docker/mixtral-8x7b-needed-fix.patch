@@ -1,0 +1,14 @@
+diff --git a/megatron/core/transformer/attention.py b/megatron/core/transformer/attention.py
+index 9b662d86..4d9c8bd3 100644
+--- a/megatron/core/transformer/attention.py
++++ b/megatron/core/transformer/attention.py
+@@ -298,6 +298,9 @@ class Attention(MegatronModule, ABC):
+             # otherwise, only relative positional embedding takes effect
+             # value_layer = apply_rotary_pos_emb(value_layer, k_pos_emb)
+ 
++            assert key.shape == value.shape
++            value = torch.as_strided(value, value.shape, key.stride())
++
+         # ==================================
+         # core attention computation
+         # ==================================
