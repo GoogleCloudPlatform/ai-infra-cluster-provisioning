@@ -64,28 +64,32 @@ sudo chmod +x /usr/local/bin/helm
 You can use the topology-aware scheduler to deploy your GKE Pods to nodes that
 have a specified GPU topology.
 
+In the following `kubectl` commands, we will use the files directly from a
+repository. Alternatively, the repo can be cloned locally and the `kubectl`
+commands can reference the local files instead.
+
 For more information, see: 
 https://github.com/GoogleCloudPlatform/container-engine-accelerators/tree/master/gpudirect-tcpxo/topology-scheduler
 
 Setup the service account:
 
 ```
-kubectl apply -f topology-scheduler/service-account.yaml
+kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/service-account.yaml
 ```
 
 Install the topology scheduler scripts in a configmap:
 
 ```
 kubectl -n kube-system create configmap topology-scheduler-scripts \
-  --from-file=schedule-daemon.py=topology-scheduler/schedule-daemon.py \
-  --from-file=label-nodes-daemon.py=topology-scheduler/label-nodes-daemon.py
+  --from-file=schedule-daemon.py=https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/schedule-daemon.py \
+  --from-file=label-nodes-daemon.py=https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/label-nodes-daemon.py
 ```
 
 Install the topology label daemonset and topology scheduler pod:
 
 ```
-kubectl apply -f topology-scheduler/label-nodes-daemon.yaml
-kubectl apply -f topology-scheduler/schedule-daemon.yaml
+kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/label-nodes-daemon.yaml
+kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/schedule-daemon.yaml
 ```
 
 You can observe the actions of the topology scheduler using:
