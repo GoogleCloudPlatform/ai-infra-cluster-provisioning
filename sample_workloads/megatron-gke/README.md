@@ -80,9 +80,14 @@ kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container
 Install the topology scheduler scripts in a configmap:
 
 ```
+# Download the files to use
+curl -OL  https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/schedule-daemon.py
+curl -OL  https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/label-nodes-daemon.py
+
 kubectl -n kube-system create configmap topology-scheduler-scripts \
-  --from-file=schedule-daemon.py=https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/schedule-daemon.py \
-  --from-file=label-nodes-daemon.py=https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/label-nodes-daemon.py
+  --from-file=schedule-daemon.py=schedule-daemon.py \
+  --from-file=label-nodes-daemon.py=label-nodes-daemon.py
+
 ```
 
 Install the topology label daemonset and topology scheduler pod:
