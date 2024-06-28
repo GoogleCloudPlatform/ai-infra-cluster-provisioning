@@ -38,14 +38,14 @@ kind: Job
 metadata:
   name: "{{ .Release.Name }}"
   namespace: default
-  labels:
-  {{- if $root.Values.queue }}
-    kueue.x-k8s.io/queue-name: "{{ $root.Values.queue }}"
-  {{- end }}
+  # labels:
+  # {{- if $root.Values.queue }}
+  #   kueue.x-k8s.io/queue-name: "{{ $root.Values.queue }}"
+  # {{- end }}
 spec:
-  {{- if $root.Values.queue }}
-  suspend: true
-  {{- end }}
+  # {{- if $root.Values.queue }}
+  # suspend: true
+  # {{- end }}
   parallelism: {{ $nodes }}
   completions: {{ $nodes }}
   completionMode: Indexed
@@ -416,6 +416,7 @@ spec:
 
         export NODE_RANK=$JOB_COMPLETION_INDEX
         echo "Launching Torch distributed as node rank $NODE_RANK out of $NNODES nodes"
+        nsys_pids_to_wait_on=() # <- Ensure we let these complete before exiting
         for ((LOCAL_RANK=0; LOCAL_RANK <= $((GPUS_PER_NODE - 1)); LOCAL_RANK++)); do
           RANK=$((8*$NODE_RANK + $LOCAL_RANK))
 
@@ -428,20 +429,30 @@ spec:
             ${megatron_arguments[@]} \
             ${workload_arguments[@]} &
 
+            # Keep the pid of the nsys process in array
+            nsys_pids_to_wait_on+=($!)
+
           TORCH_PIDS[$LOCAL_RANK]=$!
           echo "Launched rank $LOCAL_RANK as PID $!"
         done
 
         if [ "$NODE_RANK" -eq "0" ]; then
            nvidia-smi -l 60 &
+           # Get job id (for reference not to wait on)
+           nvidia_smi_pid=$!
+           echo "PID of nvidia-smi: $nvidia_smi_pid"
         fi
 
         if [ "$NODE_RANK" -eq "0" ] && { ! [ -z ${EMBEDDED_TENSORBOARD_TARGET} ]; }; then
           echo "Launching an embedded Tensorboard against log directory $EMBEDDED_TENSORBOARD_TARGET"
           tensorboard --logdir $EMBEDDED_TENSORBOARD_TARGET &
+          wait $! # <-- This will wait on Tensorboard (if it exists)
         fi
 
-        wait # <-- This will wait on Tensorboard (if it exists)
+        # Let nsys jobs complete 
+        echo "Waiting for nsys jobs to complete"
+        wait $nsys_pids_to_wait_on
+
         echo "Pod on $(hostname --fqdn) is exiting"
       volumeMounts:
         - name: nvidia-install-dir-host
