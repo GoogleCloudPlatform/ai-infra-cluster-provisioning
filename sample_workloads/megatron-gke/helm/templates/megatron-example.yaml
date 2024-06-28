@@ -38,14 +38,14 @@ kind: Job
 metadata:
   name: "{{ .Release.Name }}"
   namespace: default
-  # labels:
-  # {{- if $root.Values.queue }}
-  #   kueue.x-k8s.io/queue-name: "{{ $root.Values.queue }}"
-  # {{- end }}
+  labels:
+  {{- if $root.Values.queue }}
+    kueue.x-k8s.io/queue-name: "{{ $root.Values.queue }}"
+  {{- end }}
 spec:
-  # {{- if $root.Values.queue }}
-  # suspend: true
-  # {{- end }}
+  {{- if $root.Values.queue }}
+  suspend: true
+  {{- end }}
   parallelism: {{ $nodes }}
   completions: {{ $nodes }}
   completionMode: Indexed
