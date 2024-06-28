@@ -1,0 +1,13 @@
+diff --git a/megatron/training/training.py b/megatron/training/training.py
+index b1019793..f443ca03 100644
+--- a/megatron/training/training.py
++++ b/megatron/training/training.py
+@@ -1,5 +1,8 @@
+ # Copyright (c) 2024, NVIDIA CORPORATION. All rights reserved.
+ 
++import utilities.monitor_collectives
++utilities.monitor_collectives.shunt_torch_communication()
++
+ """Pretrain utilities."""
+ 
+ import gc
