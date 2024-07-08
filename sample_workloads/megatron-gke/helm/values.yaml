@@ -20,8 +20,8 @@ gcsDownload: # downloads or synchronizes contents of a GCS bucket folder on init
   target: "/ssd/.cache/"
 
 workload:
-  # Default image but can/should be modified to the user's
-  image: "us-east4-docker.pkg.dev/supercomputer-testing/megatron-benchmark/pytorch-megatron:23.11-py3"
+  # CHANGE `image` value to user defined value
+  image: $REGION-docker.pkg.dev/$PROJECT_ID/$USER-test-megatron/pytorch-megatron:23.11-py3
   torchDistributedTarget: "/workspace/Megatron-LM/pretrain_gpt.py"
 
   # CHANGE `gcsBucketForDataCataPath` value to user defined value
