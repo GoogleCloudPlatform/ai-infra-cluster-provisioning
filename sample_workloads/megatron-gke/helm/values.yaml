@@ -48,6 +48,10 @@ network:
 
   # NCCL binaries (contains 2.18.x and plug-in):
   pluginVersion: "cl_625842736"
+  
+  # Receive daemon (tcpx or tcpxo)
+  netRxDaemonRepository: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev"
+  netRxDaemonVersion: "v1.0.8"
 
   ncclSettings:
   - name: NCCL_DEBUG

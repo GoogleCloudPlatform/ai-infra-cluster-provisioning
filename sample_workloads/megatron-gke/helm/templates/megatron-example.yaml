@@ -191,7 +191,7 @@ spec:
     # Either the tcpx or tcpxo receive daemon
     {{ if ne $root.Values.network.stack "tcp" }}
     - name: network-rx-daemon
-      image: "gcr.io/supercomputer-testing/reginaren/rxdm_elm:k8s"
+      image: "{{ $root.Values.network.netRxDaemonRepository }}:{{ $root.Values.network.netRxDaemonVersion }}"
       imagePullPolicy: Always
       securityContext:
         privileged: true
