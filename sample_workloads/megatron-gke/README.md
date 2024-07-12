@@ -152,13 +152,3 @@ create a new experiment with a different name.
 
 The experiment writes metrics from Nsight profiling to the GCS bucket specified
 in the `megatron-experiments`.
-
-
-
-
-
-
-
-
-
-
