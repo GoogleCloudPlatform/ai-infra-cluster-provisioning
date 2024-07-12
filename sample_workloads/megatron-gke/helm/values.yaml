@@ -1,0 +1,65 @@
+queue: "multislice-queue"
+
+volumes:
+# The VM host path for SSDs is assumed at /mnt/stateful_partition/kube-ephemeral-ssd
+  ssdMountPath: "/ssd"
+
+# This mounts any persistent volume claims present in the cluster:
+#  pvcMounts:
+#  - name: <shared-file-system>
+#    mountPath: "/nfs"
+
+# CHANGE `bucketName` value to user defined value
+# This requires GCS fuse driver installed
+gcsMounts:
+- bucketName: $USER-test-megatron
+  mountPath: "/gcs"
+
+gcsDownload: # downloads or synchronizes contents of a GCS bucket folder on initialization
+  source: "gs://nemo-megatron-demo/training-data/tokenized/sentencepiece-llama2/wikipedia" 
+  target: "/ssd/.cache/"
+
+workload:
+  # CHANGE `image` value to user defined value
+  image: $REGION-docker.pkg.dev/$PROJECT_ID/$USER-test-megatron/pytorch-megatron:23.11-py3
+  torchDistributedTarget: "/workspace/Megatron-LM/pretrain_gpt.py"
+
+  # CHANGE `gcsBucketForDataCataPath` value to user defined value
+  # It will be mounted to /nfs on container startup using GCS fuse
+  gcsBucketForDataCataPath: $USER-test-megatron
+
+  gpus: 128 # This should be one of: {<= 8,  multiple of 8}
+  arguments: 
+  # These argument name will be prefixed with '--'
+  - name: "data-path"
+    value: "/ssd/.cache/wikipedia-tokenized-for-llama2"
+  - name: "data-cache-path"
+    value: "/gcs/.cache/wikipedia-tokenized-for-llama2"
+  - name: "tokenizer-model"
+    value: "/ssd/.cache/llama-2-7b-megatron-checkpoint/tokenizer.model"
+
+  # If not 'null', launches a Tensorboard server on first node. By design, the job will then not exit on first node.
+  # This is primarly intended for debugging purposes, when a shared file-system or external Tensorboard is unavailable.
+  embeddedTensorboardTarget: null
+
+network:
+  # Do not change. This code template is designed for A3+
+  stack: "tcpxo" # one of {"tcp", "tcpx", "tcpxo"}
+
+  # NCCL binaries 
+  ncclRepository: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirecttcpx-dev"
+  ncclVersion: "v1.0.1"
+  
+  # Receive daemon (tcpx or tcpxo)
+  netRxDaemonRepository: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev"
+  netRxDaemonVersion: "v1.0.8"
+
+  ncclSettings:
+  - name: NCCL_DEBUG
+    value: "VERSION"
+ 
+  # The following NCCL settings are recommended for TCPxo only (but tunable):
+  - name: NCCL_MIN_NCHANNELS
+    value: "16"
+  - name: NCCL_MAX_NCHANNELS
+    value: "16"
