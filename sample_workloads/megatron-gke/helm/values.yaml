@@ -43,11 +43,12 @@ workload:
   embeddedTensorboardTarget: null
 
 network:
-  # Do not change. This code template is designed for A3+ benchmark for Debian only.
+  # Do not change. This code template is designed for A3+
   stack: "tcpxo" # one of {"tcp", "tcpx", "tcpxo"}
 
-  # NCCL binaries (contains 2.18.x and plug-in):
-  pluginVersion: "cl_625842736"
+  # NCCL binaries 
+  ncclRepository: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirecttcpx-dev"
+  ncclVersion: "v1.0.1"
   
   # Receive daemon (tcpx or tcpxo)
   netRxDaemonRepository: "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev"

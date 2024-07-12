@@ -9,7 +9,7 @@
 {{ end }}
 {{ if eq .Values.network.stack "tcpxo" }}
   {{ $netRxRepository = "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/tcpgpudmarxd-dev" }}
-  {{ $netNcclRepository = "us-docker.pkg.dev/kernel-net-team/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-pre-test-cuda12.0" }}
+  {{ $netNcclRepository = "us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpxo/nccl-plugin-gpudirecttcpx-dev:v1.0.1" }}
 {{ end }}
 
 {{ $nodes := div .Values.workload.gpus 8 | max 1 }}
@@ -167,7 +167,7 @@ spec:
 
     {{ if ne $root.Values.network.stack "tcp" }}
     - name: nccl-plugin-installer
-      image: "{{ $netNcclRepository }}:{{ $root.Values.network.pluginVersion }}"
+      image: "{{ $root.Values.network.ncclRepository }}:{{ $root.Values.network.ncclVersion }}"
       imagePullPolicy: Always
       volumeMounts:
       - name: nccl-plugin-volume
@@ -179,11 +179,13 @@ spec:
           mkdir -p /var/lib/tcpxo
           ln -s /var/lib/tcpxo /var/lib/tcpx
           /scripts/container_entry.sh install --install-nccl
-          mkdir /usr/local/nccl-plugin/lib64
-          cp -r /var/lib/tcpxo/lib64/. /usr/local/nccl-plugin/lib64
+          # cp -r /var/lib/tcpxo/lib64/. /usr/local/nccl-plugin/lib64
+          cp -r /var/lib/tcpxo/* /usr/local/nccl-plugin/
           echo "Installed NCCL plugin to pod-wide, shared NCCL plug-in volume"
           echo "Contents (mounted at /usr/local/nccl-plugin/lib64):"
           ls /usr/local/nccl-plugin/lib64 | sed 's/^/  /'
+          echo "Contents (mounted at /usr/local/nccl-plugin/):"
+          ls /usr/local/nccl-plugin/ | sed 's/^/  /'
     {{ end }}
 
     containers:
@@ -277,6 +279,12 @@ spec:
         value: "{{ $environment_variable.value }}"
       {{- end }}
 
+      # The following is needed to prevent send-receive stalling execution
+      - name: NVTE_FWD_LAYERNORM_SM_MARGIN
+        value: "8"
+      - name: NVTE_BWD_LAYERNORM_SM_MARGIN
+        value: "8"
+
       {{ if ne $root.Values.network.stack "tcp" }}
 
       # The following TCPxo settings should likely not be adjusted:
@@ -299,6 +307,12 @@ spec:
         value: "1"
       - name: NCCL_FASTRAK_USE_LLCM
         value: "1"
+
+       # The following NCCL tuner settings should likely not be adjusted: 
+      - name: NCCL_TUNER_PLUGIN
+        value: "libnccl-tuner.so"
+      - name: NCCL_TUNER_CONFIG_PATH
+        value: "/usr/local/nccl-plugin/lib64/a3plus_tuner_config.textproto"
       {{ end }}
 
       {{ if eq $root.Values.network.stack "tcpx" }}
@@ -364,12 +378,12 @@ spec:
         mkdir -p /gcs
         gcsfuse --client-protocol http2 $GCS_FUSE_BUCKET /gcs 
 
-        export LD_LIBRARY_PATH="/usr/local/nccl-plugin/lib64:/usr/local/cuda-12.3/lib64:${LD_LIBRARY_PATH}"
+        export LD_LIBRARY_PATH="/usr/local/nccl-plugin/lib64:/usr/local/cuda-12.3/lib64:/usr/local/nvidia/lib64/:${LD_LIBRARY_PATH}"
         echo "Warning: Set LD_LIBRARY_PATH=$LD_LIBRARY_PATH to override the NCCL library"
 
         ldconfig /usr/local/nvidia/lib64/
         echo "Added /usr/local/nvidia/lib64/ to ldconfig:"
-        ldconfig -p | grep libcuda | sed 's/^/  /'  
+        ldconfig -p | grep libcuda | sed 's/^/  /'
 
         echo "Contents of /usr/local/nccl-plugin/lib64:"
         ls /usr/local/nccl-plugin/lib64 | sed 's/^/  /'
