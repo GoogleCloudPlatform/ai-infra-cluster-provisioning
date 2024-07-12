@@ -32,6 +32,9 @@ Configure gcloud to use your GPC credentials for authentication:
 gcloud auth login
 ```
 
+For more information, see
+[Authenticate for using the gcloud CLI](https://cloud.google.com/docs/authentication/gcloud).
+
 Install `kubectl` and the GKE gcloud plugin:
 
 ```
@@ -65,7 +68,7 @@ You can use the topology-aware scheduler to deploy your GKE Pods to nodes that
 have a specified GPU topology.
 
 In the following `kubectl` commands, we will use the files directly from a
-repository. Alternatively, the repo can be cloned locally and the `kubectl`
+repository. Alternatively, the [repo](https://github.com/GoogleCloudPlatform/container-engine-accelerators/tree/master/gpudirect-tcpxo/topology-scheduler) can be cloned locally and the `kubectl`
 commands can reference the local files instead.
 
 For more information, see: 
@@ -90,7 +93,7 @@ kubectl -n kube-system create configmap topology-scheduler-scripts \
 
 ```
 
-Install the topology label daemonset and topology scheduler pod:
+Install the topology label daemonset and topology scheduler Pod:
 
 ```
 kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpxo/topology-scheduler/label-nodes-daemon.yaml
@@ -107,18 +110,19 @@ kubectl -n kube-system logs topology-scheduler-pod
 
 ### Build the Dockerfile and push to the GCP Artifact Registry
 
-Create a GCS bucket and a Docker registry. In the
-`scripts/setup-and-configure-resources.sh` script, replace the bucket and
-registry names with the ones you created, and then run the script:
+Create a [GCS bucket](https://cloud.google.com/storage/docs/creating-buckets)
+and a [Docker repository](https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images).
+In the `scripts/setup-and-configure-resources.sh` script, replace the bucket
+and repository names with the ones you created, and then run the script:
 
 ```
 bash scripts/setup-and-configure-resources.sh
 ```
 
 Build and push the image `pytorch-megatron:23.11-py3`. You should ensure the
-artifact repository name matches what you used in the 
-`scripts/setup-and-configure-resources.sh` script. You can also edit the Docker
-image tag name before pushing.
+artifact repository name in the `scripts/build-and-push-docker-image.sh` file
+matches what you used in the `scripts/setup-and-configure-resources.sh` script.
+You can also edit the Docker image tag name before pushing.
 
 ```
 bash scripts/build-and-push-docker-image.sh
@@ -130,10 +134,12 @@ bash scripts/build-and-push-docker-image.sh
 
 ### Launch Megatron-LM Llama2 Benchmark
 
-> Note: Edit `selected-configuration.sh`  to specify your configuration. For
-> some example configurations, see `sample-configurations`. Also edit 
+> Note: Edit `selected-configuration.sh` to specify your configuration. For
+> some example configurations, see
+> [`sample-configurations`](sample-configurations/). Also edit 
 > `helm/values.yaml` to specify your defined GCS bucket and Docker image
-> (defined in the previous [step](#build-the-dockerfile-and-push-to-the-gcp-artifact-registry)).
+> (defined in the previous 
+> [step](#build-the-dockerfile-and-push-to-the-gcp-artifact-registry)).
 
 
 ```
@@ -145,7 +151,7 @@ erase the existing experiment using the `helm uninstall` command or you can
 create a new experiment with a different name.
 
 The experiment writes metrics from Nsight profiling to the GCS bucket specified
-under `megatron-experiments`.
+in the `megatron-experiments`.
 
 
 
