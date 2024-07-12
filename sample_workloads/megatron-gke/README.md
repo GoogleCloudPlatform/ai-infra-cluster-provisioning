@@ -10,12 +10,12 @@ workload (Megatron-LM) on A3 Mega.
 
 Before proceeding, set up a Google Kubernetes Engine (GKE) clusters.
 
-For more information about creating a GKE cluster, see  
+For more information about creating a GKE cluster, see
 https://cloud.google.com/kubernetes-engine/docs/how-to/gpu-bandwidth-gpudirect-tcpx
 
 ### Setup your environment
 
-Set up environment variables for some common parameters: 
+Set up environment variables for some common parameters:
 
 ```
 export CLUSTER_NAME=<CLUSTER_NAME>
@@ -68,10 +68,12 @@ You can use the topology-aware scheduler to deploy your GKE Pods to nodes that
 have a specified GPU topology.
 
 In the following `kubectl` commands, we will use the files directly from a
-repository. Alternatively, the [repo](https://github.com/GoogleCloudPlatform/container-engine-accelerators/tree/master/gpudirect-tcpxo/topology-scheduler) can be cloned locally and the `kubectl`
-commands can reference the local files instead.
+repository. Alternatively, the
+[repo](https://github.com/GoogleCloudPlatform/container-engine-accelerators/tree/master/gpudirect-tcpxo/topology-scheduler)
+can be cloned locally and the `kubectl` commands can reference the local files
+instead.
 
-For more information, see: 
+For more information, see:
 https://github.com/GoogleCloudPlatform/container-engine-accelerators/tree/master/gpudirect-tcpxo/topology-scheduler
 
 Setup the service account:
@@ -134,13 +136,10 @@ bash scripts/build-and-push-docker-image.sh
 
 ### Launch Megatron-LM Llama2 Benchmark
 
-> Note: Edit `selected-configuration.sh` to specify your configuration. For
-> some example configurations, see
-> [`sample-configurations`](sample-configurations/). Also edit 
-> `helm/values.yaml` to specify your defined GCS bucket and Docker image
-> (defined in the previous 
-> [step](#build-the-dockerfile-and-push-to-the-gcp-artifact-registry)).
-
+> Note: Edit `selected-configuration.sh` to specify your configuration. For some
+> example configurations, see [`sample-configurations`](sample-configurations/).
+> Also edit `helm/values.yaml` to specify your defined GCS bucket and Docker
+> image (defined in the previous [step](#build-the-dockerfile-and-push-to-the-gcp-artifact-registry)).
 
 ```
 helm install <HELM-EXPERIMENT-NAME> helm/ --values helm/values.yaml
