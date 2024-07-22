@@ -59,7 +59,7 @@ variable "gke_version" {
 }
 
 variable "host_maintenance_interval" {
-  description = "Specifies the frequency of planned maintenance events. 'PERIODIC' is th only supported value for host_maintenance_interval. This enables using stable fleet VM."
+  description = "gSC only config, set 'null' for non gSC compute. Specifies the frequency of planned maintenance events. 'PERIODIC' is the only supported value for host_maintenance_interval. This enables using stable fleet VM."
   type        = string
   default     = "PERIODIC"
   validation {
@@ -67,7 +67,7 @@ variable "host_maintenance_interval" {
       ["PERIODIC"],
       var.host_maintenance_interval,
     ) : true
-    error_message = "'PERIODIC' is th only supported value for host_maintenance_interval."
+    error_message = "'PERIODIC' is the only supported value for host_maintenance_interval."
   }
 }
 
