@@ -24,7 +24,7 @@ COPY requirements.txt .
 RUN pip install -r requirements-all.txt tokenizers sentencepiece ujson
 RUN pip install --upgrade torchvision
 
-RUN pip install nvidia-dlprof-pytorch-nvtx nvidia-pyindex nvidia-dlprof
+RUN pip install --index-url=https://pypi.ngc.nvidia.com --trusted-host pypi.ngc.nvidia.com nvidia-dlprof-pytorch-nvtx nvidia-dlprof
 
 COPY . .
 
