@@ -40,7 +40,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_a3-mega-mig-cos"></a> [a3-mig-cos](#module\_a3-mega-mig-cos) | github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3-mega/terraform/modules/cluster/mig-cos | n/a |
+| <a name="module_a3-mig-cos"></a> [a3-mig-cos](#module\_a3-mig-cos) | github.com/GoogleCloudPlatform/ai-infra-cluster-provisioning//a3-mega/terraform/modules/cluster/mig-cos | n/a |
 
 ## Resources
 
