@@ -25,12 +25,12 @@ echo $EXPERIMENT_LOCAL_DIR
 if [[ ${#GCS_EXPERIMENT_BUCKET} -le 2 ]]; then
   echo "Disabling gsutil calls. Not syncing experiment dir."
 else
-  gsutil -m rsync -r gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
+  gcloud storage rsync --recursive gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/ ${EXPERIMENT_LOCAL_DIR}/
 fi
 
 LOCAL_DATA_DIR=/data
 mkdir -p $LOCAL_DATA_DIR
-gsutil -m rsync gs://${GCS_DATA_BUCKET}/${DATA_DIR} /data
+gcloud storage rsync gs://${GCS_DATA_BUCKET}/${DATA_DIR} /data
 
 export MASTER_PORT=6002
 export GPUS_PER_NODE=8
@@ -135,7 +135,7 @@ function on_script_completion {
     echo "Disabling gsutil. Not uploading logs."
   else
     echo "Uploading ${EXPERIMENT_LOCAL_DIR} to gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/"
-    gsutil rsync -r ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
+    gcloud storage rsync --recursive ${EXPERIMENT_LOCAL_DIR}/ gs://${GCS_EXPERIMENT_BUCKET}/${EXPERIMENT_ROOT_DIR}/
   fi
 
   # semaphore to cleanly exit hardware utilization monitor

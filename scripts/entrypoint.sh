@@ -104,7 +104,7 @@ main () {
     # Copy files to GCS
     echo -e '\n========================================================\n' >&2
     echo "Copying tfvars to GCS bucket..." >&2
-    gsutil cp \
+    gcloud storage cp \
         "${tmp_var_file}" \
         "${deployment_path}/terraform.tfvars" || {
         echo 'unable to upload tfvars to GCS bucket'
@@ -112,7 +112,7 @@ main () {
     } >&2
 
     echo "Copying terraform logs to GCS bucket..." >&2
-    gsutil cp \
+    gcloud storage cp \
         "${log_file}" \
         "${deployment_path}/terraform.log" || {
         echo 'unable to upload terraform logs to GCS bucket'
