@@ -74,13 +74,15 @@ resource "google_container_cluster" "cluster" {
   name     = var.resource_prefix
   location = var.region
 
+  deletion_protection = false
+
   # We need to explicitly manage the node pool to enable features such as
   # auto-upgrade and auto-scaling, but we can't create a cluster with no node
   # pool defined. So we create the smallest possible default node pool and
   # immediately delete it. This is a best-practice suggested in the Terraform
   # documentation for the container_cluster resource.
-  initial_node_count  = 1
-  min_master_version  = local.gke_master_version
+  initial_node_count = 1
+  min_master_version = local.gke_master_version
 
   network    = module.network.network_self_links[0]
   subnetwork = module.network.subnetwork_self_links[0]
