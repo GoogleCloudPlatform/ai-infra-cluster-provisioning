@@ -1,7 +1,0 @@
-/*.list
-**/.terraform*
-**/terraform.tf*
-!**/samples/**/terraform.tfvars
-**/tfplan
-**/backend.tf
-sample_workloads/lit_gpt_demo/lit-gpt/**

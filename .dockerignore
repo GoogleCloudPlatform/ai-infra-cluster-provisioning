@@ -1,8 +1,0 @@
-/docs
-/samples
-/tools
-/.git
-**/.terraform
-**/terraform.tf*
-**/tfplan
-**/backend.tf
